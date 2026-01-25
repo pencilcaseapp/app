@@ -19,7 +19,7 @@ jobs:
           url: '${{ secrets.ZOOM_DEPLOYMENT_ENDPOINT }}?format=full'
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json", "Authorization": "${{ secrets.ZOOM_DEPLOYMENT_API_KEY }}" }'
-          data: '{ "head": { "text": "✅ Website" }, "body": [ {"type": "message", "text": ${{ toJSON( github.event.workflow_run.head_commit.message ) }} }, { "type": "message", "text": "See workflow run", "link": "${{ github.event.workflow_run.html_url }}" } ] }'
+          data: '{ "head": { "text": "✅ App" }, "body": [ {"type": "message", "text": ${{ toJSON( github.event.workflow_run.head_commit.message ) }} }, { "type": "message", "text": "See workflow run", "link": "${{ github.event.workflow_run.html_url }}" } ] }'
 
   notify-failure:
     runs-on: ubuntu-latest
@@ -34,4 +34,4 @@ jobs:
           url: '${{ secrets.ZOOM_DEPLOYMENT_ENDPOINT }}?format=full'
           method: 'POST'
           customHeaders: '{"Content-Type": "application/json", "Authorization": "${{ secrets.ZOOM_DEPLOYMENT_API_KEY }}" }'
-          data: '{ "head": { "text": "🚨 Website" }, "body": [ {"type": "message", "text": ${{ toJSON( github.event.workflow_run.head_commit.message ) }} }, { "type": "message", "text": "See workflow run", "link": "${{ github.event.workflow_run.html_url }}" } ] }'
+          data: '{ "head": { "text": "🚨 App" }, "body": [ {"type": "message", "text": ${{ toJSON( github.event.workflow_run.head_commit.message ) }} }, { "type": "message", "text": "See workflow run", "link": "${{ github.event.workflow_run.html_url }}" } ] }'
