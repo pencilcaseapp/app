@@ -1,0 +1,82 @@
+name: 👀 Check changes
+on: pull_request
+
+env:
+  CI: "true"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install deps
+        uses: bahmutov/npm-install@v1
+      - name: Lint
+        run: npm run lint
+  
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install deps
+        uses: bahmutov/npm-install@v1
+      - name: Tests
+        run: npm run test
+
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install deps
+        uses: bahmutov/npm-install@v1
+      - name: Transpile TypeScript
+        run: npm run typecheck
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install deps
+        uses: bahmutov/npm-install@v1
+      - name: Build
+        run: npm run build
+
+  build-storybook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install deps
+        uses: bahmutov/npm-install@v1
+      - name: Build Storybook
+        run: npm run build-storybook
