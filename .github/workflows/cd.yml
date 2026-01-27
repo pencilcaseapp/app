@@ -88,96 +88,32 @@ jobs:
       - name: Build Storybook
         run: npm run build-storybook
 
-  # deploy-staging:
-  #   needs:
-  #     - lint
-  #     - test
-  #     - typecheck
-  #     - build
-  #     - build-storybook
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 20
-  #   concurrency: deploy-staging-${{ github.ref }}
-  #   environment:
-  #     name: staging
-  #     url: https://staging.pencilcase.app
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     - uses: opentofu/setup-opentofu@v1
-  #     - name: Deploy infra
-  #       run: cd infra && tofu init -backend-config=backends/staging.tfbackend && tofu apply -auto-approve
-  #       env:
-  #         SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-  #         SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.SCW_ACCESS_KEY }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
-  #         TF_VAR_organization_id: ${{ secrets.SCW_ORGANIZATION_ID }}
-  #         TF_VAR_project_id: ${{ secrets.SCW_PROJECT_ID }}
-  #         TF_VAR_stage: staging
-  #     - name: Download build artifacts
-  #       uses: actions/download-artifact@v6
-  #       with:
-  #         name: build
-  #         path: build
-  #     - name: Deploy website
-  #       run: aws s3 sync ./build s3://pencilcase-web-staging --endpoint-url https://s3.fr-par.scw.cloud --delete
-  #       env:
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.SCW_ACCESS_KEY }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
-  #     - name: Purge CDN cache
-  #       run: |
-  #         curl -X POST "https://api.bunny.net/pullzone/${BUNNY_PULL_ZONE_ID}/purgeCache" \
-  #           -H "AccessKey: ${BUNNY_API_KEY}"
-  #       env:
-  #         BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
-  #         BUNNY_PULL_ZONE_ID: ${{ secrets.BUNNY_PULL_ZONE_ID }}
-  #     - name: Verify deployment
-  #       run: |
-  #         STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://staging.pencilcase.app)
-  #         if [ "$STATUS" -ne 200 ]; then
-  #           echo "Health check failed with status $STATUS"
-  #           exit 1
-  #         fi
-  #         echo "Health check passed with status $STATUS"
-
-  # deploy-prod:
-  #   needs:
-  #     - deploy-staging
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 20
-  #   concurrency: deploy-prod-${{ github.ref }}
-  #   environment:
-  #     name: prod
-  #     url: https://pencilcase.app
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     - uses: opentofu/setup-opentofu@v1
-  #     - name: Deploy infra
-  #       run: cd infra && tofu init -backend-config=backends/prod.tfbackend && tofu apply -auto-approve
-  #       env:
-  #         SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-  #         SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.SCW_ACCESS_KEY }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
-  #         TF_VAR_organization_id: ${{ secrets.SCW_ORGANIZATION_ID }}
-  #         TF_VAR_project_id: ${{ secrets.SCW_PROJECT_ID }}
-  #         TF_VAR_stage: prod
-  #     - name: Download build artifacts
-  #       uses: actions/download-artifact@v6
-  #       with:
-  #         name: build
-  #         path: build
-  #     - name: Deploy website
-  #       run: aws s3 sync ./build s3://pencilcase-web-prod --endpoint-url https://s3.fr-par.scw.cloud --delete
-  #       env:
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.SCW_ACCESS_KEY }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
-  #     - name: Purge CDN cache
-  #       run: |
-  #         curl -X POST "https://api.bunny.net/pullzone/${BUNNY_PULL_ZONE_ID}/purgeCache" \
-  #           -H "AccessKey: ${BUNNY_API_KEY}"
-  #       env:
-  #         BUNNY_API_KEY: ${{ secrets.BUNNY_API_KEY }}
-  #         BUNNY_PULL_ZONE_ID: ${{ secrets.BUNNY_PULL_ZONE_ID }}
+  deploy-prod:
+    needs:
+      - lint
+      - test
+      - typecheck
+      - build
+      - build-storybook
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency: deploy-prod-${{ github.ref }}
+    environment:
+      name: prod
+      url: https://pencilcase.app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install deps
+        uses: bahmutov/npm-install@v1
+      - name: Deploy app
+        run: npx clever deploy -a pencil-case-app-prod -f -p rebuild
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
