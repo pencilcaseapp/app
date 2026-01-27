@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "app_id": "app_98d9b508-d42d-441d-ba43-96dfa3c96293",
+      "org_id": "orga_87a00902-e5b5-427e-9508-ab0a17bfe51f",
+      "deploy_url": "https://push-n3-par-clevercloud-customers.services.clever-cloud.com/app_98d9b508-d42d-441d-ba43-96dfa3c96293.git",
+      "git_ssh_url": "git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_98d9b508-d42d-441d-ba43-96dfa3c96293.git",
+      "name": "pencil-case-app-prod",
+      "alias": "pencil-case-app-prod"
+    }
+  ]
+}
