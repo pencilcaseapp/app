@@ -1,2 +1,0 @@
-bucket = "pencilcase-state-staging"
-key    = "website.tfstate"

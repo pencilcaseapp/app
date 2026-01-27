@@ -12,16 +12,3 @@ updates:
     commit-message:
       prefix: "build"
       include: "scope"
-
-  - package-ecosystem: "terraform"
-    directory: "/infra"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    groups:
-      all-dependencies:
-        patterns:
-          - "*"
-    commit-message:
-      prefix: "build"
-      include: "scope"

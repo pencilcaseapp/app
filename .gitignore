@@ -7,10 +7,6 @@
 /.react-router/
 /build/
 
-# Infra
-.terraform
-*.tfvars
-
 # Storybook
 *storybook.log
 storybook-static
