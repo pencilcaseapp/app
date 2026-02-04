@@ -27,10 +27,11 @@ else {
   app.use(viteDevServer.middlewares);
   app.use(
     createRequestHandler({
+      // @ts-expect-error virtual module
       build: () =>
         viteDevServer.ssrLoadModule(
           'virtual:react-router/server-build',
-        ) as any,
+        ),
     }),
   );
 }
