@@ -7,6 +7,9 @@
 /.react-router/
 /build/
 
+# Server
+server.js
+
 # Storybook
 *storybook.log
 storybook-static
