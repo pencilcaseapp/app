@@ -1,15 +1,13 @@
 import { io, Socket } from 'socket.io-client';
-import { getConfig } from '~/config';
 
 let socket: Socket | null = null;
 
-export function getSocket(): Socket {
+export function getSocket(url?: string): Socket {
   if (socket) {
     return socket;
   }
 
-  const config = getConfig();
-  socket = io(config.socket.url, {
+  socket = io(url, {
     autoConnect: false,
   });
 
