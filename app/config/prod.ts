@@ -11,7 +11,7 @@ export function getConfigProd(): Config {
     },
 
     socket: {
-      url: 'pencilcase.app',
+      url: 'https://pencilcase.app',
       enableCors: false,
     },
   };

@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import { getConfig } from '~/config';
 
 let socket: Socket | null = null;
 
@@ -7,7 +8,8 @@ export function getSocket(): Socket {
     return socket;
   }
 
-  socket = io(process.env.NODE_ENV === 'production' ? 'http://localhost:3000' : 'http://localhost:3003', {
+  const config = getConfig();
+  socket = io(config.socket.url, {
     autoConnect: false,
   });
 
