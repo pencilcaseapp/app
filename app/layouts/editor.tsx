@@ -1,6 +1,6 @@
 import { getConfig } from '~/config';
 import { Outlet } from 'react-router';
-import { SocketProvider } from '~/components/socket-provider/socket-provider';
+import { SocketProvider } from '~/components/socket-provider';
 import type { Route } from './+types/editor';
 
 export function loader() {
