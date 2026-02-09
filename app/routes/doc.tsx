@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useSocket } from '~/hooks/use-socket';
+import type { Route } from './+types/doc';
 
-export default function View() {
+export default function ({ params }: Route.ComponentProps) {
   const socket = useSocket();
 
   useEffect(() => {
@@ -11,6 +12,11 @@ export default function View() {
   });
 
   return (
-    <h1>Doc 123</h1>
+    <>
+      <h1>
+        Doc
+        {params.id}
+      </h1>
+    </>
   );
 }
