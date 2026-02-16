@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import * as Y from 'yjs';
 import * as syncProtocol from 'y-protocols/sync';
 import * as awarenessProtocol from 'y-protocols/awareness';
@@ -47,7 +50,7 @@ const messageAwareness = 1;
  * @param {WSSharedDoc} doc
  * @param {any} _tr
  */
-const updateHandler = (update, _origin, doc, _tr) => {
+const updateHandler = (update, _origin, doc) => {
   const encoder = encoding.createEncoder();
   encoding.writeVarUint(encoder, messageSync);
   syncProtocol.writeUpdate(encoder, update);
@@ -58,7 +61,7 @@ const updateHandler = (update, _origin, doc, _tr) => {
 /**
  * @type {(ydoc: Y.Doc) => Promise<void>}
  */
-let contentInitializor = _ydoc => Promise.resolve();
+let contentInitializor = () => Promise.resolve();
 
 /**
  * This function is called once every time a Yjs document is created. You can
@@ -96,8 +99,12 @@ export class WSSharedDoc extends Y.Doc {
       if (conn !== null) {
         const connControlledIDs = /** @type {Set<number>} */ (this.conns.get(conn));
         if (connControlledIDs !== undefined) {
-          added.forEach((clientID) => { connControlledIDs.add(clientID); });
-          removed.forEach((clientID) => { connControlledIDs.delete(clientID); });
+          added.forEach((clientID) => {
+            connControlledIDs.add(clientID);
+          });
+          removed.forEach((clientID) => {
+            connControlledIDs.delete(clientID);
+          });
         }
       }
       // broadcast awareness update
@@ -163,7 +170,6 @@ const messageListener = (conn, doc, message) => {
   }
   catch (err) {
     console.error(err);
-    // @ts-ignore
     doc.emit('error', [err]);
   }
 };
@@ -177,7 +183,6 @@ const closeConn = (doc, conn) => {
     /**
      * @type {Set<number>}
      */
-    // @ts-ignore
     const controlledIds = doc.conns.get(conn);
     doc.conns.delete(conn);
     awarenessProtocol.removeAwarenessStates(doc.awareness, Array.from(controlledIds), null);
@@ -203,9 +208,12 @@ const send = (doc, conn, m) => {
     closeConn(doc, conn);
   }
   try {
-    conn.send(m, {}, (err) => { err != null && closeConn(doc, conn); });
+    conn.send(m, {}, (err) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      err != null && closeConn(doc, conn);
+    });
   }
-  catch (e) {
+  catch {
     closeConn(doc, conn);
   }
 };
@@ -239,7 +247,7 @@ export const setupWSConnection = (conn, req, { docName = (req.url || '').slice(1
       try {
         conn.ping();
       }
-      catch (e) {
+      catch {
         closeConn(doc, conn);
         clearInterval(pingInterval);
       }
