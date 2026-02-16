@@ -10,9 +10,8 @@ export function getConfigProd(): Config {
       host: env.get('HOST').required().asString(),
     },
 
-    socket: {
+    ws: {
       url: 'https://pencilcase.app',
-      enableCors: false,
     },
   };
 }

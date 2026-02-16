@@ -9,9 +9,8 @@ export interface Config {
     host: string;
   };
 
-  socket: {
-    url: string | undefined;
-    enableCors: boolean;
+  ws: {
+    url: string;
   };
 }
 

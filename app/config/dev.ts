@@ -9,9 +9,8 @@ export function getConfigDev(): Config {
       host: 'localhost',
     },
 
-    socket: {
+    ws: {
       url: 'http://localhost:3003',
-      enableCors: true,
     },
   };
 }
