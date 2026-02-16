@@ -10,7 +10,7 @@ export function getConfigDev(): Config {
     },
 
     ws: {
-      url: 'http://localhost:3003',
+      url: 'http://localhost:3003/live',
     },
   };
 }
