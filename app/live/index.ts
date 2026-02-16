@@ -1,20 +1,12 @@
-import type { Server as NodeServer } from 'node:http';
-import { WebSocketServer } from 'ws';
-import { setupWSConnection } from './utils';
+import { Hocuspocus } from '@hocuspocus/server';
+import type { Application } from 'express-ws';
 
-export function createLiveServer(server: NodeServer) {
-  const wss = new WebSocketServer({ noServer: true });
-  wss.on('connection', setupWSConnection);
+const hocuspocus = new Hocuspocus({
+  name: 'hocuspocus-01',
+});
 
-  server.on('upgrade', (request, socket, head) => {
-  // You may check auth of request here..
-  // Call `wss.HandleUpgrade` *after* you checked whether the client has access
-  // (e.g. by checking cookies, or url parameters).
-  // See https://github.com/websockets/ws#client-authentication
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit('connection', ws, request);
-    });
+export function createLiveServer(app: Application) {
+  app.ws('/live', (websocket, request) => {
+    hocuspocus.handleConnection(websocket, request);
   });
-
-  return wss;
 }

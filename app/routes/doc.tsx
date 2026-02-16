@@ -18,8 +18,8 @@ import { HorizontalRuleNode } from '@lexical/extension';
 import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import { useEffect, useMemo, useState } from 'react';
 import * as Y from 'yjs';
-import { WebsocketProvider } from 'y-websocket';
 import type { Provider } from '@lexical/yjs';
+import { HocuspocusProvider } from '@hocuspocus/provider';
 
 export function loader() {
   const config = getConfig();
@@ -53,19 +53,14 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
   }), []);
 
   const providerFactory = (id: string, yjsDocMap: Map<string, Y.Doc>): Provider => {
-    let doc = yjsDocMap.get(id);
-
-    if (doc === undefined) {
-      doc = new Y.Doc();
-      yjsDocMap.set(id, doc);
-    }
-    else {
-      doc.load();
-    }
+    const doc = new Y.Doc();
+    yjsDocMap.set(id, doc);
 
     // @ts-expect-error type mismatch between y-websocket and @lexical/yjs
-    const provider: Provider = new WebsocketProvider(loaderData.wsUrl, id, doc, {
-      connect: false,
+    const provider: Provider = new HocuspocusProvider({
+      url: loaderData.wsUrl,
+      name: id,
+      document: doc,
     });
 
     setProvider(provider);

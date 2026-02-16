@@ -1,19 +1,18 @@
 import express from 'express';
-import { createServer } from 'node:http';
+import expressWebsockets from 'express-ws';
 import compression from 'compression';
 import { createRequestHandler } from '@react-router/express';
 import { createLiveServer } from '~/live';
 import { getConfig } from '~/config';
 
-const app = express();
-const server = createServer(app);
+const { app } = expressWebsockets(express());
 const config = getConfig();
 
 app.use(compression());
 app.disable('x-powered-by');
 
 if (config.environment === 'prod') {
-  createLiveServer(server);
+  createLiveServer(app);
   app.use(
     '/assets',
     express.static('build/client/assets', { immutable: true, maxAge: '1y' }),
@@ -44,6 +43,6 @@ else {
   );
 }
 
-server.listen(config.server.port, config.server.host, () => {
+app.listen(config.server.port, config.server.host, () => {
   console.log(`App listening on http://${config.server.host}:${config.server.port}`);
 });

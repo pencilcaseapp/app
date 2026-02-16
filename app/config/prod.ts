@@ -11,7 +11,7 @@ export function getConfigProd(): Config {
     },
 
     ws: {
-      url: 'https://pencilcase.app',
+      url: 'https://pencilcase.app/live',
     },
   };
 }
