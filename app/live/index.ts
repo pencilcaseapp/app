@@ -1,25 +1,20 @@
-import { Server } from 'socket.io';
 import type { Server as NodeServer } from 'node:http';
-import { getConfig } from '~/config';
+import { WebSocketServer } from 'ws';
+import { setupWSConnection } from './utils';
 
 export function createLiveServer(server: NodeServer) {
-  const config = getConfig();
+  const wss = new WebSocketServer({ noServer: true });
+  wss.on('connection', setupWSConnection);
 
-  const io = new Server(server, {
-    cors: config.socket.enableCors
-      ? {
-          origin: '*',
-        }
-      : undefined,
-  });
-
-  io.on('connection', (socket) => {
-    console.log('connected to live server', socket.id);
-
-    socket.on('disconnect', function () {
-      console.log('disconnected from live server', socket.id);
+  server.on('upgrade', (request, socket, head) => {
+  // You may check auth of request here..
+  // Call `wss.HandleUpgrade` *after* you checked whether the client has access
+  // (e.g. by checking cookies, or url parameters).
+  // See https://github.com/websockets/ws#client-authentication
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
     });
   });
 
-  return io;
+  return wss;
 }
