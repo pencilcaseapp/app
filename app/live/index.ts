@@ -14,12 +14,27 @@ export function createLiveServer(server: NodeServer) {
   });
 
   io.on('connection', (socket) => {
-    console.log('connected to live server', socket.id);
+    const { docId, userName } = socket.handshake.auth;
+    socket.data.userName = userName;
+
+    if (docId) {
+      socket.join(docId);
+      emitUsers(docId, io);
+    }
 
     socket.on('disconnect', function () {
-      console.log('disconnected from live server', socket.id);
+      if (docId) {
+        emitUsers(docId, io);
+      }
     });
   });
 
   return io;
+}
+
+async function emitUsers(docId: string, io: Server) {
+  const sockets = await io.in(docId).fetchSockets();
+  const users = sockets.map(s => ({ id: s.id, userName: s.data.userName }));
+
+  io.to(docId).emit('users.updated', users);
 }

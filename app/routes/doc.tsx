@@ -1,22 +1,27 @@
-import { useEffect } from 'react';
 import { useSocket } from '~/hooks/use-socket';
 import type { Route } from './+types/doc';
+import { getConfig } from '~/config';
 
-export default function ({ params }: Route.ComponentProps) {
-  const socket = useSocket();
+export function loader() {
+  const config = getConfig();
 
-  useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to socket server');
-    });
-  });
+  return {
+    socketUrl: config.socket.url,
+  };
+}
+
+export default function ({ params, loaderData }: Route.ComponentProps) {
+  const { users } = useSocket({ url: loaderData.socketUrl, docId: params.id });
 
   return (
     <>
-      <h1>
-        Doc
-        {params.id}
-      </h1>
+      <title>{params.id}</title>
+      Currently connected users:
+      <ul>
+        {users.map(user => (
+          <li key={user}>{user}</li>
+        ))}
+      </ul>
     </>
   );
 }
