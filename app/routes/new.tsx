@@ -1,7 +1,8 @@
 import { href, redirect } from 'react-router';
-import { v7 as uuid } from 'uuid';
+import { db } from '~/db';
+import { documentsTable } from '~/db/schema';
 
-export function loader() {
-  const docId = uuid();
-  return redirect(href('/doc/:id', { id: docId }));
+export async function loader() {
+  const document = await db.insert(documentsTable).values({}).returning();
+  return redirect(href('/doc/:id', { id: document[0].id }));
 }

@@ -26,23 +26,23 @@ npm run docker:up
 The Docker containers run in the background, regardless of the development server. 
 You can stop the containers with `npm run docker:down`
 
+### Environment
+
+Create a `.env` file to set some environment variables. To get started, just copy the example file.
+
+```bash
+cp .env.example .env
+```
+
 ### Development
 
-Start the development server with HMR:
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
 Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
 
 ## License
 
