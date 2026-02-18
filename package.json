@@ -19,6 +19,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@hocuspocus/extension-database": "^3.4.4",
     "@hocuspocus/provider": "^3.4.4",
     "@hocuspocus/server": "^3.4.4",
     "@lexical/react": "^0.40.0",
@@ -28,7 +29,6 @@
     "classnames": "^2.5.1",
     "compression": "^1.8.1",
     "cross-env": "^10.1.0",
-    "dotenv": "^17.3.1",
     "drizzle-orm": "^1.0.0-beta.15-859cf75",
     "env-var": "^7.5.0",
     "express": "^5.2.1",

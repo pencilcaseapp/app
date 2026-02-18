@@ -30,14 +30,6 @@ npx drizzle-kit migrate
 The Docker containers run in the background, regardless of the development server. 
 You can stop the containers with `npm run docker:down`
 
-### Environment
-
-Create a `.env` file to set some environment variables. To get started, just copy the example file.
-
-```bash
-cp .env.example .env
-```
-
 ### Development
 
 Start the development server:

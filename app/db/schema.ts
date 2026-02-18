@@ -1,6 +1,6 @@
 import { pgTable, timestamp, uuid, text, bytea } from 'drizzle-orm/pg-core';
 
-export const documentsTable = pgTable('documents', {
+export const documents = pgTable('documents', {
   id: uuid().primaryKey().defaultRandom(),
   title: text(),
   content: bytea(),

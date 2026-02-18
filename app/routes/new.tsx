@@ -1,8 +1,8 @@
 import { href, redirect } from 'react-router';
 import { db } from '~/db';
-import { documentsTable } from '~/db/schema';
+import { documents } from '~/db/schema';
 
 export async function loader() {
-  const document = await db.insert(documentsTable).values({}).returning();
+  const document = await db.insert(documents).values({}).returning();
   return redirect(href('/doc/:id', { id: document[0].id }));
 }
