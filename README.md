@@ -17,17 +17,16 @@ npm install
 
 ### Database
 
-Start a local Postgres database:
+Start a local Postgres database with Docker:
 
 ```bash
-# Spin up db with Docker Compose
 npm run docker:up
 ```
 
 The Docker containers run in the background, regardless of the development server. 
 You can stop the containers with `npm run docker:down`
 
-### Development
+### Server
 
 Start the development server:
 
@@ -35,7 +34,7 @@ Start the development server:
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+Your app will be available at `http://localhost:5173`.
 
 ## License
 
