@@ -2,6 +2,11 @@
 
 ## Local Development
 
+### Prerequisites
+
+- [Docker Desktop](https://docs.docker.com/desktop/)
+- [Node.js](https://nodejs.org/en/download)
+
 ### Installation
 
 Install the dependencies:
@@ -9,6 +14,17 @@ Install the dependencies:
 ```bash
 npm install
 ```
+
+### Database
+
+Start a local Postgres database with Docker Compose:
+
+```bash
+npm run docker:up
+```
+
+The Docker containers run in the background, regardless of the development server. 
+You can stop the containers with `npm run docker:down`
 
 ### Development
 

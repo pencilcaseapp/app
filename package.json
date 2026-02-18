@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "cross-env NODE_ENV=production node ./server.js",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
     "dev": "run-p \"dev:*\"",
     "dev:live": "tsx --watch ./server-live.ts",
     "dev:react-router": "tsx ./server.ts",
