@@ -17,14 +17,11 @@ npm install
 
 ### Database
 
-Start and migrate a local Postgres database:
+Start a local Postgres database:
 
 ```bash
 # Spin up db with Docker Compose
 npm run docker:up
-
-# Run SQL migrations with Drizzle
-npx drizzle-kit migrate
 ```
 
 The Docker containers run in the background, regardless of the development server. 
