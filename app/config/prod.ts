@@ -10,6 +10,10 @@ export function getConfigProd(): Config {
       host: env.get('HOST').required().asString(),
     },
 
+    db: {
+      url: env.get('DATABASE_URL').required().asString(),
+    },
+
     ws: {
       url: 'https://pencilcase.app/live',
     },

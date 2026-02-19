@@ -8,5 +8,5 @@ const { app } = expressWebsockets(express());
 createLiveServer(app);
 
 app.listen(port, () => {
-  console.log(`Live server listening on http://localhost:${port}`);
+  console.log(`📡 Live server listening on http://localhost:${port}`);
 });

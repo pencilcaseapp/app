@@ -9,6 +9,10 @@ export interface Config {
     host: string;
   };
 
+  db: {
+    url: string;
+  };
+
   ws: {
     url: string;
   };

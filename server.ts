@@ -4,6 +4,7 @@ import compression from 'compression';
 import { createRequestHandler } from '@react-router/express';
 import { createLiveServer } from '~/live';
 import { getConfig } from '~/config';
+import { migrateDatabase } from '~/db/migrate';
 
 const { app } = expressWebsockets(express());
 const config = getConfig();
@@ -43,6 +44,11 @@ else {
   );
 }
 
-app.listen(config.server.port, config.server.host, () => {
-  console.log(`App listening on http://${config.server.host}:${config.server.port}`);
-});
+async function startServer() {
+  await migrateDatabase();
+  app.listen(config.server.port, config.server.host, () => {
+    console.log(`🚀 App listening on http://${config.server.host}:${config.server.port}`);
+  });
+}
+
+startServer();
