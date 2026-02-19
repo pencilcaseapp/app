@@ -2,7 +2,6 @@ import type { Route } from './+types/doc';
 import { getConfig } from '~/config';
 import { LexicalCollaboration } from '@lexical/react/LexicalCollaborationContext';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
@@ -32,6 +31,7 @@ export function loader() {
 export default function ({ params, loaderData }: Route.ComponentProps) {
   const [me] = useState<string>(() => `User #${Math.floor(Math.random() * 100)}`);
   const [provider, setProvider] = useState<Provider | null>(null);
+  const [isSynced, setIsSynced] = useState(false);
   const [users, setUsers] = useState<string[]>([]);
   const config = useMemo(() => ({
     editorState: null,
@@ -61,6 +61,9 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
       url: loaderData.wsUrl,
       name: id,
       document: doc,
+      onSynced: ({ state }) => {
+        setIsSynced(state);
+      },
     });
 
     setProvider(provider);
@@ -101,12 +104,11 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
             contentEditable={(
               <ContentEditable
                 aria-placeholder="Enter some text..."
-                placeholder={<div>Enter some text...</div>}
+                placeholder={isSynced ? <div>Enter some text...</div> : <div></div>}
               />
             )}
             ErrorBoundary={LexicalErrorBoundary}
           />
-          <AutoFocusPlugin />
           <CheckListPlugin />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           <CollaborationPlugin
