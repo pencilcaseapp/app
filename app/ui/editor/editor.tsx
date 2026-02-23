@@ -3,15 +3,19 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
-import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
-import { TRANSFORMERS } from '@lexical/markdown';
+import { ClickableLinkPlugin } from '@lexical/react/LexicalClickableLinkPlugin';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { ListNode, ListItemNode } from '@lexical/list';
-import { TableNode, TableCellNode, TableRowNode } from '@lexical/table';
 import { CodeNode } from '@lexical/code';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { HorizontalRuleNode } from '@lexical/extension';
 import { useMemo, type ComponentProps } from 'react';
+import { EditorPluginMarkdown } from './editor-plugin-markdown';
+import { EditorPluginAutoLink } from './editor-plugin-auto-link';
+import editorTheme from './editor-theme';
+
+import './editor.css';
 
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
@@ -36,14 +40,12 @@ export const Editor: React.FC<EditorProps> = ({
       LinkNode,
       ListNode,
       ListItemNode,
-      TableNode,
-      TableCellNode,
-      TableRowNode,
       CodeNode,
       HeadingNode,
       QuoteNode,
       HorizontalRuleNode,
     ],
+    theme: editorTheme,
   }), []);
 
   return (
@@ -64,7 +66,10 @@ export const Editor: React.FC<EditorProps> = ({
           ErrorBoundary={LexicalErrorBoundary}
         />
         <CheckListPlugin />
-        <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+        <ListPlugin />
+        <ClickableLinkPlugin />
+        <EditorPluginAutoLink />
+        <EditorPluginMarkdown />
         {children}
       </LexicalComposer>
     </>
