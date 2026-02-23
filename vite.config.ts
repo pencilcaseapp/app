@@ -7,5 +7,10 @@ import devtoolsJson from 'vite-plugin-devtools-json';
 const isStorybook = process.argv[1]?.includes('storybook');
 
 export default defineConfig({
-  plugins: [tailwindcss(), !isStorybook && reactRouter(), tsconfigPaths(), devtoolsJson()],
+  plugins: [
+    tailwindcss(),
+    !isStorybook && reactRouter(),
+    tsconfigPaths(),
+    devtoolsJson(),
+  ],
 });
