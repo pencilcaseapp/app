@@ -7,7 +7,6 @@ import { ClickableLinkPlugin } from '@lexical/react/LexicalClickableLinkPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { ListNode, ListItemNode } from '@lexical/list';
-import { TableNode, TableCellNode, TableRowNode } from '@lexical/table';
 import { CodeNode } from '@lexical/code';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { HorizontalRuleNode } from '@lexical/extension';
@@ -41,9 +40,6 @@ export const Editor: React.FC<EditorProps> = ({
       LinkNode,
       ListNode,
       ListItemNode,
-      TableNode,
-      TableCellNode,
-      TableRowNode,
       CodeNode,
       HeadingNode,
       QuoteNode,
