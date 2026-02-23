@@ -1,4 +1,5 @@
 import type { Config } from '.';
+import env from 'env-var';
 
 export function getConfigTest(): Config {
   return {
@@ -10,7 +11,7 @@ export function getConfigTest(): Config {
     },
 
     db: {
-      url: 'postgresql://postgres:postgres@localhost:5434/db',
+      url: env.get('DATABASE_URL').default('postgresql://postgres:postgres@localhost:5434/db').asString(),
     },
 
     ws: {
