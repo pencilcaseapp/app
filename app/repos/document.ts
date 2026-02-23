@@ -15,7 +15,10 @@ export async function getDocument(id: string) {
   });
 }
 
-export async function updateDocument(id: string, input: { title?: string | null; content?: Buffer<ArrayBufferLike> | null }) {
+export async function updateDocument(
+  id: string,
+  input: { title?: string | null; content?: Buffer<ArrayBufferLike> | null },
+) {
   const { title, content } = input;
 
   const response = await db.update(documents)

@@ -8,6 +8,21 @@ export default defineConfig([
   stylistic.configs.customize({
     semi: true,
   }),
+
   tseslint.configs.recommended,
   reactHooks.configs.flat.recommended,
+  {
+    plugins: {
+      '@stylistic': stylistic,
+    },
+    rules: {
+      '@stylistic/max-len': ['error', {
+        code: 80,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+        ignoreUrls: true,
+        ignoreRegExpLiterals: true,
+      }],
+    },
+  },
 ]);
