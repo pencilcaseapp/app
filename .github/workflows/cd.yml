@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
       - name: Install deps
         uses: bahmutov/npm-install@v1
       - name: Lint
@@ -32,7 +32,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
       - name: Install deps
         uses: bahmutov/npm-install@v1
       - name: Tests
@@ -47,7 +47,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
       - name: Install deps
         uses: bahmutov/npm-install@v1
       - name: Transpile TypeScript
@@ -62,7 +62,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
       - name: Install deps
         uses: bahmutov/npm-install@v1
       - name: Build
@@ -82,7 +82,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
       - name: Install deps
         uses: bahmutov/npm-install@v1
       - name: Build Storybook
@@ -109,7 +109,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .node-version
       - name: Install deps
         uses: bahmutov/npm-install@v1
       - name: Deploy app
