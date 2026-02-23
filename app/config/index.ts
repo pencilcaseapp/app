@@ -1,8 +1,9 @@
 import { getConfigDev } from './dev';
 import { getConfigProd } from './prod';
+import { getConfigTest } from './test';
 
 export interface Config {
-  environment: 'development' | 'prod';
+  environment: 'development' | 'test' | 'prod';
 
   server: {
     port: number;
@@ -22,6 +23,10 @@ export function getConfig(): Config {
   switch (process.env.ENV) {
     case 'development': {
       return getConfigDev();
+    }
+
+    case 'test': {
+      return getConfigTest();
     }
 
     case 'prod': {
