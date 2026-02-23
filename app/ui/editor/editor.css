@@ -1,0 +1,258 @@
+[contenteditable] {
+  outline: none;
+  line-height: 1.6;
+  color: #111827;
+}
+
+@media (prefers-color-scheme: dark) {
+  [contenteditable] {
+    color: #f3f4f6;
+  }
+}
+
+/* Headings */
+.editor-heading-h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.editor-heading-h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 1.25rem 0 0.625rem;
+}
+
+.editor-heading-h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 1rem 0 0.5rem;
+}
+
+.editor-heading-h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0.875rem 0 0.5rem;
+}
+
+.editor-heading-h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0.75rem 0 0.375rem;
+}
+
+/* Paragraphs */
+.editor-paragraph {
+  font-size: 1rem;
+  line-height: 1.75;
+  margin: 0.5rem 0;
+}
+
+.editor-paragraph:first-child,
+.editor-heading-h1:first-child,
+.editor-heading-h2:first-child,
+.editor-heading-h3:first-child {
+  margin-top: 0;
+}
+
+/* Links */
+.editor-link {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+
+.editor-link:hover {
+  color: #1e40af;
+}
+
+@media (prefers-color-scheme: dark) {
+  .editor-link {
+    color: #60a5fa;
+  }
+
+  .editor-link:hover {
+    color: #93c5fd;
+  }
+}
+
+/* Ordered Lists */
+.editor-list-ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.editor-list-ol-depth-1 {
+  list-style-type: decimal;
+}
+
+.editor-list-ol-depth-2 {
+  list-style-type: lower-alpha;
+}
+
+.editor-list-ol-depth-3 {
+  list-style-type: lower-roman;
+}
+
+/* Unordered Lists */
+.editor-list-ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.editor-list-ul .editor-list-ul {
+  list-style-type: circle;
+}
+
+.editor-list-ul .editor-list-ul .editor-list-ul {
+  list-style-type: square;
+}
+
+/* List items (shared) */
+.editor-listitem {
+  margin: 0.25rem 0;
+  line-height: 1.75;
+}
+
+.editor-listitem p {
+  margin: 0;
+}
+
+.editor-nested-listitem {
+  list-style-type: none;
+}
+
+/* Checklist items (shared base) */
+.editor-listitem-checked,
+.editor-listitem-unchecked {
+  position: relative;
+  padding-left: 1.5rem;
+  list-style-type: none;
+  outline: none;
+}
+
+.editor-listitem-checked::before,
+.editor-listitem-unchecked::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.375rem;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #9ca3af;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.editor-listitem-checked::before {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3E%3Cpath d='M12.207 4.793a1 1 0 0 1 0 1.414l-5 5a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L6.5 9.086l4.293-4.293a1 1 0 0 1 1.414 0z'/%3E%3C/svg%3E");
+  background-size: 0.75rem;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.editor-listitem-checked {
+  color: #9ca3af;
+}
+
+@media (prefers-color-scheme: dark) {
+  .editor-listitem-unchecked::before {
+    border-color: #6b7280;
+  }
+
+  .editor-listitem-checked::before {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+  }
+
+  .editor-listitem-checked {
+    color: #6b7280;
+  }
+}
+
+/* Horizontal Rules */
+.editor-hr {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin: 1.5rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .editor-hr {
+    border-top-color: #374151;
+  }
+}
+
+/* Blockquotes */
+.editor-quote {
+  border-left: 3px solid #d1d5db;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #4b5563;
+  font-style: italic;
+}
+
+.editor-quote p {
+  margin: 0.25rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .editor-quote {
+    border-left-color: #4b5563;
+    color: #9ca3af;
+  }
+}
+
+/* Text direction */
+.editor-ltr {
+  text-align: left;
+}
+
+.editor-rtl {
+  text-align: right;
+}
+
+/* Inline text styles */
+.editor-text-bold {
+  font-weight: 700;
+}
+
+.editor-text-italic {
+  font-style: italic;
+}
+
+.editor-text-underline {
+  text-decoration: underline;
+}
+
+.editor-text-strikethrough {
+  text-decoration: line-through;
+}
+
+.editor-text-underline-strikethrough {
+  text-decoration: underline line-through;
+}
+
+.editor-text-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875em;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  background-color: #f3f4f6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .editor-text-code {
+    background-color: #374151;
+  }
+}
