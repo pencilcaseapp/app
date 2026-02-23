@@ -4,6 +4,7 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { ClickableLinkPlugin } from '@lexical/react/LexicalClickableLinkPlugin';
+import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { ListNode, ListItemNode } from '@lexical/list';
@@ -68,6 +69,7 @@ export const Editor: React.FC<EditorProps> = ({
         <CheckListPlugin />
         <ListPlugin />
         <ClickableLinkPlugin />
+        <TabIndentationPlugin maxIndent={3} />
         <EditorPluginAutoLink />
         <EditorPluginMarkdown />
         {children}
