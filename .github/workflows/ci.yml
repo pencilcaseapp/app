@@ -27,9 +27,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          - POSTGRES_USER=postgres
-          - POSTGRES_PASSWORD=postgres
-          - POSTGRES_DB=db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: db
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
