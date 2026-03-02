@@ -1,16 +1,15 @@
 import classNames from 'classnames';
+import type { ComponentProps } from 'react';
 
-export interface ButtonProps extends React.PropsWithChildren {
-  className?: string;
-  onClick?: () => void;
-}
+export type ButtonProps = ComponentProps<'button'>;
 
 export const Button: React.FC<ButtonProps> = ({
-  children,
   className,
-  onClick,
+  ...props
 }) => {
   const classes = classNames('bg-transparent border border-gray-400 px-2 py rounded', className);
 
-  return <button className={classes} onClick={onClick}>{children}</button>;
+  return (
+    <button className={classes} {...props} />
+  );
 };
