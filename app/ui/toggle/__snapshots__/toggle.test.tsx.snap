@@ -1,0 +1,21 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`active > matches snapshot 1`] = `
+<div>
+  <button
+    class="py px-2 border border-gray-400 rounded-xs bg-gray-200"
+  >
+    Toggle
+  </button>
+</div>
+`;
+
+exports[`not active > matches snapshot 1`] = `
+<div>
+  <button
+    class="py px-2 border border-gray-400 rounded-xs"
+  >
+    Toggle
+  </button>
+</div>
+`;
