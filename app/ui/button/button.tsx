@@ -1,11 +1,15 @@
 import classNames from 'classnames';
+import type { ComponentProps } from 'react';
 
-export interface ButtonProps extends React.PropsWithChildren {
-  className?: string;
-}
+export type ButtonProps = ComponentProps<'button'>;
 
-export const Button: React.FC<ButtonProps> = ({ children, className }) => {
-  const classes = classNames('bg-blue-500', 'text-white px-4 py-2', className);
+export const Button: React.FC<ButtonProps> = ({
+  className,
+  ...props
+}) => {
+  const classes = classNames('bg-transparent border border-gray-400 px-2 py rounded', className);
 
-  return <button className={classes}>{children}</button>;
+  return (
+    <button className={classes} {...props} />
+  );
 };
