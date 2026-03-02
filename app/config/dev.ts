@@ -6,15 +6,15 @@ export function getConfigDev(): Config {
 
     server: {
       port: 3000,
-      host: '192.168.2.69',
+      host: 'localhost',
     },
 
     db: {
-      url: 'postgresql://postgres:postgres@192.168.2.69:5433/db',
+      url: 'postgresql://postgres:postgres@localhost:5433/db',
     },
 
     ws: {
-      url: 'http://192.168.2.69:3003/live',
+      url: 'http://localhost:3003/live',
     },
   };
 }
