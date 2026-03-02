@@ -4,7 +4,7 @@ exports[`active > matches snapshot 1`] = `
 <div>
   <button
     aria-pressed="true"
-    class="bg-transparent border border-gray-400 px-2 py rounded !bg-gray-200"
+    class="bg-transparent border border-gray-400 px-2 py rounded !bg-gray-200 dark:!bg-gray-600"
   >
     Toggle
   </button>
