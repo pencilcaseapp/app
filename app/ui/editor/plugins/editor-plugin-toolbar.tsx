@@ -10,7 +10,7 @@ import type { EditorFormatBlock } from '../editor.types';
 export const EditorPluginToolbar: React.FC = () => {
   const [editor] = useLexicalComposerContext();
   const [formatBlock, setFormatBlock] = useState<EditorFormatBlock>('p');
-  const [textFormat, setTextFormat] = useState({
+  const [textStyle, setTextFormat] = useState({
     bold: false,
     italic: false,
     underline: false,
@@ -37,52 +37,52 @@ export const EditorPluginToolbar: React.FC = () => {
     );
   }, [editor]);
 
-  const handleTextFormat = useCallback((format: 'bold' | 'italic' | 'underline') => {
-    editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
+  const toggleTextStyle = useCallback((style: 'bold' | 'italic' | 'underline') => {
+    editor.dispatchCommand(FORMAT_TEXT_COMMAND, style);
     setTextFormat(prev => ({
       ...prev,
-      [format]: !prev[format],
+      [style]: !prev[style],
     }));
   }, [editor]);
 
-  const handleTextStyle = useCallback((style: EditorFormatBlock) => {
+  const toggleBlock = useCallback((block: EditorFormatBlock) => {
     editor.update(() => {
       const selection = $getSelection();
 
-      if (style === 'p' || !$isRangeSelection(selection)) {
+      if (block === 'p' || !$isRangeSelection(selection)) {
         return;
       }
 
       const formatBlock = $getFormatBlock(selection);
-      if (formatBlock === style) {
+      if (formatBlock === block) {
         $setBlocksType(selection, () => $createParagraphNode());
         setFormatBlock('p');
       }
       else {
-        $setBlocksType(selection, () => $createHeadingNode(style));
-        setFormatBlock(style);
+        $setBlocksType(selection, () => $createHeadingNode(block));
+        setFormatBlock(block);
       }
     });
   }, [editor]);
 
   return (
     <div className="flex gap-2 my-2">
-      <Toggle isActive={formatBlock === 'h1'} onClick={() => handleTextStyle('h1')}>
+      <Toggle isActive={formatBlock === 'h1'} onClick={() => toggleBlock('h1')}>
         H1
       </Toggle>
-      <Toggle isActive={formatBlock === 'h2'} onClick={() => handleTextStyle('h2')}>
+      <Toggle isActive={formatBlock === 'h2'} onClick={() => toggleBlock('h2')}>
         H2
       </Toggle>
-      <Toggle isActive={formatBlock === 'h3'} onClick={() => handleTextStyle('h3')}>
+      <Toggle isActive={formatBlock === 'h3'} onClick={() => toggleBlock('h3')}>
         H3
       </Toggle>
-      <Toggle isActive={textFormat.bold} onClick={() => handleTextFormat('bold')}>
+      <Toggle isActive={textStyle.bold} onClick={() => toggleTextStyle('bold')}>
         B
       </Toggle>
-      <Toggle isActive={textFormat.italic} onClick={() => handleTextFormat('italic')}>
+      <Toggle isActive={textStyle.italic} onClick={() => toggleTextStyle('italic')}>
         I
       </Toggle>
-      <Toggle isActive={textFormat.underline} onClick={() => handleTextFormat('underline')}>
+      <Toggle isActive={textStyle.underline} onClick={() => toggleTextStyle('underline')}>
         U
       </Toggle>
     </div>
