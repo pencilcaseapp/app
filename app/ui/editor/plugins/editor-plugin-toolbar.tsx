@@ -1,19 +1,20 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $createParagraphNode, $getSelection, $isRangeSelection, COMMAND_PRIORITY_CRITICAL, FORMAT_TEXT_COMMAND, SELECTION_CHANGE_COMMAND } from 'lexical';
-import { $createHeadingNode, $isHeadingNode } from '@lexical/rich-text';
+import { $createHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { useCallback, useEffect, useState } from 'react';
-import { $findTopLevelElement } from '../utils/node';
+import { $getFormatBlock } from '../utils/node';
 import { Toggle } from '~/ui';
-
-type TextStyle = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p';
+import type { EditorFormatBlock } from '../editor.types';
 
 export const EditorPluginToolbar: React.FC = () => {
   const [editor] = useLexicalComposerContext();
-  const [isBold, setIsBold] = useState(false);
-  const [isItalic, setIsItalic] = useState(false);
-  const [isUnderline, setIsUnderline] = useState(false);
-  const [textStyle, setTextStyle] = useState<TextStyle>('p');
+  const [formatBlock, setFormatBlock] = useState<EditorFormatBlock>('p');
+  const [textFormat, setTextFormat] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+  });
 
   useEffect(() => {
     editor.registerCommand(
@@ -22,20 +23,12 @@ export const EditorPluginToolbar: React.FC = () => {
         const selection = $getSelection();
 
         if ($isRangeSelection(selection)) {
-          setIsBold(selection.hasFormat('bold'));
-          setIsItalic(selection.hasFormat('italic'));
-          setIsUnderline(selection.hasFormat('underline'));
-
-          const anchorNode = selection.anchor.getNode();
-          const element = $findTopLevelElement(anchorNode);
-
-          if ($isHeadingNode(element)) {
-            const tag = element.getTag();
-            setTextStyle(tag);
-          }
-          else {
-            setTextStyle('p');
-          }
+          setTextFormat({
+            bold: selection.hasFormat('bold'),
+            italic: selection.hasFormat('italic'),
+            underline: selection.hasFormat('underline'),
+          });
+          setFormatBlock($getFormatBlock(selection));
         }
 
         return false;
@@ -46,26 +39,13 @@ export const EditorPluginToolbar: React.FC = () => {
 
   const handleTextFormat = useCallback((format: 'bold' | 'italic' | 'underline') => {
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
-
-    switch (format) {
-      case 'bold':{
-        setIsBold(prev => !prev);
-        break;
-      }
-
-      case 'italic': {
-        setIsItalic(prev => !prev);
-        break;
-      }
-
-      case 'underline': {
-        setIsUnderline(prev => !prev);
-        break;
-      }
-    }
+    setTextFormat(prev => ({
+      ...prev,
+      [format]: !prev[format],
+    }));
   }, [editor]);
 
-  const handleTextStyle = useCallback((style: TextStyle) => {
+  const handleTextStyle = useCallback((style: EditorFormatBlock) => {
     editor.update(() => {
       const selection = $getSelection();
 
@@ -73,39 +53,37 @@ export const EditorPluginToolbar: React.FC = () => {
         return;
       }
 
-      const anchorNode = selection.anchor.getNode();
-      const element = $findTopLevelElement(anchorNode);
-
-      if ($isHeadingNode(element) && element.getTag() === style) {
+      const formatBlock = $getFormatBlock(selection);
+      if (formatBlock === style) {
         $setBlocksType(selection, () => $createParagraphNode());
-        setTextStyle('p');
+        setFormatBlock('p');
       }
       else {
         $setBlocksType(selection, () => $createHeadingNode(style));
-        setTextStyle(style);
+        setFormatBlock(style);
       }
     });
   }, [editor]);
 
   return (
     <div className="flex gap-2 my-2">
-      <Toggle isActive={textStyle === 'h1'} onClick={() => handleTextStyle('h1')}>
+      <Toggle isActive={formatBlock === 'h1'} onClick={() => handleTextStyle('h1')}>
         H1
       </Toggle>
-      <Toggle isActive={textStyle === 'h2'} onClick={() => handleTextStyle('h2')}>
+      <Toggle isActive={formatBlock === 'h2'} onClick={() => handleTextStyle('h2')}>
         H2
       </Toggle>
-      <Toggle isActive={textStyle === 'h3'} onClick={() => handleTextStyle('h3')}>
+      <Toggle isActive={formatBlock === 'h3'} onClick={() => handleTextStyle('h3')}>
         H3
       </Toggle>
-      <Toggle isActive={isBold} onClick={() => handleTextFormat('bold')}>
-        Bold
+      <Toggle isActive={textFormat.bold} onClick={() => handleTextFormat('bold')}>
+        B
       </Toggle>
-      <Toggle isActive={isItalic} onClick={() => handleTextFormat('italic')}>
-        Italic
+      <Toggle isActive={textFormat.italic} onClick={() => handleTextFormat('italic')}>
+        I
       </Toggle>
-      <Toggle isActive={isUnderline} onClick={() => handleTextFormat('underline')}>
-        Underline
+      <Toggle isActive={textFormat.underline} onClick={() => handleTextFormat('underline')}>
+        U
       </Toggle>
     </div>
   );
