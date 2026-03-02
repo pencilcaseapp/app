@@ -31,7 +31,6 @@ export const Editor: React.FC<EditorProps> = ({
   children,
   placeholder,
   ariaPlaceholder,
-  avatars,
 }) => {
   const config = useMemo<EditorConfig>(() => ({
     editorState: null,
@@ -51,12 +50,7 @@ export const Editor: React.FC<EditorProps> = ({
   }), []);
 
   return (
-    <>
-      <ul>
-        {avatars.map(user => (
-          <li key={user}>{user}</li>
-        ))}
-      </ul>
+    <div className="max-w-4xl flex flex-col justify-center mx-auto px-4">
       <LexicalComposer initialConfig={config}>
         <EditorPluginToolbar />
         <RichTextPlugin
@@ -64,6 +58,7 @@ export const Editor: React.FC<EditorProps> = ({
             <ContentEditable
               aria-placeholder={ariaPlaceholder}
               placeholder={placeholder}
+              className="mt-15"
             />
           )}
           ErrorBoundary={LexicalErrorBoundary}
@@ -76,6 +71,6 @@ export const Editor: React.FC<EditorProps> = ({
         <EditorPluginMarkdown />
         {children}
       </LexicalComposer>
-    </>
+    </div>
   );
 };

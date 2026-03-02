@@ -66,25 +66,30 @@ export const EditorPluginToolbar: React.FC = () => {
   }, [editor]);
 
   return (
-    <div className="flex gap-2 my-2">
-      <Toggle isActive={formatBlock === 'h1'} onClick={() => toggleBlock('h1')}>
-        H1
-      </Toggle>
-      <Toggle isActive={formatBlock === 'h2'} onClick={() => toggleBlock('h2')}>
-        H2
-      </Toggle>
-      <Toggle isActive={formatBlock === 'h3'} onClick={() => toggleBlock('h3')}>
-        H3
-      </Toggle>
-      <Toggle isActive={textStyle.bold} onClick={() => toggleTextStyle('bold')}>
-        B
-      </Toggle>
-      <Toggle isActive={textStyle.italic} onClick={() => toggleTextStyle('italic')}>
-        I
-      </Toggle>
-      <Toggle isActive={textStyle.underline} onClick={() => toggleTextStyle('underline')}>
-        U
-      </Toggle>
+    <div
+      id="editor"
+      className="w-full h-15 fixed left-0 top-0 z-50 flex bg-white dark:bg-gray-950 justify-center items-center"
+    >
+      <div className="flex gap-2">
+        <Toggle isActive={formatBlock === 'h1'} onClick={() => toggleBlock('h1')}>
+          H1
+        </Toggle>
+        <Toggle isActive={formatBlock === 'h2'} onClick={() => toggleBlock('h2')}>
+          H2
+        </Toggle>
+        <Toggle isActive={formatBlock === 'h3'} onClick={() => toggleBlock('h3')}>
+          H3
+        </Toggle>
+        <Toggle isActive={textStyle.bold} onClick={() => toggleTextStyle('bold')}>
+          B
+        </Toggle>
+        <Toggle isActive={textStyle.italic} onClick={() => toggleTextStyle('italic')}>
+          I
+        </Toggle>
+        <Toggle isActive={textStyle.underline} onClick={() => toggleTextStyle('underline')}>
+          U
+        </Toggle>
+      </div>
     </div>
   );
 };
