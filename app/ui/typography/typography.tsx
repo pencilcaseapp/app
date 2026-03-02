@@ -11,6 +11,12 @@ type Color
     | 'orange-300'
     | 'orange-500'
     | 'orange-700'
+    | 'yellow-300'
+    | 'yellow-500'
+    | 'yellow-700'
+    | 'pink-300'
+    | 'pink-500'
+    | 'pink-700'
     | 'red-300'
     | 'red-500'
     | 'red-700'
@@ -83,6 +89,12 @@ export const Typography = <C extends React.ElementType = 'p'>({
     textColorLight === 'orange-300' && `text-pca-orange-300`,
     textColorLight === 'orange-500' && `text-pca-orange-500`,
     textColorLight === 'orange-700' && `text-pca-orange-700`,
+    textColorLight === 'yellow-300' && `text-pca-yellow-300`,
+    textColorLight === 'yellow-500' && `text-pca-yellow-500`,
+    textColorLight === 'yellow-700' && `text-pca-yellow-700`,
+    textColorLight === 'pink-300' && `text-pca-pink-300`,
+    textColorLight === 'pink-500' && `text-pca-pink-500`,
+    textColorLight === 'pink-700' && `text-pca-pink-700`,
     textColorLight === 'red-300' && `text-pca-red-300`,
     textColorLight === 'red-500' && `text-pca-red-500`,
     textColorLight === 'red-700' && `text-pca-red-700`,
@@ -94,9 +106,9 @@ export const Typography = <C extends React.ElementType = 'p'>({
     textColorLight === 'grey-600' && `text-pca-grey-600`,
     textColorLight === 'grey-700' && `text-pca-grey-700`,
     textColorLight === 'grey-800' && `text-pca-grey-800`,
-    textColorLight === 'grey-900' && `text-pca-grey-900 dark:text-pca-white`,
-    textColorLight === 'white' && 'text-white dark:text-pca-grey-900',
-    textColorLight === 'black' && 'text-black dark:text-pca-white',
+    textColorLight === 'grey-900' && `text-pca-grey-900`,
+    textColorLight === 'white' && 'text-white',
+    textColorLight === 'black' && 'text-black',
   ]);
 
   const textColorDarkClasses = classNames([
@@ -109,6 +121,12 @@ export const Typography = <C extends React.ElementType = 'p'>({
     textColorDark === 'orange-300' && `dark:text-pca-orange-300`,
     textColorDark === 'orange-500' && `dark:text-pca-orange-500`,
     textColorDark === 'orange-700' && `dark:text-pca-orange-700`,
+    textColorDark === 'yellow-300' && `dark:text-pca-yellow-300`,
+    textColorDark === 'yellow-500' && `dark:text-pca-yellow-500`,
+    textColorDark === 'yellow-700' && `dark:text-pca-yellow-700`,
+    textColorDark === 'pink-300' && `dark:text-pca-pink-300`,
+    textColorDark === 'pink-500' && `dark:text-pca-pink-500`,
+    textColorDark === 'pink-700' && `dark:text-pca-pink-700`,
     textColorDark === 'red-300' && `dark:text-pca-red-300`,
     textColorDark === 'red-500' && `dark:text-pca-red-500`,
     textColorDark === 'red-700' && `dark:text-pca-red-700`,

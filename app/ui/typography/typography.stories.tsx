@@ -2,13 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Typography } from './typography';
 
 /**
- * The Typography component wraps everything you need to render text at Wakesys.
+ * The Typography component wraps everything you need to render text in the
+ * pencil case app.
  * It supports headlines, paragraphs, and span elements and some additional
  * options to transform the text. The component comes with some defaults based
  * on the variant. Let's take a look at the variants we have in place:
  */
 const meta: Meta<typeof Typography> = {
-  title: 'Web/Data Display/Typography',
+  title: 'Data Display/Typography',
   component: Typography,
 };
 
@@ -44,6 +45,7 @@ export const Variants: Story = {
       <Typography variant="heading3">Heading 3</Typography>
       <Typography variant="body">Body</Typography>
       <Typography variant="bodySmall">Body Small</Typography>
+      <Typography variant="bodyTiny">Body Tiny</Typography>
     </>
   ),
 };

@@ -3,7 +3,7 @@
 exports[`Typography > snapshots > body variant with defaults matches snapshot 1`] = `
 <div>
   <p
-    class="antialiased font-inter text-base font-normal text-pca-grey-900 dark:text-pca-white dark:text-white"
+    class="antialiased font-inter text-base font-normal text-pca-grey-900 dark:text-white"
   >
     Body Default Snapshot
   </p>
@@ -13,7 +13,7 @@ exports[`Typography > snapshots > body variant with defaults matches snapshot 1`
 exports[`Typography > snapshots > bodySmall variant matches snapshot 1`] = `
 <div>
   <p
-    class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-pca-white dark:text-white"
+    class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white"
   >
     Body Small Snapshot
   </p>
@@ -33,7 +33,7 @@ exports[`Typography > snapshots > fully customized typography matches snapshot 1
 exports[`Typography > snapshots > heading1 variant matches snapshot 1`] = `
 <div>
   <h1
-    class="antialiased font-inter text-[28px] sm:text-4xl font-bold text-pca-grey-900 dark:text-pca-white dark:text-white"
+    class="antialiased font-inter text-[28px] sm:text-4xl font-bold text-pca-grey-900 dark:text-white"
   >
     Heading 1 Snapshot
   </h1>
@@ -54,7 +54,7 @@ exports[`Typography > snapshots > polymorphic as label matches snapshot 1`] = `
 exports[`Typography > snapshots > title variant matches snapshot 1`] = `
 <div>
   <h1
-    class="antialiased font-inter text-5xl font-bold text-pca-grey-900 dark:text-pca-white dark:text-white"
+    class="antialiased font-inter text-5xl font-bold text-pca-grey-900 dark:text-white"
   >
     Title Snapshot
   </h1>
