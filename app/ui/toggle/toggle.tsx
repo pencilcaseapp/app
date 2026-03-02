@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from 'react';
 import classNames from 'classnames';
+import { Button } from '../button/button';
 
 export interface ToggleProps extends PropsWithChildren {
   isActive: boolean;
@@ -11,13 +12,13 @@ export const Toggle: React.FC<ToggleProps> = ({
   onClick,
   children,
 }) => {
-  const buttonClasses = classNames('py px-2 border border-gray-400 rounded-xs', {
-    'bg-gray-200': isActive,
+  const buttonClasses = classNames({
+    '!bg-gray-200': isActive,
   });
 
   return (
-    <button className={buttonClasses} onClick={onClick}>
+    <Button className={buttonClasses} onClick={onClick}>
       {children}
-    </button>
+    </Button>
   );
 };
