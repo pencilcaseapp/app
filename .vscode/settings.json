@@ -8,5 +8,8 @@
     "editor.defaultFormatter": "opentofu.vscode-opentofu",
     "editor.formatOnSave": true,
     "editor.formatOnSaveMode": "file"
-  }
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
 }
