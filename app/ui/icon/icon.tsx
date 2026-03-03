@@ -1,20 +1,23 @@
 import classNames from 'classnames';
 import type { IconName } from './icons';
 import { icons } from './icons';
-import type { SVGAttributes, PropsWithChildren } from 'react';
+import { useId, type SVGAttributes } from 'react';
 
 export type IconProps = {
   icon: IconName;
   className?: string;
+  title?: string;
 } & SVGAttributes<SVGElement>
-& PropsWithChildren;
+;
 
 export const Icon: React.FC<IconProps> = ({
   icon,
-  children,
   className,
+  title,
   ...rest
 }) => {
+  const titleId = useId();
+
   return (
     <svg
       className={classNames(className)}
@@ -24,9 +27,11 @@ export const Icon: React.FC<IconProps> = ({
       height="24"
       fill="transparent"
       focusable="false"
+      aria-labelledby={title ? titleId : undefined}
+      aria-hidden={!title}
       {...rest}
     >
-      {children}
+      {title && <title id={titleId}>{title}</title>}
       {icons[icon]}
     </svg>
   );

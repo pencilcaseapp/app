@@ -20,7 +20,7 @@ Icons are used to represent actions, objects, and concepts. They are used to com
 
 <IconGallery>
   {Object.keys(icons).map((icon) => (
-      <IconItem name={icon}>
+      <IconItem key={icon} name={icon}>
         <Icon icon={icon} />
       </IconItem>
     ))}
