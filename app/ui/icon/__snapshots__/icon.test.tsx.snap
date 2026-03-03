@@ -3,6 +3,7 @@
 exports[`Icon Component > should render with icon name 1`] = `
 <div>
   <svg
+    aria-hidden="true"
     class=""
     fill="transparent"
     focusable="false"
@@ -22,6 +23,7 @@ exports[`Icon Component > should render with icon name 1`] = `
 exports[`Icon Component > should render with icon name 2`] = `
 <div>
   <svg
+    aria-hidden="true"
     class=""
     fill="transparent"
     focusable="false"
@@ -41,6 +43,7 @@ exports[`Icon Component > should render with icon name 2`] = `
 exports[`Icon Component > should render with icon name 3`] = `
 <div>
   <svg
+    aria-hidden="true"
     class=""
     fill="transparent"
     focusable="false"
@@ -60,6 +63,7 @@ exports[`Icon Component > should render with icon name 3`] = `
 exports[`Icon Component > should render with icon name 4`] = `
 <div>
   <svg
+    aria-hidden="true"
     class=""
     fill="transparent"
     focusable="false"
@@ -80,6 +84,7 @@ exports[`Icon Component > should render with icon name 4`] = `
 exports[`Icon Component > should render with icon name 5`] = `
 <div>
   <svg
+    aria-hidden="true"
     class=""
     fill="transparent"
     focusable="false"
@@ -101,6 +106,7 @@ exports[`Icon Component > should render with icon name 5`] = `
 exports[`Icon Component > should render with icon name 6`] = `
 <div>
   <svg
+    aria-hidden="true"
     class=""
     fill="transparent"
     focusable="false"
@@ -121,6 +127,7 @@ exports[`Icon Component > should render with icon name 6`] = `
 exports[`Icon Component > should render with icon name 7`] = `
 <div>
   <svg
+    aria-hidden="true"
     class=""
     fill="transparent"
     focusable="false"
@@ -140,6 +147,7 @@ exports[`Icon Component > should render with icon name 7`] = `
 exports[`Icon Component > should render with icon name 8`] = `
 <div>
   <svg
+    aria-hidden="true"
     class=""
     fill="transparent"
     focusable="false"
@@ -159,6 +167,7 @@ exports[`Icon Component > should render with icon name 8`] = `
 exports[`Icon Component > should render with icon name 9`] = `
 <div>
   <svg
+    aria-hidden="true"
     class=""
     fill="transparent"
     focusable="false"
