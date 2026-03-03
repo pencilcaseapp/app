@@ -1,0 +1,36 @@
+import {
+  Meta,
+  Title,
+  IconGallery,
+  IconItem,
+  Controls,
+  Canvas,
+  Story,
+} from '@storybook/addon-docs/blocks';
+import * as IconStories from './icon.stories';
+
+import { Icon } from './icon';
+import { icons } from './icons';
+
+<Meta of={IconStories} />
+
+# Icons
+
+Icons are used to represent actions, objects, and concepts. They are used to communicate meaning without using words. Icons are also used to help users navigate and understand the interface.
+
+<IconGallery>
+  {Object.keys(icons).map((icon) => (
+      <IconItem key={icon} name={icon}>
+        <Icon icon={icon} />
+      </IconItem>
+    ))}
+</IconGallery>
+
+# Custom Styles
+
+The Icon component supports custom styles by passing the `className` prop to it. Since we use TailwindCSS you can add any utility class to the component you need.
+In this case we just add some `color`:
+
+<Canvas withSource="open">
+  <Story of={IconStories.CustomStyles} />
+</Canvas>
