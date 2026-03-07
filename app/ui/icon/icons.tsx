@@ -7,7 +7,8 @@ export type IconName
     | 'underline'
     | 'listUl'
     | 'listOl'
-    | 'listCheck';
+    | 'listCheck'
+    | 'share';
 
 export const icons: {
   [index in IconName]: React.ReactElement<SVGPathElement>;
@@ -68,6 +69,15 @@ export const icons: {
     <path
       d="M6 14C7.10457 14 8 14.8954 8 16C8 17.1046 7.10457 18 6 18C4.89543 18 4 17.1046 4 16C4 14.8954 4.89543 14 6 14ZM20 16.75H11V15.25H20V16.75ZM6 6C7.10457 6 8 6.89543 8 8C8 9.10457 7.10457 10 6 10C4.89543 10 4 9.10457 4 8C4 6.89543 4.89543 6 6 6ZM20 8.75H11V7.25H20V8.75Z"
       fill="currentColor"
+    />
+  ),
+  share: (
+    <path
+      d="M21 12V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H7.8C6.11984 21 5.27976 21 4.63803 20.673C4.07354 20.3854 3.6146 19.9265 3.32698 19.362C3 18.7202 3 17.8802 3 16.2V12M16 7L12 3M12 3L8 7M12 3V15"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   ),
 };
