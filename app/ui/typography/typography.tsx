@@ -48,7 +48,7 @@ export type TypographyProps = {
   textColorLight?: Color;
   textColorDark?: Color;
   textAlign?: 'left' | 'center' | 'right';
-  fontWeight?: 'regular' | 'semibold' | 'bold';
+  fontWeight?: 'regular' | 'medium' | 'semibold' | 'bold';
   textTransform?: 'uppercase' | 'capitalize' | 'lowercase';
   className?: string;
 };
@@ -152,6 +152,7 @@ export const Typography = <C extends React.ElementType = 'p'>({
   const fontWeightClasses = classNames([
     fontWeight === 'regular' && 'font-normal',
     fontWeight === 'semibold' && 'font-semibold',
+    fontWeight === 'medium' && 'font-medium',
     fontWeight === 'bold' && 'font-bold',
   ]);
 

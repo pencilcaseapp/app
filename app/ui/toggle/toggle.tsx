@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { Button, type ButtonProps } from '../button/button';
 
-export interface ToggleProps extends ButtonProps {
+export interface ToggleProps extends ButtonProps<'button'> {
   isActive: boolean;
 }
 

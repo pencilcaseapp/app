@@ -50,7 +50,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const boldButton = screen.getByText('B');
+    const boldButton = screen.getByRole('button', { name: 'B' });
     await user.click(boldButton);
 
     expect(boldButton).toHaveAttribute('aria-pressed', 'true');
@@ -67,7 +67,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const italicButton = screen.getByText('I');
+    const italicButton = screen.getByRole('button', { name: 'I' });
     await user.click(italicButton);
 
     expect(italicButton).toHaveAttribute('aria-pressed', 'true');
@@ -84,7 +84,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const underlineButton = screen.getByText('U');
+    const underlineButton = screen.getByRole('button', { name: 'U' });
     await user.click(underlineButton);
 
     expect(underlineButton).toHaveAttribute('aria-pressed', 'true');
@@ -101,7 +101,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const h1Button = screen.getByText('H1');
+    const h1Button = screen.getByRole('button', { name: 'H1' });
     await user.click(h1Button);
 
     expect(h1Button).toHaveAttribute('aria-pressed', 'true');
@@ -115,7 +115,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const h2Button = screen.getByText('H2');
+    const h2Button = screen.getByRole('button', { name: 'H2' });
     await user.click(h2Button);
 
     expect(h2Button).toHaveAttribute('aria-pressed', 'true');
@@ -129,7 +129,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const h3Button = screen.getByText('H3');
+    const h3Button = screen.getByRole('button', { name: 'H3' });
     await user.click(h3Button);
 
     expect(h3Button).toHaveAttribute('aria-pressed', 'true');
@@ -143,7 +143,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const h1Button = screen.getByText('H1');
+    const h1Button = screen.getByRole('button', { name: 'H1' });
     await user.click(h1Button);
     expect(h1Button).toHaveAttribute('aria-pressed', 'true');
 
@@ -161,7 +161,7 @@ describe('EditorPluginToolbar', () => {
     expect(editor.querySelector('h1')).toBeNull();
     expect(editor.querySelector('p')).toBeInTheDocument();
 
-    await user.click(screen.getByText('H1'));
+    await user.click(screen.getByRole('button', { name: 'H1' }));
 
     expect(editor.querySelector('h1')).toBeInTheDocument();
     expect(editor.querySelector('p')).toBeNull();
@@ -176,7 +176,7 @@ describe('EditorPluginToolbar', () => {
 
     expect(editor.querySelector('h2')).toBeNull();
 
-    await user.click(screen.getByText('H2'));
+    await user.click(screen.getByRole('button', { name: 'H2' }));
 
     expect(editor.querySelector('h2')).toBeInTheDocument();
     expect(editor.querySelector('p')).toBeNull();
@@ -191,7 +191,7 @@ describe('EditorPluginToolbar', () => {
 
     expect(editor.querySelector('h3')).toBeNull();
 
-    await user.click(screen.getByText('H3'));
+    await user.click(screen.getByRole('button', { name: 'H3' }));
 
     expect(editor.querySelector('h3')).toBeInTheDocument();
     expect(editor.querySelector('p')).toBeNull();
@@ -204,7 +204,7 @@ describe('EditorPluginToolbar', () => {
     const editor = screen.getByRole('textbox');
     await user.click(editor);
 
-    const h1Button = screen.getByText('H1');
+    const h1Button = screen.getByRole('button', { name: 'H1' });
     await user.click(h1Button);
     expect(editor.querySelector('h1')).toBeInTheDocument();
     expect(editor.querySelector('p')).toBeNull();
