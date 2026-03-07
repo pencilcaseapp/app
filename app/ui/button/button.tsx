@@ -18,6 +18,7 @@ export type ButtonProps<C extends React.ElementType>
       disabled?: boolean;
       iconPosition?: 'start' | 'end';
       icon?: IconName;
+      iconTitle?: string;
       className?: string;
     }
   >;
@@ -37,6 +38,7 @@ export const Button = forwardRef(
       icon,
       iconPosition = 'end',
       className,
+      iconTitle,
       ...props
     }: ButtonProps<C>,
     ref?: unknown,
@@ -141,6 +143,7 @@ export const Button = forwardRef(
         {icon && (
           <Icon
             icon={icon}
+            title={iconTitle}
             className={classNames([hideClasses, [
               'shrink-0',
               isOnlyIcon ? 'w-6 h-6' : 'w-4 h-4',

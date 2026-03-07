@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`LoadingIndicator > size > renders loading indicator 1`] = `
+exports[`LoadingIndicator > renders loading indicator 1`] = `
 <div>
   <div
     class="pointer-events-none flex items-center justify-center"

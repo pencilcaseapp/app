@@ -69,8 +69,11 @@ describe('Button', () => {
     });
 
     test('renders icon-only button with square sizing when no children', () => {
-      render(<Button icon="h1" />);
+      render(<Button icon="h1" title="Heading 1" />);
       const button = screen.getByRole('button');
+      const iconTitle = screen.getByTitle('Heading 1');
+
+      expect(iconTitle).toBeInTheDocument();
       expect(button.className).toMatch(/w-9/);
       expect(button.className).toMatch(/h-9/);
     });

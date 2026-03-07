@@ -20,11 +20,9 @@ describe('LoadingIndicator', () => {
     expect(container.firstElementChild).toHaveClass('my-class');
   });
 
-  describe('size', () => {
-    test('renders loading indicator', () => {
-      const { container } = render(<LoadingIndicator />);
-      expect(container).toMatchSnapshot();
-    });
+  test('renders loading indicator', () => {
+    const { container } = render(<LoadingIndicator />);
+    expect(container).toMatchSnapshot();
   });
 
   test('applies staggered animation delays to dots', () => {
