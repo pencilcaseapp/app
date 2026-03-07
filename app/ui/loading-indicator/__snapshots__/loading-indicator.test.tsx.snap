@@ -1,0 +1,36 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LoadingIndicator > size > renders loading indicator 1`] = `
+<div>
+  <div
+    class="pointer-events-none flex items-center justify-center"
+  >
+    <div
+      aria-label="loading"
+      class="flex items-center justify-center w-6 h-6 gap-1"
+      role="status"
+    >
+      <div
+        aria-hidden="true"
+        class="w-1 h-1 rounded-full bg-current animate-[bounce-dot_1.4s_ease-in-out_infinite]"
+        style="animation-delay: 0s;"
+      />
+      <div
+        aria-hidden="true"
+        class="w-1 h-1 rounded-full bg-current animate-[bounce-dot_1.4s_ease-in-out_infinite]"
+        style="animation-delay: 0.16s;"
+      />
+      <div
+        aria-hidden="true"
+        class="w-1 h-1 rounded-full bg-current animate-[bounce-dot_1.4s_ease-in-out_infinite]"
+        style="animation-delay: 0.32s;"
+      />
+      <span
+        class="sr-only"
+      >
+        Loading...
+      </span>
+    </div>
+  </div>
+</div>
+`;
