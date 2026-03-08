@@ -30,8 +30,20 @@ export const HorizontalOverflow: FC<HorizontalOverflowProps> = ({
   });
 
   useEffect(() => {
-    handleOverflowCalculation();
-  }, [scrollableElement, x]);
+    const element = scrollableElement.current;
+    if (!element || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      handleOverflowCalculation();
+    });
+
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+    };
+  }, [x, scrollableElement]);
 
   return (
     <div className={classes}>
