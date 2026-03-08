@@ -34,12 +34,12 @@ describe('EditorPluginToolbar', () => {
   test('renders all toggle buttons', () => {
     renderToolbar();
 
-    expect(screen.getByText('H1')).toBeInTheDocument();
-    expect(screen.getByText('H2')).toBeInTheDocument();
-    expect(screen.getByText('H3')).toBeInTheDocument();
-    expect(screen.getByText('B')).toBeInTheDocument();
-    expect(screen.getByText('I')).toBeInTheDocument();
-    expect(screen.getByText('U')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'headline 1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'headline 2' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'headline 3' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'bold' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'italic' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'underline' })).toBeInTheDocument();
   });
 
   test('toggles bold when B is clicked', async () => {
@@ -50,7 +50,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const boldButton = screen.getByRole('button', { name: 'B' });
+    const boldButton = screen.getByRole('button', { name: 'bold' });
     await user.click(boldButton);
 
     expect(boldButton).toHaveAttribute('aria-pressed', 'true');
@@ -67,7 +67,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const italicButton = screen.getByRole('button', { name: 'I' });
+    const italicButton = screen.getByRole('button', { name: 'italic' });
     await user.click(italicButton);
 
     expect(italicButton).toHaveAttribute('aria-pressed', 'true');
@@ -84,7 +84,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const underlineButton = screen.getByRole('button', { name: 'U' });
+    const underlineButton = screen.getByRole('button', { name: 'underline' });
     await user.click(underlineButton);
 
     expect(underlineButton).toHaveAttribute('aria-pressed', 'true');
@@ -101,7 +101,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const h1Button = screen.getByRole('button', { name: 'H1' });
+    const h1Button = screen.getByRole('button', { name: 'headline 1' });
     await user.click(h1Button);
 
     expect(h1Button).toHaveAttribute('aria-pressed', 'true');
@@ -115,7 +115,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const h2Button = screen.getByRole('button', { name: 'H2' });
+    const h2Button = screen.getByRole('button', { name: 'headline 2' });
     await user.click(h2Button);
 
     expect(h2Button).toHaveAttribute('aria-pressed', 'true');
@@ -129,7 +129,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const h3Button = screen.getByRole('button', { name: 'H3' });
+    const h3Button = screen.getByRole('button', { name: 'headline 3' });
     await user.click(h3Button);
 
     expect(h3Button).toHaveAttribute('aria-pressed', 'true');
@@ -143,7 +143,7 @@ describe('EditorPluginToolbar', () => {
     await user.click(editor);
     await user.type(editor, 'Hello');
 
-    const h1Button = screen.getByRole('button', { name: 'H1' });
+    const h1Button = screen.getByRole('button', { name: 'headline 1' });
     await user.click(h1Button);
     expect(h1Button).toHaveAttribute('aria-pressed', 'true');
 
@@ -161,7 +161,7 @@ describe('EditorPluginToolbar', () => {
     expect(editor.querySelector('h1')).toBeNull();
     expect(editor.querySelector('p')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'H1' }));
+    await user.click(screen.getByRole('button', { name: 'headline 1' }));
 
     expect(editor.querySelector('h1')).toBeInTheDocument();
     expect(editor.querySelector('p')).toBeNull();
@@ -176,7 +176,7 @@ describe('EditorPluginToolbar', () => {
 
     expect(editor.querySelector('h2')).toBeNull();
 
-    await user.click(screen.getByRole('button', { name: 'H2' }));
+    await user.click(screen.getByRole('button', { name: 'headline 2' }));
 
     expect(editor.querySelector('h2')).toBeInTheDocument();
     expect(editor.querySelector('p')).toBeNull();
@@ -191,7 +191,7 @@ describe('EditorPluginToolbar', () => {
 
     expect(editor.querySelector('h3')).toBeNull();
 
-    await user.click(screen.getByRole('button', { name: 'H3' }));
+    await user.click(screen.getByRole('button', { name: 'headline 3' }));
 
     expect(editor.querySelector('h3')).toBeInTheDocument();
     expect(editor.querySelector('p')).toBeNull();
@@ -204,7 +204,7 @@ describe('EditorPluginToolbar', () => {
     const editor = screen.getByRole('textbox');
     await user.click(editor);
 
-    const h1Button = screen.getByRole('button', { name: 'H1' });
+    const h1Button = screen.getByRole('button', { name: 'headline 1' });
     await user.click(h1Button);
     expect(editor.querySelector('h1')).toBeInTheDocument();
     expect(editor.querySelector('p')).toBeNull();

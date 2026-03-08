@@ -71,24 +71,12 @@ export const EditorPluginToolbar: React.FC = () => {
       className="w-full h-15 fixed left-0 top-0 z-50 flex bg-white dark:bg-pca-grey-900 justify-center items-center"
     >
       <div className="flex gap-2">
-        <Toggle isActive={formatBlock === 'h1'} onClick={() => toggleBlock('h1')}>
-          H1
-        </Toggle>
-        <Toggle isActive={formatBlock === 'h2'} onClick={() => toggleBlock('h2')}>
-          H2
-        </Toggle>
-        <Toggle isActive={formatBlock === 'h3'} onClick={() => toggleBlock('h3')}>
-          H3
-        </Toggle>
-        <Toggle isActive={textStyle.bold} onClick={() => toggleTextStyle('bold')}>
-          B
-        </Toggle>
-        <Toggle isActive={textStyle.italic} onClick={() => toggleTextStyle('italic')}>
-          I
-        </Toggle>
-        <Toggle isActive={textStyle.underline} onClick={() => toggleTextStyle('underline')}>
-          U
-        </Toggle>
+        <Toggle isActive={formatBlock === 'h1'} onClick={() => toggleBlock('h1')} icon="h1" iconTitle="headline 1" />
+        <Toggle isActive={formatBlock === 'h2'} onClick={() => toggleBlock('h2')} icon="h2" iconTitle="headline 2" />
+        <Toggle isActive={formatBlock === 'h3'} onClick={() => toggleBlock('h3')} icon="h3" iconTitle="headline 3" />
+        <Toggle isActive={textStyle.bold} onClick={() => toggleTextStyle('bold')} icon="bold" iconTitle="bold" />
+        <Toggle isActive={textStyle.italic} onClick={() => toggleTextStyle('italic')} icon="italic" iconTitle="italic" />
+        <Toggle isActive={textStyle.underline} onClick={() => toggleTextStyle('underline')} icon="underline" iconTitle="underline" />
       </div>
     </div>
   );
