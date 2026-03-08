@@ -34,12 +34,12 @@ describe('EditorPluginToolbar', () => {
   test('renders all toggle buttons', () => {
     renderToolbar();
 
-    expect(screen.getByTitle('headline 1')).toBeInTheDocument();
-    expect(screen.getByTitle('headline 2')).toBeInTheDocument();
-    expect(screen.getByTitle('headline 3')).toBeInTheDocument();
-    expect(screen.getByTitle('bold')).toBeInTheDocument();
-    expect(screen.getByTitle('italic')).toBeInTheDocument();
-    expect(screen.getByTitle('underline')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'headline 1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'headline 2' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'headline 3' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'bold' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'italic' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'underline' })).toBeInTheDocument();
   });
 
   test('toggles bold when B is clicked', async () => {
