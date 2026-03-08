@@ -33,5 +33,6 @@ export const Icon: Story = {
   args: {
     isActive: false,
     icon: 'h1',
+    iconTitle: 'heading 1',
   },
 };
