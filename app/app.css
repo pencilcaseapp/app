@@ -59,7 +59,7 @@
     #fff 100%
   );
 
-    --background-image-overflow-gradient-dark: linear-gradient(
+  --background-image-overflow-gradient-dark: linear-gradient(
     90deg,
     rgba(16, 16, 16, 0) 0%,
     rgba(16, 16, 16, 0.02) 8%,
