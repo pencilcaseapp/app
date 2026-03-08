@@ -9,11 +9,12 @@ export const Toggle: React.FC<ToggleProps> = ({
   isActive,
   ...props
 }) => {
-  const buttonClasses = classNames({
-    '!bg-gray-200 dark:!bg-gray-600': isActive,
-  });
+  const buttonClasses = classNames(
+    { 'bg-pca-grey-900! text-pca-white! dark:text-pca-grey-900! dark:bg-pca-white!': isActive },
+    props.className,
+  );
 
   return (
-    <Button className={buttonClasses} aria-pressed={isActive} {...props} />
+    <Button color="secondary" className={buttonClasses} aria-pressed={isActive} {...props} />
   );
 };
