@@ -8,3 +8,6 @@ export * from './editor/editor';
 // Forms
 export * from './button/button';
 export * from './toggle/toggle';
+
+// Utils
+export * from './horizontal-overflow/horizontal-overflow';
