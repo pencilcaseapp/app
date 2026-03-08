@@ -69,6 +69,7 @@
     "happy-dom": "^20.3.9",
     "npm-run-all2": "^8.0.4",
     "storybook": "^10.1.11",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.13",
     "tsx": "^4.21.0",
     "typescript": "^5.9.2",
