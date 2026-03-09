@@ -5,11 +5,11 @@ import { useEffect, useRef } from 'react';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { BLUR_COMMAND, COMMAND_PRIORITY_CRITICAL } from 'lexical';
-import { useIsVirtualKeyboardOpen } from '~/hooks/use-is-virtual-keyboard-open';
+import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 
 export const EditorPluginRichText: React.FC = () => {
   const contenteditable = useRef<HTMLDivElement>(null);
-  const { isVirtualKeyboardOpen } = useIsVirtualKeyboardOpen();
+  const [isVirtualKeyboardOpen] = useVirtualKeyboard();
   const [editor] = useLexicalComposerContext();
 
   useEffect(
@@ -27,6 +27,7 @@ export const EditorPluginRichText: React.FC = () => {
           contenteditable.current.style.height = '';
           contenteditable.current.scrollTop = 0;
           document.documentElement.scrollTop = scrollTop;
+
           return false;
         },
         COMMAND_PRIORITY_CRITICAL,
