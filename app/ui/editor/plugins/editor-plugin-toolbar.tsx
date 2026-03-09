@@ -68,7 +68,7 @@ export const EditorPluginToolbar: React.FC = () => {
   return (
     <div
       id="editor"
-      className="w-full h-15 fixed left-0 top-0 z-50 flex bg-white dark:bg-pca-grey-900 justify-center items-center"
+      className="w-full h-12 md:h-15 fixed left-0 top-0 z-50 flex bg-white dark:bg-pca-grey-900 justify-center items-center"
     >
       <div className="flex gap-2">
         <Toggle isActive={formatBlock === 'h1'} onClick={() => toggleBlock('h1')} icon="h1" iconTitle="headline 1" />

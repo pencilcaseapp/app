@@ -48,12 +48,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     return (
       <LexicalCollaboration>
         <Editor
-          ariaPlaceholder="Start here …"
-          placeholder={
-            isSynced
-              ? <div>Start here …</div>
-              : <div></div>
-          }
           avatars={avatars}
         >
           <CollaborationPlugin

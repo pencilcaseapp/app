@@ -22,15 +22,11 @@ import './editor.css';
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
 export interface EditorProps extends React.PropsWithChildren {
-  placeholder: React.JSX.Element;
-  ariaPlaceholder: string;
   avatars: string[];
 }
 
 export const Editor: React.FC<EditorProps> = ({
   children,
-  placeholder,
-  ariaPlaceholder,
 }) => {
   const config = useMemo<EditorConfig>(() => ({
     editorState: null,
@@ -50,15 +46,15 @@ export const Editor: React.FC<EditorProps> = ({
   }), []);
 
   return (
-    <div className="max-w-4xl flex flex-col justify-center mx-auto px-4">
+    <div className="w-full relative">
       <LexicalComposer initialConfig={config}>
         <EditorPluginToolbar />
         <RichTextPlugin
           contentEditable={(
             <ContentEditable
-              aria-placeholder={ariaPlaceholder}
-              placeholder={placeholder}
-              className="mt-15"
+              aria-placeholder=""
+              placeholder={<span />}
+              className="pt-15 md:pt-27 pb-3 md:pb-12 w-full min-h-dvh px-4 md:px-[calc((100%-608px)/2)]"
             />
           )}
           ErrorBoundary={LexicalErrorBoundary}
