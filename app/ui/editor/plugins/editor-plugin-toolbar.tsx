@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $createParagraphNode, $getSelection, $isRangeSelection, COMMAND_PRIORITY_CRITICAL, FORMAT_TEXT_COMMAND, SELECTION_CHANGE_COMMAND } from 'lexical';
+import { $createParagraphNode, $getSelection, $isRangeSelection, BLUR_COMMAND, COMMAND_PRIORITY_CRITICAL, FORMAT_TEXT_COMMAND, SELECTION_CHANGE_COMMAND } from 'lexical';
 import { $createHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -31,6 +31,24 @@ export const EditorPluginToolbar: React.FC = () => {
           });
           setFormatBlock($getFormatBlock(selection));
         }
+
+        return false;
+      },
+      COMMAND_PRIORITY_CRITICAL,
+    );
+
+    editor.registerCommand(
+      BLUR_COMMAND,
+      () => {
+        setTextFormat({
+          bold: false,
+          italic: false,
+          underline: false,
+        });
+
+        setFormatBlock('p');
+
+        window.getSelection()?.removeAllRanges();
 
         return false;
       },
