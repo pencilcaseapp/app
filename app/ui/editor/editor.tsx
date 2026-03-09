@@ -1,7 +1,4 @@
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { ClickableLinkPlugin } from '@lexical/react/LexicalClickableLinkPlugin';
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin';
@@ -18,18 +15,21 @@ import { EditorPluginToolbar } from './plugins/editor-plugin-toolbar';
 import editorTheme from './editor-theme';
 
 import './editor.css';
+import { EditorPluginRichText } from './plugins/editor-plugin-rich-text';
 
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
 export interface EditorProps extends React.PropsWithChildren {
+  initialEditorState?: EditorConfig['editorState'];
   avatars: string[];
 }
 
 export const Editor: React.FC<EditorProps> = ({
+  initialEditorState,
   children,
 }) => {
   const config = useMemo<EditorConfig>(() => ({
-    editorState: null,
+    editorState: initialEditorState ?? null,
     namespace: 'pencilCase',
     onError: console.log,
     nodes: [
@@ -43,22 +43,13 @@ export const Editor: React.FC<EditorProps> = ({
       HorizontalRuleNode,
     ],
     theme: editorTheme,
-  }), []);
+  }), [initialEditorState]);
 
   return (
     <div className="w-full relative">
       <LexicalComposer initialConfig={config}>
         <EditorPluginToolbar />
-        <RichTextPlugin
-          contentEditable={(
-            <ContentEditable
-              aria-placeholder=""
-              placeholder={<span />}
-              className="pt-15 md:pt-27 pb-3 md:pb-12 w-full min-h-dvh px-4 md:px-[calc((100%-608px)/2)]"
-            />
-          )}
-          ErrorBoundary={LexicalErrorBoundary}
-        />
+        <EditorPluginRichText />
         <CheckListPlugin />
         <ListPlugin />
         <ClickableLinkPlugin />

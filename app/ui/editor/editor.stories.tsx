@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Editor } from './editor';
+import { initialEditorState } from '~/test/fixtures/editor';
 
 const meta = {
   title: 'Editor/Editor',
@@ -15,11 +16,6 @@ type Story = StoryObj<typeof meta>;
 export const Primary: Story = {
   args: {
     avatars: [],
-  },
-};
-
-export const WithAvatars: Story = {
-  args: {
-    avatars: ['Alice', 'Bob', 'Charlie'],
+    initialEditorState: JSON.stringify(initialEditorState),
   },
 };
