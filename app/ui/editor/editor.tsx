@@ -1,7 +1,4 @@
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { ClickableLinkPlugin } from '@lexical/react/LexicalClickableLinkPlugin';
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin';
@@ -18,22 +15,21 @@ import { EditorPluginToolbar } from './plugins/editor-plugin-toolbar';
 import editorTheme from './editor-theme';
 
 import './editor.css';
+import { EditorPluginRichText } from './plugins/editor-plugin-rich-text';
 
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
 export interface EditorProps extends React.PropsWithChildren {
-  placeholder: React.JSX.Element;
-  ariaPlaceholder: string;
+  initialEditorState?: EditorConfig['editorState'];
   avatars: string[];
 }
 
 export const Editor: React.FC<EditorProps> = ({
+  initialEditorState,
   children,
-  placeholder,
-  ariaPlaceholder,
 }) => {
   const config = useMemo<EditorConfig>(() => ({
-    editorState: null,
+    editorState: initialEditorState ?? null,
     namespace: 'pencilCase',
     onError: console.log,
     nodes: [
@@ -47,22 +43,13 @@ export const Editor: React.FC<EditorProps> = ({
       HorizontalRuleNode,
     ],
     theme: editorTheme,
-  }), []);
+  }), [initialEditorState]);
 
   return (
-    <div className="max-w-4xl flex flex-col justify-center mx-auto px-4">
+    <div className="w-full relative">
       <LexicalComposer initialConfig={config}>
         <EditorPluginToolbar />
-        <RichTextPlugin
-          contentEditable={(
-            <ContentEditable
-              aria-placeholder={ariaPlaceholder}
-              placeholder={placeholder}
-              className="mt-15"
-            />
-          )}
-          ErrorBoundary={LexicalErrorBoundary}
-        />
+        <EditorPluginRichText />
         <CheckListPlugin />
         <ListPlugin />
         <ClickableLinkPlugin />

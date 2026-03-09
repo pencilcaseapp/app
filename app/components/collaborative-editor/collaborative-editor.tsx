@@ -14,6 +14,7 @@ export interface CollaborativeEditorProps {
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
   = ({ id, wsUrl }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const [avatars, setAvatars] = useState<string[]>([]);
 
@@ -48,12 +49,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     return (
       <LexicalCollaboration>
         <Editor
-          ariaPlaceholder="Start here …"
-          placeholder={
-            isSynced
-              ? <div>Start here …</div>
-              : <div></div>
-          }
           avatars={avatars}
         >
           <CollaborationPlugin

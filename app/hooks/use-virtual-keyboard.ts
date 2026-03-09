@@ -1,0 +1,23 @@
+import { useEffect, useState } from 'react';
+
+export const useVirtualKeyboard = () => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const listener = () => {
+      setIsOpen(
+        window.visualViewport
+          ? window.visualViewport.height < window.innerHeight
+          : false,
+      );
+    };
+
+    window.visualViewport?.addEventListener('resize', listener);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', listener);
+    };
+  }, []);
+
+  return [isOpen];
+};
