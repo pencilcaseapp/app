@@ -36,16 +36,13 @@ export const EditorPluginRichText: React.FC = () => {
   );
 
   useEffect(() => {
-    if (!contenteditable.current
-      || !window.visualViewport
-      || !isVirtualKeyboardOpen
-    ) {
+    if (!contenteditable.current || !isVirtualKeyboardOpen) {
       return;
     }
 
-    const scrollTop = document.documentElement.scrollTop;
     disableBodyScroll(contenteditable.current);
-    const visualHeight = window.visualViewport.height;
+    const scrollTop = document.documentElement.scrollTop;
+    const visualHeight = window.visualViewport?.height;
     contenteditable.current.style.minHeight = 'auto';
     contenteditable.current.style.height = `${visualHeight}px`;
     document.documentElement.scrollTop = 0;
