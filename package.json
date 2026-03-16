@@ -23,6 +23,7 @@
     "@hocuspocus/extension-database": "^3.4.4",
     "@hocuspocus/provider": "^3.4.4",
     "@hocuspocus/server": "^3.4.4",
+    "@lexical/headless": "^0.40.0",
     "@lexical/react": "^0.40.0",
     "@lexical/yjs": "^0.40.0",
     "@react-router/express": "^7.13.0",
@@ -47,6 +48,7 @@
     "yjs": "^13.6.29"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.3.0",
     "@react-router/dev": "7.13.0",
     "@storybook/addon-docs": "^10.2.14",
     "@storybook/react-vite": "^10.2.1",

@@ -5,15 +5,16 @@ import type { Provider } from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui';
 import { useCallback, useState } from 'react';
-import { getDocFromMap } from '~/utils/yjs';
+import { extractTitleFromYDoc, getDocFromMap } from '~/utils/yjs';
 
 export interface CollaborativeEditorProps {
   id: string;
   wsUrl: string;
+  onTitleChange?: (title: string | null) => void;
 }
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
-  = ({ id, wsUrl }) => {
+  = ({ id, wsUrl, onTitleChange }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const [avatars, setAvatars] = useState<string[]>([]);
@@ -34,6 +35,10 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
         onAwarenessChange({ states }) {
           setAvatars(states.map(state => state.name));
         },
+        onMessage() {
+          const title = extractTitleFromYDoc(doc);
+          onTitleChange?.(title);
+        },
       });
 
       return {
@@ -44,7 +49,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
         on: provider.on.bind(provider),
         off: provider.off.bind(provider),
       };
-    }, [wsUrl]);
+    }, [wsUrl, onTitleChange]);
 
     return (
       <LexicalCollaboration>

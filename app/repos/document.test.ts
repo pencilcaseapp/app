@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { createDocument, getDocument, updateDocument } from './document';
+import { createDocument, getDocument, getDocumentTitle, updateDocument } from './document';
 import { db } from '~/db';
-import { createEmptyDocument } from '~/test/fixtures/document';
+import { createDocumentWithTitle, createEmptyDocument } from '~/test/fixtures/document';
 
 describe('createDocument', () => {
   it('creates an empty document', async () => {
@@ -28,6 +28,15 @@ describe('getDocument', () => {
     const document = await getDocument(fixture.id);
 
     expect(document).toStrictEqual(fixture);
+  });
+});
+
+describe('getDocumentTitle', () => {
+  it('returns a document title by id', async () => {
+    const fixture = await createDocumentWithTitle();
+    const documentTitle = await getDocumentTitle(fixture.id);
+
+    expect(documentTitle).toBe(fixture.title);
   });
 });
 
