@@ -15,6 +15,19 @@ export async function getDocument(id: string) {
   });
 }
 
+export async function getDocumentTitle(id: string) {
+  const doc = await db.query.documents.findFirst({
+    where: {
+      id,
+    },
+    columns: {
+      title: true,
+    },
+  });
+
+  return doc?.title ?? null;
+}
+
 export async function updateDocument(
   id: string,
   input: { title?: string | null; content?: Buffer<ArrayBufferLike> | null },
