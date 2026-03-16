@@ -13,13 +13,14 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+          cache: npm
       - name: Install deps
-        uses: bahmutov/npm-install@v1
+        run: npm ci
       - name: Lint
         run: npm run lint
   
@@ -42,13 +43,14 @@ jobs:
           --health-retries 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+          cache: npm
       - name: Install deps
-        uses: bahmutov/npm-install@v1
+        run: npm ci
       - name: Tests
         run: npm run test
 
@@ -57,13 +59,14 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+          cache: npm
       - name: Install deps
-        uses: bahmutov/npm-install@v1
+        run: npm ci
       - name: Transpile TypeScript
         run: npm run typecheck
 
@@ -72,13 +75,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+          cache: npm
       - name: Install deps
-        uses: bahmutov/npm-install@v1
+        run: npm ci
       - name: Build
         run: npm run build
       - name: Upload build artifacts
@@ -92,13 +96,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+          cache: npm
       - name: Install deps
-        uses: bahmutov/npm-install@v1
+        run: npm ci
       - name: Build Storybook
         run: npm run build-storybook
 
@@ -117,15 +122,16 @@ jobs:
       url: https://pencilcase.app
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+          cache: npm
       - name: Install deps
-        uses: bahmutov/npm-install@v1
+        run: npm ci
       - name: Deploy app
         run: npx clever deploy -a pencil-case-app-prod -f -p rebuild
         env:
