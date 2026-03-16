@@ -4,7 +4,7 @@ import * as Y from 'yjs';
 import type { Provider } from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { extractTitleFromYDoc, getDocFromMap } from '~/utils/yjs';
 
 export interface CollaborativeEditorProps {
@@ -15,15 +15,31 @@ export interface CollaborativeEditorProps {
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
   = ({ id, wsUrl, onTitleChange }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const [avatars, setAvatars] = useState<string[]>([]);
+    const [doc, setDoc] = useState<Y.Doc>();
+
+    const handleUpdate = useCallback(() => {
+      if (!isSynced || !doc) return;
+      const title = extractTitleFromYDoc(doc);
+      onTitleChange?.(title);
+    }, [isSynced, onTitleChange, doc]);
+
+    useEffect(() => {
+      if (!doc) return;
+      doc.on('update', handleUpdate);
+
+      return () => {
+        doc.off('update', handleUpdate);
+      };
+    }, [doc, handleUpdate]);
 
     const providerFactory = useCallback((
       id: string,
       yjsDocMap: Map<string, Y.Doc>,
     ): Provider => {
       const doc = getDocFromMap(id, yjsDocMap);
+      setDoc(doc);
 
       const provider = new HocuspocusProvider({
         name: id,
@@ -35,10 +51,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
         onAwarenessChange({ states }) {
           setAvatars(states.map(state => state.name));
         },
-        onMessage() {
-          const title = extractTitleFromYDoc(doc);
-          onTitleChange?.(title);
-        },
       });
 
       return {
@@ -49,7 +61,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
         on: provider.on.bind(provider),
         off: provider.off.bind(provider),
       };
-    }, [wsUrl, onTitleChange]);
+    }, [wsUrl]);
 
     return (
       <LexicalCollaboration>
