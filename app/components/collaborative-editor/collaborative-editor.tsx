@@ -15,6 +15,7 @@ export interface CollaborativeEditorProps {
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
   = ({ id, wsUrl }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const [avatars, setAvatars] = useState<string[]>([]);
 
