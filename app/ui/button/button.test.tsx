@@ -51,7 +51,7 @@ describe('Button', () => {
   describe('colors', () => {
     test.each<[ButtonColor, string]>([
       ['primary', 'bg-pca-grey-900'],
-      ['secondary', 'bg-pca-white'],
+      ['secondary', 'bg-transparent'],
       ['upgrade', 'bg-pca-yellow-500'],
       ['danger', 'bg-pca-red-500'],
     ])('renders %s color with expected class', (color, expectedClass) => {

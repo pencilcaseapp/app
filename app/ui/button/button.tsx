@@ -6,7 +6,6 @@ import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import { Icon } from '../icon/icon';
 import type { PolymorphicComponentPropWithRef } from '../polymorphic-types/polymorphic-types';
 
-// type Variant = 'filled' | 'outlined' | 'text' | 'transparent';
 export type ButtonColor = 'primary' | 'secondary' | 'upgrade' | 'danger';
 
 export type ButtonProps<C extends React.ElementType>
@@ -65,7 +64,7 @@ export const Button = forwardRef(
       'text-pca-grey-900 dark:text-pca-white',
       disabled && 'text-pca-grey-300! dark:text-pca-grey-700! focus:outline-hidden',
       !disabled
-      && 'bg-pca-white dark:bg-pca-grey-900 hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700',
+      && 'bg-transparent dark:bg-pca-grey-900 hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700',
     ]);
 
     const upgradeFilledClasses = classNames([

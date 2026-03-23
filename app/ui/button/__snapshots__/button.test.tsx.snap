@@ -31,7 +31,7 @@ exports[`Button > colors > renders primary color with expected class 1`] = `
 exports[`Button > colors > renders secondary color with expected class 1`] = `
 <div>
   <button
-    class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-pca-white dark:bg-pca-grey-900 hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700"
+    class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-transparent dark:bg-pca-grey-900 hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700"
   >
     <span
       class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none -translate-y-px"
