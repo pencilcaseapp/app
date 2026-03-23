@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Topbar > matches snapshot 1`] = `
+<div>
+  <header
+    class="fixed z-50 w-full top-0 left-0 h-14 px-2 grid grid-cols-1 grid-rows-1 items-center bg-pca-white dark:bg-pca-grey-900 lg:bg-transparent dark:lg:bg-transparent border-b border-pca-grey-200 dark:border-pca-grey-800"
+  >
+    <div
+      class="col-start-1 row-start-1 justify-self-start z-10 flex min-w-max"
+    >
+      <button>
+        Menu
+      </button>
+    </div>
+    <div
+      class="col-start-1 row-start-1 justify-self-center max-w-full"
+      style="padding-left: 0px; padding-right: 0px;"
+    >
+      <div
+        class="md:block relative overflow-clip after:content-[''] after:absolute after:w-12 after:h-full after:bg-overflow-gradient-light dark:after:bg-overflow-gradient-dark after:top-0 after:-right-[1px] before:content-[''] before:absolute before:w-12 before:h-full before:bg-overflow-gradient-light dark:before:bg-overflow-gradient-dark before:top-0 before:-left-[1px] before:z-10 before:rotate-180 before:transition before:duration-300 after:transition after:duration-300 before:pointer-events-none after:pointer-events-none before:opacity-0 after:opacity-0"
+      >
+        <div
+          class="relative overflow-x-auto scrollbar-none"
+        >
+          <div
+            class="flex gap-4 md:gap-2 flex-nowrap h-14 items-center"
+            style="padding-left: 0px; padding-right: 0px;"
+          >
+            <span>
+              Toolbar
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="col-start-1 row-start-1 justify-self-end z-10 flex min-w-max items-center"
+    >
+      <div
+        class="inline-flex min-w-max items-center gap-2"
+      >
+        <button>
+          Share
+        </button>
+      </div>
+    </div>
+  </header>
+</div>
+`;
