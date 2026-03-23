@@ -1,6 +1,10 @@
 import { render } from '@testing-library/react';
 import { HorizontalOverflow } from './horizontal-overflow';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('react-use', () => ({
+  useScroll: () => 0,
+}));
 
 describe('HorizontalOverflow', () => {
   it('should match snapshot', () => {

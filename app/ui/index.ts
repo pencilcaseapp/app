@@ -4,6 +4,7 @@ export * from './icon/icon';
 
 // Editor
 export * from './editor/editor';
+export * from './topbar/topbar';
 
 // Forms
 export * from './button/button';

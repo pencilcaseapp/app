@@ -3,7 +3,7 @@
 exports[`HorizontalOverflow > should match snapshot 1`] = `
 <div>
   <div
-    class="relative overflow-hidden after:content-[''] after:absolute after:w-12 after:h-full after:bg-overflow-gradient-light dark:after:bg-overflow-gradient-dark after:top-0 after:-right-[1px] before:content-[''] before:absolute before:w-12 before:h-full before:bg-overflow-gradient-light dark:before:bg-overflow-gradient-dark before:top-0 before:-left-[1px] before:z-10 before:rotate-180 before:transition before:duration-300 after:transition after:duration-300 before:pointer-events-none after:pointer-events-none before:opacity-0 after:opacity-0"
+    class="relative overflow-clip after:content-[''] after:absolute after:w-12 after:h-full after:bg-overflow-gradient-light dark:after:bg-overflow-gradient-dark after:top-0 after:-right-[1px] before:content-[''] before:absolute before:w-12 before:h-full before:bg-overflow-gradient-light dark:before:bg-overflow-gradient-dark before:top-0 before:-left-[1px] before:z-10 before:rotate-180 before:transition before:duration-300 after:transition after:duration-300 before:pointer-events-none after:pointer-events-none before:opacity-0 after:opacity-0"
   >
     <div
       class="relative overflow-x-auto scrollbar-none"
