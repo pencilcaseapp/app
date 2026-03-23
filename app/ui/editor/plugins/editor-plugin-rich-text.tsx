@@ -57,7 +57,7 @@ export const EditorPluginRichText: React.FC = () => {
           ref={contenteditable}
           aria-placeholder=""
           placeholder={<span />}
-          className="pt-15 md:pt-27 pb-3 md:pb-12 w-full min-h-dvh px-4 md:px-[calc((100%-608px)/2)] overflow-y-auto"
+          className="pt-15 md:pt-27 pb-3 md:pb-12 w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)] overflow-y-auto"
         />
       )}
       ErrorBoundary={LexicalErrorBoundary}
