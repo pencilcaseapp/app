@@ -7,7 +7,7 @@ vi.mock('react-use', () => ({
   useScroll: () => 0,
 }));
 
-describe.only('Topbar', () => {
+describe('Topbar', () => {
   test('renders left, center, and right sections', () => {
     render(
       <Topbar

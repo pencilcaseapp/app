@@ -40,12 +40,12 @@ export const Topbar: FC<TopbarProps> = ({ left, center, right, hasBorder }) => {
   }, []);
 
   const { y } = useWindowScroll();
-  const isScrolling = y > 65;
+  const isScrolling = y > 30;
 
   return (
-    <header className={classNames('fixed z-50 w-full top-0 left-0 h-14 px-2 grid grid-cols-1 grid-rows-1 items-center bg-pca-white  lg:bg-transparent',
+    <header className={classNames('fixed z-50 w-full top-0 left-0 h-14 px-2 grid grid-cols-1 grid-rows-1 items-center bg-pca-white dark:bg-pca-grey-900 lg:bg-transparent dark:lg:bg-transparent',
       hasBorder && 'border-b border-pca-grey-200 dark:border-pca-grey-800',
-      isScrolling && 'shadow-xs lg:shadow-none',
+      isScrolling && 'shadow-md dark:shadow-md lg:shadow-none dark:shadow-pca-grey-900/50 dark:lg:shadow-none',
     )}
     >
       <div ref={leftRef} className="col-start-1 row-start-1 justify-self-start z-10 flex min-w-max">

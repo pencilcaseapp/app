@@ -3,7 +3,7 @@
 exports[`Topbar > matches snapshot 1`] = `
 <div>
   <header
-    class="fixed z-50 w-full top-0 left-0 h-14 px-2 grid grid-cols-1 grid-rows-1 items-center bg-pca-white  lg:bg-transparent border-b border-pca-grey-200 dark:border-pca-grey-800"
+    class="fixed z-50 w-full top-0 left-0 h-14 px-2 grid grid-cols-1 grid-rows-1 items-center bg-pca-white dark:bg-pca-grey-900 lg:bg-transparent dark:lg:bg-transparent border-b border-pca-grey-200 dark:border-pca-grey-800"
   >
     <div
       class="col-start-1 row-start-1 justify-self-start z-10 flex min-w-max"
