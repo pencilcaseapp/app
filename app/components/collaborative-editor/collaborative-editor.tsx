@@ -6,6 +6,7 @@ import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui';
 import { useEffect, useState } from 'react';
 import { useSocketClient } from '~/contexts/socket-client';
+import { useDocumentTitle } from '~/hooks/use-document-title';
 
 export interface CollaborativeEditorProps {
   id: string;
@@ -13,12 +14,13 @@ export interface CollaborativeEditorProps {
 }
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
-  = ({ id }) => {
+  = ({ id, onTitleChange }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const [avatars, setAvatars] = useState<string[]>([]);
     const socketClient = useSocketClient();
     const [doc] = useState(() => new Y.Doc());
+    useDocumentTitle(doc, onTitleChange);
     const [provider] = useState(() => new HocuspocusProvider({
       name: id,
       websocketProvider: socketClient,

@@ -16,7 +16,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
 
   return (
     <>
-      <title>{title ?? 'Untitled'}</title>
+      <title>{title === null ? 'Untitled' : title}</title>
       <CollaborativeEditor
         id={params.id}
         onTitleChange={setTitle}
