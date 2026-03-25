@@ -4,48 +4,58 @@ import * as Y from 'yjs';
 import type { Provider } from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui';
-import { useCallback, useState } from 'react';
-import { getDocFromMap } from '~/utils/yjs';
+import { useEffect, useState } from 'react';
+import { useSocketClient } from '~/contexts/socket-client';
 
 export interface CollaborativeEditorProps {
   id: string;
-  wsUrl: string;
   onTitleChange?: (title: string | null) => void;
 }
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
-  = ({ id, wsUrl }) => {
+  = ({ id }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const [avatars, setAvatars] = useState<string[]>([]);
+    const socketClient = useSocketClient();
+    const [doc] = useState(() => new Y.Doc());
+    const [provider] = useState(() => new HocuspocusProvider({
+      name: id,
+      websocketProvider: socketClient,
+      document: doc,
+      onSynced: ({ state }) => {
+        setIsSynced(state);
+      },
+      onAwarenessChange({ states }) {
+        setAvatars(states.map(state => state.name));
+      },
+    }));
 
-    const providerFactory = useCallback((
+    const [providerFactory] = useState(() => (
       id: string,
       yjsDocMap: Map<string, Y.Doc>,
     ): Provider => {
-      const doc = getDocFromMap(id, yjsDocMap);
-
-      const provider = new HocuspocusProvider({
-        name: id,
-        document: doc,
-        url: wsUrl,
-        onSynced: ({ state }) => {
-          setIsSynced(state);
-        },
-        onAwarenessChange({ states }) {
-          setAvatars(states.map(state => state.name));
-        },
-      });
+      yjsDocMap.set(id, doc);
 
       return {
         // @ts-expect-error type mismatch
         awareness: provider.awareness,
-        connect: () => {},
+        connect: () => {
+          if (!provider.isAttached) {
+            provider.attach();
+          }
+        },
         disconnect: () => {},
         on: provider.on.bind(provider),
         off: provider.off.bind(provider),
       };
-    }, [wsUrl]);
+    });
+
+    useEffect(() => {
+      return () => {
+        provider.detach();
+      };
+    }, [provider]);
 
     return (
       <LexicalCollaboration>
