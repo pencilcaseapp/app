@@ -49,6 +49,49 @@ export const HorizontalOverflow: FC<HorizontalOverflowProps> = ({
     };
   }, [x, scrollableElement]);
 
+  useEffect(() => {
+    const element = scrollableElement.current;
+    if (!element) return;
+
+    let startX = 0;
+    let startY = 0;
+    let direction: 'horizontal' | 'vertical' | null = null;
+
+    const onTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      direction = null;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (direction === null) {
+        const deltaX = Math.abs(e.touches[0].clientX - startX);
+        const deltaY = Math.abs(e.touches[0].clientY - startY);
+        if (deltaX > 5 || deltaY > 5) {
+          direction = deltaX > deltaY
+            ? 'horizontal'
+            : 'vertical';
+        }
+      }
+
+      if (direction === 'horizontal') {
+        e.stopPropagation();
+      }
+    };
+
+    element.addEventListener('touchstart', onTouchStart, {
+      passive: true,
+    });
+    element.addEventListener('touchmove', onTouchMove, {
+      passive: true,
+    });
+
+    return () => {
+      element.removeEventListener('touchstart', onTouchStart);
+      element.removeEventListener('touchmove', onTouchMove);
+    };
+  }, []);
+
   return (
     <div className={classes}>
       <div
