@@ -1,6 +1,7 @@
 // Data Display
 export * from './typography/typography';
 export * from './icon/icon';
+export * from './separator/separator';
 
 // Editor
 export * from './editor/editor';
