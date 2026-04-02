@@ -2,6 +2,7 @@
 export * from './typography/typography';
 export * from './icon/icon';
 export * from './separator/separator';
+export * from './tooltip/tooltip';
 
 // Editor
 export * from './editor/editor';
