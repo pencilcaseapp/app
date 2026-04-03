@@ -1,0 +1,59 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`custom color > matches snapshot 1`] = `
+<div>
+  <div
+    class="flex items-center group flex-row gap-3"
+  >
+    <abbr
+      class="flex shrink-0 items-center justify-center rounded-full no-underline relative border h-[28px] w-[28px] border-pca-white text-pca-white dark:border-pca-grey-900"
+      data-state="closed"
+      style="background-color: #E74C3C;"
+    >
+      <span
+        class="antialiased font-inter text-xs text-pca-grey-900 dark:text-white font-medium text-inherit!"
+      >
+        A
+      </span>
+    </abbr>
+  </div>
+</div>
+`;
+
+exports[`large > matches snapshot 1`] = `
+<div>
+  <div
+    class="flex items-center group flex-row gap-3"
+  >
+    <abbr
+      class="flex shrink-0 items-center justify-center rounded-full no-underline relative border bg-pca-yellow-500 text-pca-grey-900 border border-pca-grey-800 h-[40px] w-[40px]"
+      data-state="closed"
+    >
+      <span
+        class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit!"
+      >
+        P
+      </span>
+    </abbr>
+  </div>
+</div>
+`;
+
+exports[`small > matches snapshot 1`] = `
+<div>
+  <div
+    class="flex items-center group flex-row gap-3"
+  >
+    <abbr
+      class="flex shrink-0 items-center justify-center rounded-full no-underline relative border bg-pca-yellow-500 text-pca-grey-900 border border-pca-grey-800 h-[28px] w-[28px]"
+      data-state="closed"
+    >
+      <span
+        class="antialiased font-inter text-xs text-pca-grey-900 dark:text-white font-medium text-inherit!"
+      >
+        P
+      </span>
+    </abbr>
+  </div>
+</div>
+`;
