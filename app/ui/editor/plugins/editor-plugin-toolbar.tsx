@@ -4,11 +4,11 @@ import { $createHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { $getFormatBlock } from '../utils/node';
-import { Button, Toggle, Topbar } from '~/ui';
+import { Button, Topbar, Toolbar, ToolbarGroup, ToolbarToggle, ToolbarSeparator } from '~/ui';
 import type { EditorFormatBlock } from '../editor.types';
 import { useMedia, useWindowScroll } from 'react-use';
-import classNames from 'classnames';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
+import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
 
 export const EditorPluginToolbar: React.FC = () => {
   const [editor] = useLexicalComposerContext();
@@ -102,9 +102,23 @@ export const EditorPluginToolbar: React.FC = () => {
     e.preventDefault();
   }, []);
 
-  const isWide = useMedia('(min-width: 480px)');
-  const { y } = useWindowScroll();
-  const isScrolling = y > 65;
+  const isWide = useMedia('(min-width: 1024px)');
+  const { y: windowY } = useWindowScroll();
+
+  const [contentY, setContentY] = useState(0);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      CONTENT_SCROLL_COMMAND,
+      (scrollTop) => {
+        setContentY(scrollTop);
+        return false;
+      },
+      COMMAND_PRIORITY_CRITICAL,
+    );
+  }, [editor]);
+
+  const isScrolling = (isVirtualKeyboardOpen ? contentY : windowY) > 65;
 
   return (
     <Topbar
@@ -114,26 +128,25 @@ export const EditorPluginToolbar: React.FC = () => {
       right={!isVirtualKeyboardOpen && (<Button icon="share" color="upgrade">Share</Button>)}
       center={(
         (isWide || isVirtualKeyboardOpen) && (
-          <div className={classNames('flex gap-2 origin-center transition-all ring-pca-grey-200 bg-pca-white/85 dark:bg-pca-grey-900/80 rounded-2xl px-1.5 py-1.5 mx-1',
-            isScrolling && 'lg:shadow-xs lg:ring-1 lg:dark:ring-pca-grey-700 lg:backdrop-blur-md',
-          )}
-          >
-            <div className="flex gap-4 md:gap-2">
-              <Toggle className="h-8!" isActive={formatBlock === 'h1'} onMouseDown={handleEditorFocus} onClick={() => toggleBlock('h1')} icon="h1" iconTitle="headline 1" />
-              <Toggle className="h-8!" isActive={formatBlock === 'h2'} onMouseDown={handleEditorFocus} onClick={() => toggleBlock('h2')} icon="h2" iconTitle="headline 2" />
-              <Toggle className="h-8!" isActive={formatBlock === 'h3'} onMouseDown={handleEditorFocus} onClick={() => toggleBlock('h3')} icon="h3" iconTitle="headline 3" />
-            </div>
-            <div className="flex gap-4 md:gap-2">
-              <Toggle className="h-8!" isActive={textStyle.bold} onMouseDown={handleEditorFocus} onClick={() => toggleTextStyle('bold')} icon="bold" iconTitle="bold" />
-              <Toggle className="h-8!" isActive={textStyle.italic} onMouseDown={handleEditorFocus} onClick={() => toggleTextStyle('italic')} icon="italic" iconTitle="italic" />
-              <Toggle className="h-8!" isActive={textStyle.underline} onMouseDown={handleEditorFocus} onClick={() => toggleTextStyle('underline')} icon="underline" iconTitle="underline" />
-            </div>
-            <div className="flex gap-4 md:gap-2">
-              <Toggle className="h-8!" disabled isActive={false} icon="listUl" iconTitle="unordered list" />
-              <Toggle className="h-8!" disabled isActive={false} icon="listOl" iconTitle="ordered list" />
-              <Toggle className="h-8!" disabled isActive={false} icon="listCheck" iconTitle="checklist" />
-            </div>
-          </div>
+          <Toolbar isScrolling={isScrolling}>
+            <ToolbarGroup>
+              <ToolbarToggle isActive={formatBlock === 'h1'} onMouseDown={handleEditorFocus} onClick={() => toggleBlock('h1')} icon="h1" tooltipLabel="Heading 1" />
+              <ToolbarToggle isActive={formatBlock === 'h2'} onMouseDown={handleEditorFocus} onClick={() => toggleBlock('h2')} icon="h2" tooltipLabel="Heading 2" />
+              <ToolbarToggle isActive={formatBlock === 'h3'} onMouseDown={handleEditorFocus} onClick={() => toggleBlock('h3')} icon="h3" tooltipLabel="Heading 3" />
+            </ToolbarGroup>
+            <ToolbarSeparator />
+            <ToolbarGroup>
+              <ToolbarToggle isActive={textStyle.bold} onMouseDown={handleEditorFocus} onClick={() => toggleTextStyle('bold')} icon="bold" tooltipLabel="Bold" />
+              <ToolbarToggle isActive={textStyle.italic} onMouseDown={handleEditorFocus} onClick={() => toggleTextStyle('italic')} icon="italic" tooltipLabel="Italic" />
+              <ToolbarToggle isActive={textStyle.underline} onMouseDown={handleEditorFocus} onClick={() => toggleTextStyle('underline')} icon="underline" tooltipLabel="Underline" />
+            </ToolbarGroup>
+            <ToolbarSeparator />
+            <ToolbarGroup>
+              <ToolbarToggle isActive={false} icon="listUl" tooltipLabel="Bulleted list" />
+              <ToolbarToggle isActive={false} icon="listOl" tooltipLabel="Numbered list" />
+              <ToolbarToggle isActive={false} icon="listCheck" tooltipLabel="Checklist" />
+            </ToolbarGroup>
+          </Toolbar>
         )
       )}
     />

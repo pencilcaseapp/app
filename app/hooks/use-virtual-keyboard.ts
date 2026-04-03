@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 
 export const useVirtualKeyboard = () => {
+  const isTouchDevice = matchMedia('(pointer: coarse) and (hover: none)').matches;
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
+    if (!isTouchDevice) return;
+
     const listener = () => {
       setIsOpen(
         window.visualViewport
@@ -17,7 +21,7 @@ export const useVirtualKeyboard = () => {
     return () => {
       window.visualViewport?.removeEventListener('resize', listener);
     };
-  }, []);
+  }, [isTouchDevice]);
 
   return [isOpen];
 };
