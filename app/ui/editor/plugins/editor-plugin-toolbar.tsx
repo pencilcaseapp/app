@@ -4,11 +4,11 @@ import { $createHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { $getFormatBlock } from '../utils/node';
-import { Button, Toggle, Topbar } from '~/ui';
+import { Button, Topbar, Toolbar, ToolbarGroup, ToolbarToggle, ToolbarSeparator } from '~/ui';
 import type { EditorFormatBlock } from '../editor.types';
 import { useMedia, useWindowScroll } from 'react-use';
-import classNames from 'classnames';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
+import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
 
 export const EditorPluginToolbar: React.FC = () => {
   const [editor] = useLexicalComposerContext();
@@ -102,9 +102,23 @@ export const EditorPluginToolbar: React.FC = () => {
     e.preventDefault();
   }, []);
 
-  const isWide = useMedia('(min-width: 480px)');
-  const { y } = useWindowScroll();
-  const isScrolling = y > 65;
+  const isWide = useMedia('(min-width: 1024px)');
+  const { y: windowY } = useWindowScroll();
+
+  const [contentY, setContentY] = useState(0);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      CONTENT_SCROLL_COMMAND,
+      (scrollTop) => {
+        setContentY(scrollTop);
+        return false;
+      },
+      COMMAND_PRIORITY_CRITICAL,
+    );
+  }, [editor]);
+
+  const isScrolling = (isVirtualKeyboardOpen ? contentY : windowY) > 65;
 
   return (
     <Topbar

@@ -6,6 +6,7 @@ import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { BLUR_COMMAND, COMMAND_PRIORITY_CRITICAL } from 'lexical';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
+import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
 
 export const EditorPluginRichText: React.FC = () => {
   const contenteditable = useRef<HTMLDivElement>(null);
@@ -35,6 +36,17 @@ export const EditorPluginRichText: React.FC = () => {
     },
     [editor],
   );
+
+  useEffect(() => {
+    const el = contenteditable.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      editor.dispatchCommand(CONTENT_SCROLL_COMMAND, el.scrollTop);
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [editor]);
 
   useEffect(() => {
     if (!contenteditable.current || !isVirtualKeyboardOpen) {
