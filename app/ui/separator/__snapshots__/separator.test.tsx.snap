@@ -3,7 +3,7 @@
 exports[`horizontal > matches snapshot 1`] = `
 <div>
   <div
-    class="bg-pca-grey-200 dark:bg-pca-grey-800 shrink-0 h-px w-full"
+    class="bg-pca-grey-300/50 dark:bg-pca-grey-800 shrink-0 h-px w-full"
     data-orientation="horizontal"
     role="separator"
   />
@@ -14,7 +14,7 @@ exports[`vertical > matches snapshot 1`] = `
 <div>
   <div
     aria-orientation="vertical"
-    class="bg-pca-grey-200 dark:bg-pca-grey-800 shrink-0 w-px h-full"
+    class="bg-pca-grey-300/50 dark:bg-pca-grey-800 shrink-0 w-px h-full"
     data-orientation="vertical"
     role="separator"
   />
