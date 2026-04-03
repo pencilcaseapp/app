@@ -8,7 +8,6 @@ import { Button, Topbar, Toolbar, ToolbarGroup, ToolbarToggle, ToolbarSeparator 
 import type { EditorFormatBlock } from '../editor.types';
 import { useMedia, useWindowScroll } from 'react-use';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
-import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
 
 export const EditorPluginToolbar: React.FC = () => {
   const [editor] = useLexicalComposerContext();
@@ -105,20 +104,7 @@ export const EditorPluginToolbar: React.FC = () => {
   const isWide = useMedia('(min-width: 1024px)');
   const { y: windowY } = useWindowScroll();
 
-  const [contentY, setContentY] = useState(0);
-
-  useEffect(() => {
-    return editor.registerCommand(
-      CONTENT_SCROLL_COMMAND,
-      (scrollTop) => {
-        setContentY(scrollTop);
-        return false;
-      },
-      COMMAND_PRIORITY_CRITICAL,
-    );
-  }, [editor]);
-
-  const isScrolling = (isVirtualKeyboardOpen ? contentY : windowY) > 65;
+  const isScrolling = windowY > 65;
 
   return (
     <Topbar
