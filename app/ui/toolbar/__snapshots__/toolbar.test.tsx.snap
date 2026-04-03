@@ -1,0 +1,272 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Toolbar > matches snapshot 1`] = `
+<div>
+  <div
+    class="flex gap-2 items-center h-11 origin-center transition-all ring-pca-grey-200 bg-pca-white/85 dark:bg-pca-grey-900/80 rounded-2xl px-1.5 py-1.5 mx-1"
+  >
+    <div
+      class="flex gap-4 md:gap-2"
+    >
+      <button
+        aria-label="Heading 1"
+        aria-pressed="true"
+        class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl w-9 h-9 py-0 px-0 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-transparent dark:bg-transparent hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700 bg-pca-grey-900! text-pca-white! dark:text-pca-grey-900! dark:bg-pca-white! h-8!"
+        data-state="closed"
+      >
+        <svg
+          aria-hidden="true"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M17.0399 7.92603L20.0399 6.92603V17M4 6.5V12.0001M4 12.0001V17.0001M4 12.0001H12M12 6.5V12.0001M12 12.0001V17.0001"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+      <button
+        aria-label="Heading 2"
+        aria-pressed="false"
+        class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl w-9 h-9 py-0 px-0 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-transparent dark:bg-transparent hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700 h-8!"
+        data-state="closed"
+      >
+        <svg
+          aria-hidden="true"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15 10.4998V9.99976C15 8.3429 16.3431 6.99976 18 6.99976H18.1716C19.7337 6.99976 20.9996 8.26627 20.9996 9.82837C20.9996 10.5785 20.702 11.2979 20.1716 11.8284L15 16.9999L21.5 17M3 6.99988V11.9999M3 11.9999V16.9999M3 11.9999H11M11 6.99988V11.9999M11 11.9999V16.9999"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+      <button
+        aria-label="Heading 3"
+        aria-pressed="false"
+        class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl w-9 h-9 py-0 px-0 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-transparent dark:bg-transparent hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700 h-8!"
+        data-state="closed"
+      >
+        <svg
+          aria-hidden="true"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15 7H21L17 11H18C19.6569 11 21 12.3431 21 14C21 15.6569 19.6569 17 18 17C17.3793 17 16.7738 16.8077 16.2671 16.4492C15.7604 16.0907 15.3775 15.5838 15.1709 14.9985M3 7V12M3 12V17M3 12H11M11 7V12M11 12V17"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      aria-orientation="vertical"
+      class="bg-pca-grey-300/50 dark:bg-pca-grey-800 shrink-0 w-px h-full h-6!"
+      data-orientation="vertical"
+      role="separator"
+    />
+    <div
+      class="flex gap-4 md:gap-2"
+    >
+      <button
+        aria-label="Bold"
+        aria-pressed="false"
+        class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl w-9 h-9 py-0 px-0 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-transparent dark:bg-transparent hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700 h-8!"
+        data-state="closed"
+      >
+        <svg
+          aria-hidden="true"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M8 11.5H12.5M8 11.5V6H12.5C14.433 6 16 7.23122 16 8.75C16 10.2688 14.433 11.5 12.5 11.5M8 11.5V17H13.5C15.433 17 17 15.7688 17 14.25C17 12.7312 15.433 11.5 13.5 11.5H12.5"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+      <button
+        aria-label="Italic"
+        aria-pressed="false"
+        class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl w-9 h-9 py-0 px-0 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-transparent dark:bg-transparent hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700 h-8!"
+        data-state="closed"
+      >
+        <svg
+          aria-hidden="true"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M8 17H10M10 17H12M10 17L14 6M12 6H14M14 6H16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+      <button
+        aria-label="Underline"
+        aria-pressed="false"
+        class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl w-9 h-9 py-0 px-0 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-transparent dark:bg-transparent hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700 h-8!"
+        data-state="closed"
+      >
+        <svg
+          aria-hidden="true"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 18H18M8 6V11C8 13.2091 9.79086 15 12 15C14.2091 15 16 13.2091 16 11V6"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      aria-orientation="vertical"
+      class="bg-pca-grey-300/50 dark:bg-pca-grey-800 shrink-0 w-px h-full h-6!"
+      data-orientation="vertical"
+      role="separator"
+    />
+    <div
+      class="flex gap-4 md:gap-2"
+    >
+      <button
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl w-9 h-9 py-0 px-0 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-transparent dark:bg-transparent hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700 h-8!"
+        data-state="closed"
+      >
+        <svg
+          aria-hidden="true"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 17C6 17.5523 5.55228 18 5 18C4.44772 18 4 17.5523 4 17C4 16.4477 4.44772 16 5 16C5.55228 16 6 16.4477 6 17Z M6 7C6 7.55228 5.55228 8 5 8C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6C5.55228 6 6 6.44772 6 7Z M11 17H19M11 7H19M6 17C6 17.5523 5.55228 18 5 18C4.44772 18 4 17.5523 4 17C4 16.4477 4.44772 16 5 16C5.55228 16 6 16.4477 6 17ZM6 7C6 7.55228 5.55228 8 5 8C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6C5.55228 6 6 6.44772 6 7Z"
+            fill="currentColor"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+      <button
+        aria-label="Numbered list"
+        aria-pressed="false"
+        class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl w-9 h-9 py-0 px-0 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-transparent dark:bg-transparent hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700 h-8!"
+        data-state="closed"
+      >
+        <svg
+          aria-hidden="true"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M11 17H19M4 15.6853V15.5C4 14.6716 4.67157 14 5.5 14H5.54054C6.34658 14 7.00021 14.6534 7.00021 15.4595C7.00021 15.8103 6.8862 16.1519 6.67568 16.4326L4 20.0002L7 20M11 7H19M4 5L6 4V10"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+      <button
+        aria-label="Checklist"
+        aria-pressed="false"
+        class="relative overflow-hidden flex items-center justify-center transition-colors duration-200 ease-in-out gap-2 transition-colors duration-300 ease-in-out h-9 rounded-xl w-9 h-9 py-0 px-0 flex-row transition-colors duration-300 ease-in-out h-9 text-pca-grey-900 dark:text-pca-white bg-transparent dark:bg-transparent hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700 h-8!"
+        data-state="closed"
+      >
+        <svg
+          aria-hidden="true"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 17H20M8 15L5.5 18L4 17M12 7H20M8 5L5.5 8L4 7"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Toolbar > matches snapshot when scrolling 1`] = `
+<div>
+  <div
+    class="flex gap-2 items-center h-11 origin-center transition-all ring-pca-grey-200 bg-pca-white/85 dark:bg-pca-grey-900/80 rounded-2xl px-1.5 py-1.5 mx-1 lg:shadow-xs lg:ring-1 lg:dark:ring-pca-grey-800 lg:backdrop-blur-md"
+  >
+    <button>
+      Action
+    </button>
+  </div>
+</div>
+`;
