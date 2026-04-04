@@ -6,7 +6,14 @@ const meta: Meta<typeof Avatar> = {
   title: 'Data Display/Avatar',
   component: Avatar,
   argTypes: {
-    subtitle: {
+    name: {
+      control: { type: 'text' },
+    },
+    size: {
+      control: { type: 'select' },
+      options: ['small', 'large'],
+    },
+    color: {
       control: { type: 'text' },
     },
   },

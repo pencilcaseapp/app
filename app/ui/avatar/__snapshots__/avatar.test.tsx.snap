@@ -2,12 +2,13 @@
 
 exports[`custom color > matches snapshot 1`] = `
 <div>
-  <div
+  <button
     class="flex items-center group flex-row gap-3"
+    data-state="closed"
   >
     <abbr
+      aria-label="Alice"
       class="flex shrink-0 items-center justify-center rounded-full no-underline relative border h-[28px] w-[28px] border-pca-white text-pca-white dark:border-pca-grey-900"
-      data-state="closed"
       style="background-color: #E74C3C;"
     >
       <span
@@ -16,18 +17,19 @@ exports[`custom color > matches snapshot 1`] = `
         A
       </span>
     </abbr>
-  </div>
+  </button>
 </div>
 `;
 
 exports[`large > matches snapshot 1`] = `
 <div>
-  <div
+  <button
     class="flex items-center group flex-row gap-3"
+    data-state="closed"
   >
     <abbr
+      aria-label="Pency Pencilton"
       class="flex shrink-0 items-center justify-center rounded-full no-underline relative border bg-pca-yellow-500 text-pca-grey-900 border border-pca-grey-800 h-[40px] w-[40px]"
-      data-state="closed"
     >
       <span
         class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit!"
@@ -35,18 +37,19 @@ exports[`large > matches snapshot 1`] = `
         P
       </span>
     </abbr>
-  </div>
+  </button>
 </div>
 `;
 
 exports[`small > matches snapshot 1`] = `
 <div>
-  <div
+  <button
     class="flex items-center group flex-row gap-3"
+    data-state="closed"
   >
     <abbr
+      aria-label="Pency Pencilton"
       class="flex shrink-0 items-center justify-center rounded-full no-underline relative border bg-pca-yellow-500 text-pca-grey-900 border border-pca-grey-800 h-[28px] w-[28px]"
-      data-state="closed"
     >
       <span
         class="antialiased font-inter text-xs text-pca-grey-900 dark:text-white font-medium text-inherit!"
@@ -54,6 +57,6 @@ exports[`small > matches snapshot 1`] = `
         P
       </span>
     </abbr>
-  </div>
+  </button>
 </div>
 `;
