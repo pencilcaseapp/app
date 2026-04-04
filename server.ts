@@ -32,6 +32,11 @@ else {
     }),
   );
 
+  app.ws('/live', async (websocket, request) => {
+    const { hocuspocus } = await viteDevServer.ssrLoadModule('./app/live/index.ts');
+    hocuspocus.handleConnection(websocket, request);
+  });
+
   app.use(viteDevServer.middlewares);
   app.use(
     createRequestHandler({

@@ -12,9 +12,5 @@ export function getConfigTest(): Config {
     db: {
       url: 'postgresql://postgres:postgres@localhost:5434/db',
     },
-
-    ws: {
-      url: 'http://localhost:3003/live',
-    },
   };
 }

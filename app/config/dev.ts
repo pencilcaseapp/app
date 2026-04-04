@@ -12,9 +12,5 @@ export function getConfigDev(): Config {
     db: {
       url: 'postgresql://postgres:postgres@localhost:5433/db',
     },
-
-    ws: {
-      url: 'http://localhost:3003/live',
-    },
   };
 }

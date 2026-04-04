@@ -13,10 +13,6 @@ export interface Config {
   db: {
     url: string;
   };
-
-  ws: {
-    url: string;
-  };
 }
 
 export function getConfig(): Config {
