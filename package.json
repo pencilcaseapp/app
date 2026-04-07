@@ -37,6 +37,7 @@
     "env-var": "^7.5.0",
     "express": "^5.2.1",
     "express-ws": "^5.0.2",
+    "internal-ip": "^9.0.0",
     "isbot": "^5.1.36",
     "lexical": "^0.41.0",
     "pg": "^8.20.0",
