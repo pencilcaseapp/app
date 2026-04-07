@@ -18,13 +18,9 @@ export function useSocketClient() {
   return context;
 }
 
-export interface SocketClientProviderProps extends PropsWithChildren {
-  wsUrl: string;
-}
-
-export const SocketClientProvider: React.FC<SocketClientProviderProps>
-  = ({ wsUrl, children }) => {
-    const socketClient = getSocketClient(wsUrl);
+export const SocketClientProvider: React.FC<PropsWithChildren>
+  = ({ children }) => {
+    const socketClient = getSocketClient();
 
     return (
       <SocketClientContext.Provider value={socketClient}>

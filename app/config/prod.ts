@@ -13,9 +13,5 @@ export function getConfigProd(): Config {
     db: {
       url: env.get('DATABASE_URL').required().asString(),
     },
-
-    ws: {
-      url: 'https://pencilcase.app/live',
-    },
   };
 }

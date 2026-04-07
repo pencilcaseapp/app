@@ -2,6 +2,7 @@ import express from 'express';
 import expressWebsockets from 'express-ws';
 import compression from 'compression';
 import { createRequestHandler } from '@react-router/express';
+import { internalIpV4 } from 'internal-ip';
 import { createLiveServer } from '~/live';
 import { getConfig } from '~/config';
 import { migrateDatabase } from '~/db/migrate';
@@ -32,6 +33,11 @@ else {
     }),
   );
 
+  app.ws('/live', async (websocket, request) => {
+    const { hocuspocus } = await viteDevServer.ssrLoadModule('./app/live/index.ts');
+    hocuspocus.handleConnection(websocket, request);
+  });
+
   app.use(viteDevServer.middlewares);
   app.use(
     createRequestHandler({
@@ -46,8 +52,13 @@ else {
 
 async function startServer() {
   await migrateDatabase();
+
+  const localIp = await internalIpV4();
+  const host = localIp ?? config.server.host;
+
   app.listen(config.server.port, config.server.host, () => {
-    console.log(`🚀 App listening on http://${config.server.host}:${config.server.port}`);
+    console.log(`🚀 App listening on http://localhost:${config.server.port}`);
+    console.log(`🛜 Address on your network http://${host}:${config.server.port}`);
   });
 }
 

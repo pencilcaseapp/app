@@ -4,7 +4,7 @@ import { Database } from '@hocuspocus/extension-database';
 import { getDocument, updateDocument } from '~/repos/document';
 import { extractTitleFromYDoc } from '~/utils/yjs';
 
-const hocuspocus = new Hocuspocus({
+export const hocuspocus = new Hocuspocus({
   name: 'hocuspocus-01',
   extensions: [
     new Database({
