@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 import { createHeadlessEditor } from '@lexical/headless';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { ListNode, ListItemNode } from '@lexical/list';
-import { CodeNode } from '@lexical/code';
+import { CodeNode } from '@lexical/code-core';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { HorizontalRuleNode } from '@lexical/extension';
 import {
