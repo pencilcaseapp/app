@@ -2,6 +2,7 @@ import type { Route } from './+types/doc';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
 import { getDocumentTitle } from '~/repos/document';
 import { useState } from 'react';
+import { ClientOnly } from '~/ui';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const documentTitle = await getDocumentTitle(params.id);
@@ -17,10 +18,12 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
   return (
     <>
       <title>{title ?? 'Untitled'}</title>
-      <CollaborativeEditor
-        id={params.id}
-        onTitleChange={setTitle}
-      />
+      <ClientOnly>
+        <CollaborativeEditor
+          id={params.id}
+          onTitleChange={setTitle}
+        />
+      </ClientOnly>
     </>
   );
 }
