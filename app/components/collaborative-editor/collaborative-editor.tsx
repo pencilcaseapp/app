@@ -65,10 +65,10 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
 
     useEffect(() => {
       if (isVirtualKeyboardOpen) {
-        ref.current?.style.setProperty('display', 'none');
+        ref.current?.style.setProperty('visibility', 'hidden');
       }
       else {
-        ref.current?.style.removeProperty('display');
+        ref.current?.style.removeProperty('visibility');
       }
     }, [isVirtualKeyboardOpen]);
 
