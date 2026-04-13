@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $createParagraphNode, $getSelection, $isRangeSelection, BLUR_COMMAND, COMMAND_PRIORITY_CRITICAL, FORMAT_TEXT_COMMAND, SELECTION_CHANGE_COMMAND } from 'lexical';
+import { $createParagraphNode, $getSelection, $isRangeSelection, COMMAND_PRIORITY_CRITICAL, FORMAT_TEXT_COMMAND, mergeRegister, SELECTION_CHANGE_COMMAND } from 'lexical';
 import { $createHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -17,51 +17,43 @@ export const EditorPluginToolbar: React.FC = () => {
     italic: false,
     underline: false,
   });
-
+  const isWide = useMedia('(min-width: 1024px)');
+  const { y: windowY } = useWindowScroll();
+  const isScrolling = windowY > 65;
   const topbarRef = useRef<HTMLElement>(null);
   const [isVirtualKeyboardOpen] = useVirtualKeyboard();
 
+  const $updateToolbar = useCallback(() => {
+    const selection = $getSelection();
+
+    if ($isRangeSelection(selection)) {
+      setTextStyle({
+        bold: selection.hasFormat('bold'),
+        italic: selection.hasFormat('italic'),
+        underline: selection.hasFormat('underline'),
+      });
+
+      setFormatBlock($getFormatBlock(selection));
+    }
+  }, []);
+
   useEffect(() => {
-    editor.registerCommand(
-      SELECTION_CHANGE_COMMAND,
-      () => {
-        const selection = $getSelection();
-
-        if ($isRangeSelection(selection)) {
-          setTextStyle({
-            bold: selection.hasFormat('bold'),
-            italic: selection.hasFormat('italic'),
-            underline: selection.hasFormat('underline'),
-          });
-          setFormatBlock($getFormatBlock(selection));
-        }
-
-        return false;
-      },
-      COMMAND_PRIORITY_CRITICAL,
-    );
-
-    editor.registerCommand(
-      BLUR_COMMAND,
-      () => {
-        if (!topbarRef.current) {
+    return mergeRegister(
+      editor.registerCommand(
+        SELECTION_CHANGE_COMMAND,
+        () => {
+          $updateToolbar();
           return false;
-        }
-        setTextStyle({
-          bold: false,
-          italic: false,
-          underline: false,
+        },
+        COMMAND_PRIORITY_CRITICAL,
+      ),
+      editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          $updateToolbar();
         });
-
-        setFormatBlock('p');
-
-        window.getSelection()?.removeAllRanges();
-
-        return false;
-      },
-      COMMAND_PRIORITY_CRITICAL,
+      }),
     );
-  }, [editor]);
+  }, [editor, $updateToolbar]);
 
   const toggleTextStyle = useCallback((style: 'bold' | 'italic' | 'underline') => {
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, style);
@@ -91,20 +83,9 @@ export const EditorPluginToolbar: React.FC = () => {
     });
   }, [editor]);
 
-  useEffect(() => {
-    if (!topbarRef.current || !isVirtualKeyboardOpen) {
-      return;
-    }
-  }, [isVirtualKeyboardOpen]);
-
   const handleEditorFocus = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
   }, []);
-
-  const isWide = useMedia('(min-width: 1024px)');
-  const { y: windowY } = useWindowScroll();
-
-  const isScrolling = windowY > 65;
 
   return (
     <Topbar
