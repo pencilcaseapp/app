@@ -8,7 +8,7 @@ import { BLUR_COMMAND, COMMAND_PRIORITY_CRITICAL } from 'lexical';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 
 export const EditorPluginRichText: React.FC = () => {
-  const contenteditable = useRef<HTMLDivElement>(null);
+  const contenteditableRef = useRef<HTMLDivElement>(null);
   const [isVirtualKeyboardOpen] = useVirtualKeyboard();
   const [editor] = useLexicalComposerContext();
 
@@ -17,15 +17,15 @@ export const EditorPluginRichText: React.FC = () => {
       editor.registerCommand(
         BLUR_COMMAND,
         () => {
-          if (!contenteditable.current) {
+          if (!contenteditableRef.current) {
             return false;
           }
 
-          enableBodyScroll(contenteditable.current);
-          const scrollTop = contenteditable.current.scrollTop;
-          contenteditable.current.style.minHeight = '';
-          contenteditable.current.style.height = '';
-          contenteditable.current.scrollTop = 0;
+          enableBodyScroll(contenteditableRef.current);
+          const scrollTop = contenteditableRef.current.scrollTop;
+          contenteditableRef.current.style.minHeight = '';
+          contenteditableRef.current.style.height = '';
+          contenteditableRef.current.scrollTop = 0;
           document.documentElement.scrollTop = scrollTop;
 
           return false;
@@ -37,24 +37,24 @@ export const EditorPluginRichText: React.FC = () => {
   );
 
   useEffect(() => {
-    if (!contenteditable.current || !isVirtualKeyboardOpen) {
+    if (!contenteditableRef.current || !isVirtualKeyboardOpen) {
       return;
     }
 
-    disableBodyScroll(contenteditable.current);
+    disableBodyScroll(contenteditableRef.current);
     const scrollTop = document.documentElement.scrollTop;
     const visualHeight = window.visualViewport?.height;
-    contenteditable.current.style.minHeight = 'auto';
-    contenteditable.current.style.height = `${visualHeight}px`;
+    contenteditableRef.current.style.minHeight = 'auto';
+    contenteditableRef.current.style.height = `${visualHeight}px`;
     document.documentElement.scrollTop = 0;
-    contenteditable.current.scrollTop = scrollTop;
+    contenteditableRef.current.scrollTop = scrollTop;
   }, [isVirtualKeyboardOpen]);
 
   return (
     <RichTextPlugin
       contentEditable={(
         <ContentEditable
-          ref={contenteditable}
+          ref={contenteditableRef}
           aria-placeholder=""
           placeholder={<span />}
           className="pt-15 md:pt-27 pb-3 md:pb-12 w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)] overflow-y-auto"

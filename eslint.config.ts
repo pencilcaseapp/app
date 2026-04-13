@@ -4,7 +4,7 @@ import stylistic from '@stylistic/eslint-plugin';
 import eslintReact from '@eslint-react/eslint-plugin';
 
 export default defineConfig([
-  globalIgnores(['**/.react-router/']),
+  globalIgnores(['**/.react-router/', '**/*.js']),
   stylistic.configs.customize({
     semi: true,
   }),
