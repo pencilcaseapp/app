@@ -16,7 +16,7 @@ export default defineConfig({
   ],
   optimizeDeps: {
     entries: [
-      'app/routes/*.ts',
+      'app/routes/*.tsx',
     ],
   },
 });
