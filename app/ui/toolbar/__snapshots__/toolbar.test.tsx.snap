@@ -86,7 +86,7 @@ exports[`Toolbar > matches snapshot 1`] = `
     </div>
     <div
       aria-orientation="vertical"
-      class="bg-pca-grey-300/50 dark:bg-pca-grey-800 shrink-0 w-px h-full h-6!"
+      class="bg-pca-grey-300/30 dark:bg-pca-grey-700/30 shrink-0 w-px h-full h-6!"
       data-orientation="vertical"
       role="separator"
     />
@@ -171,7 +171,7 @@ exports[`Toolbar > matches snapshot 1`] = `
     </div>
     <div
       aria-orientation="vertical"
-      class="bg-pca-grey-300/50 dark:bg-pca-grey-800 shrink-0 w-px h-full h-6!"
+      class="bg-pca-grey-300/30 dark:bg-pca-grey-700/30 shrink-0 w-px h-full h-6!"
       data-orientation="vertical"
       role="separator"
     />

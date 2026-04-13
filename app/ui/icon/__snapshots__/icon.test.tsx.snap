@@ -276,3 +276,72 @@ exports[`Icon Component > should render with icon name 12`] = `
   </svg>
 </div>
 `;
+
+exports[`Icon Component > should render with icon name 13`] = `
+<div>
+  <svg
+    aria-hidden="true"
+    class=""
+    fill="transparent"
+    focusable="false"
+    height="24"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M17 12C17 12.5523 17.4477 13 18 13C18.5523 13 19 12.5523 19 12C19 11.4477 18.5523 11 18 11C17.4477 11 17 11.4477 17 12Z"
+      fill="currentColor"
+    />
+    <path
+      d="M11 12C11 12.5523 11.4477 13 12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12Z"
+      fill="currentColor"
+    />
+    <path
+      d="M5 12C5 12.5523 5.44772 13 6 13C6.55228 13 7 12.5523 7 12C7 11.4477 6.55228 11 6 11C5.44772 11 5 11.4477 5 12Z"
+      fill="currentColor"
+    />
+    <path
+      d="M17 12C17 12.5523 17.4477 13 18 13C18.5523 13 19 12.5523 19 12C19 11.4477 18.5523 11 18 11C17.4477 11 17 11.4477 17 12Z"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.5"
+    />
+    <path
+      d="M11 12C11 12.5523 11.4477 13 12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12Z"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.5"
+    />
+    <path
+      d="M5 12C5 12.5523 5.44772 13 6 13C6.55228 13 7 12.5523 7 12C7 11.4477 6.55228 11 6 11C5.44772 11 5 11.4477 5 12Z"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.5"
+    />
+  </svg>
+</div>
+`;
+
+exports[`Icon Component > should render with icon name 14`] = `
+<div>
+  <svg
+    aria-hidden="true"
+    class=""
+    fill="transparent"
+    focusable="false"
+    height="24"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M12.3086 2.53125L13.584 4.125H21.5137V18.75H19.0957L19.2158 20.127L3.77441 21.4775L2.42383 6.03711L6.01367 5.72168V2.25H12.083L12.3086 2.53125ZM4.04883 7.40039L5.1377 19.8525L17.5908 18.7627L16.6533 8.05371L9.54492 8.67578L7.89844 7.06348L4.04883 7.40039ZM7.51367 5.59082L8.4541 5.50879L10.1006 7.12207L18.0166 6.42871L18.9639 17.25H20.0137V5.625H12.8623L12.6367 5.34375L11.3613 3.75H7.51367V5.59082Z"
+      fill="currentColor"
+    />
+  </svg>
+</div>
+`;

@@ -17,5 +17,13 @@ export * from './toolbar/toolbar-separator';
 export * from './button/button';
 export * from './toggle/toggle';
 
+// Navigation
+export * from './dropdown-menu/dropdown-menu';
+export * from './dropdown-menu/dropdown-menu-portal';
+export * from './dropdown-menu/dropdown-menu-trigger';
+export * from './dropdown-menu/dropdown-menu-content';
+export * from './dropdown-menu/dropdown-menu-item';
+export * from './dropdown-menu/dropdown-menu-separator';
+
 // Utils
 export * from './horizontal-overflow/horizontal-overflow';
