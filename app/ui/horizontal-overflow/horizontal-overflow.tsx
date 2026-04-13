@@ -11,8 +11,8 @@ export const HorizontalOverflow: FC<HorizontalOverflowProps> = ({
   children,
   className,
 }) => {
-  const scrollableElement = useRef<HTMLDivElement>(null);
-  const { x } = useScroll(scrollableElement as RefObject<HTMLDivElement>);
+  const scrollableElementRef = useRef<HTMLDivElement>(null);
+  const { x } = useScroll(scrollableElementRef as RefObject<HTMLDivElement>);
   const [hasOverflowLeft, setHasOverflowLeft] = useState(false);
   const [hasOverflowRight, setHasOverflowRight] = useState(false);
 
@@ -24,7 +24,7 @@ export const HorizontalOverflow: FC<HorizontalOverflowProps> = ({
   );
 
   const handleOverflowCalculation = useEffectEvent(() => {
-    const { current } = scrollableElement;
+    const { current } = scrollableElementRef;
     if (!current) return;
 
     setHasOverflowLeft(x > 0);
@@ -34,7 +34,7 @@ export const HorizontalOverflow: FC<HorizontalOverflowProps> = ({
   });
 
   useEffect(() => {
-    const element = scrollableElement.current;
+    const element = scrollableElementRef.current;
     if (!element || typeof ResizeObserver === 'undefined') {
       return;
     }
@@ -47,10 +47,10 @@ export const HorizontalOverflow: FC<HorizontalOverflowProps> = ({
     return () => {
       observer.disconnect();
     };
-  }, [x, scrollableElement]);
+  }, [x, scrollableElementRef]);
 
   useEffect(() => {
-    const element = scrollableElement.current;
+    const element = scrollableElementRef.current;
     if (!element) return;
 
     let startX = 0;
@@ -95,7 +95,7 @@ export const HorizontalOverflow: FC<HorizontalOverflowProps> = ({
   return (
     <div className={classes}>
       <div
-        ref={scrollableElement}
+        ref={scrollableElementRef}
         className="relative overflow-x-auto scrollbar-none"
       >
         {children}

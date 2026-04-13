@@ -6,7 +6,9 @@ export const useDocumentTitle = (
   doc: Y.Doc,
   onTitleChange?: (title: string | null) => void,
 ) => {
-  const [title, setTitle] = useState<string | null>(extractTitleFromYDoc(doc));
+  const [title, setTitle] = useState<string | null>(
+    () => extractTitleFromYDoc(doc),
+  );
 
   useEffect(() => {
     const handleTitleChange = () => {

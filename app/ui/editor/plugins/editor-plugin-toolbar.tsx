@@ -12,7 +12,7 @@ import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 export const EditorPluginToolbar: React.FC = () => {
   const [editor] = useLexicalComposerContext();
   const [formatBlock, setFormatBlock] = useState<EditorFormatBlock>('p');
-  const [textStyle, setTextFormat] = useState({
+  const [textStyle, setTextStyle] = useState({
     bold: false,
     italic: false,
     underline: false,
@@ -28,7 +28,7 @@ export const EditorPluginToolbar: React.FC = () => {
         const selection = $getSelection();
 
         if ($isRangeSelection(selection)) {
-          setTextFormat({
+          setTextStyle({
             bold: selection.hasFormat('bold'),
             italic: selection.hasFormat('italic'),
             underline: selection.hasFormat('underline'),
@@ -47,7 +47,7 @@ export const EditorPluginToolbar: React.FC = () => {
         if (!topbarRef.current) {
           return false;
         }
-        setTextFormat({
+        setTextStyle({
           bold: false,
           italic: false,
           underline: false,
@@ -65,7 +65,7 @@ export const EditorPluginToolbar: React.FC = () => {
 
   const toggleTextStyle = useCallback((style: 'bold' | 'italic' | 'underline') => {
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, style);
-    setTextFormat(prev => ({
+    setTextStyle(prev => ({
       ...prev,
       [style]: !prev[style],
     }));

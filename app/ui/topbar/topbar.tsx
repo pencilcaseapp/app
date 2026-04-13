@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { HorizontalOverflow } from '../horizontal-overflow/horizontal-overflow';
 import classNames from 'classnames';
 import { useWindowScroll } from 'react-use';
@@ -8,10 +8,11 @@ export type TopbarProps = {
   center?: React.ReactNode;
   right?: React.ReactNode;
   hasBorder?: boolean;
+  ref: React.Ref<HTMLElement>;
 };
 
-export const Topbar = forwardRef<HTMLElement, TopbarProps>(
-  ({ left, center, right, hasBorder }, ref) => {
+export const Topbar: React.FC<TopbarProps>
+  = ({ left, center, right, hasBorder, ref }) => {
     const leftRef = useRef<HTMLDivElement>(null);
     const rightRef = useRef<HTMLDivElement>(null);
     const [leftWidth, setLeftWidth] = useState(0);
@@ -27,7 +28,9 @@ export const Topbar = forwardRef<HTMLElement, TopbarProps>(
           ? (rightRef.current.offsetWidth + 6)
           : 0;
 
+        // eslint-disable-next-line @eslint-react/set-state-in-effect
         setLeftWidth(leftElement);
+        // eslint-disable-next-line @eslint-react/set-state-in-effect
         setRightWidth(rightElement);
       };
 
@@ -81,6 +84,4 @@ export const Topbar = forwardRef<HTMLElement, TopbarProps>(
         </div>
       </header>
     );
-  });
-
-Topbar.displayName = 'Topbar';
+  };

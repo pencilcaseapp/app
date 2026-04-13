@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export const useVirtualKeyboard = () => {
-  const isTouchDevice = typeof matchMedia === 'function'
-    && matchMedia('(pointer: coarse) and (hover: none)').matches;
+  const isTouchDevice = useMemo(() => typeof matchMedia === 'function'
+    && matchMedia('(pointer: coarse) and (hover: none)').matches, []);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 

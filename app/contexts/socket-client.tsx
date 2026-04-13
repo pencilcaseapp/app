@@ -1,5 +1,5 @@
 import type { HocuspocusProviderWebsocket } from '@hocuspocus/provider';
-import { createContext, useContext, type PropsWithChildren } from 'react';
+import { createContext, use, type PropsWithChildren } from 'react';
 import { getSocketClient } from '~/utils/socket-client';
 
 export const SocketClientContext = createContext<
@@ -9,7 +9,7 @@ HocuspocusProviderWebsocket | null
 );
 
 export function useSocketClient() {
-  const context = useContext(SocketClientContext);
+  const context = use(SocketClientContext);
 
   if (!context) {
     throw new Error('useSocketClient must be used within a SocketClientProvider');
@@ -23,8 +23,8 @@ export const SocketClientProvider: React.FC<PropsWithChildren>
     const socketClient = getSocketClient();
 
     return (
-      <SocketClientContext.Provider value={socketClient}>
+      <SocketClientContext value={socketClient}>
         {children}
-      </SocketClientContext.Provider>
+      </SocketClientContext>
     );
   };
