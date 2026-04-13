@@ -1,18 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useMedia } from 'react-use';
 
 export const useVirtualKeyboard = () => {
-  const isTouchDevice = useMemo(() => typeof matchMedia === 'function'
-    && matchMedia('(pointer: coarse) and (hover: none)').matches, []);
-
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (!isTouchDevice) return;
+    if (!isTouchDevice) {
+      return;
+    }
 
     const listener = () => {
       setIsOpen(
         window.visualViewport
-          ? window.visualViewport.height < window.innerHeight
+          ? window.innerHeight - window.visualViewport.height > 50
           : false,
       );
     };
