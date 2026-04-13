@@ -5,7 +5,7 @@ import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { ListNode, ListItemNode } from '@lexical/list';
-import { CodeNode } from '@lexical/code';
+import { CodeNode } from '@lexical/code-core';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { HorizontalRuleNode } from '@lexical/extension';
 import { useMemo, type ComponentProps } from 'react';
