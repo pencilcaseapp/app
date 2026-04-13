@@ -1,7 +1,7 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import stylistic from '@stylistic/eslint-plugin';
-import reactHooks from 'eslint-plugin-react-hooks';
+import eslintReact from '@eslint-react/eslint-plugin';
 
 export default defineConfig([
   globalIgnores(['**/.react-router/']),
@@ -10,7 +10,7 @@ export default defineConfig([
   }),
 
   tseslint.configs.recommended,
-  reactHooks.configs.flat.recommended,
+  eslintReact.configs['recommended-typescript'],
   {
     plugins: {
       '@stylistic': stylistic,
