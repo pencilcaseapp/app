@@ -8,7 +8,7 @@ export type TopbarProps = {
   center?: React.ReactNode;
   right?: React.ReactNode;
   hasBorder?: boolean;
-  ref: React.Ref<HTMLElement>;
+  ref?: React.Ref<HTMLElement>;
 };
 
 export const Topbar: React.FC<TopbarProps>
