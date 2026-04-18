@@ -8,11 +8,12 @@ import {
   createEditor,
 } from 'lexical';
 import { $createHeadingNode, HeadingNode } from '@lexical/rich-text';
+import { $createListItemNode, $createListNode, ListItemNode, ListNode } from '@lexical/list';
 import { $findTopLevelElement, $getFormatBlock } from './node';
 
 function createTestEditor() {
   return createEditor({
-    nodes: [HeadingNode],
+    nodes: [HeadingNode, ListNode, ListItemNode],
     onError: () => {},
   });
 }
@@ -178,6 +179,72 @@ describe('$getFormatBlock', () => {
       $setSelection(selection);
 
       expect($getFormatBlock(selection)).toBe('p');
+    });
+  });
+
+  test('returns "bullet" for a bullet list', async () => {
+    const editor = createTestEditor();
+
+    await runWithEditor(editor, () => {
+      const root = $getRoot();
+      root.clear();
+      const list = $createListNode('bullet');
+      const listItem = $createListItemNode();
+      const text = $createTextNode('Item');
+      listItem.append(text);
+      list.append(listItem);
+      root.append(list);
+
+      const selection = $createRangeSelection();
+      selection.anchor.set(text.getKey(), 0, 'text');
+      selection.focus.set(text.getKey(), 4, 'text');
+      $setSelection(selection);
+
+      expect($getFormatBlock(selection)).toBe('bullet');
+    });
+  });
+
+  test('returns "number" for a numbered list', async () => {
+    const editor = createTestEditor();
+
+    await runWithEditor(editor, () => {
+      const root = $getRoot();
+      root.clear();
+      const list = $createListNode('number');
+      const listItem = $createListItemNode();
+      const text = $createTextNode('Step');
+      listItem.append(text);
+      list.append(listItem);
+      root.append(list);
+
+      const selection = $createRangeSelection();
+      selection.anchor.set(text.getKey(), 0, 'text');
+      selection.focus.set(text.getKey(), 4, 'text');
+      $setSelection(selection);
+
+      expect($getFormatBlock(selection)).toBe('number');
+    });
+  });
+
+  test('returns "check" for a check list', async () => {
+    const editor = createTestEditor();
+
+    await runWithEditor(editor, () => {
+      const root = $getRoot();
+      root.clear();
+      const list = $createListNode('check');
+      const listItem = $createListItemNode();
+      const text = $createTextNode('Task');
+      listItem.append(text);
+      list.append(listItem);
+      root.append(list);
+
+      const selection = $createRangeSelection();
+      selection.anchor.set(text.getKey(), 0, 'text');
+      selection.focus.set(text.getKey(), 4, 'text');
+      $setSelection(selection);
+
+      expect($getFormatBlock(selection)).toBe('check');
     });
   });
 });

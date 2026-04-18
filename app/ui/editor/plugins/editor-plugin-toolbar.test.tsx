@@ -6,6 +6,9 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HeadingNode } from '@lexical/rich-text';
+import { ListNode, ListItemNode } from '@lexical/list';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
+import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { EditorPluginToolbar } from './editor-plugin-toolbar';
 
 function renderToolbar() {
@@ -16,7 +19,7 @@ function renderToolbar() {
         onError: (error) => {
           throw error;
         },
-        nodes: [HeadingNode],
+        nodes: [HeadingNode, ListNode, ListItemNode],
       }}
     >
       <EditorPluginToolbar />
@@ -26,6 +29,8 @@ function renderToolbar() {
         }
         ErrorBoundary={LexicalErrorBoundary}
       />
+      <ListPlugin />
+      <CheckListPlugin />
     </LexicalComposer>,
   );
 }
@@ -214,6 +219,105 @@ describe('EditorPluginToolbar', () => {
 
     await user.click(h1Button);
     expect(editor.querySelector('h1')).toBeNull();
+    expect(editor.querySelector('p')).toBeInTheDocument();
+  });
+
+  test('toggles bullet list when Bulleted list is clicked', async () => {
+    const user = userEvent.setup();
+    renderToolbar();
+
+    const editor = screen.getByRole('textbox');
+    await user.click(editor);
+
+    const bulletButton = screen.getByRole('button', { name: 'Bulleted list' });
+    await user.click(bulletButton);
+
+    expect(bulletButton).toHaveAttribute('aria-pressed', 'true');
+    expect(editor.querySelector('ul')).toBeInTheDocument();
+    expect(editor.querySelector('p')).toBeNull();
+  });
+
+  test('toggles numbered list when Numbered list is clicked', async () => {
+    const user = userEvent.setup();
+    renderToolbar();
+
+    const editor = screen.getByRole('textbox');
+    await user.click(editor);
+
+    const numberButton = screen.getByRole('button', { name: 'Numbered list' });
+    await user.click(numberButton);
+
+    expect(numberButton).toHaveAttribute('aria-pressed', 'true');
+    expect(editor.querySelector('ol')).toBeInTheDocument();
+    expect(editor.querySelector('p')).toBeNull();
+  });
+
+  test('toggles check list when Checklist is clicked', async () => {
+    const user = userEvent.setup();
+    renderToolbar();
+
+    const editor = screen.getByRole('textbox');
+    await user.click(editor);
+
+    const checkButton = screen.getByRole('button', { name: 'Checklist' });
+    await user.click(checkButton);
+
+    expect(checkButton).toHaveAttribute('aria-pressed', 'true');
+    expect(editor.querySelector('ul')).toBeInTheDocument();
+    expect(editor.querySelector('p')).toBeNull();
+  });
+
+  test('reverts bullet list back to paragraph when clicked again', async () => {
+    const user = userEvent.setup();
+    renderToolbar();
+
+    const editor = screen.getByRole('textbox');
+    await user.click(editor);
+
+    const bulletButton = screen.getByRole('button', { name: 'Bulleted list' });
+    await user.click(bulletButton);
+    expect(bulletButton).toHaveAttribute('aria-pressed', 'true');
+    expect(editor.querySelector('ul')).toBeInTheDocument();
+
+    await user.click(bulletButton);
+    expect(bulletButton).toHaveAttribute('aria-pressed', 'false');
+    expect(editor.querySelector('ul')).toBeNull();
+    expect(editor.querySelector('p')).toBeInTheDocument();
+  });
+
+  test('reverts numbered list back to paragraph when clicked again', async () => {
+    const user = userEvent.setup();
+    renderToolbar();
+
+    const editor = screen.getByRole('textbox');
+    await user.click(editor);
+
+    const numberButton = screen.getByRole('button', { name: 'Numbered list' });
+    await user.click(numberButton);
+    expect(numberButton).toHaveAttribute('aria-pressed', 'true');
+    expect(editor.querySelector('ol')).toBeInTheDocument();
+
+    await user.click(numberButton);
+    expect(numberButton).toHaveAttribute('aria-pressed', 'false');
+    expect(editor.querySelector('ol')).toBeNull();
+    expect(editor.querySelector('p')).toBeInTheDocument();
+  });
+
+  test('reverts check list back to paragraph when clicked again', async () => {
+    const user = userEvent.setup();
+    renderToolbar();
+
+    const editor = screen.getByRole('textbox');
+    await user.click(editor);
+
+    const checkButton = screen.getByRole('button', { name: 'Checklist' });
+    await user.click(checkButton);
+    expect(checkButton).toHaveAttribute('aria-pressed', 'true');
+    expect(editor.querySelector('ul')).toBeInTheDocument();
+
+    await user.click(checkButton);
+    expect(checkButton).toHaveAttribute('aria-pressed', 'false');
+    expect(editor.querySelector('ul')).toBeNull();
     expect(editor.querySelector('p')).toBeInTheDocument();
   });
 });

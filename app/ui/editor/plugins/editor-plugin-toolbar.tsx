@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $createParagraphNode, $getSelection, $isRangeSelection, COMMAND_PRIORITY_CRITICAL, FORMAT_TEXT_COMMAND, mergeRegister, SELECTION_CHANGE_COMMAND } from 'lexical';
+import { $addUpdateTag, $createParagraphNode, $getSelection, $isRangeSelection, COMMAND_PRIORITY_CRITICAL, FORMAT_TEXT_COMMAND, mergeRegister, SELECTION_CHANGE_COMMAND, SKIP_SELECTION_FOCUS_TAG } from 'lexical';
 import { $createHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -8,6 +8,11 @@ import { Button, Topbar, Toolbar, ToolbarGroup, ToolbarToggle, ToolbarSeparator 
 import type { EditorFormatBlock } from '../editor.types';
 import { useMedia, useWindowScroll } from 'react-use';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
+import {
+  INSERT_CHECK_LIST_COMMAND,
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
+} from '@lexical/list';
 
 export const EditorPluginToolbar: React.FC = () => {
   const [editor] = useLexicalComposerContext();
@@ -25,16 +30,17 @@ export const EditorPluginToolbar: React.FC = () => {
 
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
-
-    if ($isRangeSelection(selection)) {
-      setTextStyle({
-        bold: selection.hasFormat('bold'),
-        italic: selection.hasFormat('italic'),
-        underline: selection.hasFormat('underline'),
-      });
-
-      setFormatBlock($getFormatBlock(selection));
+    if (!$isRangeSelection(selection)) {
+      return;
     }
+
+    setTextStyle({
+      bold: selection.hasFormat('bold'),
+      italic: selection.hasFormat('italic'),
+      underline: selection.hasFormat('underline'),
+    });
+
+    setFormatBlock($getFormatBlock(selection));
   }, []);
 
   useEffect(() => {
@@ -57,28 +63,46 @@ export const EditorPluginToolbar: React.FC = () => {
 
   const toggleTextStyle = useCallback((style: 'bold' | 'italic' | 'underline') => {
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, style);
-    setTextStyle(prev => ({
-      ...prev,
-      [style]: !prev[style],
-    }));
   }, [editor]);
 
-  const toggleBlock = useCallback((block: EditorFormatBlock) => {
+  const toggleHeadline = useCallback((block: 'h1' | 'h2' | 'h3') => {
     editor.update(() => {
       const selection = $getSelection();
-
-      if (block === 'p' || !$isRangeSelection(selection)) {
+      if (!$isRangeSelection(selection)) {
         return;
       }
 
       const formatBlock = $getFormatBlock(selection);
       if (formatBlock === block) {
         $setBlocksType(selection, () => $createParagraphNode());
-        setFormatBlock('p');
       }
       else {
         $setBlocksType(selection, () => $createHeadingNode(block));
-        setFormatBlock(block);
+      }
+    });
+  }, [editor]);
+
+  const toggleList = useCallback((block: 'bullet' | 'number' | 'check') => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if (!$isRangeSelection(selection)) {
+        return;
+      }
+
+      $addUpdateTag(SKIP_SELECTION_FOCUS_TAG);
+
+      const formatBlock = $getFormatBlock(selection);
+      if (formatBlock === block) {
+        $setBlocksType(selection, () => $createParagraphNode());
+      }
+      else if (block === 'bullet') {
+        editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+      }
+      else if (block === 'number') {
+        editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+      }
+      else if (block === 'check') {
+        editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined);
       }
     });
   }, [editor]);
@@ -97,9 +121,9 @@ export const EditorPluginToolbar: React.FC = () => {
         (isWide || isVirtualKeyboardOpen) && (
           <Toolbar isScrolling={isScrolling}>
             <ToolbarGroup>
-              <ToolbarToggle isActive={formatBlock === 'h1'} onMouseDown={handleEditorFocus} onClick={() => toggleBlock('h1')} icon="h1" tooltipLabel="Heading 1" />
-              <ToolbarToggle isActive={formatBlock === 'h2'} onMouseDown={handleEditorFocus} onClick={() => toggleBlock('h2')} icon="h2" tooltipLabel="Heading 2" />
-              <ToolbarToggle isActive={formatBlock === 'h3'} onMouseDown={handleEditorFocus} onClick={() => toggleBlock('h3')} icon="h3" tooltipLabel="Heading 3" />
+              <ToolbarToggle isActive={formatBlock === 'h1'} onMouseDown={handleEditorFocus} onClick={() => toggleHeadline('h1')} icon="h1" tooltipLabel="Heading 1" />
+              <ToolbarToggle isActive={formatBlock === 'h2'} onMouseDown={handleEditorFocus} onClick={() => toggleHeadline('h2')} icon="h2" tooltipLabel="Heading 2" />
+              <ToolbarToggle isActive={formatBlock === 'h3'} onMouseDown={handleEditorFocus} onClick={() => toggleHeadline('h3')} icon="h3" tooltipLabel="Heading 3" />
             </ToolbarGroup>
             <ToolbarSeparator />
             <ToolbarGroup>
@@ -109,9 +133,9 @@ export const EditorPluginToolbar: React.FC = () => {
             </ToolbarGroup>
             <ToolbarSeparator />
             <ToolbarGroup>
-              <ToolbarToggle isActive={false} icon="listUl" tooltipLabel="Bulleted list" />
-              <ToolbarToggle isActive={false} icon="listOl" tooltipLabel="Numbered list" />
-              <ToolbarToggle isActive={false} icon="listCheck" tooltipLabel="Checklist" />
+              <ToolbarToggle isActive={formatBlock === 'bullet'} onMouseDown={handleEditorFocus} onClick={() => toggleList('bullet')} icon="listUl" tooltipLabel="Bulleted list" />
+              <ToolbarToggle isActive={formatBlock === 'number'} onMouseDown={handleEditorFocus} onClick={() => toggleList('number')} icon="listOl" tooltipLabel="Numbered list" />
+              <ToolbarToggle isActive={formatBlock === 'check'} onMouseDown={handleEditorFocus} onClick={() => toggleList('check')} icon="listCheck" tooltipLabel="Checklist" />
             </ToolbarGroup>
           </Toolbar>
         )
