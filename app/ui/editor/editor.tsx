@@ -16,7 +16,7 @@ import { EditorPluginRichText } from './plugins/editor-plugin-rich-text';
 import editorTheme from './editor-theme';
 
 import './editor.css';
-import { EditorPluginFocusEmpty } from './plugins/editor-plugin-focus-empty';
+import { EditorPluginAutoFocus } from './plugins/editor-plugin-auto-focus';
 
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
@@ -51,10 +51,10 @@ export const Editor: React.FC<EditorProps> = ({
       <LexicalComposer initialConfig={config}>
         <EditorPluginToolbar />
         <EditorPluginRichText />
-        <EditorPluginFocusEmpty />
+        <EditorPluginAutoFocus />
         <CheckListPlugin />
         <ListPlugin />
-        <ClickableLinkPlugin />
+        <ClickableLinkPlugin newTab />
         <TabIndentationPlugin maxIndent={3} />
         <EditorPluginAutoLink />
         <EditorPluginMarkdown />

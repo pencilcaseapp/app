@@ -3,7 +3,7 @@ import { $getRoot } from 'lexical';
 import { $isHeadingNode } from '@lexical/rich-text';
 import { useEffect, useRef } from 'react';
 
-export const EditorPluginFocusEmpty: React.FC = () => {
+export const EditorPluginAutoFocus: React.FC = () => {
   const [editor] = useLexicalComposerContext();
   const hasAutoFocusedRef = useRef(false);
 
@@ -33,16 +33,19 @@ export const EditorPluginFocusEmpty: React.FC = () => {
 
       hasAutoFocusedRef.current = true;
 
-      editor.update(() => {
-        const root = $getRoot();
-        const firstNode = root.getFirstChild();
-
-        if ($isHeadingNode(firstNode)) {
-          firstNode.selectEnd();
-        }
-      }, { discrete: true });
-
-      editor.focus();
+      editor.focus(
+        () => {
+          const activeElement = document.activeElement;
+          const rootElement = editor.getRootElement() as HTMLDivElement;
+          if (
+            rootElement !== null
+            && (activeElement === null || !rootElement.contains(activeElement))
+          ) {
+            rootElement.focus({ preventScroll: true });
+          }
+        },
+        { defaultSelection: 'rootEnd' },
+      );
     };
 
     maybeFocusEmptyDocument();
