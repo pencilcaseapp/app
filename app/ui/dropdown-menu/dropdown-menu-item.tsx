@@ -51,7 +51,7 @@ export const DropdownMenuItem = <C extends React.ElementType = 'a'>({
           <Icon icon={icon} className={classNames('mr-2 shrink-0 w-5 h-5', isLoading && 'opacity-0')} />
         )}
         <Typography
-          as="span"
+          as="div"
           variant="bodySmall"
           className={classes}
           textAlign="left"
