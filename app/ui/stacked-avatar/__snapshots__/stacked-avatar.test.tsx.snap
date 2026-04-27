@@ -1,0 +1,110 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`StackedAvatars > matches snapshot 1`] = `
+<div>
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    class="flex h-8 items-center justify-end -space-x-1 transition-all duration-300 ease-in-out focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 rounded-3xl px-1"
+    data-state="closed"
+    id="radix-_r_0_"
+    type="button"
+  >
+    <div
+      class="flex items-center group flex-row gap-3 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 rounded-full focus:z-50 pointer-events-none focus:outline-none"
+      data-state="closed"
+      tabindex="-1"
+    >
+      <abbr
+        aria-label="Alice"
+        class="flex shrink-0 items-center justify-center rounded-full no-underline relative border h-[28px] w-[28px] border-pca-white text-pca-white dark:border-pca-grey-900"
+        style="background-color: #E74C3C;"
+      >
+        <span
+          class="antialiased font-inter text-xs text-pca-grey-900 dark:text-white font-medium text-inherit!"
+        >
+          A
+        </span>
+      </abbr>
+    </div>
+    <div
+      class="flex items-center group flex-row gap-3 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 rounded-full focus:z-50 pointer-events-none focus:outline-none"
+      data-state="closed"
+      tabindex="-1"
+    >
+      <abbr
+        aria-label="Bob"
+        class="flex shrink-0 items-center justify-center rounded-full no-underline relative border h-[28px] w-[28px] border-pca-white text-pca-white dark:border-pca-grey-900"
+        style="background-color: #3498DB;"
+      >
+        <span
+          class="antialiased font-inter text-xs text-pca-grey-900 dark:text-white font-medium text-inherit!"
+        >
+          B
+        </span>
+      </abbr>
+    </div>
+    <div
+      class="flex items-center group flex-row gap-3 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 rounded-full focus:z-50 pointer-events-none focus:outline-none"
+      data-state="closed"
+      tabindex="-1"
+    >
+      <abbr
+        aria-label="Charlie"
+        class="flex shrink-0 items-center justify-center rounded-full no-underline relative border h-[28px] w-[28px] border-pca-white text-pca-white dark:border-pca-grey-900"
+        style="background-color: #2ECC71;"
+      >
+        <span
+          class="antialiased font-inter text-xs text-pca-grey-900 dark:text-white font-medium text-inherit!"
+        >
+          C
+        </span>
+      </abbr>
+    </div>
+    <div
+      class="flex items-center group flex-row gap-3 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 rounded-full focus:z-50 pointer-events-none focus:outline-none"
+      data-state="closed"
+      tabindex="-1"
+    >
+      <abbr
+        aria-label="Diana"
+        class="flex shrink-0 items-center justify-center rounded-full no-underline relative border h-[28px] w-[28px] border-pca-white text-pca-white dark:border-pca-grey-900"
+        style="background-color: #F39C12;"
+      >
+        <span
+          class="antialiased font-inter text-xs text-pca-grey-900 dark:text-white font-medium text-inherit!"
+        >
+          D
+        </span>
+      </abbr>
+    </div>
+    <div
+      class="flex items-center group flex-row gap-3 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 rounded-full focus:z-50 pointer-events-none focus:outline-none"
+      data-state="closed"
+      tabindex="-1"
+    >
+      <abbr
+        aria-label="Eve"
+        class="flex shrink-0 items-center justify-center rounded-full no-underline relative border h-[28px] w-[28px] border-pca-white text-pca-white dark:border-pca-grey-900"
+        style="background-color: #9B59B6;"
+      >
+        <span
+          class="antialiased font-inter text-xs text-pca-grey-900 dark:text-white font-medium text-inherit!"
+        >
+          E
+        </span>
+      </abbr>
+    </div>
+    <div
+      class="w-7 h-7 rounded-full bg-pca-yellow-500 text-pca-grey-900 text-xs font-medium flex items-center justify-center ring-1 ring-pca-white dark:ring-pca-grey-900 transition-transform duration-300 z-50"
+    >
+      2
+      <span
+        class="text-[9px]"
+      >
+        +
+      </span>
+    </div>
+  </button>
+</div>
+`;

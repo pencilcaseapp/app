@@ -37,7 +37,7 @@ export const Avatar = <C extends React.ElementType = 'button'>({
         {...props}
         ref={ref}
         className={classNames(
-          'flex items-center group flex-row gap-3',
+          'flex items-center group flex-row gap-3 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 rounded-full focus:z-50',
           className,
         )}
       >
