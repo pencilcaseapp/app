@@ -10,7 +10,7 @@
     "build": "run-p \"build:*\"",
     "build:react-router": "react-router build",
     "build:server": "esbuild ./server.ts --outdir=./ --bundle --format=esm --platform=node --target=node24 --packages=external --external:./build/server/index.js",
-    "test": "cross-env ENV=test vitest",
+    "test": "vitest",
     "typecheck": "react-router typegen && tsc",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
