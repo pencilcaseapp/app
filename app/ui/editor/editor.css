@@ -256,3 +256,99 @@
     background-color: #374151;
   }
 }
+
+/* Prism code token highlights */
+.editor-code-token-attr {
+  color: #c2410c;
+}
+
+.editor-code-token-property {
+  color: #1d4ed8;
+}
+
+.editor-code-token-selector {
+  color: #047857;
+}
+
+.editor-code-token-comment {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.editor-code-token-function {
+  color: #7c3aed;
+}
+
+.editor-code-token-operator {
+  color: #be185d;
+}
+
+.editor-code-token-variable {
+  color: #b45309;
+}
+
+.editor-code-token-punctuation {
+  color: #475569;
+}
+
+.editor-code-token-deleted {
+  color: #b91c1c;
+  background-color: rgb(185 28 28 / 0.1);
+}
+
+.editor-code-token-inserted {
+  color: #15803d;
+  background-color: rgb(21 128 61 / 0.1);
+}
+
+.editor-code-token-unchanged {
+  color: #334155;
+}
+
+@media (prefers-color-scheme: dark) {
+  .editor-code-token-attr {
+    color: #fb923c;
+  }
+
+  .editor-code-token-property {
+    color: #93c5fd;
+  }
+
+  .editor-code-token-selector {
+    color: #6ee7b7;
+  }
+
+  .editor-code-token-comment {
+    color: #94a3b8;
+  }
+
+  .editor-code-token-function {
+    color: #c4b5fd;
+  }
+
+  .editor-code-token-operator {
+    color: #f9a8d4;
+  }
+
+  .editor-code-token-variable {
+    color: #fcd34d;
+  }
+
+  .editor-code-token-punctuation {
+    color: #cbd5e1;
+  }
+
+  .editor-code-token-deleted {
+    color: #fca5a5;
+    background-color: rgb(248 113 113 / 0.15);
+  }
+
+  .editor-code-token-inserted {
+    color: #86efac;
+    background-color: rgb(74 222 128 / 0.15);
+  }
+
+  .editor-code-token-unchanged {
+    color: #e2e8f0;
+  }
+}

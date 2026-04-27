@@ -5,12 +5,13 @@ import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { ListNode, ListItemNode } from '@lexical/list';
-import { CodeNode } from '@lexical/code-core';
+import { CodeHighlightNode, CodeNode } from '@lexical/code-core';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { HorizontalRuleNode } from '@lexical/extension';
 import { useMemo, type ComponentProps } from 'react';
 import { EditorPluginMarkdown } from './plugins/editor-plugin-markdown';
 import { EditorPluginAutoLink } from './plugins/editor-plugin-auto-link';
+import { EditorPluginCodePrism } from './plugins/editor-plugin-code-prism';
 import { EditorPluginToolbar } from './plugins/editor-plugin-toolbar';
 import { EditorPluginRichText } from './plugins/editor-plugin-rich-text';
 import editorTheme from './editor-theme';
@@ -39,6 +40,7 @@ export const Editor: React.FC<EditorProps> = ({
       ListNode,
       ListItemNode,
       CodeNode,
+      CodeHighlightNode,
       HeadingNode,
       QuoteNode,
       HorizontalRuleNode,
@@ -58,6 +60,7 @@ export const Editor: React.FC<EditorProps> = ({
         <TabIndentationPlugin maxIndent={3} />
         <EditorPluginAutoLink />
         <EditorPluginMarkdown />
+        <EditorPluginCodePrism />
         {children}
       </LexicalComposer>
     </div>
