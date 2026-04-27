@@ -12,10 +12,11 @@ import { useMemo, type ComponentProps } from 'react';
 import { EditorPluginMarkdown } from './plugins/editor-plugin-markdown';
 import { EditorPluginAutoLink } from './plugins/editor-plugin-auto-link';
 import { EditorPluginToolbar } from './plugins/editor-plugin-toolbar';
+import { EditorPluginRichText } from './plugins/editor-plugin-rich-text';
 import editorTheme from './editor-theme';
 
 import './editor.css';
-import { EditorPluginRichText } from './plugins/editor-plugin-rich-text';
+import { EditorPluginAutoFocus } from './plugins/editor-plugin-auto-focus';
 
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
@@ -50,9 +51,10 @@ export const Editor: React.FC<EditorProps> = ({
       <LexicalComposer initialConfig={config}>
         <EditorPluginToolbar />
         <EditorPluginRichText />
+        <EditorPluginAutoFocus />
         <CheckListPlugin />
         <ListPlugin />
-        <ClickableLinkPlugin />
+        <ClickableLinkPlugin newTab />
         <TabIndentationPlugin maxIndent={3} />
         <EditorPluginAutoLink />
         <EditorPluginMarkdown />

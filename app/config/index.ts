@@ -30,7 +30,7 @@ export function getConfig(): Config {
     }
 
     default: {
-      return getConfigDev();
+      return getConfigTest();
     }
   }
 }
