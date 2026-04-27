@@ -14,10 +14,10 @@ export const EditorPluginRichText: React.FC = () => {
 
   useEffect(
     () => {
-      editor.registerCommand(
+      return editor.registerCommand(
         BLUR_COMMAND,
         () => {
-          if (!contenteditableRef.current) {
+          if (!contenteditableRef.current || !isVirtualKeyboardOpen) {
             return false;
           }
 
@@ -33,7 +33,7 @@ export const EditorPluginRichText: React.FC = () => {
         COMMAND_PRIORITY_CRITICAL,
       );
     },
-    [editor],
+    [editor, isVirtualKeyboardOpen],
   );
 
   useEffect(() => {
