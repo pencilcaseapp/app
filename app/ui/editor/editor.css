@@ -21,12 +21,12 @@
 [contenteditable] > *:only-child:has(> br)::before {
   position: absolute;
   content: var(--editor-placeholder, 'Type something …');
-  color: var(--color-pca-grey-200);
+  color: var(--color-pca-grey-300);
 }
 
 @media (prefers-color-scheme: dark) {
   [contenteditable] > *:only-child:has(> br)::before {
-    color: var(--color-pca-grey-800);
+    color: var(--color-pca-grey-700);
   }
 }
 
