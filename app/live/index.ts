@@ -1,11 +1,13 @@
-import { Hocuspocus } from '@hocuspocus/server';
-import type { Application } from 'express-ws';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Hocuspocus, type WebSocketLike } from '@hocuspocus/server';
 import { Database } from '@hocuspocus/extension-database';
 import { getDocument, updateDocument } from '~/repos/document';
 import { extractTitleFromYDoc } from '~/utils/yjs';
 import { createInitialDocumentContent } from '~/utils/headless';
+import crossws from 'crossws/adapters/node';
+import type { Server } from 'node:http';
 
-export const hocuspocus = new Hocuspocus({
+const hocuspocus = new Hocuspocus({
   name: 'hocuspocus-01',
   extensions: [
     new Database({
@@ -22,8 +24,33 @@ export const hocuspocus = new Hocuspocus({
   ],
 });
 
-export function createLiveServer(app: Application) {
-  app.ws('/live', (websocket, request) => {
-    hocuspocus.handleConnection(websocket, request as unknown as Request);
+export const ws = crossws({
+  hooks: {
+    open(peer) {
+      const clientConnection = hocuspocus.handleConnection(
+        peer.websocket as unknown as WebSocketLike,
+        peer.request,
+      )
+      ;(peer as any)._hocuspocus = clientConnection;
+    },
+    message(peer, message) {
+      ;(peer as any)._hocuspocus?.handleMessage(message.uint8Array());
+    },
+    close(peer, event) {
+      ;(peer as any)._hocuspocus?.handleClose({
+        code: event.code,
+        reason: event.reason,
+      });
+    },
+    error(peer, error) {
+      console.error('WebSocket error for peer:', peer.id);
+      console.error(error);
+    },
+  },
+});
+
+export function createLiveServer(server: Server) {
+  server.on('upgrade', (request, socket, head) => {
+    ws.handleUpgrade(request, socket, head);
   });
 }
