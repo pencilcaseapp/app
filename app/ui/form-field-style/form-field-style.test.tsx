@@ -13,7 +13,7 @@ describe('FormFieldStyle', () => {
 
   test('renders error state', () => {
     const { container } = render(
-      <FormFieldStyle as="input" type="email" isError />,
+      <FormFieldStyle as="input" type="email" aria-invalid={true} />,
     );
 
     expect(container).toMatchSnapshot();

@@ -30,11 +30,13 @@ export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, 
       <FormFieldStyle
         id={id}
         type={type}
-        isError={!!errorMessage}
+        aria-invalid={!!errorMessage}
+        aria-errormessage={errorMessage ? `${id}-error` : undefined}
         {...props}
       />
       {hint && !errorMessage && (
         <Typography
+          as="span"
           variant="bodyTiny"
           textColorLight="grey-900"
           textColorDark="white"
@@ -44,6 +46,8 @@ export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, 
       )}
       {errorMessage && (
         <Typography
+          id={`${id}-error`}
+          as="span"
           variant="bodyTiny"
           textColorLight="red-500"
           textColorDark="red-500"

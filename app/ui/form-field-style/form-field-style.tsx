@@ -1,13 +1,9 @@
 import classNames from 'classnames';
 import type { PolymorphicComponentProp } from '../polymorphic-types/polymorphic-types';
 
-export interface FormFieldStyleProps {
-  isError?: boolean;
-}
-
 export const FormFieldStyle = <C extends React.ElementType = 'input'>
-(props: PolymorphicComponentProp<C, FormFieldStyleProps>) => {
-  const { as, className, isError, ...rest } = props;
+(props: PolymorphicComponentProp<C, unknown>) => {
+  const { as, className, 'aria-invalid': ariaInvalid, ...rest } = props;
   const Component = as || 'input';
 
   const classes = classNames([
@@ -20,13 +16,14 @@ export const FormFieldStyle = <C extends React.ElementType = 'input'>
     // Disabled state styles
     'disabled:pointer-events-none disabled:bg-pca-grey-100 dark:disabled:bg-pca-grey-800/30 disabled:border-pca-grey-200 dark:disabled:border-transparent disabled:placeholder-pca-grey-300 dark:disabled:placeholder-pca-grey-800',
     // Error state styles
-    isError && 'dark:bg-pca-red-500/10 dark:hover:bg-pca-red-500/20 dark:focus:bg-pca-red-500/20 dark:active:bg-pca-red-500/20 border-pca-red-500 dark:border-pca-red-500! hover:border-pca-red-700 dark:hover:border-pca-red-700 focus:border-pca-red-700 dark:focus:border-pca-red-700 focus:ring-pca-red-300 active:ring-pca-red-300',
+    ariaInvalid && 'dark:bg-pca-red-500/10 dark:hover:bg-pca-red-500/20 dark:focus:bg-pca-red-500/20 dark:active:bg-pca-red-500/20 border-pca-red-500 dark:border-pca-red-500! hover:border-pca-red-700 dark:hover:border-pca-red-700 focus:border-pca-red-700 dark:focus:border-pca-red-700 focus:ring-pca-red-300 active:ring-pca-red-300',
     className,
   ]);
 
   return (
     <Component
       {...rest}
+      aria-invalid={ariaInvalid}
       className={classes}
     />
   );
