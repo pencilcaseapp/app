@@ -24,6 +24,6 @@ export const hocuspocus = new Hocuspocus({
 
 export function createLiveServer(app: Application) {
   app.ws('/live', (websocket, request) => {
-    hocuspocus.handleConnection(websocket, request);
+    hocuspocus.handleConnection(websocket, request as unknown as Request);
   });
 }
