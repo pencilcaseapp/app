@@ -5,6 +5,7 @@ export * from './separator/separator';
 export * from './tooltip/tooltip';
 export * from './avatar/avatar';
 export * from './stacked-avatar/stacked-avatar';
+export * from './logo/logo';
 
 // Editor
 export * from './editor/editor';
