@@ -25,6 +25,7 @@ export * from './dropdown-menu/dropdown-menu-trigger';
 export * from './dropdown-menu/dropdown-menu-content';
 export * from './dropdown-menu/dropdown-menu-item';
 export * from './dropdown-menu/dropdown-menu-separator';
+export * from './link/link';
 
 // Utils
 export * from './horizontal-overflow/horizontal-overflow';
