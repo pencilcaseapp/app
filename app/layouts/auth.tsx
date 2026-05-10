@@ -4,7 +4,7 @@ import { LayoutBase } from './base';
 
 export default function LayoutAuth() {
   return (
-    <LayoutBase bodyClassName="w-full bg-pca-yellow-500 dark:bg-black min-h-dvh">
+    <LayoutBase bodyClassName="w-full bg-pca-yellow-500 dark:bg-black">
       <header className="h-13 md:h-23.75 flex items-center justify-center">
         <Logo />
       </header>
