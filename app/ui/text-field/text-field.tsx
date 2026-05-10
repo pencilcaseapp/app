@@ -1,6 +1,7 @@
 import type { InputHTMLAttributes } from 'react';
 import { Typography } from '../typography/typography';
 import { FormFieldStyle } from '../form-field-style/form-field-style';
+import classNames from 'classnames';
 
 export interface TextFieldProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'className'> {
@@ -9,11 +10,12 @@ export interface TextFieldProps
   type?: 'text' | 'password' | 'email';
   hint?: string;
   errorMessage?: string;
+  className?: string;
 };
 
-export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, hint, errorMessage, ...props }) => {
+export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, hint, errorMessage, className, ...props }) => {
   return (
-    <div className="flex flex-col gap-2 group">
+    <div className={classNames('flex flex-col gap-2 group', className)}>
       {label && (
         <Typography
           as="label"
