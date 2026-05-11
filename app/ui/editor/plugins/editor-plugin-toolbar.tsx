@@ -115,8 +115,8 @@ export const EditorPluginToolbar: React.FC = () => {
     <Topbar
       ref={topbarRef}
       hasBorder={isVirtualKeyboardOpen}
-      left={!isVirtualKeyboardOpen ? <Button color="secondary" icon="sidebar" iconTitle="sidebar" /> : <Button color="secondary" icon="close" className="text-pca-grey-400!" iconTitle="close" />}
-      right={!isVirtualKeyboardOpen && (<Button icon="share" color="upgrade">Share</Button>)}
+      left={!isVirtualKeyboardOpen ? <Button colorLight="secondary" icon="sidebar" iconTitle="sidebar" /> : <Button colorLight="secondary" icon="close" className="text-pca-grey-400!" iconTitle="close" />}
+      right={!isVirtualKeyboardOpen && (<Button icon="share" colorLight="upgrade">Share</Button>)}
       center={(
         (isWide || isVirtualKeyboardOpen) && (
           <Toolbar isScrolling={isScrolling}>

@@ -82,7 +82,7 @@ export const SwapAreasExample: Story = {
         <Topbar
           hasBorder={!isSwapped}
           left={
-            !isSwapped ? (<Button colorLight="secondary" className="text-pca-grey-400! dark:text-pca-grey-600!" icon="close" />) : (<Button color="secondary" icon="sidebar" />)
+            !isSwapped ? (<Button colorLight="secondary" className="text-pca-grey-400! dark:text-pca-grey-600!" icon="close" />) : (<Button colorLight="secondary" icon="sidebar" />)
 
           }
           center={
