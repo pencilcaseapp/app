@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: .node-version
+          node-version-file: .nvmrc
           cache: npm
       - name: Install deps
         run: npm ci
@@ -47,7 +47,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: .node-version
+          node-version-file: .nvmrc
           cache: npm
       - name: Install deps
         run: npm ci
@@ -63,7 +63,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: .node-version
+          node-version-file: .nvmrc
           cache: npm
       - name: Install deps
         run: npm ci
@@ -79,7 +79,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: .node-version
+          node-version-file: .nvmrc
           cache: npm
       - name: Install deps
         run: npm ci
@@ -100,7 +100,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: .node-version
+          node-version-file: .nvmrc
           cache: npm
       - name: Install deps
         run: npm ci
@@ -128,7 +128,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: .node-version
+          node-version-file: .nvmrc
           cache: npm
       - name: Install deps
         run: npm ci

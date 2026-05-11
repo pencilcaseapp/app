@@ -4,7 +4,13 @@ import { $createHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { $getFormatBlock } from '../utils/node';
-import { Button, Topbar, Toolbar, ToolbarGroup, ToolbarToggle, ToolbarSeparator } from '~/ui';
+import { Button } from '~/ui/button/button';
+import { Topbar } from '~/ui/topbar/topbar';
+import { Toolbar } from '~/ui/toolbar/toolbar';
+import { ToolbarGroup } from '~/ui/toolbar/toolbar-group';
+import { ToolbarToggle } from '~/ui/toolbar/toolbar-toggle';
+import { ToolbarSeparator } from '~/ui/toolbar/toolbar-separator';
+
 import type { EditorFormatBlock } from '../editor.types';
 import { useMedia, useWindowScroll } from 'react-use';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';

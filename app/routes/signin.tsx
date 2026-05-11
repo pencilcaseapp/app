@@ -1,4 +1,7 @@
-import { Button, Link, TextField, Typography } from '~/ui';
+import { Typography } from '~/ui/typography/typography';
+import { Button } from '~/ui/button/button';
+import { Link } from '~/ui/link/link';
+import { TextField } from '~/ui/text-field/text-field';
 
 export default function () {
   return (

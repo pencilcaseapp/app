@@ -3,7 +3,7 @@ import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import * as Y from 'yjs';
 import type { Provider } from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
-import { Editor } from '~/ui';
+import { Editor } from '~/ui/editor/editor';
 import { useEffect, useRef, useState } from 'react';
 import { useSocketClient } from '~/contexts/socket-client';
 import { useDocumentTitle } from '~/hooks/use-document-title';
