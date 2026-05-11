@@ -1,10 +1,13 @@
 import { Outlet } from 'react-router';
 import { Logo } from '~/ui/logo/logo';
-import { LayoutBase } from './base';
+
+export const handle = {
+  bodyClassName: 'w-full bg-pca-yellow-500 dark:bg-black',
+};
 
 export default function LayoutAuth() {
   return (
-    <LayoutBase bodyClassName="w-full bg-pca-yellow-500 dark:bg-black">
+    <>
       <header className="h-13 md:h-23.75 flex items-center justify-center">
         <Logo />
       </header>
@@ -13,6 +16,6 @@ export default function LayoutAuth() {
           <Outlet />
         </div>
       </main>
-    </LayoutBase>
+    </>
   );
 };

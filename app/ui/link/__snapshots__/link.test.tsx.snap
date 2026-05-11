@@ -3,7 +3,7 @@
 exports[`Link > renders a link 1`] = `
 <div>
   <a
-    class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-semibold inline-block rounded-sm underline decoration-[1.5px] underline-offset-[5px] transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-pca-blue-300 decoration-inherit"
+    class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-semibold inline-block rounded-sm underline transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-pca-blue-300 decoration-inherit decoration-[1.5px] underline-offset-[5px]"
     href="https://pencilcase.app"
     target="_blank"
   >
@@ -15,7 +15,7 @@ exports[`Link > renders a link 1`] = `
 exports[`Link > renders a link with custom styling 1`] = `
 <div>
   <a
-    class="antialiased font-inter text-sm text-pca-red-500 dark:text-white font-semibold inline-block rounded-sm underline decoration-[1.5px] underline-offset-[5px] transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-pca-blue-300 decoration-inherit"
+    class="antialiased font-inter text-sm text-pca-red-500 dark:text-white font-semibold inline-block rounded-sm underline transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-pca-blue-300 decoration-inherit decoration-[1.5px] underline-offset-[5px]"
     href="https://pencilcase.app"
   >
     Go to pencil case
@@ -26,7 +26,7 @@ exports[`Link > renders a link with custom styling 1`] = `
 exports[`Link > renders a react router link 1`] = `
 <div>
   <a
-    class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-semibold inline-block rounded-sm underline decoration-[1.5px] underline-offset-[5px] transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-pca-blue-300 decoration-inherit"
+    class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-semibold inline-block rounded-sm underline transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-pca-blue-300 decoration-inherit decoration-[1.5px] underline-offset-[5px]"
     data-discover="true"
     href="/some-path"
   >

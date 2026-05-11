@@ -1,9 +1,40 @@
 import {
   isRouteErrorResponse,
   Outlet,
+  Links,
+  Meta,
+  Scripts,
+  ScrollRestoration,
+  useMatches,
+  type UIMatch,
 } from 'react-router';
 import type { Route } from './+types/root';
+import classNames from 'classnames';
+
 import './app.css';
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  const matches = useMatches() as UIMatch<unknown, { bodyClassName: string }>[];
+  const routeBodyClassNames = matches
+    .filter(match => match.handle?.bodyClassName)
+    .map(match => match.handle?.bodyClassName);
+
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body className={classNames(...routeBodyClassNames)}>
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
 
 export default function App() {
   return <Outlet />;
