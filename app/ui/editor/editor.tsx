@@ -24,10 +24,12 @@ export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig
 export interface EditorProps extends React.PropsWithChildren {
   initialEditorState?: EditorConfig['editorState'];
   avatars: string[];
+  topbarLeft?: React.ReactNode;
 }
 
 export const Editor: React.FC<EditorProps> = ({
   initialEditorState,
+  topbarLeft,
   children,
 }) => {
   const config = useMemo<EditorConfig>(() => ({
@@ -51,7 +53,7 @@ export const Editor: React.FC<EditorProps> = ({
   return (
     <div className="w-full relative">
       <LexicalComposer initialConfig={config}>
-        <EditorPluginToolbar />
+        <EditorPluginToolbar topbarLeft={topbarLeft} />
         <EditorPluginRichText />
         <EditorPluginAutoFocus />
         <CheckListPlugin />
