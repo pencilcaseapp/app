@@ -160,7 +160,7 @@ export function Button<C extends React.ElementType = 'button'>(
     >
       {children && (
         <Typography
-          className={classNames('text-inherit! leading-none -translate-y-px', hideClasses)}
+          className={classNames('text-inherit! leading-none', hideClasses)}
           variant="bodySmall"
           fontWeight="medium"
           as="span"

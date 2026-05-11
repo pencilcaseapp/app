@@ -3,6 +3,8 @@ import { CollaborativeEditor } from '~/components/collaborative-editor/collabora
 import { getDocumentTitle } from '~/repos/document';
 import { useState } from 'react';
 import { ClientOnly } from '~/ui/client-only/client-only';
+import { Button } from '~/ui/button/button';
+import { href, Link } from 'react-router';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const documentTitle = await getDocumentTitle(params.id);
@@ -22,6 +24,11 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
         <CollaborativeEditor
           id={params.id}
           onTitleChange={setTitle}
+          topbarLeft={(
+            <Button as={Link} to={href('/signin')} colorLight="upgrade">
+              Sign In
+            </Button>
+          )}
         />
       </ClientOnly>
     </>

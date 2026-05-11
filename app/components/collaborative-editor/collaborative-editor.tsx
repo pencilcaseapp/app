@@ -13,10 +13,11 @@ import { createPortal } from 'react-dom';
 export interface CollaborativeEditorProps {
   id: string;
   onTitleChange?: (title: string | null) => void;
+  topbarLeft?: React.ReactNode;
 }
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
-  = ({ id, onTitleChange }) => {
+  = ({ id, onTitleChange, topbarLeft }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -74,7 +75,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
 
     return (
       <LexicalCollaboration>
-        <Editor avatars={avatars}>
+        <Editor avatars={avatars} topbarLeft={topbarLeft}>
           <CollaborationPlugin
             id={id}
             providerFactory={providerFactory}

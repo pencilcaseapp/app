@@ -6,7 +6,7 @@ exports[`Button > dark colors > renders danger color with expected class 1`] = `
     class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-white dark:bg-pca-red-500 dark:hover:bg-pca-red-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-red-300"
   >
     <span
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none -translate-y-px"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
       danger
     </span>
@@ -20,7 +20,7 @@ exports[`Button > dark colors > renders primary color with expected class 1`] = 
     class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-grey-900 dark:bg-pca-white dark:hover:bg-pca-grey-300 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-300"
   >
     <span
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none -translate-y-px"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
       primary
     </span>
@@ -34,7 +34,7 @@ exports[`Button > dark colors > renders secondary color with expected class 1`] 
     class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700"
   >
     <span
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none -translate-y-px"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
       secondary
     </span>
@@ -48,7 +48,7 @@ exports[`Button > dark colors > renders upgrade color with expected class 1`] = 
     class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-grey-900 dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-yellow-300"
   >
     <span
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none -translate-y-px"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
       upgrade
     </span>
@@ -62,7 +62,7 @@ exports[`Button > light colors > renders danger color with expected class 1`] = 
     class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-red-500 hover:bg-pca-red-700 focus:outline-hidden focus:ring-2 focus:ring-pca-red-300 dark:text-pca-white dark:bg-pca-red-500 dark:hover:bg-pca-red-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-red-300"
   >
     <span
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none -translate-y-px"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
       danger
     </span>
@@ -76,7 +76,7 @@ exports[`Button > light colors > renders primary color with expected class 1`] =
     class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-grey-900 dark:bg-pca-white dark:hover:bg-pca-grey-300 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-300"
   >
     <span
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none -translate-y-px"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
       primary
     </span>
@@ -90,7 +90,7 @@ exports[`Button > light colors > renders secondary color with expected class 1`]
     class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700"
   >
     <span
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none -translate-y-px"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
       secondary
     </span>
@@ -104,7 +104,7 @@ exports[`Button > light colors > renders upgrade color with expected class 1`] =
     class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-grey-900 bg-pca-yellow-500 hover:bg-pca-yellow-700 focus:outline-hidden focus:ring-2 focus:ring-pca-yellow-300 dark:text-pca-grey-900 dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-yellow-300"
   >
     <span
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none -translate-y-px"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
       upgrade
     </span>
