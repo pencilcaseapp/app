@@ -204,8 +204,6 @@
 
 html,
 body {
-  @apply bg-pca-white dark:bg-pca-grey-900;
-
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
