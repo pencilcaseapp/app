@@ -96,25 +96,25 @@ export const Primary: Story = {
 export const Secondary: Story = {
   render: () => (
     <div className="flex grow-0 flex-wrap gap-4">
-      <Button color="secondary" onClick={() => console.log('clicked')}>
+      <Button colorLight="secondary" onClick={() => console.log('clicked')}>
         Share
       </Button>
       <Button
-        color="secondary"
+        colorLight="secondary"
         isLoading={true}
         onClick={() => console.log('clicked')}
       >
         Share
       </Button>
       <Button
-        color="secondary"
+        colorLight="secondary"
         disabled={true}
         onClick={() => console.log('clicked')}
       >
         Share
       </Button>
       <Button
-        color="secondary"
+        colorLight="secondary"
         onClick={() => console.log('clicked')}
         icon="share"
         iconPosition="start"
@@ -123,7 +123,7 @@ export const Secondary: Story = {
       </Button>
       <Button
 
-        color="secondary"
+        colorLight="secondary"
         onClick={() => console.log('clicked')}
         icon="share"
       >
@@ -131,7 +131,7 @@ export const Secondary: Story = {
       </Button>
       <Button
 
-        color="secondary"
+        colorLight="secondary"
         isLoading={true}
         onClick={() => console.log('clicked')}
         icon="share"
@@ -140,7 +140,7 @@ export const Secondary: Story = {
       </Button>
       <Button
 
-        color="secondary"
+        colorLight="secondary"
         disabled={true}
         onClick={() => console.log('clicked')}
         icon="share"
@@ -149,20 +149,20 @@ export const Secondary: Story = {
       </Button>
       <Button
 
-        color="secondary"
+        colorLight="secondary"
         onClick={() => console.log('clicked')}
         icon="h1"
       />
       <Button
 
-        color="secondary"
+        colorLight="secondary"
         isLoading={true}
         onClick={() => console.log('clicked')}
         icon="h1"
       />
       <Button
 
-        color="secondary"
+        colorLight="secondary"
         disabled={true}
         onClick={() => console.log('clicked')}
         icon="h1"
@@ -174,25 +174,25 @@ export const Secondary: Story = {
 export const Upgrade: Story = {
   render: () => (
     <div className="flex grow-0 flex-wrap gap-4">
-      <Button color="upgrade" onClick={() => console.log('clicked')}>
+      <Button colorLight="upgrade" onClick={() => console.log('clicked')}>
         Upgrade
       </Button>
       <Button
-        color="upgrade"
+        colorLight="upgrade"
         isLoading={true}
         onClick={() => console.log('clicked')}
       >
         Upgrade
       </Button>
       <Button
-        color="upgrade"
+        colorLight="upgrade"
         disabled={true}
         onClick={() => console.log('clicked')}
       >
         Upgrade
       </Button>
       <Button
-        color="upgrade"
+        colorLight="upgrade"
         onClick={() => console.log('clicked')}
         icon="share"
         iconPosition="start"
@@ -200,14 +200,14 @@ export const Upgrade: Story = {
         Upgrade
       </Button>
       <Button
-        color="upgrade"
+        colorLight="upgrade"
         onClick={() => console.log('clicked')}
         icon="share"
       >
         Upgrade
       </Button>
       <Button
-        color="upgrade"
+        colorLight="upgrade"
         isLoading={true}
         onClick={() => console.log('clicked')}
         icon="share"
@@ -215,7 +215,7 @@ export const Upgrade: Story = {
         Upgrade
       </Button>
       <Button
-        color="upgrade"
+        colorLight="upgrade"
         disabled={true}
         onClick={() => console.log('clicked')}
         icon="share"
@@ -223,18 +223,18 @@ export const Upgrade: Story = {
         Upgrade
       </Button>
       <Button
-        color="upgrade"
+        colorLight="upgrade"
         onClick={() => console.log('clicked')}
         icon="h1"
       />
       <Button
-        color="upgrade"
+        colorLight="upgrade"
         isLoading={true}
         onClick={() => console.log('clicked')}
         icon="h1"
       />
       <Button
-        color="upgrade"
+        colorLight="upgrade"
         disabled={true}
         onClick={() => console.log('clicked')}
         icon="h1"
@@ -246,25 +246,25 @@ export const Upgrade: Story = {
 export const Danger: Story = {
   render: () => (
     <div className="flex grow-0 flex-wrap gap-4">
-      <Button color="danger" onClick={() => console.log('clicked')}>
+      <Button colorLight="danger" onClick={() => console.log('clicked')}>
         Delete
       </Button>
       <Button
-        color="danger"
+        colorLight="danger"
         isLoading={true}
         onClick={() => console.log('clicked')}
       >
         Delete
       </Button>
       <Button
-        color="danger"
+        colorLight="danger"
         disabled={true}
         onClick={() => console.log('clicked')}
       >
         Delete
       </Button>
       <Button
-        color="danger"
+        colorLight="danger"
         onClick={() => console.log('clicked')}
         icon="share"
         iconPosition="start"
@@ -272,14 +272,14 @@ export const Danger: Story = {
         Delete
       </Button>
       <Button
-        color="danger"
+        colorLight="danger"
         onClick={() => console.log('clicked')}
         icon="share"
       >
         Delete
       </Button>
       <Button
-        color="danger"
+        colorLight="danger"
         isLoading={true}
         onClick={() => console.log('clicked')}
         icon="share"
@@ -287,7 +287,7 @@ export const Danger: Story = {
         Delete
       </Button>
       <Button
-        color="danger"
+        colorLight="danger"
         disabled={true}
         onClick={() => console.log('clicked')}
         icon="share"
@@ -295,18 +295,18 @@ export const Danger: Story = {
         Delete
       </Button>
       <Button
-        color="danger"
+        colorLight="danger"
         onClick={() => console.log('clicked')}
         icon="h1"
       />
       <Button
-        color="danger"
+        colorLight="danger"
         isLoading={true}
         onClick={() => console.log('clicked')}
         icon="h1"
       />
       <Button
-        color="danger"
+        colorLight="danger"
         disabled={true}
         onClick={() => console.log('clicked')}
         icon="h1"

@@ -1,0 +1,11 @@
+html,
+body {
+  background-color: var(--color-pca-white);    
+}
+
+@media (prefers-color-scheme: dark) {
+  html,
+  body {
+    background-color: var(--color-pca-grey-900);
+  }
+}

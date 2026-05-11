@@ -17,6 +17,6 @@ export const Toggle: React.FC<ToggleProps> = ({
   );
 
   return (
-    <Button color="secondary" className={buttonClasses} aria-pressed={isActive} {...props} />
+    <Button colorLight="secondary" className={buttonClasses} aria-pressed={isActive} {...props} />
   );
 };

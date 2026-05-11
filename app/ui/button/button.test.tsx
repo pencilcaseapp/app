@@ -48,14 +48,28 @@ describe('Button', () => {
     expect(anchor).toHaveAttribute('href', 'https://example.com');
   });
 
-  describe('colors', () => {
+  describe('light colors', () => {
     test.each<[ButtonColor, string]>([
       ['primary', 'bg-pca-grey-900'],
       ['secondary', 'bg-transparent'],
       ['upgrade', 'bg-pca-yellow-500'],
       ['danger', 'bg-pca-red-500'],
     ])('renders %s color with expected class', (color, expectedClass) => {
-      const { container } = render(<Button color={color}>{color}</Button>);
+      const { container } = render(<Button colorLight={color}>{color}</Button>);
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass(expectedClass);
+      expect(container).toMatchSnapshot();
+    });
+  });
+
+  describe('dark colors', () => {
+    test.each<[ButtonColor, string]>([
+      ['primary', 'dark:text-pca-grey-900'],
+      ['secondary', 'dark:text-pca-white'],
+      ['upgrade', 'dark:text-pca-grey-900'],
+      ['danger', 'dark:text-pca-white'],
+    ])('renders %s color with expected class', (color, expectedClass) => {
+      const { container } = render(<Button colorDark={color}>{color}</Button>);
       const button = screen.getByRole('button');
       expect(button).toHaveClass(expectedClass);
       expect(container).toMatchSnapshot();

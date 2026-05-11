@@ -12,7 +12,8 @@ export type ButtonProps<C extends React.ElementType>
     C,
     {
       isLoading?: boolean;
-      color?: ButtonColor;
+      colorLight?: ButtonColor;
+      colorDark?: ButtonColor;
       disabled?: boolean;
       iconPosition?: 'start' | 'end';
       icon?: IconName;
@@ -27,7 +28,8 @@ export function Button<C extends React.ElementType = 'button'>(
     children,
     isLoading,
     disabled,
-    color = 'primary',
+    colorLight = 'primary',
+    colorDark,
     icon,
     iconPosition = 'end',
     className,
@@ -40,28 +42,44 @@ export function Button<C extends React.ElementType = 'button'>(
      * Filled Variants
      */
   const filledClasses = classNames([
-    'transition-colors duration-300 ease-in-out h-9',
+    'transition-all duration-300 ease-in-out h-9',
     (disabled || isLoading)
     && 'pointer-events-none',
   ]);
 
-  const primaryFilledClasses = classNames([
+  const primaryLightFilledClasses = classNames([
     filledClasses,
-    'text-pca-white dark:text-pca-grey-900 ',
-    disabled && 'bg-pca-grey-300 dark:bg-pca-grey-800 dark:text-pca-grey-700! focus:outline-hidden',
+    'text-pca-white',
+    disabled && 'bg-pca-grey-300 focus:outline-hidden',
     !disabled
-    && 'bg-pca-grey-900 dark:bg-pca-white hover:bg-pca-grey-800 dark:hover:bg-pca-grey-300 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300',
+    && 'bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300',
   ]);
 
-  const secondaryFilledClasses = classNames([
+  const primaryDarkFilledClasses = classNames([
     filledClasses,
-    'text-pca-grey-900 dark:text-pca-white',
-    disabled && 'text-pca-grey-300! dark:text-pca-grey-700! focus:outline-hidden',
+    'dark:text-pca-grey-900',
+    disabled && 'dark:bg-pca-grey-800 dark:text-pca-grey-700! dark:focus:outline-hidden',
     !disabled
-    && 'bg-transparent dark:bg-transparent hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:focus:ring-pca-grey-700',
+    && 'dark:bg-pca-white dark:hover:bg-pca-grey-300 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-300',
   ]);
 
-  const upgradeFilledClasses = classNames([
+  const secondaryLightFilledClasses = classNames([
+    filledClasses,
+    'text-pca-grey-900',
+    disabled && 'text-pca-grey-300! focus:outline-hidden',
+    !disabled
+    && 'bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300',
+  ]);
+
+  const secondaryDarkFilledClasses = classNames([
+    filledClasses,
+    'dark:text-pca-white',
+    disabled && 'dark:text-pca-grey-700! dark:focus:outline-hidden',
+    !disabled
+    && 'dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700',
+  ]);
+
+  const upgradeLightFilledClasses = classNames([
     filledClasses,
     'text-pca-grey-900',
     disabled && 'bg-pca-yellow-300/50 text-pca-grey-300! focus:outline-hidden',
@@ -69,19 +87,46 @@ export function Button<C extends React.ElementType = 'button'>(
     && 'bg-pca-yellow-500 hover:bg-pca-yellow-700 focus:outline-hidden focus:ring-2 focus:ring-pca-yellow-300',
   ]);
 
-  const dangerFilledClasses = classNames([
+  const upgradeDarkFilledClasses = classNames([
+    filledClasses,
+    'dark:text-pca-grey-900',
+    disabled && 'dark:bg-pca-yellow-300/50 dark:text-pca-grey-300! dark:focus:outline-hidden',
+    !disabled
+    && 'dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-yellow-300',
+  ]);
+
+  const dangerLightFilledClasses = classNames([
     filledClasses,
     'text-pca-white',
     disabled && 'bg-pca-red-300/50 text-pca-grey-300! focus:outline-hidden',
     !disabled
-    && 'bg-pca-red-500 hover:bg-pca-red-700 focus:outline-hidden focus:ring-2 focus:ring-pca-red-300 dark:focus:ring-pca-red-700',
+    && 'bg-pca-red-500 hover:bg-pca-red-700 focus:outline-hidden focus:ring-2 focus:ring-pca-red-300',
+  ]);
+
+  const dangerDarkFilledClasses = classNames([
+    filledClasses,
+    'dark:text-pca-white',
+    disabled && 'dark:bg-pca-red-300/50 dark:text-pca-grey-300! dark:focus:outline-hidden',
+    !disabled
+    && 'dark:bg-pca-red-500 dark:hover:bg-pca-red-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-red-300',
   ]);
 
   const colorClasses = classNames([
-    color === 'primary' && primaryFilledClasses,
-    color === 'secondary' && secondaryFilledClasses,
-    color === 'upgrade' && upgradeFilledClasses,
-    color === 'danger' && dangerFilledClasses,
+    colorLight === 'primary' && primaryLightFilledClasses,
+    !colorDark && colorLight === 'primary' && primaryDarkFilledClasses,
+    colorDark === 'primary' && primaryDarkFilledClasses,
+
+    colorLight === 'secondary' && secondaryLightFilledClasses,
+    !colorDark && colorLight === 'secondary' && secondaryDarkFilledClasses,
+    colorDark === 'secondary' && secondaryDarkFilledClasses,
+
+    colorLight === 'upgrade' && upgradeLightFilledClasses,
+    !colorDark && colorLight === 'upgrade' && upgradeDarkFilledClasses,
+    colorDark === 'upgrade' && upgradeDarkFilledClasses,
+
+    colorLight === 'danger' && dangerLightFilledClasses,
+    !colorDark && colorLight === 'danger' && dangerDarkFilledClasses,
+    colorDark === 'danger' && dangerDarkFilledClasses,
   ]);
 
   const baseShapeClasses = classNames([
@@ -98,7 +143,7 @@ export function Button<C extends React.ElementType = 'button'>(
   const classes = classNames([
     'relative overflow-hidden',
     'flex items-center justify-center',
-    'transition-colors duration-200 ease-in-out',
+    'transition-all duration-300 ease-in-out',
     'gap-2',
     filledClasses,
     isOnlyIcon ? iconOnlyClasses : baseShapeClasses,

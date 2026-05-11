@@ -15,7 +15,7 @@ export default function () {
         We’ll handle the magic (link) for you …
       </Typography>
       <TextField id="email" type="email" name="email" placeholder="e.g. your@example.com" label="E-Mail" className="mb-6" />
-      <Button color="primary" className="mb-10 w-full">Continue</Button>
+      <Button colorLight="primary" colorDark="upgrade" className="mb-10 w-full">Continue</Button>
       <Typography variant="bodyTiny" textColorLight="grey-800" textColorDark="grey-300" className="text-center">
         By continuing, you acknowledge that you understand
         and agree to the
