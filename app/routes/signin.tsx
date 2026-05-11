@@ -1,11 +1,38 @@
 import { Typography } from '~/ui/typography/typography';
-import { Button } from '~/ui/button/button';
 import { Link } from '~/ui/link/link';
-import { TextField } from '~/ui/text-field/text-field';
+import type { Route } from './+types/signin';
+import { z } from 'zod';
+import { useAppForm } from '~/hooks/use-app-form';
+import { ControlledForm } from '~/components/controlled-form/controlled-form';
+import { validateForm } from '~/utils/form';
+import { href, redirect } from 'react-router';
 
-export default function () {
+const formSchema = z.object({
+  email: z.email(),
+});
+
+export async function action({ request }: Route.ActionArgs) {
+  const form = await validateForm(request, formSchema);
+
+  if (!form.ok) {
+    return form.formState;
+  }
+
+  return redirect(href('/home'));
+}
+
+export default function SignIn() {
+  const form = useAppForm({
+    defaultValues: {
+      email: '',
+    },
+    validators: {
+      onBlur: formSchema,
+    },
+  });
+
   return (
-    <>
+    <ControlledForm form={form}>
       <title>Sign In or Sign Up</title>
       <Typography variant="heading2" textColorLight="black" textColorDark="white" className="mb-3 text-center">
         Sign In or Sign Up
@@ -17,8 +44,25 @@ export default function () {
         <br />
         We’ll handle the magic (link) for you …
       </Typography>
-      <TextField id="email" type="email" name="email" placeholder="e.g. your@example.com" label="E-Mail" className="mb-6" />
-      <Button colorLight="primary" colorDark="upgrade" className="mb-10 w-full">Continue</Button>
+      <form.AppField name="email">
+        {field => (
+          <field.TextField
+            type="email"
+            placeholder="e.g. your@example.com"
+            label="E-Mail"
+            className="mb-6"
+          />
+        )}
+      </form.AppField>
+
+      <form.SubmitButton
+        colorLight="primary"
+        colorDark="upgrade"
+        className="mb-10 w-full"
+      >
+        Continue
+      </form.SubmitButton>
+
       <Typography variant="bodyTiny" textColorLight="grey-800" textColorDark="grey-300" className="text-center">
         By continuing, you acknowledge that you understand
         and agree to the
@@ -30,6 +74,6 @@ export default function () {
         <Link variant="bodyTiny" fontWeight="regular" textColorLight="grey-800" textColorDark="grey-300" href="https://example.com/privacy" target="_blank">Privacy Policy</Link>
         .
       </Typography>
-    </>
+    </ControlledForm>
   );
 }
