@@ -48,7 +48,6 @@ export function Button<C extends React.ElementType = 'button'>(
   ]);
 
   const primaryLightFilledClasses = classNames([
-    filledClasses,
     'text-pca-white',
     disabled && 'bg-pca-grey-300 focus:outline-hidden',
     !disabled
@@ -56,7 +55,6 @@ export function Button<C extends React.ElementType = 'button'>(
   ]);
 
   const primaryDarkFilledClasses = classNames([
-    filledClasses,
     'dark:text-pca-grey-900',
     disabled && 'dark:bg-pca-grey-800 dark:text-pca-grey-700! dark:focus:outline-hidden',
     !disabled
@@ -64,7 +62,6 @@ export function Button<C extends React.ElementType = 'button'>(
   ]);
 
   const secondaryLightFilledClasses = classNames([
-    filledClasses,
     'text-pca-grey-900',
     disabled && 'text-pca-grey-300! focus:outline-hidden',
     !disabled
@@ -72,7 +69,6 @@ export function Button<C extends React.ElementType = 'button'>(
   ]);
 
   const secondaryDarkFilledClasses = classNames([
-    filledClasses,
     'dark:text-pca-white',
     disabled && 'dark:text-pca-grey-700! dark:focus:outline-hidden',
     !disabled
@@ -80,7 +76,6 @@ export function Button<C extends React.ElementType = 'button'>(
   ]);
 
   const upgradeLightFilledClasses = classNames([
-    filledClasses,
     'text-pca-grey-900',
     disabled && 'bg-pca-yellow-300/50 text-pca-grey-300! focus:outline-hidden',
     !disabled
@@ -88,7 +83,6 @@ export function Button<C extends React.ElementType = 'button'>(
   ]);
 
   const upgradeDarkFilledClasses = classNames([
-    filledClasses,
     'dark:text-pca-grey-900',
     disabled && 'dark:bg-pca-yellow-300/50 dark:text-pca-grey-300! dark:focus:outline-hidden',
     !disabled
@@ -96,7 +90,6 @@ export function Button<C extends React.ElementType = 'button'>(
   ]);
 
   const dangerLightFilledClasses = classNames([
-    filledClasses,
     'text-pca-white',
     disabled && 'bg-pca-red-300/50 text-pca-grey-300! focus:outline-hidden',
     !disabled
@@ -104,7 +97,6 @@ export function Button<C extends React.ElementType = 'button'>(
   ]);
 
   const dangerDarkFilledClasses = classNames([
-    filledClasses,
     'dark:text-pca-white',
     disabled && 'dark:bg-pca-red-300/50 dark:text-pca-grey-300! dark:focus:outline-hidden',
     !disabled
@@ -143,7 +135,6 @@ export function Button<C extends React.ElementType = 'button'>(
   const classes = classNames([
     'relative overflow-hidden',
     'flex items-center justify-center',
-    'transition-all duration-300 ease-in-out',
     'gap-2',
     filledClasses,
     isOnlyIcon ? iconOnlyClasses : baseShapeClasses,
