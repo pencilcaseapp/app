@@ -87,6 +87,9 @@
   --animate-scale-in: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-scale-out: scaleOut 0.15s cubic-bezier(0.4, 0, 1, 1);
 
+  --animate-accordion-down: accordionDown 0.2s ease-out;
+  --animate-accordion-up: accordionUp 0.2s ease-out;
+
   @keyframes slideDownAndFadeIn {
     from {
       opacity: 0;
@@ -146,6 +149,27 @@
     to {
       opacity: 0.3;
       transform: scale(0.9);
+    }
+  }
+
+  @keyframes accordionDown {
+    from {
+      height: 0;
+      opacity: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+      opacity: 1;
+    }
+  }
+  @keyframes accordionUp {
+    from {
+      height: var(--radix-accordion-content-height);
+      opacity: 1;
+    }
+    to {
+      height: 0;
+      opacity: 0;
     }
   }
 
