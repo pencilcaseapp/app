@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DocumentItem > matches snapshot 1`] = `
+<div>
+  <div
+    class="transition-colors group h-9 flex items-center justify-between gap-2 pr-0.5 rounded-xl cursor-pointer not-has-aria-[current=page]:hover:bg-pca-grey-100 dark:not-has-aria-[current=page]:hover:bg-pca-grey-800 not-has-aria-[current=page]:has-data-[state=open]:bg-pca-grey-100 dark:not-has-aria-[current=page]:has-data-[state=open]:bg-pca-grey-800 not-has-aria-[current=page]:has-[:focus-visible]:bg-pca-grey-200 dark:not-has-aria-[current=page]:has-[:focus-visible]:bg-pca-grey-800 not-has-aria-[current=page]:has-[:active]:bg-pca-grey-200 dark:not-has-aria-[current=page]:has-[:active]:bg-pca-grey-800 has-aria-[current=page]:bg-pca-yellow-500 dark:has-aria-[current=page]:bg-pca-yellow-500 dark:has-aria-[current=page]:text-pca-grey-900 has-[[aria-current=page]:focus-visible]:bg-pca-yellow-700 dark:has-[[aria-current=page]:focus-visible]:bg-pca-yellow-700 has-[[aria-current=page]:active]:bg-pca-yellow-700 dark:has-[[aria-current=page]:active]:bg-pca-yellow-700 has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50"
+  >
+    <a
+      class="flex items-center gap-2 min-w-0 flex-1 pl-3 py-1 focus:outline-none"
+      href="/documents/1"
+    >
+      <span
+        class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white block truncate min-w-0 flex-1 dark:group-has-aria-[current=page]:text-pca-grey-900!"
+        title="My document"
+      >
+        My document
+      </span>
+    </a>
+    <div
+      class="shrink-0 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:has-data-[state=open]:opacity-100 transition-opacity group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700 group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700! dark:group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700! group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button]:text-pca-grey-900!"
+    >
+      <span
+        data-testid="action-area"
+      >
+        …
+      </span>
+    </div>
+  </div>
+</div>
+`;

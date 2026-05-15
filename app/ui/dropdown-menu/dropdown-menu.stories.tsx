@@ -75,7 +75,7 @@ export const WithSurroundingContent: Story = {
                 <DropdownMenuItem as="button" onClick={action('clicked')} icon="share">
                   Share
                 </DropdownMenuItem>
-                <DropdownMenuItem icon="folder">
+                <DropdownMenuItem icon="space">
                   Move to folder
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
