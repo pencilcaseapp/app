@@ -16,6 +16,7 @@ export const ControlledSubmitButton: React.FC<ControlledSubmitButtonProps>
             type="submit"
             disabled={isSubmitting}
             isLoading={isSubmitting}
+            aria-label={isSubmitting ? 'Submitting' : undefined}
             {...props}
           />
         )}
