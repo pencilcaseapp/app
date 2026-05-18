@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, expect, test } from 'vitest';
+import { expect, test } from 'vitest';
 import { formHook } from '~/hooks/use-app-form';
 import { ControlledSubmitButton } from './controlled-submit-button';
 import { userEvent } from '@testing-library/user-event';
@@ -27,25 +27,23 @@ const TestForm: React.FC = () => {
   );
 };
 
-describe('ControlledSubmitButton', () => {
-  test('matches snapshot', () => {
-    const { container } = render(
-      <TestForm />,
-    );
+test('matches snapshot', () => {
+  const { container } = render(
+    <TestForm />,
+  );
 
-    expect(container).toMatchSnapshot();
-  });
+  expect(container).toMatchSnapshot();
+});
 
-  test('is disabled and shows loading state when submitting', async () => {
-    const { getByRole } = render(
-      <TestForm />,
-    );
+test('is disabled and shows loading state when submitting', async () => {
+  const { getByRole } = render(
+    <TestForm />,
+  );
 
-    const button = getByRole('button', { name: 'Submit' });
-    await userEvent.click(button);
+  const button = getByRole('button', { name: 'Submit' });
+  await userEvent.click(button);
 
-    expect(button).toBeDisabled();
-    expect(button).toHaveAttribute('aria-label', 'Submitting');
-    expect(getByRole('status', { name: 'loading' })).toBeInTheDocument();
-  });
+  expect(button).toBeDisabled();
+  expect(button).toHaveAttribute('aria-label', 'Submitting');
+  expect(getByRole('status', { name: 'loading' })).toBeInTheDocument();
 });

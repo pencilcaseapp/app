@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ControlledTextField > matches snapshot 1`] = `
+exports[`matches snapshot 1`] = `
 <div>
   <div
     class="flex flex-col gap-2 group"

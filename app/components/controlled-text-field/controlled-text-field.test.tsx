@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, expect, test } from 'vitest';
+import { expect, test } from 'vitest';
 import z from 'zod';
 import { formHook } from '~/hooks/use-app-form';
 import { userEvent } from '@testing-library/user-event';
@@ -29,23 +29,21 @@ const TestForm: React.FC = () => {
   );
 };
 
-describe('ControlledTextField', () => {
-  test('matches snapshot', () => {
-    const { container } = render(
-      <TestForm />,
-    );
+test('matches snapshot', () => {
+  const { container } = render(
+    <TestForm />,
+  );
 
-    expect(container).toMatchSnapshot();
-  });
+  expect(container).toMatchSnapshot();
+});
 
-  test('error message', async () => {
-    const { getByLabelText, getByText } = render(
-      <TestForm />,
-    );
+test('error message', async () => {
+  const { getByLabelText, getByText } = render(
+    <TestForm />,
+  );
 
-    await userEvent.type(getByLabelText('Email'), 'invalid-email');
-    await userEvent.tab();
+  await userEvent.type(getByLabelText('Email'), 'invalid-email');
+  await userEvent.tab();
 
-    expect(getByText('Invalid email address')).toBeInTheDocument();
-  });
+  expect(getByText('Invalid email address')).toBeInTheDocument();
 });

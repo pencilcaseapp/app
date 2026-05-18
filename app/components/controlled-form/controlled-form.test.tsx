@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, expect, test } from 'vitest';
+import { expect, test } from 'vitest';
 import z from 'zod';
 import { useAppForm } from '~/hooks/use-app-form';
 import { userEvent } from '@testing-library/user-event';
@@ -10,90 +10,88 @@ const schema = z.object({
   email: z.email(),
 });
 
-describe('ControlledForm', () => {
-  test('submits the form successfully', async () => {
-    const Stub = createRoutesStub([
-      {
-        path: '/',
-        action: async () => ({ ok: true }),
-        Component: () => {
-          const actionData = useActionData();
-          const form = useAppForm({
-            defaultValues: {
-              email: '',
-            },
-            validators: {
-              onBlur: schema,
-            },
-          });
+test('submits the form successfully', async () => {
+  const Stub = createRoutesStub([
+    {
+      path: '/',
+      action: async () => ({ ok: true }),
+      Component: () => {
+        const actionData = useActionData();
+        const form = useAppForm({
+          defaultValues: {
+            email: '',
+          },
+          validators: {
+            onBlur: schema,
+          },
+        });
 
-          return (
-            <ControlledForm form={form}>
-              <form.AppField name="email">
-                {field => (
-                  <field.TextField label="Email" />
-                )}
-              </form.AppField>
-              <button type="submit">Submit</button>
-              {actionData?.ok === true && (
-                <div>Form submitted successfully</div>
+        return (
+          <ControlledForm form={form}>
+            <form.AppField name="email">
+              {field => (
+                <field.TextField label="Email" />
               )}
-            </ControlledForm>
-          );
-        },
+            </form.AppField>
+            <button type="submit">Submit</button>
+            {actionData?.ok === true && (
+              <div>Form submitted successfully</div>
+            )}
+          </ControlledForm>
+        );
       },
-    ]);
+    },
+  ]);
 
-    const { getByLabelText, getByText } = render(
-      <Stub />,
-    );
+  const { getByLabelText, getByText } = render(
+    <Stub />,
+  );
 
-    await userEvent.type(getByLabelText('Email'), 'john.doe@example.com');
-    await userEvent.click(getByText('Submit'));
+  await userEvent.type(getByLabelText('Email'), 'john.doe@example.com');
+  await userEvent.click(getByText('Submit'));
 
-    expect(getByText('Form submitted successfully')).toBeInTheDocument();
-  });
+  expect(getByText('Form submitted successfully')).toBeInTheDocument();
+});
 
-  test('shows error message on submit', async () => {
-    const Stub = createRoutesStub([
-      {
-        path: '/',
-        action: async () => ({ ok: true }),
-        Component: () => {
-          const actionData = useActionData();
-          const form = useAppForm({
-            defaultValues: {
-              email: '',
-            },
-            validators: {
-              onBlur: schema,
-            },
-          });
+test('shows error message on submit', async () => {
+  const Stub = createRoutesStub([
+    {
+      path: '/',
+      action: async () => ({ ok: true }),
+      Component: () => {
+        const actionData = useActionData();
+        const form = useAppForm({
+          defaultValues: {
+            email: '',
+          },
+          validators: {
+            onBlur: schema,
+          },
+        });
 
-          return (
-            <ControlledForm form={form}>
-              <form.AppField name="email">
-                {field => (
-                  <field.TextField label="Email" />
-                )}
-              </form.AppField>
-              <button type="submit">Submit</button>
-              {actionData?.ok === true && (
-                <div>Form submitted successfully</div>
+        return (
+          <ControlledForm form={form}>
+            <form.AppField name="email">
+              {field => (
+                <field.TextField label="Email" />
               )}
-            </ControlledForm>
-          );
-        },
+            </form.AppField>
+            <button type="submit">Submit</button>
+            {actionData?.ok === true && (
+              <div>Form submitted successfully</div>
+            )}
+          </ControlledForm>
+        );
       },
-    ]);
+    },
+  ]);
 
-    const { getByLabelText, getByText } = render(
-      <Stub />,
-    );
+  const { getByLabelText, getByText } = render(
+    <Stub />,
+  );
 
-    await userEvent.type(getByLabelText('Email'), 'invalid-email');
-    await userEvent.click(getByText('Submit'));
+  await userEvent.type(getByLabelText('Email'), 'invalid-email');
+  await userEvent.click(getByText('Submit'));
 
-    expect(getByText('Invalid email address')).toBeInTheDocument();
-  });
+  expect(getByText('Invalid email address')).toBeInTheDocument();
 });
