@@ -6,6 +6,7 @@ import { useAppForm } from '~/hooks/use-app-form';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { validateForm } from '~/utils/form';
 import { href, redirect } from 'react-router';
+import { commonCopies } from '~/common-copies';
 
 const formSchema = z.object({
   email: z.email(),
@@ -60,7 +61,7 @@ export default function SignIn() {
         colorDark="upgrade"
         className="mb-10 w-full"
       >
-        Continue
+        {commonCopies.actions.continue}
       </form.SubmitButton>
 
       <Typography variant="bodyTiny" textColorLight="grey-800" textColorDark="grey-300" className="text-center">
