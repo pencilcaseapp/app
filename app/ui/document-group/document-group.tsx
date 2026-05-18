@@ -6,7 +6,7 @@ import { Typography } from '../typography/typography';
 import classNames from 'classnames';
 import { useMedia } from 'react-use';
 
-export type SpaceItemProps = {
+export type DocumentGroupProps = {
   title: string;
   icon: IconName;
   iconTitle?: string;
@@ -14,7 +14,7 @@ export type SpaceItemProps = {
   actionArea?: React.ReactNode;
 } & PropsWithChildren;
 
-export const SpaceItem: FC<SpaceItemProps>
+export const DocumentGroup: FC<DocumentGroupProps>
   = ({ title, value, children, icon, actionArea }) => {
     const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
 
@@ -23,12 +23,11 @@ export const SpaceItem: FC<SpaceItemProps>
         <AccordionHeader asChild>
           <div className={classNames([
             'group flex items-center gap-2 rounded-xl transition-colors data-[state=open]:bg-pca-grey-100 dark:data-[state=open]:bg-pca-grey-800 hover:bg-pca-grey-100 dark:hover:bg-pca-grey-800 has-data-[state=open]:bg-pca-grey-100 dark:has-data-[state=open]:bg-pca-grey-800',
-
           ])}
           >
             <AccordionTrigger className={classNames([
-              'flex items-center gap-2 px-2 min-w-0 h-9 flex-1 py-1 cursor-pointer focus-visible:outline-none rounded-xl',
-              'focus-visible:bg-pca-grey-200 dark:focus-visible:ring-0 active:bg-pca-grey-200 dark:active:ring-0 dark:focus-visible:bg-pca-grey-800',
+              'flex items-center gap-2 min-w-0 h-9 flex-1 pl-2 pr-0.5 py-1 cursor-pointer focus-visible:outline-none rounded-xl',
+              'focus-visible:bg-pca-grey-200 dark:focus-visible:ring-0 active:bg-pca-grey-200 dark:active:bg-pca-grey-800 dark:active:ring-0 dark:focus-visible:bg-pca-grey-800',
             ])}
             >
               <Icon icon={icon} />

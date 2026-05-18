@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Root as AccordionRoot } from '@radix-ui/react-accordion';
 import { action } from 'storybook/actions';
-import { SpaceItem } from './space-item';
+import { DocumentGroup } from './document-group';
 import { Typography } from '../typography/typography';
 import { DropdownMenu } from '../dropdown-menu/dropdown-menu';
 import { DropdownMenuTrigger } from '../dropdown-menu/dropdown-menu-trigger';
@@ -14,17 +14,17 @@ import { MemoryRouter } from 'react-router';
 import { NavLink } from 'react-router';
 
 /**
- * `SpaceItem` is a collapsible section built on top of
+ * `DocumentGroup` is a collapsible section built on top of
  * Radix UI's `Accordion`. Each item has an icon, a title,
  * an optional `actionArea` rendered next to the title,
  * and a body that expands/collapses on click.
  *
- * Because `SpaceItem` is an accordion item, it must be
+ * Because `DocumentGroup` is an accordion item, it must be
  * rendered inside an `Accordion.Root`.
  */
-const meta: Meta<typeof SpaceItem> = {
-  title: 'Navigation/SpaceItem',
-  component: SpaceItem,
+const meta: Meta<typeof DocumentGroup> = {
+  title: 'Navigation/DocumentGroup',
+  component: DocumentGroup,
   parameters: {
     layout: 'fullscreen',
   },
@@ -40,7 +40,7 @@ const meta: Meta<typeof SpaceItem> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof SpaceItem>;
+type Story = StoryObj<typeof DocumentGroup>;
 
 export const Default: Story = {
   args: {
@@ -92,14 +92,14 @@ export const WithActionArea: Story = {
 };
 
 /**
- * Multiple `SpaceItem`s can be composed inside the same
+ * Multiple `DocumentGroup`s can be composed inside the same
  * `Accordion.Root`. With `type="multiple"`, several items
  * can be expanded at the same time.
  */
 export const MultipleItems: Story = {
   render: () => (
     <>
-      <SpaceItem title="All Documents" icon="space" value="all-documents">
+      <DocumentGroup title="All Documents" icon="space" value="all-documents">
         <DocumentItem
           as={NavLink}
           to="/documents/1"
@@ -173,22 +173,22 @@ export const MultipleItems: Story = {
           )}
         />
 
-      </SpaceItem>
-      <SpaceItem title="Personal" icon="space" value="personal">
+      </DocumentGroup>
+      <DocumentGroup title="Personal" icon="space" value="personal">
         <Typography variant="bodySmall">
           Your private documents.
         </Typography>
-      </SpaceItem>
-      <SpaceItem title="Shared" icon="share" value="shared">
+      </DocumentGroup>
+      <DocumentGroup title="Shared" icon="share" value="shared">
         <Typography variant="bodySmall">
           Documents shared with your collaborators.
         </Typography>
-      </SpaceItem>
-      <SpaceItem title="Trash" icon="trash" value="trash">
+      </DocumentGroup>
+      <DocumentGroup title="Trash" icon="trash" value="trash">
         <Typography variant="bodySmall">
           Deleted documents are kept here for 30 days.
         </Typography>
-      </SpaceItem>
+      </DocumentGroup>
     </>
   ),
 };
