@@ -15,7 +15,7 @@ export type DocumentGroupProps = {
 } & PropsWithChildren;
 
 export const DocumentGroup: FC<DocumentGroupProps>
-  = ({ title, value, children, icon, actionArea }) => {
+  = ({ title, value, children, icon, actionArea, iconTitle }) => {
     const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
 
     return (
@@ -30,7 +30,7 @@ export const DocumentGroup: FC<DocumentGroupProps>
               'focus-visible:bg-pca-grey-200 dark:focus-visible:ring-0 active:bg-pca-grey-200 dark:active:bg-pca-grey-800 dark:active:ring-0 dark:focus-visible:bg-pca-grey-800',
             ])}
             >
-              <Icon icon={icon} />
+              <Icon icon={icon} title={iconTitle} />
               <Typography
                 variant="bodySmall"
                 as="span"
