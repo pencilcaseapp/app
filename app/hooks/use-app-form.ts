@@ -5,7 +5,7 @@ import { ControlledSubmitButton } from '~/components/controlled-submit-button/co
 import { ControlledTextField } from '~/components/controlled-text-field/controlled-text-field';
 import { fieldContext, formContext } from '~/contexts/form';
 
-const formHook = createFormHook({
+export const formHook = createFormHook({
   fieldContext,
   formContext,
   fieldComponents: {
