@@ -1,17 +1,27 @@
 import type { AnyFormApi } from '@tanstack/react-form';
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { Form } from 'react-router';
 
-type ControlledFormProps = {
+export type ControlledFormProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: AnyFormApi & { AppForm: any };
   children: ReactNode;
 };
 
-export function ControlledForm({ form, children }: ControlledFormProps) {
-  return (
-    <Form method="post" onSubmit={form.handleSubmit}>
-      <form.AppForm>{children}</form.AppForm>
-    </Form>
-  );
-}
+export const ControlledForm: React.FC<ControlledFormProps>
+  = ({ form, children }) => {
+    const formId = useId();
+    const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      form.handleSubmit({ formId });
+    };
+
+    return (
+      <Form id={formId} method="post" onSubmit={handleSubmit}>
+        <form.AppForm>
+          {children}
+        </form.AppForm>
+      </Form>
+    );
+  };

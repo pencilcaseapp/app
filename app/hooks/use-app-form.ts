@@ -1,9 +1,13 @@
 import { createFormHook, type FormAsyncValidateOrFn, type FormOptions, type FormValidateOrFn } from '@tanstack/react-form';
 import { mergeForm, useTransform } from '@tanstack/react-form-remix';
-import { useActionData } from 'react-router';
+import { useActionData, useSubmit } from 'react-router';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
 import { ControlledTextField } from '~/components/controlled-text-field/controlled-text-field';
 import { fieldContext, formContext } from '~/contexts/form';
+
+export interface FormMeta {
+  formId: string;
+}
 
 export const formHook = createFormHook({
   fieldContext,
@@ -28,7 +32,6 @@ export function useAppForm<
   TOnDynamic extends undefined | FormValidateOrFn<TFormData>,
   TOnDynamicAsync extends undefined | FormAsyncValidateOrFn<TFormData>,
   TOnServer extends undefined | FormAsyncValidateOrFn<TFormData>,
-  TSubmitMeta,
 >(
   props: FormOptions<
     TFormData,
@@ -42,10 +45,11 @@ export function useAppForm<
     TOnDynamic,
     TOnDynamicAsync,
     TOnServer,
-    TSubmitMeta
+    FormMeta
   >,
 ) {
   const actionData = useActionData();
+  const submit = useSubmit();
 
   return formHook.useAppForm({
     ...props,
@@ -53,12 +57,18 @@ export function useAppForm<
       baseForm => mergeForm(baseForm, actionData ?? {}),
       [actionData],
     ),
+    onSubmitMeta: {
+      formId: '',
+    },
     onSubmitInvalid() {
       const InvalidInput = document.querySelector(
         '[aria-invalid="true"]',
       ) as HTMLInputElement;
 
       InvalidInput?.focus();
+    },
+    async onSubmit({ meta }) {
+      await submit(document.getElementById(meta.formId) as HTMLFormElement);
     },
   });
 }
