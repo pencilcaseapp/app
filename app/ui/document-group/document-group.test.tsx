@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Root as AccordionRoot } from '@radix-ui/react-accordion';
-import { SpaceItem } from './space-item';
+import { DocumentGroup } from './document-group';
 
 function renderInAccordion(
   ui: React.ReactNode,
@@ -15,12 +15,12 @@ function renderInAccordion(
   );
 }
 
-describe('SpaceItem', () => {
+describe('DocumentGroup', () => {
   test('renders the title', () => {
     renderInAccordion(
-      <SpaceItem title="Personal" icon="space" value="personal">
+      <DocumentGroup title="Personal" icon="space" value="personal">
         body content
-      </SpaceItem>,
+      </DocumentGroup>,
     );
 
     expect(screen.getByText('Personal')).toBeInTheDocument();
@@ -28,9 +28,9 @@ describe('SpaceItem', () => {
 
   test('is collapsed by default', () => {
     renderInAccordion(
-      <SpaceItem title="Personal" icon="space" value="personal">
+      <DocumentGroup title="Personal" icon="space" value="personal">
         body content
-      </SpaceItem>,
+      </DocumentGroup>,
     );
 
     expect(
@@ -42,9 +42,9 @@ describe('SpaceItem', () => {
   test('expands when the trigger is clicked', async () => {
     const user = userEvent.setup();
     renderInAccordion(
-      <SpaceItem title="Personal" icon="space" value="personal">
+      <DocumentGroup title="Personal" icon="space" value="personal">
         body content
-      </SpaceItem>,
+      </DocumentGroup>,
     );
 
     await user.click(screen.getByRole('button', { name: 'Personal' }));
@@ -57,9 +57,9 @@ describe('SpaceItem', () => {
 
   test('renders expanded when its value is in the accordion defaultValue', () => {
     renderInAccordion(
-      <SpaceItem title="Personal" icon="space" value="personal">
+      <DocumentGroup title="Personal" icon="space" value="personal">
         body content
-      </SpaceItem>,
+      </DocumentGroup>,
       { defaultValue: ['personal'] },
     );
 
@@ -71,9 +71,9 @@ describe('SpaceItem', () => {
 
   test('renders an icon', () => {
     const { container } = renderInAccordion(
-      <SpaceItem title="Personal" icon="space" value="personal">
+      <DocumentGroup title="Personal" icon="space" value="personal">
         body
-      </SpaceItem>,
+      </DocumentGroup>,
     );
 
     expect(container.querySelector('svg')).toBeInTheDocument();
@@ -82,14 +82,14 @@ describe('SpaceItem', () => {
   describe('actionArea', () => {
     test('renders the actionArea when provided', () => {
       renderInAccordion(
-        <SpaceItem
+        <DocumentGroup
           title="Work"
           icon="space"
           value="work"
           actionArea={<span data-testid="action-area">Options</span>}
         >
           body
-        </SpaceItem>,
+        </DocumentGroup>,
       );
 
       expect(screen.getByTestId('action-area')).toBeInTheDocument();
@@ -97,9 +97,9 @@ describe('SpaceItem', () => {
 
     test('does not render an actionArea container when omitted', () => {
       renderInAccordion(
-        <SpaceItem title="Personal" icon="space" value="personal">
+        <DocumentGroup title="Personal" icon="space" value="personal">
           body
-        </SpaceItem>,
+        </DocumentGroup>,
       );
 
       // Only the AccordionTrigger button should exist.
@@ -108,14 +108,14 @@ describe('SpaceItem', () => {
 
     test('should match snapshot', () => {
       const { container } = renderInAccordion(
-        <SpaceItem
+        <DocumentGroup
           title="Work"
           icon="space"
           value="work"
           actionArea={<span data-testid="action-area">Options</span>}
         >
           body
-        </SpaceItem>,
+        </DocumentGroup>,
       );
       expect(container).toMatchSnapshot();
     });

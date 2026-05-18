@@ -1,0 +1,45 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`NavigationItem > matches snapshot 1`] = `
+<div>
+  <div
+    class="transition-colors group h-9 flex items-center justify-between gap-2 pl-2 pr-0.5 rounded-xl cursor-pointer has-aria-[current=page]:bg-pca-grey-200 dark:has-aria-[current=page]:bg-pca-grey-800 hover:bg-pca-grey-100 dark:hover:bg-pca-grey-800 has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50"
+  >
+    <a
+      class="flex items-center gap-2 min-w-0 flex-1 py-1 focus:outline-none"
+      href="/spaces/personal"
+    >
+      <svg
+        aria-hidden="true"
+        class=""
+        fill="transparent"
+        focusable="false"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12.3086 2.53125L13.584 4.125H21.5137V18.75H19.0957L19.2158 20.127L3.77441 21.4775L2.42383 6.03711L6.01367 5.72168V2.25H12.083L12.3086 2.53125ZM4.04883 7.40039L5.1377 19.8525L17.5908 18.7627L16.6533 8.05371L9.54492 8.67578L7.89844 7.06348L4.04883 7.40039ZM7.51367 5.59082L8.4541 5.50879L10.1006 7.12207L18.0166 6.42871L18.9639 17.25H20.0137V5.625H12.8623L12.6367 5.34375L11.3613 3.75H7.51367V5.59082Z"
+          fill="currentColor"
+        />
+      </svg>
+      <span
+        class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white block truncate min-w-0 flex-1"
+        title="Personal"
+      >
+        Personal
+      </span>
+    </a>
+    <div
+      class="shrink-0 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:has-data-[state=open]:opacity-100 transition-opacity"
+    >
+      <span
+        data-testid="action-area"
+      >
+        …
+      </span>
+    </div>
+  </div>
+</div>
+`;
