@@ -34,7 +34,6 @@ export async function validateForm<T extends z.ZodTypeAny>(
       };
     }
 
-    // Some other error occurred while validating your form
     throw e;
   }
 }
