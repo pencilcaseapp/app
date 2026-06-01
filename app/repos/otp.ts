@@ -24,6 +24,17 @@ export async function getOtp(id: string) {
   });
 }
 
+export async function getValidOtp(id: string) {
+  return db.query.otps.findFirst({
+    where: {
+      id,
+      expiresAt: {
+        gt: new Date(),
+      },
+    },
+  });
+}
+
 export async function expireOtp(id: string) {
   const response = await db.update(otps)
     .set({
