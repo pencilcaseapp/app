@@ -12,5 +12,12 @@ export function getConfigTest(): Config {
     db: {
       url: 'postgresql://postgres:postgres@localhost:5434/db',
     },
+
+    email: {
+      from: {
+        name: 'pencil case',
+        email: 'inbox@pencilcase.app',
+      },
+    },
   };
 }
