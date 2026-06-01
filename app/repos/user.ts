@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm';
+import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { users } from '~/db/schema';
 
@@ -18,6 +19,10 @@ export async function createUser(input: {
 }
 
 export async function getUser(id: string) {
+  if (!isUuid(id)) {
+    return undefined;
+  }
+
   return db.query.users.findFirst({
     where: {
       id,

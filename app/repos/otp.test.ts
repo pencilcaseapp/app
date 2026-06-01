@@ -54,6 +54,12 @@ describe('getOtp', () => {
 
     expect(otp).toBeUndefined();
   });
+
+  it('returns undefined if id is invalid', async () => {
+    const otp = await getOtp('invalid-id');
+
+    expect(otp).toBeUndefined();
+  });
 });
 
 describe('getValidOtp', () => {
@@ -69,6 +75,12 @@ describe('getValidOtp', () => {
     const userFixture = await createUserFixture();
     const otpFixture = await createExpiredOtpFixture(userFixture.id);
     const otp = await getValidOtp(otpFixture.id);
+
+    expect(otp).toBeUndefined();
+  });
+
+  it('returns undefined if id is invalid', async () => {
+    const otp = await getValidOtp('invalid-id');
 
     expect(otp).toBeUndefined();
   });

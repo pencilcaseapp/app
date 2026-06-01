@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm';
+import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { otps } from '~/db/schema';
 
@@ -17,6 +18,10 @@ export async function createOtp(input: {
 }
 
 export async function getOtp(id: string) {
+  if (!isUuid(id)) {
+    return undefined;
+  }
+
   return db.query.otps.findFirst({
     where: {
       id,
@@ -25,6 +30,10 @@ export async function getOtp(id: string) {
 }
 
 export async function getValidOtp(id: string) {
+  if (!isUuid(id)) {
+    return undefined;
+  }
+
   return db.query.otps.findFirst({
     where: {
       id,

@@ -37,6 +37,12 @@ describe('getUser', () => {
 
     expect(user).toBeUndefined();
   });
+
+  it('returns undefined if id is invalid', async () => {
+    const user = await getUser('invalid-id');
+
+    expect(user).toBeUndefined();
+  });
 });
 
 describe('getUserByEmail', () => {
