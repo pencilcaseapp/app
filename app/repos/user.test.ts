@@ -26,10 +26,10 @@ describe('createUser', () => {
 
 describe('getUser', () => {
   it('returns a user', async () => {
-    const fixture = await createUserFixture();
-    const user = await getUser(fixture.id);
+    const userFixture = await createUserFixture();
+    const user = await getUser(userFixture.id);
 
-    expect(user).toStrictEqual(fixture);
+    expect(user).toStrictEqual(userFixture);
   });
 
   it('returns undefined if user does not exist', async () => {
@@ -41,10 +41,10 @@ describe('getUser', () => {
 
 describe('getUserByEmail', () => {
   it('returns a user by email', async () => {
-    const fixture = await createUserFixture();
-    const user = await getUserByEmail(fixture.email);
+    const userFixture = await createUserFixture();
+    const user = await getUserByEmail(userFixture.email);
 
-    expect(user).toStrictEqual(fixture);
+    expect(user).toStrictEqual(userFixture);
   });
 
   it('returns undefined if user does not exist', async () => {
@@ -56,20 +56,17 @@ describe('getUserByEmail', () => {
 
 describe('updateUser', () => {
   it('updates single fields of a user', async () => {
-    const fixture = await createUserFixture();
+    const userFixture = await createUserFixture();
 
     const userInput = {
       email: faker.internet.email(),
     };
 
-    const user = await updateUser(fixture.id, userInput);
+    const user = await updateUser(userFixture.id, userInput);
 
     expect(user).toStrictEqual({
-      id: fixture.id,
+      ...userFixture,
       email: user.email,
-      name: fixture.name,
-      newsletter: fixture.newsletter,
-      createdAt: fixture.createdAt,
       updatedAt: expect.any(Date),
     });
   });
