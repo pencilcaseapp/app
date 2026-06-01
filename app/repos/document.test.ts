@@ -18,6 +18,7 @@ describe('createDocument', () => {
       content: null,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
+      userId: null,
     });
   });
 });
@@ -55,6 +56,7 @@ describe('updateDocument', () => {
       content: Buffer.from('Hello, World!'),
       createdAt: fixture.createdAt,
       updatedAt: expect.any(Date),
+      userId: null,
     });
   });
 });
