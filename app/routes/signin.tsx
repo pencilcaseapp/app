@@ -8,6 +8,8 @@ import { validateForm } from '~/utils/form';
 import { href, redirect } from 'react-router';
 import { commonCopies } from '~/common-copies';
 import { initMagicCode } from '~/services/auth';
+import { withSearchParams } from '~/utils/url';
+import { SearchParamAuth } from '~/constants/search-params';
 
 const formSchema = z.object({
   email: z.email(),
@@ -20,9 +22,20 @@ export async function action({ request }: Route.ActionArgs) {
     return form.formState;
   }
 
-  const { otp } = await initMagicCode(form.data.email);
+  const [error, result] = await initMagicCode(form.data.email);
 
-  return redirect(href('/otp/:otpId', { otpId: otp.id }));
+  if (error !== null) {
+    return {
+      error,
+    };
+  }
+
+  return redirect(
+    withSearchParams(
+      href('/otp/:otpId', { otpId: result.otp.id }),
+      { [SearchParamAuth.Email]: form.data.email },
+    ),
+  );
 }
 
 export default function SignIn() {

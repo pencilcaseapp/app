@@ -8,20 +8,13 @@ enum InitMagicCodeError {
   TooManyRequests,
 }
 
-export type InitMagicCodeResult = {
-  ok: true;
-  otp: Otp;
-} | {
-  ok: false;
-  error: InitMagicCodeError;
-};
+export type InitMagicCodeResult = [InitMagicCodeError] | [null, { otp: Otp }];
 
-export async function initMagicCode(email: string) {
+export async function initMagicCode(
+  email: string,
+): Promise<InitMagicCodeResult> {
   if (!await canRequestNewOtp(email)) {
-    return {
-      ok: false,
-      error: InitMagicCodeError.TooManyRequests,
-    };
+    return [InitMagicCodeError.TooManyRequests];
   }
 
   await expireAllValidOtps(email);
@@ -43,5 +36,5 @@ export async function initMagicCode(email: string) {
     code,
   });
 
-  return { ok: true, otp };
+  return [null, { otp }];
 }
