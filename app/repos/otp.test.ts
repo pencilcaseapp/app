@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createOtp, expireOtp, getOtp, getValidOtp } from './otp';
+import { createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed } from './otp';
 import { createUserFixture } from '~/test/fixtures/user';
 import { createExpiredOtpFixture, createOtpFixture, createUsedOtpFixture } from '~/test/fixtures/otp';
 import { faker } from '@faker-js/faker';
@@ -107,6 +107,19 @@ describe('expireOtp', () => {
     // OTP should be expired immediately
     expect(
       expiredOtp.expiresAt.getTime(),
+    ).toBeLessThanOrEqual(new Date().getTime());
+  });
+});
+
+describe('markOtpAsUsed', () => {
+  it('marks an otp as used', async () => {
+    const userFixture = await createUserFixture();
+    const otpFixture = await createOtpFixture(userFixture.id);
+    const usedOtp = await markOtpAsUsed(otpFixture.id);
+
+    // OTP should be marked as used immediately
+    expect(
+      usedOtp.usedAt?.getTime(),
     ).toBeLessThanOrEqual(new Date().getTime());
   });
 });

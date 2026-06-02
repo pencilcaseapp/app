@@ -60,3 +60,15 @@ export async function expireOtp(id: string) {
 
   return response[0];
 }
+
+export async function markOtpAsUsed(id: string) {
+  const response = await db.update(otps)
+    .set({
+      usedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(otps.id, id))
+    .returning();
+
+  return response[0];
+}
