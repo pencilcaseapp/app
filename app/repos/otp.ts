@@ -5,12 +5,14 @@ import { otps } from '~/db/schema';
 
 export async function createOtp(input: {
   userId: string;
+  email: string;
   codeHash: string;
 }) {
-  const { userId, codeHash } = input;
+  const { userId, email, codeHash } = input;
 
   const response = await db.insert(otps).values({
     userId,
+    email,
     codeHash,
   }).returning();
 
@@ -39,6 +41,9 @@ export async function getValidOtp(id: string) {
       id,
       expiresAt: {
         gt: new Date(),
+      },
+      usedAt: {
+        isNull: true,
       },
     },
   });

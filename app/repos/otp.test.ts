@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createOtp, expireOtp, getOtp, getValidOtp } from './otp';
 import { createUserFixture } from '~/test/fixtures/user';
-import { createExpiredOtpFixture, createOtpFixture } from '~/test/fixtures/otp';
+import { createExpiredOtpFixture, createOtpFixture, createUsedOtpFixture } from '~/test/fixtures/otp';
 import { faker } from '@faker-js/faker';
 
 describe('createOtp', () => {
@@ -10,16 +10,19 @@ describe('createOtp', () => {
 
     const otp = await createOtp({
       userId: userFixture.id,
+      email: userFixture.email,
       codeHash: 'hashed-code',
     });
 
     expect(otp).toStrictEqual({
       id: expect.any(String),
       userId: userFixture.id,
+      email: userFixture.email,
       codeHash: 'hashed-code',
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
       expiresAt: expect.any(Date),
+      usedAt: null,
     });
   });
 
@@ -28,6 +31,7 @@ describe('createOtp', () => {
 
     const otp = await createOtp({
       userId: userFixture.id,
+      email: userFixture.email,
       codeHash: 'hashed-code',
     });
 
@@ -74,6 +78,14 @@ describe('getValidOtp', () => {
   it('returns undefined if otp is expired', async () => {
     const userFixture = await createUserFixture();
     const otpFixture = await createExpiredOtpFixture(userFixture.id);
+    const otp = await getValidOtp(otpFixture.id);
+
+    expect(otp).toBeUndefined();
+  });
+
+  it('returns undefined if otp is used', async () => {
+    const userFixture = await createUserFixture();
+    const otpFixture = await createUsedOtpFixture(userFixture.id);
     const otp = await getValidOtp(otpFixture.id);
 
     expect(otp).toBeUndefined();
