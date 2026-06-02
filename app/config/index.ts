@@ -13,6 +13,14 @@ export interface Config {
   db: {
     url: string;
   };
+
+  email: {
+    apiToken?: string;
+    from: {
+      name: string;
+      email: string;
+    };
+  };
 }
 
 export function getConfig(): Config {

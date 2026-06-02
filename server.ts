@@ -7,6 +7,8 @@ import { getConfig } from '~/config';
 import { migrateDatabase } from '~/db/migrate';
 import { createServer } from 'node:http';
 
+import 'dotenv/config';
+
 const app = express();
 const server = createServer(app);
 const config = getConfig();

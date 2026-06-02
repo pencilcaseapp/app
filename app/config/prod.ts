@@ -13,5 +13,13 @@ export function getConfigProd(): Config {
     db: {
       url: env.get('DATABASE_URL').required().asString(),
     },
+
+    email: {
+      apiToken: env.get('EMAIL_API_TOKEN').required().asString(),
+      from: {
+        name: 'pencil case',
+        email: 'inbox@pencilcase.app',
+      },
+    },
   };
 }
