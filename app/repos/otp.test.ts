@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed } from './otp';
+import { canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed } from './otp';
 import { createUserFixture } from '~/test/fixtures/user';
 import { createExpiredOtpFixture, createOtpFixture, createUsedOtpFixture } from '~/test/fixtures/otp';
 import { faker } from '@faker-js/faker';
@@ -121,5 +121,37 @@ describe('markOtpAsUsed', () => {
     expect(
       usedOtp.usedAt?.getTime(),
     ).toBeLessThanOrEqual(new Date().getTime());
+  });
+});
+
+describe('canRequestNewOtp', () => {
+  it('allows requesting a new OTP if no OTPs have been requested recently', async () => {
+    const userFixture = await createUserFixture();
+    const canRequest = await canRequestNewOtp(userFixture.email);
+
+    expect(canRequest).toBe(true);
+  });
+
+  it('allows requesting a new OTP if under the limit', async () => {
+    const userFixture = await createUserFixture();
+
+    await createOtpFixture(userFixture.id, userFixture.email);
+    await createOtpFixture(userFixture.id, userFixture.email);
+
+    const canRequest = await canRequestNewOtp(userFixture.email);
+
+    expect(canRequest).toBe(true);
+  });
+
+  it('prevents requesting a new OTP if over the limit', async () => {
+    const userFixture = await createUserFixture();
+
+    await createOtpFixture(userFixture.id, userFixture.email);
+    await createOtpFixture(userFixture.id, userFixture.email);
+    await createOtpFixture(userFixture.id, userFixture.email);
+
+    const canRequest = await canRequestNewOtp(userFixture.email);
+
+    expect(canRequest).toBe(false);
   });
 });

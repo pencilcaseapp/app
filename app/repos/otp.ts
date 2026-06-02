@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, and, gt } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { otps } from '~/db/schema';
@@ -71,4 +71,18 @@ export async function markOtpAsUsed(id: string) {
     .returning();
 
   return response[0];
+}
+
+export async function canRequestNewOtp(email: string) {
+  const fifteenMinutesAgo = Date.now() - 15 * 60 * 1000;
+
+  const count = await db.$count(
+    otps,
+    and(
+      eq(otps.email, email),
+      gt(otps.createdAt, new Date(fifteenMinutesAgo)),
+    ),
+  );
+
+  return count < 3;
 }
