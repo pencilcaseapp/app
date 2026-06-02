@@ -12,10 +12,10 @@ export async function createOtpFixture(userId: string, email?: string) {
   return response[0];
 }
 
-export async function createExpiredOtpFixture(userId: string) {
+export async function createExpiredOtpFixture(userId: string, email?: string) {
   const response = await db.insert(otps).values({
     userId,
-    email: faker.internet.email(),
+    email: email ?? faker.internet.email(),
     codeHash: faker.string.alphanumeric(64),
     expiresAt: new Date(Date.now() - 1000), // Set expiry in the past
   }).returning();

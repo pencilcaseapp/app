@@ -38,6 +38,23 @@ export async function getUserByEmail(email: string) {
   });
 }
 
+export async function getOrCreateUserByEmail(email: string) {
+  const [user] = await db
+    .insert(users)
+    .values({
+      email,
+    })
+    .onConflictDoUpdate({
+      target: users.email,
+      set: {
+        email,
+      },
+    })
+    .returning();
+
+  return user;
+}
+
 export async function updateUser(id: string, input: {
   email?: string;
   name?: string;

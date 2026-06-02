@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createUser, getUser, getUserByEmail, updateUser } from './user';
+import { createUser, getOrCreateUserByEmail, getUser, getUserByEmail, updateUser } from './user';
 import { createUserFixture } from '~/test/fixtures/user';
 import { faker } from '@faker-js/faker';
 
@@ -57,6 +57,29 @@ describe('getUserByEmail', () => {
     const user = await getUserByEmail('nonexistent@example.com');
 
     expect(user).toBeUndefined();
+  });
+});
+
+describe('getOrCreateUserByEmail', () => {
+  it('returns an existing user', async () => {
+    const userFixture = await createUserFixture();
+    const user = await getOrCreateUserByEmail(userFixture.email);
+
+    expect(user).toStrictEqual(userFixture);
+  });
+
+  it('creates a new user if one does not exist', async () => {
+    const email = faker.internet.email();
+    const user = await getOrCreateUserByEmail(email);
+
+    expect(user).toStrictEqual({
+      id: expect.any(String),
+      email,
+      name: null,
+      newsletter: false,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+    });
   });
 });
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed } from './otp';
+import { expireAllValidOtps, canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed } from './otp';
 import { createUserFixture } from '~/test/fixtures/user';
 import { createExpiredOtpFixture, createOtpFixture, createUsedOtpFixture } from '~/test/fixtures/otp';
 import { faker } from '@faker-js/faker';
@@ -108,6 +108,42 @@ describe('expireOtp', () => {
     expect(
       expiredOtp.expiresAt.getTime(),
     ).toBeLessThanOrEqual(new Date().getTime());
+  });
+});
+
+describe('expireAllValidOtps', () => {
+  it('expires all valid otps for a given email', async () => {
+    const userFixture = await createUserFixture();
+    const otpFixture1 = await createOtpFixture(
+      userFixture.id,
+      userFixture.email,
+    );
+
+    const otpFixture2 = await createOtpFixture(
+      userFixture.id,
+      userFixture.email,
+    );
+
+    const otpFixture3 = await createExpiredOtpFixture(
+      userFixture.id,
+      userFixture.email,
+    );
+
+    await expireAllValidOtps(userFixture.email);
+
+    const expiredOtp1 = await getOtp(otpFixture1.id);
+    const expiredOtp2 = await getOtp(otpFixture2.id);
+    const expiredOtp3 = await getOtp(otpFixture3.id);
+
+    expect(
+      expiredOtp1?.expiresAt.getTime(),
+    ).toBeLessThanOrEqual(new Date().getTime());
+    expect(
+      expiredOtp2?.expiresAt.getTime(),
+    ).toBeLessThanOrEqual(new Date().getTime());
+    expect(
+      expiredOtp3?.expiresAt.getTime(),
+    ).toBe(otpFixture3.expiresAt.getTime());
   });
 });
 

@@ -1,7 +1,9 @@
-import { eq, and, gt } from 'drizzle-orm';
+import { eq, and, gt, type InferSelectModel, isNull } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { otps } from '~/db/schema';
+
+export type Otp = InferSelectModel<typeof otps>;
 
 export async function createOtp(input: {
   userId: string;
@@ -59,6 +61,21 @@ export async function expireOtp(id: string) {
     .returning();
 
   return response[0];
+}
+
+export async function expireAllValidOtps(email: string) {
+  await db.update(otps)
+    .set({
+      expiresAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(otps.email, email),
+        gt(otps.expiresAt, new Date()),
+        isNull(otps.usedAt),
+      ))
+    .returning();
 }
 
 export async function markOtpAsUsed(id: string) {
