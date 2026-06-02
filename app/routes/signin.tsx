@@ -7,6 +7,7 @@ import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { validateForm } from '~/utils/form';
 import { href, redirect } from 'react-router';
 import { commonCopies } from '~/common-copies';
+import { initMagicCode } from '~/services/auth';
 
 const formSchema = z.object({
   email: z.email(),
@@ -19,7 +20,9 @@ export async function action({ request }: Route.ActionArgs) {
     return form.formState;
   }
 
-  return redirect(href('/home'));
+  const { otp } = await initMagicCode(form.data.email);
+
+  return redirect(href('/otp/:otpId', { otpId: otp.id }));
 }
 
 export default function SignIn() {

@@ -4,6 +4,10 @@ import { userEvent } from '@testing-library/user-event';
 import { commonCopies } from '~/common-copies';
 import { href } from 'react-router';
 
+vi.mock('~/services/auth', async () => ({
+  initMagicCode: () => ({ otp: { id: 'mock-otp-id' } }),
+}));
+
 const redirectMock = vi.fn();
 vi.mock('react-router', async () => {
   const actual = await vi.importActual('react-router');
@@ -42,6 +46,6 @@ test('redirects after form submission', async () => {
   await userEvent.click(submitButton);
 
   vi.waitFor(() => {
-    expect(redirectMock).toHaveBeenCalledWith(href('/home'));
+    expect(redirectMock).toHaveBeenCalledWith(href('/otp/:otpId', { otpId: 'mock-otp-id' }));
   });
 });

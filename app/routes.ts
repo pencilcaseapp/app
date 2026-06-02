@@ -9,5 +9,6 @@ export default [
   ]),
   layout('layouts/auth.tsx', [
     route('signin', 'routes/signin.tsx'),
+    route('otp/:otpId', 'routes/otp.tsx'),
   ]),
 ] satisfies RouteConfig;
