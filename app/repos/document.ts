@@ -1,6 +1,8 @@
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, type InferSelectModel } from 'drizzle-orm';
 import { db } from '~/db';
 import { documents } from '~/db/schema';
+
+export type Document = InferSelectModel<typeof documents>;
 
 export async function createDocument() {
   const response = await db.insert(documents).values({}).returning();
