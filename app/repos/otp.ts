@@ -12,13 +12,13 @@ export async function createOtp(input: {
 }) {
   const { userId, email, codeHash } = input;
 
-  const response = await db.insert(otps).values({
+  const [otp] = await db.insert(otps).values({
     userId,
     email,
     codeHash,
   }).returning();
 
-  return response[0];
+  return otp;
 }
 
 export async function getOtp(id: string) {
@@ -52,7 +52,7 @@ export async function getValidOtp(id: string) {
 }
 
 export async function expireOtp(id: string) {
-  const response = await db.update(otps)
+  const [otp] = await db.update(otps)
     .set({
       expiresAt: new Date(),
       updatedAt: new Date(),
@@ -60,7 +60,7 @@ export async function expireOtp(id: string) {
     .where(eq(otps.id, id))
     .returning();
 
-  return response[0];
+  return otp;
 }
 
 export async function expireAllValidOtps(email: string) {
@@ -79,7 +79,7 @@ export async function expireAllValidOtps(email: string) {
 }
 
 export async function markOtpAsUsed(id: string) {
-  const response = await db.update(otps)
+  const [otp] = await db.update(otps)
     .set({
       usedAt: new Date(),
       updatedAt: new Date(),
@@ -87,7 +87,7 @@ export async function markOtpAsUsed(id: string) {
     .where(eq(otps.id, id))
     .returning();
 
-  return response[0];
+  return otp;
 }
 
 export async function canRequestNewOtp(email: string) {

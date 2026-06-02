@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createDocument, getDocument, getDocumentTitle, updateDocument } from './document';
 import { db } from '~/db';
-import { createDocumentWithTitle, createEmptyDocument } from '~/test/fixtures/document';
+import { createDocumentWithTitle, createEmptyDocument } from '~/test/data-factories/document';
 
 describe('createDocument', () => {
   it('creates an empty document', async () => {

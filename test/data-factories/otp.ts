@@ -2,34 +2,34 @@ import { faker } from '@faker-js/faker';
 import { db } from '~/db';
 import { otps } from '~/db/schema';
 
-export async function createOtpFixture(userId: string, email?: string) {
-  const response = await db.insert(otps).values({
+export async function createValidOtp(userId: string, email?: string) {
+  const [otp] = await db.insert(otps).values({
     userId,
     email: email ?? faker.internet.email(),
     codeHash: faker.string.alphanumeric(64),
   }).returning();
 
-  return response[0];
+  return otp;
 }
 
-export async function createExpiredOtpFixture(userId: string, email?: string) {
-  const response = await db.insert(otps).values({
+export async function createExpiredOtp(userId: string, email?: string) {
+  const [otp] = await db.insert(otps).values({
     userId,
     email: email ?? faker.internet.email(),
     codeHash: faker.string.alphanumeric(64),
     expiresAt: new Date(Date.now() - 1000), // Set expiry in the past
   }).returning();
 
-  return response[0];
+  return otp;
 }
 
-export async function createUsedOtpFixture(userId: string) {
-  const response = await db.insert(otps).values({
+export async function createUsedOtp(userId: string) {
+  const [otp] = await db.insert(otps).values({
     userId,
     email: faker.internet.email(),
     codeHash: faker.string.alphanumeric(64),
     usedAt: new Date(),
   }).returning();
 
-  return response[0];
+  return otp;
 }

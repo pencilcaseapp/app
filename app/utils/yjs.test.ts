@@ -13,7 +13,7 @@ import {
 import type { Provider, ProviderAwareness } from '@lexical/yjs';
 import type { SerializedEditorState } from 'lexical';
 import { extractTitleFromYDoc, getTextFromXmlText } from './yjs';
-import { initialEditorState } from 'test/fixtures/editor';
+import { initialEditorState } from '~/test/fixtures/editor';
 
 const nodes = [
   AutoLinkNode,

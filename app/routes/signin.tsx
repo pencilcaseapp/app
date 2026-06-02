@@ -6,7 +6,7 @@ import { useAppForm } from '~/hooks/use-app-form';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { validateForm } from '~/utils/form';
 import { href, redirect } from 'react-router';
-import { commonCopies } from '~/common-copies';
+import { commonCopies } from '~/constants/common-copies';
 import { initMagicCode } from '~/services/auth';
 import { withSearchParams } from '~/utils/url';
 import { SearchParamAuth } from '~/constants/search-params';

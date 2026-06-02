@@ -1,7 +1,7 @@
 import { expect, test, vi } from 'vitest';
 import { renderRoute } from '~/utils/testing';
 import { userEvent } from '@testing-library/user-event';
-import { commonCopies } from '~/common-copies';
+import { commonCopies } from '~/constants/common-copies';
 import { href } from 'react-router';
 
 vi.mock('~/services/auth', async () => ({
