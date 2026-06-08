@@ -45,6 +45,21 @@ export const Disabled: Story = {
   },
 };
 
+export const Hint: Story = {
+  decorators: [
+    Story => (
+      <div className="w-full max-w-74">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    label: 'Verification Code',
+    value: '',
+    hint: 'Enter the code sent to your email',
+  },
+};
+
 export const Error: Story = {
   decorators: [
     Story => (

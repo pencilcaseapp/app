@@ -37,4 +37,16 @@ describe('OneTimePasswordField', () => {
 
     expect(container).toMatchSnapshot();
   });
+
+  test('hint matches snapshot', () => {
+    const { container } = render(
+      <OneTimePasswordField
+        value=""
+        onValueChange={() => {}}
+        hint="Enter the code sent to your email"
+      />,
+    );
+
+    expect(container).toMatchSnapshot();
+  });
 });

@@ -10,11 +10,12 @@ export interface OneTimePasswordFieldProps {
   onAutoSubmit?(): void;
   onValueChange(value: string): void;
   disabled?: boolean;
+  hint?: string;
   errorMessage?: string;
 }
 
 export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
-  = ({ label, disabled, errorMessage, ...props }) => {
+  = ({ label, disabled, hint, errorMessage, ...props }) => {
     const PASSWORD_LENGTH = 6;
 
     return (
@@ -42,6 +43,16 @@ export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
             </Input>
           ))}
         </Root>
+        {hint && !errorMessage && (
+          <Typography
+            as="span"
+            variant="bodyTiny"
+            textColorLight="grey-900"
+            textColorDark="white"
+          >
+            {hint}
+          </Typography>
+        )}
         {errorMessage && (
           <Typography
             id="otp-error"
