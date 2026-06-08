@@ -1,0 +1,13 @@
+import { faker } from '@faker-js/faker';
+import type { Otp } from '~/repos/otp';
+
+export const otp: Otp = {
+  id: faker.string.uuid(),
+  email: faker.internet.email(),
+  codeHash: faker.string.alphanumeric(64),
+  userId: faker.string.uuid(),
+  createdAt: faker.date.past(),
+  updatedAt: faker.date.past(),
+  expiresAt: faker.date.future(),
+  usedAt: null,
+};
