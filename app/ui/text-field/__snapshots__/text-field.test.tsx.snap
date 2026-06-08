@@ -6,7 +6,7 @@ exports[`TextField > renders disabled state 1`] = `
     class="flex flex-col gap-2 group"
   >
     <label
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold group-has-disabled:text-pca-grey-300 dark:group-has-disabled:text-pca-grey-800"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold !text-pca-grey-300 dark:!text-pca-grey-800"
       for="test"
     >
       Test Label
@@ -28,7 +28,7 @@ exports[`TextField > renders error state 1`] = `
     class="flex flex-col gap-2 group"
   >
     <label
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold group-has-disabled:text-pca-grey-300 dark:group-has-disabled:text-pca-grey-800"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold"
       for="test"
     >
       Test Label
@@ -56,7 +56,7 @@ exports[`TextField > renders hint text 1`] = `
     class="flex flex-col gap-2 group"
   >
     <label
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold group-has-disabled:text-pca-grey-300 dark:group-has-disabled:text-pca-grey-800"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold"
       for="test"
     >
       Test Label
@@ -82,7 +82,7 @@ exports[`TextField > renders the text field with label 1`] = `
     class="flex flex-col gap-2 group"
   >
     <label
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold group-has-disabled:text-pca-grey-300 dark:group-has-disabled:text-pca-grey-800"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold"
       for="test"
     >
       Test Label

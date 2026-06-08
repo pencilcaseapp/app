@@ -12,10 +12,9 @@ export interface TextFieldProps
   hint?: string;
   errorMessage?: string;
   className?: string;
-  inputClassName?: string;
 };
 
-export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, hint, errorMessage, className, inputClassName, disabled, ...props }) => {
+export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, hint, errorMessage, className, disabled, ...props }) => {
   return (
     <div className={classNames('flex flex-col gap-2 group', className)}>
       {label && (
@@ -31,7 +30,6 @@ export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, 
         type={type}
         aria-invalid={!!errorMessage}
         aria-errormessage={errorMessage ? `${id}-error` : undefined}
-        className={inputClassName}
         disabled={disabled}
         {...props}
       />

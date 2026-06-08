@@ -1,6 +1,7 @@
 import { Root, Input } from '@radix-ui/react-one-time-password-field';
-import { TextField } from '../text-field/text-field';
 import { Label } from '../label/label';
+import { FormFieldStyle } from '../form-field-style/form-field-style';
+import { Typography } from '../typography/typography';
 
 export interface OneTimePasswordFieldProps {
   label?: string;
@@ -9,10 +10,11 @@ export interface OneTimePasswordFieldProps {
   onAutoSubmit?(): void;
   onValueChange(value: string): void;
   disabled?: boolean;
+  errorMessage?: string;
 }
 
 export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
-  = ({ label, ...props }) => {
+  = ({ label, disabled, errorMessage, ...props }) => {
     const PASSWORD_LENGTH = 6;
 
     return (
@@ -20,7 +22,7 @@ export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
         {label && (
           <Label
             htmlFor="otp-0"
-            disabled={props.disabled}
+            disabled={disabled}
           >
             {label}
           </Label>
@@ -29,10 +31,28 @@ export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
           {Array.from({ length: PASSWORD_LENGTH }).map((_, index) => (
             // eslint-disable-next-line @eslint-react/no-array-index-key
             <Input key={index} asChild>
-              <TextField id={`otp-${index}`} inputClassName="w-11 h-11 text-center" />
+              <FormFieldStyle
+                id={`otp-${index}`}
+                type="text"
+                aria-invalid={!!errorMessage}
+                aria-errormessage={errorMessage ? `otp-error` : undefined}
+                disabled={disabled}
+                className="w-11 h-11 text-center"
+              />
             </Input>
           ))}
         </Root>
+        {errorMessage && (
+          <Typography
+            id="otp-error"
+            as="span"
+            variant="bodyTiny"
+            textColorLight="red-500"
+            textColorDark="red-500"
+          >
+            {errorMessage}
+          </Typography>
+        )}
       </div>
     );
   };

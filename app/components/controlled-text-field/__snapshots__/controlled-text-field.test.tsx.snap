@@ -6,7 +6,7 @@ exports[`matches snapshot 1`] = `
     class="flex flex-col gap-2 group"
   >
     <label
-      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold group-has-disabled:text-pca-grey-300 dark:group-has-disabled:text-pca-grey-800"
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold"
       for="email"
     >
       Email

@@ -44,3 +44,18 @@ export const Disabled: Story = {
     disabled: true,
   },
 };
+
+export const Error: Story = {
+  decorators: [
+    Story => (
+      <div className="w-full max-w-74">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    label: 'Verification Code',
+    value: '123456',
+    errorMessage: 'Invalid code',
+  },
+};
