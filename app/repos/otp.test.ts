@@ -1,33 +1,37 @@
 import { describe, it, expect } from 'vitest';
-import { createOtp, expireOtp, getOtp, getValidOtp } from './otp';
-import { createUserFixture } from '~/test/fixtures/user';
-import { createExpiredOtpFixture, createOtpFixture } from '~/test/fixtures/otp';
+import { expireAllValidOtps, canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed } from './otp';
+import { createTestUser } from '~/test/data-factories/user';
+import { createExpiredOtp, createValidOtp, createUsedOtp } from '~/test/data-factories/otp';
 import { faker } from '@faker-js/faker';
 
 describe('createOtp', () => {
   it('creates an otp', async () => {
-    const userFixture = await createUserFixture();
+    const userFixture = await createTestUser();
 
     const otp = await createOtp({
       userId: userFixture.id,
+      email: userFixture.email,
       codeHash: 'hashed-code',
     });
 
     expect(otp).toStrictEqual({
       id: expect.any(String),
       userId: userFixture.id,
+      email: userFixture.email,
       codeHash: 'hashed-code',
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
       expiresAt: expect.any(Date),
+      usedAt: null,
     });
   });
 
   it('creates an otp with correct expiry', async () => {
-    const userFixture = await createUserFixture();
+    const userFixture = await createTestUser();
 
     const otp = await createOtp({
       userId: userFixture.id,
+      email: userFixture.email,
       codeHash: 'hashed-code',
     });
 
@@ -42,8 +46,8 @@ describe('createOtp', () => {
 
 describe('getOtp', () => {
   it('returns an otp', async () => {
-    const userFixture = await createUserFixture();
-    const otpFixture = await createOtpFixture(userFixture.id);
+    const userFixture = await createTestUser();
+    const otpFixture = await createValidOtp(userFixture.id);
     const otp = await getOtp(otpFixture.id);
 
     expect(otp).toStrictEqual(otpFixture);
@@ -64,16 +68,24 @@ describe('getOtp', () => {
 
 describe('getValidOtp', () => {
   it('returns a valid otp', async () => {
-    const userFixture = await createUserFixture();
-    const otpFixture = await createOtpFixture(userFixture.id);
+    const userFixture = await createTestUser();
+    const otpFixture = await createValidOtp(userFixture.id);
     const otp = await getValidOtp(otpFixture.id);
 
     expect(otp).toStrictEqual(otpFixture);
   });
 
   it('returns undefined if otp is expired', async () => {
-    const userFixture = await createUserFixture();
-    const otpFixture = await createExpiredOtpFixture(userFixture.id);
+    const userFixture = await createTestUser();
+    const otpFixture = await createExpiredOtp(userFixture.id);
+    const otp = await getValidOtp(otpFixture.id);
+
+    expect(otp).toBeUndefined();
+  });
+
+  it('returns undefined if otp is used', async () => {
+    const userFixture = await createTestUser();
+    const otpFixture = await createUsedOtp(userFixture.id);
     const otp = await getValidOtp(otpFixture.id);
 
     expect(otp).toBeUndefined();
@@ -88,13 +100,94 @@ describe('getValidOtp', () => {
 
 describe('expireOtp', () => {
   it('expires an otp', async () => {
-    const userFixture = await createUserFixture();
-    const otpFixture = await createOtpFixture(userFixture.id);
+    const userFixture = await createTestUser();
+    const otpFixture = await createValidOtp(userFixture.id);
     const expiredOtp = await expireOtp(otpFixture.id);
 
     // OTP should be expired immediately
     expect(
       expiredOtp.expiresAt.getTime(),
     ).toBeLessThanOrEqual(new Date().getTime());
+  });
+});
+
+describe('expireAllValidOtps', () => {
+  it('expires all valid otps for a given email', async () => {
+    const userFixture = await createTestUser();
+    const otpFixture1 = await createValidOtp(
+      userFixture.id,
+      userFixture.email,
+    );
+
+    const otpFixture2 = await createValidOtp(
+      userFixture.id,
+      userFixture.email,
+    );
+
+    const otpFixture3 = await createExpiredOtp(
+      userFixture.id,
+      userFixture.email,
+    );
+
+    await expireAllValidOtps(userFixture.email);
+
+    const expiredOtp1 = await getOtp(otpFixture1.id);
+    const expiredOtp2 = await getOtp(otpFixture2.id);
+    const expiredOtp3 = await getOtp(otpFixture3.id);
+
+    expect(
+      expiredOtp1?.expiresAt.getTime(),
+    ).toBeLessThanOrEqual(new Date().getTime());
+    expect(
+      expiredOtp2?.expiresAt.getTime(),
+    ).toBeLessThanOrEqual(new Date().getTime());
+    expect(
+      expiredOtp3?.expiresAt.getTime(),
+    ).toBe(otpFixture3.expiresAt.getTime());
+  });
+});
+
+describe('markOtpAsUsed', () => {
+  it('marks an otp as used', async () => {
+    const userFixture = await createTestUser();
+    const otpFixture = await createValidOtp(userFixture.id);
+    const usedOtp = await markOtpAsUsed(otpFixture.id);
+
+    // OTP should be marked as used immediately
+    expect(
+      usedOtp.usedAt?.getTime(),
+    ).toBeLessThanOrEqual(new Date().getTime());
+  });
+});
+
+describe('canRequestNewOtp', () => {
+  it('allows requesting a new OTP if no OTPs have been requested recently', async () => {
+    const userFixture = await createTestUser();
+    const canRequest = await canRequestNewOtp(userFixture.email);
+
+    expect(canRequest).toBe(true);
+  });
+
+  it('allows requesting a new OTP if under the limit', async () => {
+    const userFixture = await createTestUser();
+
+    await createValidOtp(userFixture.id, userFixture.email);
+    await createValidOtp(userFixture.id, userFixture.email);
+
+    const canRequest = await canRequestNewOtp(userFixture.email);
+
+    expect(canRequest).toBe(true);
+  });
+
+  it('prevents requesting a new OTP if over the limit', async () => {
+    const userFixture = await createTestUser();
+
+    await createValidOtp(userFixture.id, userFixture.email);
+    await createValidOtp(userFixture.id, userFixture.email);
+    await createValidOtp(userFixture.id, userFixture.email);
+
+    const canRequest = await canRequestNewOtp(userFixture.email);
+
+    expect(canRequest).toBe(false);
   });
 });

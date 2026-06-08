@@ -4,9 +4,12 @@ import type { Route } from './+types/signin';
 import { z } from 'zod';
 import { useAppForm } from '~/hooks/use-app-form';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
-import { validateForm } from '~/utils/form';
+import { returnFormError, validateForm } from '~/utils/form';
 import { href, redirect } from 'react-router';
-import { commonCopies } from '~/common-copies';
+import { commonCopies } from '~/constants/common-copies';
+import { initMagicCode } from '~/services/auth';
+import { withSearchParams } from '~/utils/url';
+import { SearchParamAuth } from '~/constants/search-params';
 
 const formSchema = z.object({
   email: z.email(),
@@ -19,7 +22,22 @@ export async function action({ request }: Route.ActionArgs) {
     return form.formState;
   }
 
-  return redirect(href('/home'));
+  const [error, result] = await initMagicCode(form.data.email);
+
+  if (error !== null) {
+    return returnFormError(form.data, {
+      email: {
+        message: 'Too many requests. Please try again later.',
+      },
+    });
+  }
+
+  return redirect(
+    withSearchParams(
+      href('/otp/:otpId', { otpId: result.otp.id }),
+      { [SearchParamAuth.Email]: form.data.email },
+    ),
+  );
 }
 
 export default function SignIn() {

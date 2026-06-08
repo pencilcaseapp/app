@@ -1,7 +1,9 @@
-import { eq } from 'drizzle-orm';
+import { eq, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { users } from '~/db/schema';
+
+export type User = InferSelectModel<typeof users>;
 
 export async function createUser(input: {
   email: string;
@@ -36,6 +38,23 @@ export async function getUserByEmail(email: string) {
       email,
     },
   });
+}
+
+export async function getOrCreateUserByEmail(email: string) {
+  const [user] = await db
+    .insert(users)
+    .values({
+      email,
+    })
+    .onConflictDoUpdate({
+      target: users.email,
+      set: {
+        email,
+      },
+    })
+    .returning();
+
+  return user;
 }
 
 export async function updateUser(id: string, input: {

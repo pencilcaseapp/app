@@ -34,6 +34,7 @@
     "@tanstack/react-form": "^1.32.0",
     "@tanstack/react-form-remix": "^1.32.0",
     "@uidotdev/usehooks": "^2.4.1",
+    "argon2": "^0.44.0",
     "body-scroll-lock": "^4.0.0-beta.0",
     "classnames": "^2.5.1",
     "compression": "^1.8.1",

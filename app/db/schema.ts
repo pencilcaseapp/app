@@ -9,17 +9,22 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, table => [
-  uniqueIndex('email_idx').on(table.email),
+  uniqueIndex('users_email_idx').on(table.email),
 ]);
 
 export const otps = pgTable('otps', {
   id: uuid('id').primaryKey().defaultRandom(),
+  email: text('email').notNull(),
   codeHash: text('code_hash').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   expiresAt: timestamp('expires_at').notNull().default(sql`(CURRENT_TIMESTAMP + INTERVAL '15 minutes')`),
+  usedAt: timestamp('used_at'),
   userId: uuid('user_id').notNull().references(() => users.id),
-});
+}, table => [
+  index('otps_user_id_idx').on(table.userId),
+  index('otps_email_idx').on(table.email),
+]);
 
 export const documents = pgTable('documents', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -29,5 +34,5 @@ export const documents = pgTable('documents', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   userId: uuid('user_id').references(() => users.id),
 }, table => [
-  index('user_id_idx').on(table.userId),
+  index('documents_user_id_idx').on(table.userId),
 ]);

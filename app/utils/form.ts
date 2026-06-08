@@ -37,3 +37,18 @@ export async function validateForm<T extends z.ZodTypeAny>(
     throw e;
   }
 }
+
+export function returnFormError<T extends Record<string, unknown>>(
+  data: T,
+  fields: Partial<Record<keyof T, { message: string }>>,
+) {
+  return {
+    values: data,
+    errors: [],
+    errorMap: {
+      onServer: {
+        fields,
+      },
+    },
+  };
+};

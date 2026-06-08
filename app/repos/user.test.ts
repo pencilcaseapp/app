@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createUser, getUser, getUserByEmail, updateUser } from './user';
-import { createUserFixture } from '~/test/fixtures/user';
+import { createUser, getOrCreateUserByEmail, getUser, getUserByEmail, updateUser } from './user';
+import { createTestUser } from '~/test/data-factories/user';
 import { faker } from '@faker-js/faker';
 
 describe('createUser', () => {
@@ -26,7 +26,7 @@ describe('createUser', () => {
 
 describe('getUser', () => {
   it('returns a user', async () => {
-    const userFixture = await createUserFixture();
+    const userFixture = await createTestUser();
     const user = await getUser(userFixture.id);
 
     expect(user).toStrictEqual(userFixture);
@@ -47,7 +47,7 @@ describe('getUser', () => {
 
 describe('getUserByEmail', () => {
   it('returns a user by email', async () => {
-    const userFixture = await createUserFixture();
+    const userFixture = await createTestUser();
     const user = await getUserByEmail(userFixture.email);
 
     expect(user).toStrictEqual(userFixture);
@@ -60,9 +60,32 @@ describe('getUserByEmail', () => {
   });
 });
 
+describe('getOrCreateUserByEmail', () => {
+  it('returns an existing user', async () => {
+    const userFixture = await createTestUser();
+    const user = await getOrCreateUserByEmail(userFixture.email);
+
+    expect(user).toStrictEqual(userFixture);
+  });
+
+  it('creates a new user if one does not exist', async () => {
+    const email = faker.internet.email();
+    const user = await getOrCreateUserByEmail(email);
+
+    expect(user).toStrictEqual({
+      id: expect.any(String),
+      email,
+      name: null,
+      newsletter: false,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+    });
+  });
+});
+
 describe('updateUser', () => {
   it('updates single fields of a user', async () => {
-    const userFixture = await createUserFixture();
+    const userFixture = await createTestUser();
 
     const userInput = {
       email: faker.internet.email(),
