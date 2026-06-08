@@ -6,14 +6,15 @@ import classNames from 'classnames';
 export interface TextFieldProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'className'> {
   id: string;
-  label: string;
+  label?: string;
   type?: 'text' | 'password' | 'email';
   hint?: string;
   errorMessage?: string;
   className?: string;
+  inputClassName?: string;
 };
 
-export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, hint, errorMessage, className, ...props }) => {
+export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, hint, errorMessage, className, inputClassName, ...props }) => {
   return (
     <div className={classNames('flex flex-col gap-2 group', className)}>
       {label && (
@@ -34,6 +35,7 @@ export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, 
         type={type}
         aria-invalid={!!errorMessage}
         aria-errormessage={errorMessage ? `${id}-error` : undefined}
+        className={inputClassName}
         {...props}
       />
       {hint && !errorMessage && (
