@@ -1,6 +1,7 @@
 import type { AnyFormApi } from '@tanstack/react-form';
 import { useId, type ReactNode } from 'react';
 import { Form } from 'react-router';
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 
 export type ControlledFormProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,6 +21,7 @@ export const ControlledForm: React.FC<ControlledFormProps>
     return (
       <Form id={formId} method="post" onSubmit={handleSubmit}>
         <form.AppForm>
+          <AuthenticityTokenInput />
           {children}
         </form.AppForm>
       </Form>

@@ -5,6 +5,7 @@ import { useAppForm } from '~/hooks/use-app-form';
 import { userEvent } from '@testing-library/user-event';
 import { ControlledForm } from './controlled-form';
 import { createRoutesStub, useActionData } from 'react-router';
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 
 const schema = z.object({
   email: z.email(),
@@ -27,17 +28,19 @@ test('submits the form successfully', async () => {
         });
 
         return (
-          <ControlledForm form={form}>
-            <form.AppField name="email">
-              {field => (
-                <field.TextField label="Email" />
+          <AuthenticityTokenProvider token="test-token">
+            <ControlledForm form={form}>
+              <form.AppField name="email">
+                {field => (
+                  <field.TextField label="Email" />
+                )}
+              </form.AppField>
+              <button type="submit">Submit</button>
+              {actionData?.ok === true && (
+                <div>Form submitted successfully</div>
               )}
-            </form.AppField>
-            <button type="submit">Submit</button>
-            {actionData?.ok === true && (
-              <div>Form submitted successfully</div>
-            )}
-          </ControlledForm>
+            </ControlledForm>
+          </AuthenticityTokenProvider>
         );
       },
     },
@@ -70,17 +73,19 @@ test('shows error message on submit', async () => {
         });
 
         return (
-          <ControlledForm form={form}>
-            <form.AppField name="email">
-              {field => (
-                <field.TextField label="Email" />
+          <AuthenticityTokenProvider token="test-token">
+            <ControlledForm form={form}>
+              <form.AppField name="email">
+                {field => (
+                  <field.TextField label="Email" />
+                )}
+              </form.AppField>
+              <button type="submit">Submit</button>
+              {actionData?.ok === true && (
+                <div>Form submitted successfully</div>
               )}
-            </form.AppField>
-            <button type="submit">Submit</button>
-            {actionData?.ok === true && (
-              <div>Form submitted successfully</div>
-            )}
-          </ControlledForm>
+            </ControlledForm>
+          </AuthenticityTokenProvider>
         );
       },
     },

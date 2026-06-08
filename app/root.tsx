@@ -7,11 +7,15 @@ import {
   ScrollRestoration,
   useMatches,
   type UIMatch,
+  data,
 } from 'react-router';
 import type { Route } from './+types/root';
 import classNames from 'classnames';
+import { csrf } from './utils/csrf';
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 
 import './app.css';
+import { Typography } from './ui/typography/typography';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const matches = useMatches() as UIMatch<unknown, { bodyClassName: string }>[];
@@ -36,36 +40,45 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
-  return <Outlet />;
+export async function loader({ request }: Route.LoaderArgs) {
+  const [token, cookieHeader] = await csrf.commitToken(request, 64);
+  return data({ token }, {
+    headers: cookieHeader
+      ? {
+          'set-cookie': cookieHeader,
+        }
+      : undefined,
+  });
+}
+
+export default function App({ loaderData }: Route.ComponentProps) {
+  return (
+    <AuthenticityTokenProvider token={loaderData.token}>
+      <Outlet />
+    </AuthenticityTokenProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = 'Oops!';
   let details = 'An unexpected error occurred.';
-  let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? '404' : 'Error';
-    details
-      = error.status === 404
-        ? 'The requested page could not be found.'
-        : error.statusText || details;
+    message = `Error ${error.status}`;
+    details = error.statusText || details;
   }
   else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
-    stack = error.stack;
   }
 
   return (
     <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
+      <Typography variant="heading1" textColorLight="black" textColorDark="white" className="mb-4 text-center">
+        {message}
+      </Typography>
+      <Typography variant="body" textColorLight="grey-900" textColorDark="grey-300" className="text-center">
+        {details}
+      </Typography>
     </main>
   );
 }

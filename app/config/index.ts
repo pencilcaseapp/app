@@ -21,6 +21,10 @@ export interface Config {
       email: string;
     };
   };
+
+  csrf: {
+    secret: string;
+  };
 }
 
 export function getConfig(): Config {

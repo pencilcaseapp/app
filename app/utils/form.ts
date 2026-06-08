@@ -1,5 +1,7 @@
 import { createServerValidate, ServerValidateError } from '@tanstack/react-form-remix';
 import { z } from 'zod';
+import { csrf } from './csrf';
+import { CSRFError } from 'remix-utils/csrf/server';
 
 export type ValidateFormResult<T extends z.ZodTypeAny> = {
   ok: true;
@@ -16,6 +18,8 @@ export async function validateForm<T extends z.ZodTypeAny>(
   const formData = await request.formData();
 
   try {
+    await csrf.validate(formData, request.headers);
+
     const serverValidate = createServerValidate({
       onServerValidate: formSchema,
     });
@@ -27,6 +31,10 @@ export async function validateForm<T extends z.ZodTypeAny>(
     };
   }
   catch (e) {
+    if (e instanceof CSRFError) {
+      throw new Response('Invalid CSRF token', { status: 403 });
+    }
+
     if (e instanceof ServerValidateError) {
       return {
         ok: false,

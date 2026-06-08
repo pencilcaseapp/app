@@ -19,5 +19,9 @@ export function getConfigTest(): Config {
         email: 'inbox@pencilcase.app',
       },
     },
+
+    csrf: {
+      secret: 's3cr3t',
+    },
   };
 }
