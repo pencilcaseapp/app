@@ -15,7 +15,6 @@ exports[`DocumentGroup > actionArea > should match snapshot 1`] = `
         data-state="closed"
       >
         <button
-          aria-controls="radix-_r_m_"
           aria-expanded="false"
           class="flex items-center gap-2 min-w-0 h-9 flex-1 pl-2 pr-0.5 py-1 cursor-pointer focus-visible:outline-none rounded-xl focus-visible:bg-pca-grey-200 dark:focus-visible:ring-0 active:bg-pca-grey-200 dark:active:bg-pca-grey-800 dark:active:ring-0 dark:focus-visible:bg-pca-grey-800"
           data-orientation="vertical"
