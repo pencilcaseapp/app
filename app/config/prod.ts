@@ -21,5 +21,9 @@ export function getConfigProd(): Config {
         email: 'inbox@pencilcase.app',
       },
     },
+
+    csrf: {
+      secret: env.get('CSRF_SECRET').required().asString(),
+    },
   };
 }
