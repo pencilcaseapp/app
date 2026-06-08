@@ -3,7 +3,7 @@ import { renderRoute } from '~/utils/testing';
 import { userEvent } from '@testing-library/user-event';
 import { commonCopies } from '~/constants/common-copies';
 import { href } from 'react-router';
-import { otp } from '~/test/fixtures/otp';
+import { otpFixture } from '~/test/fixtures/otp';
 import { InitMagicCodeError } from '~/services/auth';
 
 const initMagicCodeMock = vi.fn();
@@ -48,7 +48,7 @@ test('handles form validation errors', async () => {
 });
 
 test('redirects after form submission', async () => {
-  initMagicCodeMock.mockResolvedValueOnce([null, otp]);
+  initMagicCodeMock.mockResolvedValueOnce([null, otpFixture]);
 
   const { getByLabelText, getByText } = await renderRoute('/signin');
 
@@ -59,7 +59,7 @@ test('redirects after form submission', async () => {
   await userEvent.click(submitButton);
 
   vi.waitFor(() => {
-    expect(redirectMock).toHaveBeenCalledWith(href('/otp/:otpId', { otpId: otp.id }));
+    expect(redirectMock).toHaveBeenCalledWith(href('/otp/:otpId', { otpId: otpFixture.id }));
   });
 });
 

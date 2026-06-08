@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import type { Otp } from '~/repos/otp';
 
-export const otp: Otp = {
+export const otpFixture: Otp = {
   id: faker.string.uuid(),
   email: faker.internet.email(),
   codeHash: faker.string.alphanumeric(64),

@@ -13,7 +13,7 @@ import {
 import type { Provider, ProviderAwareness } from '@lexical/yjs';
 import type { SerializedEditorState } from 'lexical';
 import { extractTitleFromYDoc, getTextFromXmlText } from './yjs';
-import { initialEditorState } from '~/test/fixtures/editor';
+import { initialEditorStateFixture } from '~/test/fixtures/editor';
 
 const nodes = [
   AutoLinkNode,
@@ -276,7 +276,7 @@ describe('extractTitleFromYDoc', () => {
     // This uses the same fixture as the app, ensuring consistency
     // with a real-world Lexical document structure
     const doc = createYDocFromEditorState(
-      initialEditorState as SerializedEditorState,
+      initialEditorStateFixture as SerializedEditorState,
     );
 
     expect(extractTitleFromYDoc(doc)).toBe('Hello World 👩‍💻');
