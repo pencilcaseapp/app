@@ -21,10 +21,26 @@ export const Controlled: Story = {
     return (
       <div className="w-full max-w-74">
         <OneTimePasswordField
+          label="Verification Code"
           value={value}
           onValueChange={setValue}
         />
       </div>
     );
+  },
+};
+
+export const Disabled: Story = {
+  decorators: [
+    Story => (
+      <div className="w-full max-w-74">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    label: 'Verification Code',
+    value: '123456',
+    disabled: true,
   },
 };
