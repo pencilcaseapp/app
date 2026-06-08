@@ -4,7 +4,7 @@ import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
 import { randomInt } from 'node:crypto';
 
-enum InitMagicCodeError {
+export enum InitMagicCodeError {
   TooManyRequests,
 }
 

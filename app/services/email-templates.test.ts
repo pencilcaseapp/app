@@ -7,7 +7,7 @@ vi.mock('./email', () => ({
 }));
 
 describe('sendEmailMagicCode', () => {
-  it('should send an email with the correct subject and HTML content', async () => {
+  it('sends an email with the correct subject and HTML content', async () => {
     await sendEmailMagicCode({
       to: {
         email: 'test@example.com',
