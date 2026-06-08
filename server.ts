@@ -15,6 +15,7 @@ const config = getConfig();
 
 app.use(compression());
 app.disable('x-powered-by');
+app.enable('trust proxy');
 
 if (config.environment === 'prod') {
   createLiveServer(server);
