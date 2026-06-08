@@ -1,6 +1,12 @@
-import { describe, expect, test } from 'vitest';
+import { vi, describe, expect, test } from 'vitest';
 import z from 'zod';
 import { validateForm } from './form';
+
+vi.mock('./csrf', () => ({
+  csrf: {
+    validate: () => Promise.resolve(),
+  },
+}));
 
 const schema = z.object({
   name: z.string(),

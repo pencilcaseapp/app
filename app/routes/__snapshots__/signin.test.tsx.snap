@@ -8,6 +8,11 @@ exports[`matches snapshot 1`] = `
     id="_r_1_"
     method="post"
   >
+    <input
+      name="csrf"
+      type="hidden"
+      value="test-token"
+    />
     <h2
       class="antialiased font-inter text-xl sm:text-2xl font-bold text-black dark:text-white mb-3 text-center"
     >
