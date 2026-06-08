@@ -24,7 +24,7 @@ export async function getDocument(id: string) {
 
 export async function getDocumentTitle(id: string) {
   if (!isUuid(id)) {
-    return null;
+    return undefined;
   }
 
   const doc = await db.query.documents.findFirst({
