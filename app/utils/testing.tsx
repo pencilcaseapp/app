@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { createRoutesStub, type Register } from 'react-router';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 import routes from '~/routes';
@@ -11,15 +11,20 @@ export async function renderRoute(path: keyof Register['pages']) {
 
   const Stub = createRoutesStub([
     {
-      path: '/',
-      Component: () => (
-        <AuthenticityTokenProvider token="test-token">
-          <Component />
-        </AuthenticityTokenProvider>
-      ),
       ...file,
+      path: '/',
+      Component,
+      HydrateFallback: () => null,
     },
   ]);
 
-  return render(<Stub />);
+  const result = render(
+    <AuthenticityTokenProvider token="test-token">
+      <Stub />
+    </AuthenticityTokenProvider>,
+  );
+
+  await act(async () => {});
+
+  return result;
 }

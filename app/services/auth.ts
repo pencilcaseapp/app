@@ -1,4 +1,4 @@
-import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, getValidOtp } from '~/repos/otp';
+import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, getValidOtp, markOtpAsUsed } from '~/repos/otp';
 import { getOrCreateUserByEmail } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
@@ -53,23 +53,28 @@ export async function initMagicCode(
 }
 
 export enum VerifyMagicCodeError {
+  Expired,
   Invalid,
 }
 
 export type VerifyMagicCodeResult
   = [VerifyMagicCodeError] | [null, { otp: Otp }];
 
-export async function verifyMagicCode(id: string, email: string, code: string) {
+export async function verifyMagicCode(
+  id: string, email: string, code: string,
+): Promise<VerifyMagicCodeResult> {
   const otp = await getValidOtp(id);
 
   if (!otp || otp.email !== email) {
-    return [VerifyMagicCodeError.Invalid];
+    return [VerifyMagicCodeError.Expired];
   }
 
   const isValid = await argon2.verify(otp.codeHash, code);
   if (!isValid) {
     return [VerifyMagicCodeError.Invalid];
   }
+
+  await markOtpAsUsed(otp.id);
 
   return [null, { otp }];
 }

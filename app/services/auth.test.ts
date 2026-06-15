@@ -9,6 +9,7 @@ const canRequestNewOtpMock = vi.fn();
 const expireAllValidOtpsMock = vi.fn();
 const createOtpMock = vi.fn();
 const getValidOtpMock = vi.fn();
+const markOtpAsUsedMock = vi.fn();
 vi.mock('~/repos/otp', async (importOriginal) => {
   const actual = await importOriginal();
 
@@ -18,6 +19,7 @@ vi.mock('~/repos/otp', async (importOriginal) => {
     expireAllValidOtps: (...args: unknown[]) => expireAllValidOtpsMock(...args),
     createOtp: (...args: unknown[]) => createOtpMock(...args),
     getValidOtp: (...args: unknown[]) => getValidOtpMock(...args),
+    markOtpAsUsed: (...args: unknown[]) => markOtpAsUsedMock(...args),
   };
 });
 
@@ -104,20 +106,20 @@ describe('initMagicCode', () => {
   });
 
   describe('verifyMagicCode', () => {
-    it('returns Invalid error if OTP is not found', async () => {
+    it('returns Expired error if OTP is not found', async () => {
       getValidOtpMock.mockResolvedValueOnce(undefined);
 
       const [error] = await verifyMagicCode(otpFixture.id, otpFixture.email, '123456');
 
-      expect(error).toEqual(VerifyMagicCodeError.Invalid);
+      expect(error).toEqual(VerifyMagicCodeError.Expired);
     });
 
-    it('returns Invalid error if email does not match', async () => {
+    it('returns Expired error if email does not match', async () => {
       getValidOtpMock.mockResolvedValueOnce(otpFixture);
 
       const [error] = await verifyMagicCode(otpFixture.id, 'test@example.com', '123456');
 
-      expect(error).toEqual(VerifyMagicCodeError.Invalid);
+      expect(error).toEqual(VerifyMagicCodeError.Expired);
     });
 
     it('returns Invalid error if code does not match', async () => {

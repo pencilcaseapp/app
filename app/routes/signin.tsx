@@ -8,12 +8,20 @@ import { returnFormError, validateForm } from '~/utils/form';
 import { href, redirect } from 'react-router';
 import { commonCopies } from '~/constants/common-copies';
 import { initMagicCode } from '~/services/auth';
-import { withSearchParams } from '~/utils/url';
+import { getOptionalSearchParam, withSearchParams } from '~/utils/url';
 import { SearchParamAuth } from '~/constants/search-params';
 
 const formSchema = z.object({
   email: z.email(),
 });
+
+export function loader({ request }: Route.ActionArgs) {
+  const email = getOptionalSearchParam(request, SearchParamAuth.Email);
+
+  return {
+    email,
+  };
+}
 
 export async function action({ request }: Route.ActionArgs) {
   const form = await validateForm(request, formSchema);
@@ -40,10 +48,10 @@ export async function action({ request }: Route.ActionArgs) {
   );
 }
 
-export default function SignIn() {
+export default function SignIn({ loaderData }: Route.ComponentProps) {
   const form = useAppForm({
     defaultValues: {
-      email: '',
+      email: loaderData.email ?? '',
     },
     validators: {
       onBlur: formSchema,
@@ -70,6 +78,7 @@ export default function SignIn() {
             placeholder="e.g. your@example.com"
             label="E-Mail"
             className="mb-6"
+            autoFocus
           />
         )}
       </form.AppField>
