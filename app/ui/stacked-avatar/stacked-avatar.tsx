@@ -46,7 +46,7 @@ export const StackedAvatars: React.FC<StackedAvatarsProps> = ({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuPortal>
-                <DropdownMenuContent align="end" className="flex gap-2">
+                <DropdownMenuContent align="end" className="flex gap-2" hideWhenDetached={false}>
                   {avatars.map(avatar => (
                     <DropdownMenuItem key={avatar.name} as="div" className="cursor-default pointer-events-none">
                       <div className="flex justify-start items-center gap-0.5">

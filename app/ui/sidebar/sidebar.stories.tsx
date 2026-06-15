@@ -1,22 +1,52 @@
-import { NavLink, Outlet } from 'react-router';
-import { SocketClientProvider } from '~/contexts/socket-client';
-import { DocumentGroup } from '~/ui/document-group/document-group';
-import { DocumentGroupRoot } from '~/ui/document-group/document-root';
-import { DocumentItem } from '~/ui/document-item/document-item';
-import { DropdownMenu } from '~/ui/dropdown-menu/dropdown-menu';
-import { DropdownMenuContent } from '~/ui/dropdown-menu/dropdown-menu-content';
-import { DropdownMenuItem } from '~/ui/dropdown-menu/dropdown-menu-item';
-import { DropdownMenuPortal } from '~/ui/dropdown-menu/dropdown-menu-portal';
-import { DropdownMenuSeparator } from '~/ui/dropdown-menu/dropdown-menu-separator';
-import { DropdownMenuTrigger } from '~/ui/dropdown-menu/dropdown-menu-trigger';
-import type { IconName } from '~/ui/icon/icons';
-import { NavigationItem } from '~/ui/navigation-item/navigation-item';
-import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
-import { Sidebar } from '~/ui/sidebar/sidebar';
+/* eslint-disable @eslint-react/rules-of-hooks */
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { MemoryRouter, NavLink } from 'react-router';
+import { Sidebar } from './sidebar';
+import { SidebarProvider } from '../sidebar-context/sidebar-provider';
+import { useSidebarContext } from '../sidebar-context/use-sidebar-context';
+import { Logo } from '../logo/logo';
+import { Topbar } from '../topbar/topbar';
+import { Button } from '../button/button';
+import { DocumentGroup } from '../document-group/document-group';
+import { DocumentItem } from '../document-item/document-item';
+import { DocumentGroupRoot } from '../document-group/document-root';
+import { NavigationItem } from '../navigation-item/navigation-item';
+import type { IconName } from '../icon/icons';
+import { DropdownMenu } from '../dropdown-menu/dropdown-menu';
+import { DropdownMenuTrigger } from '../dropdown-menu/dropdown-menu-trigger';
+import { DropdownMenuPortal } from '../dropdown-menu/dropdown-menu-portal';
+import { DropdownMenuContent } from '../dropdown-menu/dropdown-menu-content';
+import { DropdownMenuItem } from '../dropdown-menu/dropdown-menu-item';
+import { DropdownMenuSeparator } from '../dropdown-menu/dropdown-menu-separator';
+import { action } from 'storybook/actions';
 
-export const handle = {
-  bodyClassName: 'w-full bg-pca-white dark:bg-pca-grey-900',
+/**
+ * The `Sidebar` renders the application's primary navigation.
+ * It composes a list of `NavLink`s with an optional top area
+ * (typically a logo or branding) and a bottom area for
+ * secondary links such as legal pages or external resources.
+ *
+ * The Sidebar relies on `SidebarContext` to manage its
+ * open/closed state on mobile viewports, so it must be
+ * rendered inside a `SidebarProvider`. On desktop
+ * (≥ 1024px) the sidebar is always visible.
+ */
+const meta: Meta<typeof Sidebar> = {
+  title: 'Navigation/Sidebar',
+  component: Sidebar,
+  decorators: [
+    Story => (
+      <MemoryRouter>
+        <SidebarProvider>
+          <Story />
+        </SidebarProvider>
+      </MemoryRouter>
+    ),
+  ],
 };
+
+export default meta;
+type Story = StoryObj<typeof Sidebar>;
 
 const navigation = [
   { label: '(A.2.1) Le Cours Français', to: '/123' },
@@ -41,12 +71,43 @@ const bottomNavigation = [
   { label: 'Settings', to: '/settings', icon: 'settings' },
 ];
 
-export default function LayoutEditor() {
-  return (
-    <SocketClientProvider>
-      <SidebarProvider>
+/**
+ * On mobile viewports the sidebar is hidden by default and
+ * its open state is controlled through `SidebarContext`.
+ * This story showcases the typical wiring: a `Topbar` button
+ * toggles `isSidebarOpen` via `useSidebarContext`, opening
+ * the sidebar as an overlay. Resize the viewport below
+ * 1024px to see the toggle in action.
+ */
+export const Default: Story = {
+  parameters: {
+    layout: 'fullscreen',
+  },
+  render: () => {
+    const { isSidebarOpen, setIsSidebarOpen } = useSidebarContext();
+
+    return (
+      <>
+        <Topbar
+          left={(
+            <Button
+              colorLight="secondary"
+              colorDark="secondary"
+              icon="sidebar"
+              iconTitle={isSidebarOpen ? 'Close navigation' : 'Open navigation'}
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            />
+          )}
+          center={<Logo />}
+        />
         <Sidebar
           items={[
+            {
+              key: 'search',
+              content: (
+                <NavigationItem as="button" onClick={() => console.log('Search...')} icon="search" title="Search" />
+              ),
+            },
             {
               key: 'all-docs',
               content: (
@@ -64,14 +125,14 @@ export default function LayoutEditor() {
                               <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Item options" />
                               <DropdownMenuPortal>
                                 <DropdownMenuContent align="start">
-                                  <DropdownMenuItem as="button" onClick={() => console.log('clicked...')} icon="share">
+                                  <DropdownMenuItem as="button" onClick={action('share')} icon="share">
                                     Share
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem as="button" onClick={() => console.log('clicked...')} icon="create-doc">
+                                  <DropdownMenuItem as="button" onClick={action('rename')} icon="create-doc">
                                     Rename
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem as="button" onClick={() => console.log('clicked')} color="danger" icon="trash">
+                                  <DropdownMenuItem as="button" onClick={action('delete')} color="danger" icon="trash">
                                     Delete
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -102,14 +163,14 @@ export default function LayoutEditor() {
                             <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Item options" />
                             <DropdownMenuPortal>
                               <DropdownMenuContent align="start">
-                                <DropdownMenuItem as="button" onClick={() => console.log('clicked')} icon="share">
+                                <DropdownMenuItem as="button" onClick={action('share')} icon="share">
                                   Share
                                 </DropdownMenuItem>
-                                <DropdownMenuItem as="button" onClick={() => console.log('clicked')} icon="create-doc">
+                                <DropdownMenuItem as="button" onClick={action('rename')} icon="create-doc">
                                   Rename
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem as="button" onClick={() => console.log('clicked')} color="danger" icon="trash">
+                                <DropdownMenuItem as="button" onClick={action('delete')} color="danger" icon="trash">
                                   Delete
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -169,8 +230,7 @@ export default function LayoutEditor() {
             </>
           )}
         />
-        <Outlet />
-      </SidebarProvider>
-    </SocketClientProvider>
-  );
+      </>
+    );
+  },
 };

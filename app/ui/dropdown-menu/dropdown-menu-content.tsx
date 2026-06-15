@@ -13,10 +13,11 @@ export const DropdownMenuContent: FC<DropdownMenuContentProps> = ({
 }) => {
   return (
     <Content
-      {...radixDropdownMenuContentProps}
-      className={classNames('flex flex-col min-w-64 p-1.5 gap-0.5 data-[state=open]:animate-scale-in data-[state=closed]:animate-scale-out data-[align=start]:origin-top-left data-[align=end]:origin-top-right data-[align=center]:origin-top z-50 bg-pca-white/55 dark:bg-pca-grey-900/55 rounded-2xl backdrop-blur-md backdrop-saturate-150 shadow-glass dark:shadow-glass-dark glass-border', className)}
+      hideWhenDetached={true}
+      className={classNames('flex flex-col min-w-64 p-1.5 gap-0.5 data-[state=open]:animate-scale-in data-[state=closed]:animate-scale-out data-[align=start]:origin-top-left data-[align=end]:origin-top-right data-[align=center]:origin-top z-50 rounded-2xl glass-surface shadow-glass dark:shadow-glass-dark glass-border', className)}
       alignOffset={10}
       sideOffset={4}
+      {...radixDropdownMenuContentProps}
     >
       {children}
     </Content>

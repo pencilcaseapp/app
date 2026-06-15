@@ -25,7 +25,7 @@ function renderDropdownMenu(
     <DropdownMenu defaultOpen={defaultOpen}>
       <DropdownMenuTrigger />
       <DropdownMenuPortal>
-        <DropdownMenuContent>
+        <DropdownMenuContent hideWhenDetached={false}>
           {items ?? defaultItems}
         </DropdownMenuContent>
       </DropdownMenuPortal>

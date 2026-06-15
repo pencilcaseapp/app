@@ -19,6 +19,7 @@ import {
   INSERT_ORDERED_LIST_COMMAND,
   INSERT_UNORDERED_LIST_COMMAND,
 } from '@lexical/list';
+import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 
 export interface EditorPluginToolbarProps {
   topbarLeft?: React.ReactNode;
@@ -38,6 +39,7 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
     const isScrolling = windowY > 65;
     const topbarRef = useRef<HTMLElement>(null);
     const [isVirtualKeyboardOpen] = useVirtualKeyboard();
+    const { isSidebarOpen } = useSidebarContext();
 
     const $updateToolbar = useCallback(() => {
       const selection = $getSelection();
@@ -125,7 +127,7 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
     return (
       <Topbar
         ref={topbarRef}
-        hasBorder={isVirtualKeyboardOpen}
+        hasBorder={isVirtualKeyboardOpen || isSidebarOpen}
         left={!isVirtualKeyboardOpen ? topbarLeft : <Button colorLight="secondary" icon="close" className="text-pca-grey-400!" iconTitle="close" />}
         right={!isVirtualKeyboardOpen && (<Button icon="share" colorLight="secondary">Share</Button>)}
         center={(

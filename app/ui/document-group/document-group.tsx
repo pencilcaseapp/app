@@ -22,12 +22,13 @@ export const DocumentGroup: FC<DocumentGroupProps>
       <AccordionItem value={value}>
         <AccordionHeader asChild>
           <div className={classNames([
-            'group flex items-center gap-2 rounded-xl transition-colors data-[state=open]:bg-pca-grey-100 dark:data-[state=open]:bg-pca-grey-800 hover:bg-pca-grey-100 dark:hover:bg-pca-grey-800 has-data-[state=open]:bg-pca-grey-100 dark:has-data-[state=open]:bg-pca-grey-800',
+            'sticky -top-4 left-0 group flex items-center gap-2 z-10 bg-pca-white dark:bg-pca-grey-900',
           ])}
           >
             <AccordionTrigger className={classNames([
               'flex items-center gap-2 min-w-0 h-9 flex-1 pl-2 pr-0.5 py-1 cursor-pointer focus-visible:outline-none rounded-xl',
               'focus-visible:bg-pca-grey-200 dark:focus-visible:ring-0 active:bg-pca-grey-200 dark:active:bg-pca-grey-800 dark:active:ring-0 dark:focus-visible:bg-pca-grey-800',
+              'transition-colors data-[state=open]:bg-pca-grey-100 dark:data-[state=open]:bg-pca-grey-800 hover:bg-pca-grey-100 dark:hover:bg-pca-grey-800 has-data-[state=open]:bg-pca-grey-100 dark:has-data-[state=open]:bg-pca-grey-800',
             ])}
             >
               <Icon icon={icon} title={iconTitle} />

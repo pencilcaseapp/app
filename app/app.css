@@ -6,6 +6,7 @@
 
 @plugin "tailwind-scrollbar";
 
+
 @theme {
   --color-pca-white: #FFFFFF;
 
@@ -236,7 +237,6 @@
 }
 }
 
-
 .glass-border {
   position: relative;
 }
@@ -282,4 +282,8 @@ body {
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
+}
+
+@utility glass-surface {
+  @apply bg-pca-white/75 dark:bg-pca-grey-900/55 backdrop-blur-lg backdrop-saturate-150;
 }

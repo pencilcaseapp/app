@@ -1,6 +1,7 @@
 import { Typography } from '../typography/typography';
 import type { PolymorphicComponentPropWithRef } from '../polymorphic-types/polymorphic-types';
 import classNames from 'classnames';
+import { useMedia } from 'react-use';
 
 export type DocumentItemProps<C extends React.ElementType>
   = PolymorphicComponentPropWithRef<
@@ -38,6 +39,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
     'has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50',
     className,
   ]);
+  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
 
   const Component = as as React.ElementType;
 
@@ -59,7 +61,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
       </Component>
       {actionArea && (
         <div className={classNames([
-          'shrink-0 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:has-data-[state=open]:opacity-100 transition-opacity',
+          'shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity',
           'group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700',
           'dark:group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700',
           'group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700!',
@@ -68,6 +70,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
           'dark:group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700',
           // Force dark text/icon on the yellow active surface in dark mode.
           'dark:group-has-aria-[current=page]:[&_button]:text-pca-grey-900!',
+          isTouchDevice && 'opacity-100',
         ])}
         >
           {actionArea}
