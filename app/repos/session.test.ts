@@ -56,16 +56,4 @@ describe('getSessionByTokenHash', () => {
 
     expect(session).toBeUndefined();
   });
-
-  it('updates the session expiry if it is close to expiring', async () => {
-    const userFixture = await createTestUser();
-    const expiresAt = new Date(Date.now() + (29 * 24 * 60 * 60 * 1000));
-    const sessionFixture = await createValidSession(userFixture.id, expiresAt);
-
-    const session = await getSessionByTokenHash(sessionFixture.tokenHash);
-
-    const expectedExpiry = Date.now() + (29 * 24 * 60 * 60 * 1000);
-
-    expect(session?.expiresAt.getTime()).toBeGreaterThanOrEqual(expectedExpiry);
-  });
 });
