@@ -1,3 +1,4 @@
+import './signin';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { renderRoute } from '~/utils/testing';
 import { userEvent } from '@testing-library/user-event';
@@ -5,6 +6,10 @@ import { commonCopies } from '~/constants/common-copies';
 import { href } from 'react-router';
 import { otpFixture } from '~/test/fixtures/otp';
 import { InitMagicCodeError } from '~/services/auth';
+import { userFixture } from '~/test/fixtures/user';
+import { act, fireEvent } from '@testing-library/react';
+import { withSearchParams } from '~/utils/url';
+import { SearchParamAuth } from '~/constants/search-params';
 
 const initMagicCodeMock = vi.fn();
 vi.mock('~/services/auth', async (importActual) => {
@@ -17,11 +22,12 @@ vi.mock('~/services/auth', async (importActual) => {
 
 const redirectMock = vi.fn();
 vi.mock('react-router', async () => {
-  const actual = await vi.importActual('react-router');
+  const actual = await vi.importActual<typeof import('react-router')>('react-router');
   return {
     ...actual,
-    redirect: (url: string) => {
+    redirect: (url: string, init?: number | ResponseInit) => {
       redirectMock(url);
+      return actual.redirect(url, init);
     },
   };
 });
@@ -37,44 +43,54 @@ test('matches snapshot', async () => {
 });
 
 test('handles form validation errors', async () => {
-  const { getByLabelText, getByText } = await renderRoute('/signin');
-  const emailInput = getByLabelText('E-Mail');
-  const submitButton = getByText(commonCopies.actions.continue);
+  const { findByLabelText, findByText } = await renderRoute('/signin');
+
+  const emailInput = await findByLabelText('E-Mail');
+  const submitButton = await findByText(commonCopies.actions.continue);
 
   await userEvent.type(emailInput, 'invalid-email');
-  await userEvent.click(submitButton);
+  await act(async () => {
+    fireEvent.submit(submitButton);
+  });
 
-  expect(getByText('Invalid email address')).toBeInTheDocument();
+  expect(await findByText('Invalid email address')).toBeInTheDocument();
 });
 
 test('redirects after form submission', async () => {
-  initMagicCodeMock.mockResolvedValueOnce([null, otpFixture]);
+  initMagicCodeMock.mockResolvedValue([null, { otp: otpFixture }]);
 
-  const { getByLabelText, getByText } = await renderRoute('/signin');
+  const { findByLabelText, findByText } = await renderRoute('/signin');
 
-  const emailInput = getByLabelText('E-Mail');
-  const submitButton = getByText(commonCopies.actions.continue);
+  const emailInput = await findByLabelText('E-Mail');
+  const submitButton = await findByText(commonCopies.actions.continue);
 
-  await userEvent.type(emailInput, 'test@example.com');
-  await userEvent.click(submitButton);
+  await userEvent.type(emailInput, userFixture.email);
+  await act(async () => {
+    fireEvent.submit(submitButton);
+  });
 
-  vi.waitFor(() => {
-    expect(redirectMock).toHaveBeenCalledWith(href('/otp/:otpId', { otpId: otpFixture.id }));
+  await vi.waitFor(() => {
+    expect(redirectMock).toHaveBeenCalledWith(
+      withSearchParams(
+        href('/otp/:otpId', { otpId: otpFixture.id }),
+        { [SearchParamAuth.Email]: userFixture.email },
+      ),
+    );
   });
 });
 
 test('returns form error on too many requests', async () => {
-  initMagicCodeMock.mockResolvedValueOnce([InitMagicCodeError.TooManyRequests]);
+  initMagicCodeMock.mockResolvedValue([InitMagicCodeError.TooManyRequests]);
 
-  const { getByLabelText, getByText } = await renderRoute('/signin');
+  const { findByLabelText, findByText } = await renderRoute('/signin');
 
-  const emailInput = getByLabelText('E-Mail');
-  const submitButton = getByText(commonCopies.actions.continue);
+  const emailInput = await findByLabelText('E-Mail');
+  const submitButton = await findByText(commonCopies.actions.continue);
 
   await userEvent.type(emailInput, 'test@example.com');
-  await userEvent.click(submitButton);
-
-  vi.waitFor(() => {
-    expect(getByText('Too many requests')).toBeInTheDocument();
+  await act(async () => {
+    fireEvent.submit(submitButton);
   });
+
+  expect(await findByText('Too many requests. Please try again later.')).toBeInTheDocument();
 });

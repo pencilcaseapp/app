@@ -1,6 +1,8 @@
 import { faker } from '@faker-js/faker';
 import type { Session } from '~/repos/session';
 
+faker.seed(42);
+
 export const sessionFixture: Session = {
   id: faker.string.uuid(),
   userId: faker.string.uuid(),

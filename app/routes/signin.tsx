@@ -31,7 +31,6 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const [error, result] = await initMagicCode(form.data.email);
-
   if (error !== null) {
     return returnFormError(form.data, {
       email: {
