@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Label > disabled matches snapshot 1`] = `
+<div>
+  <label
+    class="antialiased font-inter text-sm text-pca-grey-300 dark:text-pca-grey-800 font-semibold"
+    for="test"
+  >
+    This is a label
+  </label>
+</div>
+`;
+
+exports[`Label > matches snapshot 1`] = `
+<div>
+  <label
+    class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold"
+    for="test"
+  >
+    This is a label
+  </label>
+</div>
+`;
