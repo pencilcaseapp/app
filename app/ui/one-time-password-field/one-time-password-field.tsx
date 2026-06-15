@@ -2,24 +2,35 @@ import { Root, Input } from '@radix-ui/react-one-time-password-field';
 import { Label } from '../label/label';
 import { FormFieldStyle } from '../form-field-style/form-field-style';
 import { Typography } from '../typography/typography';
+import classNames from 'classnames';
 
 export interface OneTimePasswordFieldProps {
   label?: string;
   value: string;
+  autoFocus?: boolean;
   autoSubmit?: boolean;
   onAutoSubmit?(): void;
   onValueChange(value: string): void;
   disabled?: boolean;
   hint?: string;
   errorMessage?: string;
+  className?: string;
 }
 
 export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
-  = ({ label, disabled, hint, errorMessage, ...props }) => {
+  = ({
+    label,
+    disabled,
+    hint,
+    errorMessage,
+    autoFocus,
+    className,
+    ...props
+  }) => {
     const PASSWORD_LENGTH = 6;
 
     return (
-      <div className="flex flex-col gap-2 group">
+      <div className={classNames('flex flex-col gap-2 group', className)}>
         {label && (
           <Label
             htmlFor="otp-0"
@@ -38,6 +49,7 @@ export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
                 aria-invalid={!!errorMessage}
                 aria-errormessage={errorMessage ? `otp-error` : undefined}
                 disabled={disabled}
+                autoFocus={autoFocus && index === 0}
                 className="w-11 h-11 text-center"
               />
             </Input>

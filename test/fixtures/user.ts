@@ -1,6 +1,8 @@
 import type { User } from '~/repos/user';
 import { faker } from '@faker-js/faker';
 
+faker.seed(42);
+
 export const userFixture: User = {
   id: faker.string.uuid(),
   email: faker.internet.email(),

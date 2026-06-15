@@ -25,6 +25,11 @@ export interface Config {
   csrf: {
     secret: string;
   };
+
+  session: {
+    secure: boolean;
+    secret: string;
+  };
 }
 
 export function getConfig(): Config {

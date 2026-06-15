@@ -3,7 +3,8 @@
 exports[`matches snapshot 1`] = `
 <div>
   <form
-    action="/"
+    action="/signin"
+    class="block"
     data-discover="true"
     id="_r_1_"
     method="post"

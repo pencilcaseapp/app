@@ -25,5 +25,10 @@ export function getConfigProd(): Config {
     csrf: {
       secret: env.get('CSRF_SECRET').required().asString(),
     },
+
+    session: {
+      secure: true,
+      secret: env.get('SESSION_SECRET').required().asString(),
+    },
   };
 }

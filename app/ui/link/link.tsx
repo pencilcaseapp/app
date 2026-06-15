@@ -16,7 +16,8 @@ export function Link<C extends React.ElementType = 'a'>(
 ) {
   const classes = classNames([
     'inline-block rounded-sm underline transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-blue-500 decoration-inherit transition-all duration-300 ease-in-out',
-    variant !== 'bodyTiny' && 'decoration-[1.5px] underline-offset-[5px]',
+    variant === 'body' && 'decoration-[1.5px] underline-offset-[5px]',
+    variant === 'bodySmall' && 'decoration-[1px] underline-offset-[3px]',
     variant === 'bodyTiny' && 'decoration-[1px] underline-offset-[3px]',
     className,
   ]);

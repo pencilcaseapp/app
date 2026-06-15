@@ -1,8 +1,21 @@
-import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps } from '~/repos/otp';
+import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, getValidOtp, markOtpAsUsed } from '~/repos/otp';
 import { getOrCreateUserByEmail } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
-import { randomInt } from 'node:crypto';
+import { randomBytes, randomInt } from 'node:crypto';
+import { createCookie } from 'react-router';
+import { getConfig } from '~/config';
+import { createSession } from '~/repos/session';
+
+const config = getConfig();
+
+const sessionCookie = createCookie('session', {
+  path: '/',
+  httpOnly: true,
+  secure: config.session.secure,
+  secrets: [config.session.secret],
+  sameSite: 'lax',
+});
 
 export enum InitMagicCodeError {
   TooManyRequests,
@@ -37,4 +50,41 @@ export async function initMagicCode(
   });
 
   return [null, { otp }];
+}
+
+export enum VerifyMagicCodeError {
+  Expired,
+  Invalid,
+}
+
+export type VerifyMagicCodeResult
+  = [VerifyMagicCodeError] | [null, { otp: Otp }];
+
+export async function verifyMagicCode(
+  id: string, email: string, code: string,
+): Promise<VerifyMagicCodeResult> {
+  const otp = await getValidOtp(id);
+
+  if (!otp || otp.email !== email) {
+    return [VerifyMagicCodeError.Expired];
+  }
+
+  const isValid = await argon2.verify(otp.codeHash, code);
+  if (!isValid) {
+    return [VerifyMagicCodeError.Invalid];
+  }
+
+  await markOtpAsUsed(otp.id);
+
+  return [null, { otp }];
+}
+
+export async function createSessionCookie(userId: string, userAgent?: string) {
+  const token = randomBytes(32);
+  const tokenHash = await argon2.hash(token);
+  const session = await createSession({ userId, tokenHash, userAgent });
+
+  return sessionCookie.serialize(token, {
+    expires: session.expiresAt,
+  });
 }

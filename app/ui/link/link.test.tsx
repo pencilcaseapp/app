@@ -6,7 +6,7 @@ import { MemoryRouter, Link as ReactRouterLink } from 'react-router';
 describe('Link', () => {
   test('renders a link', () => {
     const { container } = render(
-      <Link href="https://pencilcase.app" target="_blank">
+      <Link variant="body" href="https://pencilcase.app" target="_blank">
         Go to pencil case
       </Link>,
     );
@@ -17,7 +17,7 @@ describe('Link', () => {
   test('renders a react router link', () => {
     const { container } = render(
       <MemoryRouter>
-        <Link as={ReactRouterLink} to="/some-path">
+        <Link variant="body" as={ReactRouterLink} to="/some-path">
           Go to pencil case
         </Link>
       </MemoryRouter>,
@@ -30,6 +30,7 @@ describe('Link', () => {
     const { container } = render(
       <MemoryRouter>
         <Link
+          variant="body"
           href="https://pencilcase.app"
           textColorLight="red-500"
           textColorDark="white"
