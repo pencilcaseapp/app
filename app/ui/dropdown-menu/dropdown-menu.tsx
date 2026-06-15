@@ -6,7 +6,8 @@ export type DropdownMenuProps = RadixDropdownMenuProps & PropsWithChildren;
 
 export const DropdownMenu: FC<DropdownMenuProps> = ({
   children,
+  modal = false,
   ...radixDropdownMenuProps
 }) => {
-  return <Root {...radixDropdownMenuProps}>{children}</Root>;
+  return <Root modal={modal} {...radixDropdownMenuProps}>{children}</Root>;
 };

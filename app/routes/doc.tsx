@@ -4,7 +4,7 @@ import { getDocumentTitle } from '~/repos/document';
 import { useState } from 'react';
 import { ClientOnly } from '~/ui/client-only/client-only';
 import { Button } from '~/ui/button/button';
-import { href, Link } from 'react-router';
+import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const documentTitle = await getDocumentTitle(params.id);
@@ -16,6 +16,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 export default function ({ params, loaderData }: Route.ComponentProps) {
   const [title, setTitle] = useState(loaderData.documentTitle);
+  const { isSidebarOpen, setIsSidebarOpen, triggerRef } = useSidebarContext();
 
   return (
     <>
@@ -25,9 +26,16 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
           id={params.id}
           onTitleChange={setTitle}
           topbarLeft={(
-            <Button as={Link} to={href('/signin')} colorLight="upgrade">
-              Sign In
-            </Button>
+            <>
+              <Button
+                colorLight="secondary"
+                colorDark="secondary"
+                icon="sidebar"
+                iconTitle={isSidebarOpen ? 'Close navigation' : 'Open navigation'}
+                ref={triggerRef}
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              />
+            </>
           )}
         />
       </ClientOnly>

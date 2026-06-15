@@ -17,7 +17,7 @@ exports[`DocumentItem > matches snapshot 1`] = `
       </span>
     </a>
     <div
-      class="shrink-0 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:has-data-[state=open]:opacity-100 transition-opacity group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700 group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700! dark:group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700! group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button]:text-pca-grey-900!"
+      class="shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700 group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700! dark:group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700! group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button]:text-pca-grey-900!"
     >
       <span
         data-testid="action-area"

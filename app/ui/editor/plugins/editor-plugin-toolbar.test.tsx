@@ -10,28 +10,31 @@ import { ListNode, ListItemNode } from '@lexical/list';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { EditorPluginToolbar } from './editor-plugin-toolbar';
+import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 
 function renderToolbar() {
   return render(
-    <LexicalComposer
-      initialConfig={{
-        namespace: 'test',
-        onError: (error) => {
-          throw error;
-        },
-        nodes: [HeadingNode, ListNode, ListItemNode],
-      }}
-    >
-      <EditorPluginToolbar />
-      <RichTextPlugin
-        contentEditable={
-          <ContentEditable aria-label="editor" />
-        }
-        ErrorBoundary={LexicalErrorBoundary}
-      />
-      <ListPlugin />
-      <CheckListPlugin />
-    </LexicalComposer>,
+    <SidebarProvider>
+      <LexicalComposer
+        initialConfig={{
+          namespace: 'test',
+          onError: (error) => {
+            throw error;
+          },
+          nodes: [HeadingNode, ListNode, ListItemNode],
+        }}
+      >
+        <EditorPluginToolbar />
+        <RichTextPlugin
+          contentEditable={
+            <ContentEditable aria-label="editor" />
+          }
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <ListPlugin />
+        <CheckListPlugin />
+      </LexicalComposer>
+    </SidebarProvider>,
   );
 }
 
