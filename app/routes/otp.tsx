@@ -13,7 +13,7 @@ import { Link } from '~/ui/link/link';
 import { getValidOtp } from '~/repos/otp';
 
 const formSchema = z.object({
-  otp: z.string(),
+  otp: z.string().length(6, 'Code must be 6 digits'),
 });
 
 export async function loader({ request, params: { otpId } }: Route.ActionArgs) {
@@ -118,11 +118,12 @@ export default function Otp({ loaderData }: Route.ComponentProps) {
       </Typography>
       <form.AppField name="otp">
         {field => (
-          <field.TextField
-            type="text"
-            placeholder="Enter your OTP"
-            label="One-Time Password"
+          <field.OneTimePasswordField
+            label="Verification Code"
+            hint="Check your inbox for the code. Booja!"
             className="mb-6"
+            autoFocus
+            autoSubmit
           />
         )}
       </form.AppField>

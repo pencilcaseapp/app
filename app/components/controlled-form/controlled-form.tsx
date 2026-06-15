@@ -19,7 +19,7 @@ export const ControlledForm: React.FC<ControlledFormProps>
     };
 
     return (
-      <Form id={formId} method="post" onSubmit={handleSubmit}>
+      <Form id={formId} method="post" onSubmit={handleSubmit} className="block">
         <form.AppForm>
           <AuthenticityTokenInput />
           {children}

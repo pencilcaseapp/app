@@ -11,8 +11,8 @@ export default function LayoutAuth() {
       <header className="h-13 md:h-23.75 flex items-center justify-center">
         <Logo />
       </header>
-      <main className="px-4 pt-12 md:pt-0 md:max-w-74 mx-auto md:min-h-[calc(100dvh-95px)] md:flex md:items-center">
-        <div>
+      <main className="px-4 md:px-0 pt-12 md:pt-0 md:max-w-74 mx-auto md:min-h-[calc(100dvh-95px)] md:flex md:items-center">
+        <div className="w-full">
           <Outlet />
         </div>
       </main>
