@@ -19,6 +19,7 @@ export const ControlledOneTimePasswordField: React.FC<ControlledOneTimePasswordF
           onValueChange={field.handleChange}
           onAutoSubmit={handleAutoSubmit}
           errorMessage={field.state.meta.errors[0]?.message}
+          onBlur={field.handleBlur}
           {...props}
         />
         <input id={field.name} type="hidden" name={field.name} value={field.state.value} />

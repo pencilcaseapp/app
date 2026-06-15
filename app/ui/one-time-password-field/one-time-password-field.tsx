@@ -7,7 +7,6 @@ import classNames from 'classnames';
 export interface OneTimePasswordFieldProps {
   label?: string;
   value: string;
-  autoFocus?: boolean;
   autoSubmit?: boolean;
   onAutoSubmit?(): void;
   onValueChange(value: string): void;
@@ -15,6 +14,7 @@ export interface OneTimePasswordFieldProps {
   hint?: string;
   errorMessage?: string;
   className?: string;
+  onBlur?(): void;
 }
 
 export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
@@ -23,8 +23,8 @@ export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
     disabled,
     hint,
     errorMessage,
-    autoFocus,
     className,
+    onBlur,
     ...props
   }) => {
     const PASSWORD_LENGTH = 6;
@@ -49,8 +49,8 @@ export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
                 aria-invalid={!!errorMessage}
                 aria-errormessage={errorMessage ? `otp-error` : undefined}
                 disabled={disabled}
-                autoFocus={autoFocus && index === 0}
                 className="w-11 h-11 text-center"
+                onBlur={onBlur}
               />
             </Input>
           ))}
