@@ -1,5 +1,6 @@
 import type { FC, ReactNode } from 'react';
-import { useLockBodyScroll, useMedia } from 'react-use';
+import { useEffect } from 'react';
+import { useMedia } from 'react-use';
 import { AnimatePresence } from 'motion/react';
 import { Root, Overlay, Content, Title } from '@radix-ui/react-dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -18,7 +19,21 @@ export const SidebarPortal: FC<SidebarPortalProps> = ({
 }) => {
   const { isSidebarOpen, setIsSidebarOpen, triggerRef } = useSidebarContext();
   const isDesktop = useMedia('(min-width: 1280px)', false);
-  useLockBodyScroll(!isDesktop && isSidebarOpen);
+
+  const isScrollLocked = !isDesktop && isSidebarOpen;
+
+  useEffect(() => {
+    if (!isScrollLocked) {
+      return;
+    }
+    const { body } = document;
+    const previousOverflow = body.style.overflow;
+    body.style.overflow = 'hidden';
+
+    return () => {
+      body.style.overflow = previousOverflow;
+    };
+  }, [isScrollLocked]);
 
   return (
     <>

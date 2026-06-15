@@ -12,7 +12,6 @@ const useMedia = vi.fn();
 vi.mock('react-use', async () => {
   return {
     useMedia: () => useMedia(),
-    useLockBodyScroll: vi.fn(),
   };
 });
 
