@@ -77,7 +77,7 @@ export default function SignIn({ loaderData }: Route.ComponentProps) {
             placeholder="e.g. your@example.com"
             label="E-Mail"
             className="mb-6"
-            autoFocus
+            autoComplete="email"
           />
         )}
       </form.AppField>

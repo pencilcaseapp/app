@@ -6,7 +6,6 @@ import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
 import { sessionFixture } from '~/test/fixtures/session';
 import { userEvent } from '@testing-library/user-event';
-import { commonCopies } from '~/constants/common-copies';
 import { VerifyMagicCodeError } from '~/services/auth';
 
 const redirectMock = vi.fn();
@@ -61,7 +60,7 @@ test('redirects to onboarding on successful verification', async () => {
   verifyMagicCodeMock.mockResolvedValueOnce([null, { otp: otpFixture }]);
   createSessionCookieMock.mockResolvedValueOnce(sessionFixture);
 
-  const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {
+  const { findByLabelText } = await renderRoute('/otp/:otpId', {
     params: {
       otpId: otpFixture.id,
     },
@@ -71,10 +70,7 @@ test('redirects to onboarding on successful verification', async () => {
   });
 
   const input = await findByLabelText('Verification Code');
-  const submitButton = await findByText(commonCopies.actions.continue);
-
   await userEvent.type(input, '123456');
-  await userEvent.click(submitButton);
 
   await vi.waitFor(() => {
     expect(redirectMock).toHaveBeenCalledWith('/onboarding');
@@ -112,10 +108,8 @@ test('shows form error on invalid code', async () => {
   });
 
   const input = await findByLabelText('Verification Code');
-  const submitButton = await findByText(commonCopies.actions.continue);
 
   await userEvent.type(input, '123456');
-  await userEvent.click(submitButton);
 
   expect(await findByText('Invalid code. Please check the code and try again.')).toBeInTheDocument();
 });
@@ -126,7 +120,7 @@ test('redirects on expired code', async () => {
     VerifyMagicCodeError.Expired,
   ]);
 
-  const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {
+  const { findByLabelText } = await renderRoute('/otp/:otpId', {
     params: {
       otpId: otpFixture.id,
     },
@@ -136,10 +130,8 @@ test('redirects on expired code', async () => {
   });
 
   const input = await findByLabelText('Verification Code');
-  const submitButton = await findByText(commonCopies.actions.continue);
 
   await userEvent.type(input, '123456');
-  await userEvent.click(submitButton);
 
   expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true');
 });

@@ -91,7 +91,7 @@ export default function Otp({ loaderData }: Route.ComponentProps) {
       otp: '',
     },
     validators: {
-      onBlur: formSchema,
+      onSubmit: formSchema,
     },
   });
 
@@ -143,7 +143,6 @@ export default function Otp({ loaderData }: Route.ComponentProps) {
             label="Verification Code"
             hint="Check your inbox for the code. Booja!"
             className="mb-6"
-            autoFocus
             autoSubmit
           />
         )}
