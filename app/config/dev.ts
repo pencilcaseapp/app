@@ -25,5 +25,10 @@ export function getConfigDev(): Config {
     csrf: {
       secret: 's3cr3t',
     },
+
+    session: {
+      secure: false,
+      secret: 's3cr3t',
+    },
   };
 }
