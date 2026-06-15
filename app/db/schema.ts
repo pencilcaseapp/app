@@ -26,6 +26,18 @@ export const otps = pgTable('otps', {
   index('otps_email_idx').on(table.email),
 ]);
 
+export const sessions = pgTable('sessions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tokenHash: text('token_hash').notNull().unique(),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  expiresAt: timestamp('expires_at').notNull().default(sql`(CURRENT_TIMESTAMP + INTERVAL '30 days')`),
+  userId: uuid('user_id').notNull().references(() => users.id),
+}, table => [
+  index('sessions_user_id_idx').on(table.userId),
+  index('sessions_expires_at_idx').on(table.expiresAt),
+]);
+
 export const documents = pgTable('documents', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title'),
