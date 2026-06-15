@@ -5,7 +5,7 @@ import { Typography } from '~/ui/typography/typography';
 import { commonCopies } from '~/constants/common-copies';
 import type { Route } from './+types/otp';
 import { returnFormError, validateForm } from '~/utils/form';
-import { createSessionCookie, verifyMagicCode } from '~/services/auth';
+import { createSessionCookie, verifyMagicCode, VerifyMagicCodeError } from '~/services/auth';
 import { href, redirect, Link as ReactRouterLink } from 'react-router';
 import { SearchParamAuth } from '~/constants/search-params';
 import { getRequiredSearchParam, withSearchParams } from '~/utils/url';
@@ -44,15 +44,36 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
   }
 
   const [error, result] = await verifyMagicCode(otpId, email, form.data.otp);
+
   if (error !== null) {
-    return returnFormError(form.data, {
-      otp: {
-        message: 'Invalid code. Please check the code and try again.',
-      },
-    });
+    switch (error) {
+      case VerifyMagicCodeError.Invalid: {
+        return returnFormError(form.data, {
+          otp: {
+            message: 'Invalid code. Please check the code and try again.',
+          },
+        });
+      }
+
+      case VerifyMagicCodeError.Expired: {
+        return redirect(
+          withSearchParams(
+            href('/signin'), {
+              [SearchParamAuth.IsExpired]: 'true',
+            },
+          ),
+        );
+      }
+
+      default: {
+        const exhaustiveCheck: never = error;
+        throw new Error('Unhandled error case: ' + exhaustiveCheck);
+      }
+    }
   }
 
-  const sessionCookie = await createSessionCookie(result.otp.userId);
+  const userAgent = request.headers.get('user-agent') ?? undefined;
+  const sessionCookie = await createSessionCookie(result.otp.userId, userAgent);
 
   return redirect(
     href('/onboarding'),

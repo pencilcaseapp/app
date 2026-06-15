@@ -79,10 +79,10 @@ export async function verifyMagicCode(
   return [null, { otp }];
 }
 
-export async function createSessionCookie(userId: string) {
+export async function createSessionCookie(userId: string, userAgent?: string) {
   const token = randomBytes(32);
   const tokenHash = await argon2.hash(token);
-  const session = await createSession({ userId, tokenHash });
+  const session = await createSession({ userId, tokenHash, userAgent });
 
   return sessionCookie.serialize(token, {
     expires: session.expiresAt,

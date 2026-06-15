@@ -119,3 +119,27 @@ test('shows form error on invalid code', async () => {
 
   expect(await findByText('Invalid code. Please check the code and try again.')).toBeInTheDocument();
 });
+
+test('redirects on expired code', async () => {
+  getValidOtpMock.mockResolvedValue(otpFixture);
+  verifyMagicCodeMock.mockResolvedValueOnce([
+    VerifyMagicCodeError.Expired,
+  ]);
+
+  const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {
+    params: {
+      otpId: otpFixture.id,
+    },
+    searchParams: {
+      [SearchParamAuth.Email]: userFixture.email,
+    },
+  });
+
+  const input = await findByLabelText('Verification Code');
+  const submitButton = await findByText(commonCopies.actions.continue);
+
+  await userEvent.type(input, '123456');
+  await userEvent.click(submitButton);
+
+  expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true');
+});
