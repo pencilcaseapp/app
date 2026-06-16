@@ -143,7 +143,6 @@ export default function Otp({ loaderData }: Route.ComponentProps) {
             label="Verification Code"
             hint="Check your inbox for the code. Booja!"
             className="mb-6"
-            autoSubmit
           />
         )}
       </form.AppField>
