@@ -46,7 +46,7 @@ exports[`matches snapshot 1`] = `
     >
       <label
         class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold"
-        for="otp-0"
+        for="otp-1"
       >
         Verification Code
       </label>
@@ -66,7 +66,7 @@ exports[`matches snapshot 1`] = `
           data-radix-collection-item=""
           data-radix-index="0"
           data-radix-otp-input=""
-          id="otp-0"
+          id="otp-1"
           inputmode="numeric"
           maxlength="6"
           pattern="\\d{1}"
@@ -87,7 +87,6 @@ exports[`matches snapshot 1`] = `
           data-radix-collection-item=""
           data-radix-index="1"
           data-radix-otp-input=""
-          id="otp-1"
           inputmode="numeric"
           maxlength="1"
           pattern="\\d{1}"
@@ -108,7 +107,6 @@ exports[`matches snapshot 1`] = `
           data-radix-collection-item=""
           data-radix-index="2"
           data-radix-otp-input=""
-          id="otp-2"
           inputmode="numeric"
           maxlength="1"
           pattern="\\d{1}"
@@ -129,7 +127,6 @@ exports[`matches snapshot 1`] = `
           data-radix-collection-item=""
           data-radix-index="3"
           data-radix-otp-input=""
-          id="otp-3"
           inputmode="numeric"
           maxlength="1"
           pattern="\\d{1}"
@@ -150,7 +147,6 @@ exports[`matches snapshot 1`] = `
           data-radix-collection-item=""
           data-radix-index="4"
           data-radix-otp-input=""
-          id="otp-4"
           inputmode="numeric"
           maxlength="1"
           pattern="\\d{1}"
@@ -171,12 +167,22 @@ exports[`matches snapshot 1`] = `
           data-radix-collection-item=""
           data-radix-index="5"
           data-radix-otp-input=""
-          id="otp-5"
           inputmode="numeric"
           maxlength="1"
           pattern="\\d{1}"
           tabindex="-1"
           type="text"
+          value=""
+        />
+        <input
+          autocapitalize="off"
+          autocomplete="off"
+          autocorrect="off"
+          autosave="off"
+          name="otp"
+          readonly=""
+          spellcheck="false"
+          type="hidden"
           value=""
         />
       </div>
@@ -186,12 +192,6 @@ exports[`matches snapshot 1`] = `
         Check your inbox for the code. Booja!
       </span>
     </div>
-    <input
-      id="otp"
-      name="otp"
-      type="hidden"
-      value=""
-    />
     <button
       class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-grey-900 dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-yellow-300 mb-10 w-full"
       type="submit"
