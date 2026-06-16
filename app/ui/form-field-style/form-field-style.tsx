@@ -14,7 +14,7 @@ export const FormFieldStyle = <C extends React.ElementType = 'input'>
     // Placeholder styles
     'placeholder-pca-grey-400 dark:placeholder-pca-grey-500 placeholder-sm placeholder-font-inter',
     // Disabled state styles
-    'disabled:pointer-events-none disabled:bg-pca-grey-100 dark:disabled:bg-pca-grey-800/30 disabled:border-pca-grey-200 dark:disabled:border-transparent disabled:placeholder-pca-grey-300 dark:disabled:placeholder-pca-grey-800',
+    'disabled:pointer-events-none disabled:bg-pca-grey-100 dark:disabled:bg-pca-grey-800/30 disabled:border-pca-grey-200 dark:disabled:border-transparent disabled:placeholder-pca-grey-300 dark:disabled:placeholder-pca-grey-800 disabled:text-pca-grey-400 dark:disabled:text-pca-grey-600',
     // Error state styles
     ariaInvalid && 'dark:bg-pca-red-500/10 dark:hover:bg-pca-red-500/20 dark:focus:bg-pca-red-500/20 dark:active:bg-pca-red-500/20 border-pca-red-500 dark:border-pca-red-500! hover:border-pca-red-700 dark:hover:border-pca-red-700 focus:border-pca-red-700 dark:focus:border-pca-red-700 focus:ring-pca-red-300 active:ring-pca-red-300',
     className,
