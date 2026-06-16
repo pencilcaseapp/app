@@ -40,12 +40,12 @@ export const SidebarMenu: FC<SidebarMenuProps> = ({
         exit="close"
         initial={initialState}
         className={classNames([
-          'fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-screen bg-pca-white dark:bg-pca-grey-900',
+          'fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-[100dvh] bg-pca-white dark:bg-pca-grey-900',
           isAnimationComplete && 'transition-shadow ease-in-out duration-200 sm:max-xl:shadow-md sm:max-xl:ring-1 ring-pca-grey-200 sm:max-xl:dark:ring-pca-grey-800',
         ])}
       >
         <nav
-          className="top-0 left-0 h-[100vh-56px] flex justify-between flex-col w-full max-w-none sm:max-w-62.5 overflow-hidden overscroll-y-none overflow-x-hidden"
+          className="top-0 left-0 h-[100dvh-56px] flex justify-between flex-col w-full max-w-none sm:max-w-62.5 overflow-hidden overscroll-y-none overflow-x-hidden"
         >
           <ul className="flex gap-2 flex-col px-1.5 pt-4 grow overflow-scroll scrollbar-none pb-42">
             {items.map(({ key, content }) => {
