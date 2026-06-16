@@ -25,6 +25,7 @@ export const Disabled: Story = {
   args: {
     id: 'name',
     type: 'text',
+    value: '',
     label: 'Name',
     placeholder: 'e.g. John Doe',
     disabled: true,
