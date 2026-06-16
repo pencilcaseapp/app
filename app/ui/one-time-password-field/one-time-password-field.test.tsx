@@ -6,6 +6,7 @@ describe('OneTimePasswordField', () => {
   test('matches snapshot', () => {
     const { container } = render(
       <OneTimePasswordField
+        name="otp"
         value=""
         onValueChange={() => {}}
       />,
@@ -17,6 +18,7 @@ describe('OneTimePasswordField', () => {
   test('disabled matches snapshot', () => {
     const { container } = render(
       <OneTimePasswordField
+        name="otp"
         value=""
         onValueChange={() => {}}
         disabled
@@ -29,6 +31,7 @@ describe('OneTimePasswordField', () => {
   test('error message matches snapshot', () => {
     const { container } = render(
       <OneTimePasswordField
+        name="otp"
         value=""
         onValueChange={() => {}}
         errorMessage="Invalid code"
@@ -41,6 +44,7 @@ describe('OneTimePasswordField', () => {
   test('hint matches snapshot', () => {
     const { container } = render(
       <OneTimePasswordField
+        name="otp"
         value=""
         onValueChange={() => {}}
         hint="Enter the code sent to your email"

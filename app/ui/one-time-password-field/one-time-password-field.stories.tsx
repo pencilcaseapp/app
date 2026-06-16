@@ -21,6 +21,7 @@ export const Controlled: Story = {
     return (
       <div className="w-full max-w-74">
         <OneTimePasswordField
+          name="otp"
           label="Verification Code"
           value={value}
           onValueChange={setValue}
@@ -39,6 +40,7 @@ export const Disabled: Story = {
     ),
   ],
   args: {
+    name: 'otp',
     label: 'Verification Code',
     value: '123456',
     disabled: true,
@@ -54,6 +56,7 @@ export const Hint: Story = {
     ),
   ],
   args: {
+    name: 'otp',
     label: 'Verification Code',
     value: '',
     hint: 'Enter the code sent to your email',
@@ -69,6 +72,7 @@ export const Error: Story = {
     ),
   ],
   args: {
+    name: 'otp',
     label: 'Verification Code',
     value: '123456',
     errorMessage: 'Invalid code',
