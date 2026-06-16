@@ -114,7 +114,9 @@ test('matches snapshot', async () => {
 //   await userEvent.type(input, '123456');
 //   await fireEvent.submit(button);
 
-//   expect(await findByText('Invalid code. Please check the code and try again.')).toBeInTheDocument();
+//   expect(
+// await findByText('Invalid code. Please check the code and try again.')
+// ).toBeInTheDocument();
 // });
 
 // test('redirects on expired code', async () => {
