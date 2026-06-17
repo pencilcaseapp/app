@@ -109,7 +109,7 @@ export default function Otp({ loaderData }: Route.ComponentProps) {
         textColorDark="white"
         className="text-center"
       >
-        We sent you an verification code to:
+        We sent a code to:
       </Typography>
       <Typography
         variant="bodySmall"
@@ -140,7 +140,7 @@ export default function Otp({ loaderData }: Route.ComponentProps) {
       <form.AppField name="otp">
         {field => (
           <field.OneTimePasswordField
-            label="Verification Code"
+            label="One-Time Password"
             hint="Check your inbox for the code. Booja!"
             className="mb-6"
           />

@@ -24,7 +24,7 @@ exports[`matches snapshot 1`] = `
     <p
       class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white text-center"
     >
-      We sent you an verification code to:
+      We sent a code to:
     </p>
     <p
       class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-semibold mb-6 text-center"
@@ -48,7 +48,7 @@ exports[`matches snapshot 1`] = `
         class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold"
         for="otp"
       >
-        Verification Code
+        One-Time Password
       </label>
       <noscript />
       <div

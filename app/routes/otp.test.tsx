@@ -73,7 +73,7 @@ test('redirects to onboarding on successful verification', async () => {
     },
   });
 
-  const input = await findByLabelText('Verification Code');
+  const input = await findByLabelText('One-Time Password');
   const button = await findByText('Continue');
 
   await userEvent.type(input, '123456');
@@ -117,7 +117,7 @@ test('shows form error on invalid code', async () => {
     },
   });
 
-  const input = await findByLabelText('Verification Code');
+  const input = await findByLabelText('One-Time Password');
   const button = await findByText('Continue');
 
   await userEvent.type(input, '123456');
@@ -146,7 +146,7 @@ test('redirects on expired code', async () => {
     },
   });
 
-  const input = await findByLabelText('Verification Code');
+  const input = await findByLabelText('One-Time Password');
   const button = await findByText('Continue');
 
   await userEvent.type(input, '123456');
