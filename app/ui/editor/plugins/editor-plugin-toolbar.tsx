@@ -10,7 +10,6 @@ import { Toolbar } from '~/ui/toolbar/toolbar';
 import { ToolbarGroup } from '~/ui/toolbar/toolbar-group';
 import { ToolbarToggle } from '~/ui/toolbar/toolbar-toggle';
 import { ToolbarSeparator } from '~/ui/toolbar/toolbar-separator';
-
 import type { EditorFormatBlock } from '../editor.types';
 import { useMedia, useWindowScroll } from 'react-use';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
@@ -20,6 +19,7 @@ import {
   INSERT_UNORDERED_LIST_COMMAND,
 } from '@lexical/list';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
+import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
 
 export interface EditorPluginToolbarProps {
   topbarLeft?: React.ReactNode;
@@ -34,12 +34,15 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
       italic: false,
       underline: false,
     });
+    const [contentY, setContentY] = useState(0);
+
     const isWide = useMedia('(min-width: 1024px)');
+
     const { y: windowY } = useWindowScroll();
-    const isScrolling = windowY > 65;
     const topbarRef = useRef<HTMLElement>(null);
     const [isVirtualKeyboardOpen] = useVirtualKeyboard();
     const { isSidebarOpen } = useSidebarContext();
+    const isScrolling = (isVirtualKeyboardOpen ? contentY : windowY) > 65;
 
     const $updateToolbar = useCallback(() => {
       const selection = $getSelection();
@@ -55,6 +58,17 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
 
       setFormatBlock($getFormatBlock(selection));
     }, []);
+
+    useEffect(() => {
+      return editor.registerCommand(
+        CONTENT_SCROLL_COMMAND,
+        (scrollTop) => {
+          setContentY(scrollTop);
+          return false;
+        },
+        COMMAND_PRIORITY_CRITICAL,
+      );
+    }, [editor]);
 
     useEffect(() => {
       return mergeRegister(
