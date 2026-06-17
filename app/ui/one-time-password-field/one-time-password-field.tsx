@@ -1,15 +1,15 @@
-import { Root, Input, HiddenInput } from '@radix-ui/react-one-time-password-field';
+import { OTPInput } from 'input-otp';
 import { Label } from '../label/label';
-import { FormFieldStyle } from '../form-field-style/form-field-style';
+// import { FormFieldStyle } from '../form-field-style/form-field-style';
 import { Typography } from '../typography/typography';
 import classNames from 'classnames';
+import { FormFieldStyle } from '../form-field-style/form-field-style';
 
 export interface OneTimePasswordFieldProps {
   label?: string;
   name: string;
   value: string;
-  autoSubmit?: boolean;
-  onValueChange(value: string): void;
+  onChange(value: string): void;
   disabled?: boolean;
   hint?: string;
   errorMessage?: string;
@@ -22,64 +22,47 @@ export const OneTimePasswordField: React.FC<OneTimePasswordFieldProps>
     hint,
     errorMessage,
     className,
-    ...props
+    value,
+    onChange,
+    name,
+    disabled,
   }) => {
     return (
       <div className={classNames('flex flex-col gap-2 group', className)}>
         {label && (
           <Label
-            htmlFor="otp-1"
-            disabled={props.disabled}
+            htmlFor={name}
+            disabled={disabled}
           >
             {label}
           </Label>
         )}
-        <Root {...props} className="flex justify-between w-full">
-          <Input asChild>
+        <OTPInput
+          id={name}
+          maxLength={6}
+          containerClassName="flex justify-between w-full"
+          value={value}
+          onChange={onChange}
+          name={name}
+          disabled={disabled}
+          pushPasswordManagerStrategy="none"
+          data-lpignore="true"
+          data-1p-ignore="true"
+          render={({ slots }) => slots.map((slot, idx) => (
             <FormFieldStyle
-              id="otp-1"
+              // eslint-disable-next-line @eslint-react/no-array-index-key
+              key={idx}
+              as="div"
               aria-invalid={!!errorMessage}
               aria-errormessage={errorMessage ? `otp-error` : undefined}
-              className="w-11 h-11 text-center"
-            />
-          </Input>
-          <Input asChild>
-            <FormFieldStyle
-              aria-invalid={!!errorMessage}
-              aria-errormessage={errorMessage ? `otp-error` : undefined}
-              className="w-11 h-11 text-center"
-            />
-          </Input>
-          <Input asChild>
-            <FormFieldStyle
-              aria-invalid={!!errorMessage}
-              aria-errormessage={errorMessage ? `otp-error` : undefined}
-              className="w-11 h-11 text-center"
-            />
-          </Input>
-          <Input asChild>
-            <FormFieldStyle
-              aria-invalid={!!errorMessage}
-              aria-errormessage={errorMessage ? `otp-error` : undefined}
-              className="w-11 h-11 text-center"
-            />
-          </Input>
-          <Input asChild>
-            <FormFieldStyle
-              aria-invalid={!!errorMessage}
-              aria-errormessage={errorMessage ? `otp-error` : undefined}
-              className="w-11 h-11 text-center"
-            />
-          </Input>
-          <Input asChild>
-            <FormFieldStyle
-              aria-invalid={!!errorMessage}
-              aria-errormessage={errorMessage ? `otp-error` : undefined}
-              className="w-11 h-11 text-center"
-            />
-          </Input>
-          <HiddenInput />
-        </Root>
+              className={classNames('w-11 h-11 text-center', {
+                'ring-2': slot.isActive,
+              })}
+            >
+              {slot.char}
+            </FormFieldStyle>
+          ))}
+        />
         {hint && !errorMessage && (
           <Typography
             as="span"

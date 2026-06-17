@@ -8,7 +8,7 @@ describe('OneTimePasswordField', () => {
       <OneTimePasswordField
         name="otp"
         value=""
-        onValueChange={() => {}}
+        onChange={() => {}}
       />,
     );
 
@@ -20,7 +20,7 @@ describe('OneTimePasswordField', () => {
       <OneTimePasswordField
         name="otp"
         value=""
-        onValueChange={() => {}}
+        onChange={() => {}}
         disabled
       />,
     );
@@ -33,7 +33,7 @@ describe('OneTimePasswordField', () => {
       <OneTimePasswordField
         name="otp"
         value=""
-        onValueChange={() => {}}
+        onChange={() => {}}
         errorMessage="Invalid code"
       />,
     );
@@ -46,7 +46,7 @@ describe('OneTimePasswordField', () => {
       <OneTimePasswordField
         name="otp"
         value=""
-        onValueChange={() => {}}
+        onChange={() => {}}
         hint="Enter the code sent to your email"
       />,
     );

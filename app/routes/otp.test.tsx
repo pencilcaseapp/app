@@ -4,10 +4,11 @@ import { SearchParamAuth } from '~/constants/search-params';
 import { otpFixture } from '~/test/fixtures/otp';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
-// import { sessionFixture } from '~/test/fixtures/session';
-// import { userEvent } from '@testing-library/user-event';
-// import { VerifyMagicCodeError } from '~/services/auth';
-// import { fireEvent } from '@testing-library/dom';
+import { sessionFixture } from '~/test/fixtures/session';
+import { userEvent } from '@testing-library/user-event';
+import { VerifyMagicCodeError } from '~/services/auth';
+import { fireEvent } from '@testing-library/dom';
+import { act } from 'react';
 
 const redirectMock = vi.fn();
 vi.mock('react-router', async () => {
@@ -56,91 +57,103 @@ test('matches snapshot', async () => {
   expect(container).toMatchSnapshot();
 });
 
-// test('redirects to onboarding on successful verification', async () => {
-//   getValidOtpMock.mockResolvedValueOnce(otpFixture);
-//   verifyMagicCodeMock.mockResolvedValueOnce([null, { otp: otpFixture }]);
-//   createSessionCookieMock.mockResolvedValueOnce(sessionFixture);
+test('redirects to onboarding on successful verification', async () => {
+  getValidOtpMock.mockResolvedValueOnce(otpFixture);
+  verifyMagicCodeMock.mockResolvedValueOnce([null, { otp: otpFixture }]);
+  createSessionCookieMock.mockResolvedValueOnce(sessionFixture);
 
-//   const { findByLabelText } = await renderRoute('/otp/:otpId', {
-//     params: {
-//       otpId: otpFixture.id,
-//     },
-//     searchParams: {
-//       [SearchParamAuth.Email]: userFixture.email,
-//     },
-//   });
+  const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {
+    params: {
+      otpId: otpFixture.id,
+    },
+    searchParams: {
+      [SearchParamAuth.Email]: userFixture.email,
+    },
+  });
 
-//   const input = await findByLabelText('Verification Code');
-//   await userEvent.type(input, '123456');
+  const input = await findByLabelText('Verification Code');
+  const button = await findByText('Continue');
 
-//   await vi.waitFor(() => {
-//     expect(redirectMock).toHaveBeenCalledWith('/onboarding');
-//   });
-// });
+  await userEvent.type(input, '123456');
 
-// test('redirects to signin with expired param', async () => {
-//   getValidOtpMock.mockResolvedValueOnce(null);
+  await act(async () => {
+    await fireEvent.submit(button);
+  });
 
-//   await renderRoute('/otp/:otpId', {
-//     params: {
-//       otpId: otpFixture.id,
-//     },
-//     searchParams: {
-//       [SearchParamAuth.Email]: userFixture.email,
-//     },
-//   });
+  await vi.waitFor(() => {
+    expect(redirectMock).toHaveBeenCalledWith('/onboarding');
+  });
+});
 
-//   expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true');
-// });
+test('redirects to signin with expired param', async () => {
+  getValidOtpMock.mockResolvedValueOnce(null);
 
-// test('shows form error on invalid code', async () => {
-//   getValidOtpMock.mockResolvedValue(otpFixture);
-//   verifyMagicCodeMock.mockResolvedValueOnce([
-//     VerifyMagicCodeError.Invalid,
-//   ]);
+  await renderRoute('/otp/:otpId', {
+    params: {
+      otpId: otpFixture.id,
+    },
+    searchParams: {
+      [SearchParamAuth.Email]: userFixture.email,
+    },
+  });
 
-//   const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {
-//     params: {
-//       otpId: otpFixture.id,
-//     },
-//     searchParams: {
-//       [SearchParamAuth.Email]: userFixture.email,
-//     },
-//   });
+  expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true');
+});
 
-//   const input = await findByLabelText('Verification Code');
-//   const button = await findByText('Continue');
+test('shows form error on invalid code', async () => {
+  getValidOtpMock.mockResolvedValue(otpFixture);
+  verifyMagicCodeMock.mockResolvedValueOnce([
+    VerifyMagicCodeError.Invalid,
+  ]);
 
-//   await userEvent.type(input, '123456');
-//   await fireEvent.submit(button);
+  const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {
+    params: {
+      otpId: otpFixture.id,
+    },
+    searchParams: {
+      [SearchParamAuth.Email]: userFixture.email,
+    },
+  });
 
-//   expect(
-// await findByText('Invalid code. Please check the code and try again.')
-// ).toBeInTheDocument();
-// });
+  const input = await findByLabelText('Verification Code');
+  const button = await findByText('Continue');
 
-// test('redirects on expired code', async () => {
-//   getValidOtpMock.mockResolvedValue(otpFixture);
-//   verifyMagicCodeMock.mockResolvedValueOnce([
-//     VerifyMagicCodeError.Expired,
-//   ]);
+  await userEvent.type(input, '123456');
 
-//   const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {
-//     params: {
-//       otpId: otpFixture.id,
-//     },
-//     searchParams: {
-//       [SearchParamAuth.Email]: userFixture.email,
-//     },
-//   });
+  await act(async () => {
+    await fireEvent.submit(button);
+  });
 
-//   const input = await findByLabelText('Verification Code');
-//   const button = await findByText('Continue');
+  expect(
+    await findByText('Invalid code. Please check the code and try again.'),
+  ).toBeInTheDocument();
+});
 
-//   await userEvent.type(input, '123456');
-//   await fireEvent.submit(button);
+test('redirects on expired code', async () => {
+  getValidOtpMock.mockResolvedValue(otpFixture);
+  verifyMagicCodeMock.mockResolvedValueOnce([
+    VerifyMagicCodeError.Expired,
+  ]);
 
-//   await vi.waitFor(() => {
-//     expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true');
-//   });
-// });
+  const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {
+    params: {
+      otpId: otpFixture.id,
+    },
+    searchParams: {
+      [SearchParamAuth.Email]: userFixture.email,
+    },
+  });
+
+  const input = await findByLabelText('Verification Code');
+  const button = await findByText('Continue');
+
+  await userEvent.type(input, '123456');
+
+  await act(async () => {
+    await fireEvent.submit(button);
+  });
+
+  await vi.waitFor(() => {
+    expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true');
+  });
+});
