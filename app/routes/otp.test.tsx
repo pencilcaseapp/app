@@ -54,6 +54,8 @@ test('matches snapshot', async () => {
     },
   });
 
+  await act(() => new Promise(resolve => setTimeout(resolve)));
+
   expect(container).toMatchSnapshot();
 });
 

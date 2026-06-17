@@ -1,9 +1,8 @@
 import { OTPInput } from 'input-otp';
 import { Label } from '../label/label';
-// import { FormFieldStyle } from '../form-field-style/form-field-style';
+import { FormFieldStyle } from '../form-field-style/form-field-style';
 import { Typography } from '../typography/typography';
 import classNames from 'classnames';
-import { FormFieldStyle } from '../form-field-style/form-field-style';
 
 export interface OneTimePasswordFieldProps {
   label?: string;
