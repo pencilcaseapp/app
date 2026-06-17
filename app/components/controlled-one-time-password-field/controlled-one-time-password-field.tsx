@@ -1,7 +1,7 @@
 import { useFieldContext } from '~/contexts/form';
 import { OneTimePasswordField, type OneTimePasswordFieldProps } from '~/ui/one-time-password-field/one-time-password-field';
 
-export type ControlledOneTimePasswordFieldProps = Omit<OneTimePasswordFieldProps, 'onValueChange' | 'value' | 'onAutoSubmit' | 'errorMessage' | 'name'>;
+export type ControlledOneTimePasswordFieldProps = Omit<OneTimePasswordFieldProps, 'onChange' | 'value' | 'onAutoSubmit' | 'errorMessage' | 'name'>;
 
 // eslint-disable-next-line @stylistic/max-len
 export const ControlledOneTimePasswordField: React.FC<ControlledOneTimePasswordFieldProps>
@@ -12,7 +12,7 @@ export const ControlledOneTimePasswordField: React.FC<ControlledOneTimePasswordF
       <OneTimePasswordField
         name={field.name}
         value={field.state.value}
-        onValueChange={field.handleChange}
+        onChange={field.handleChange}
         errorMessage={field.state.meta.errors[0]?.message}
         {...props}
       />

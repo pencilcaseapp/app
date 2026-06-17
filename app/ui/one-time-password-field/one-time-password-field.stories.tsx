@@ -24,7 +24,7 @@ export const Controlled: Story = {
           name="otp"
           label="Verification Code"
           value={value}
-          onValueChange={setValue}
+          onChange={setValue}
         />
       </div>
     );

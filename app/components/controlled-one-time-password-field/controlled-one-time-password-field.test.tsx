@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react';
+import { act } from 'react';
 import { expect, test } from 'vitest';
 import z from 'zod';
 import { formHook } from '~/hooks/use-app-form';
@@ -31,10 +32,12 @@ const TestForm: React.FC = () => {
   );
 };
 
-test('matches snapshot', () => {
+test('matches snapshot', async () => {
   const { container } = render(
     <TestForm />,
   );
+
+  await act(() => new Promise(resolve => setTimeout(resolve)));
 
   expect(container).toMatchSnapshot();
 });
