@@ -1,5 +1,6 @@
 {
-  "editor.formatOnSave": false,
+  "editor.formatOnSave": true,
+  "eslint.run": "onSave",
   "prettier.enable": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
