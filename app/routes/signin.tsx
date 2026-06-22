@@ -10,6 +10,7 @@ import { commonCopies } from '~/constants/common-copies';
 import { initMagicCode } from '~/services/auth';
 import { getOptionalSearchParam, withSearchParams } from '~/utils/url';
 import { SearchParamAuth } from '~/constants/search-params';
+import { Notification } from '~/ui/notification/notification';
 
 const formSchema = z.object({
   email: z.email(),
@@ -17,9 +18,13 @@ const formSchema = z.object({
 
 export function loader({ request }: Route.ActionArgs) {
   const email = getOptionalSearchParam(request, SearchParamAuth.Email);
+  const isExpired = getOptionalSearchParam<boolean>(
+    request, SearchParamAuth.IsExpired,
+  );
 
   return {
     email,
+    isExpired,
   };
 }
 
@@ -65,11 +70,16 @@ export default function SignIn({ loaderData }: Route.ComponentProps) {
         <br />
         with Magic
       </Typography>
-      <Typography variant="bodySmall" textColorLight="grey-900" textColorDark="white" className="mb-6 text-center">
-        Please enter your e-mail address.
-        <br />
-        We’ll handle the magic (link) for you …
+      <Typography variant="bodySmall" textColorLight="grey-900" textColorDark="white" className="mb-6 text-center px-10">
+        Enter your e-mail address to receive a one-time verification code.
       </Typography>
+      {loaderData.isExpired && (
+        <Notification
+          variant="warning"
+          title="Code has expired. Please try again."
+          className="mb-5"
+        />
+      )}
       <form.AppField name="email">
         {field => (
           <field.TextField

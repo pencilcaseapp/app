@@ -94,3 +94,14 @@ test('returns form error on too many requests', async () => {
 
   expect(await findByText('Too many requests. Please try again later.')).toBeInTheDocument();
 });
+
+test('expired code shows notification', async () => {
+  const { findByText } = await renderRoute('/signin', {
+    params: {},
+    searchParams: {
+      [SearchParamAuth.IsExpired]: 'true',
+    },
+  });
+
+  expect(await findByText('Code has expired. Please try again.')).toBeInTheDocument();
+});
