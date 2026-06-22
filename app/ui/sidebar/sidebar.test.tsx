@@ -7,12 +7,19 @@ import { SidebarProvider } from '../sidebar-context/sidebar-provider';
 import { useSidebarContext } from '../sidebar-context/use-sidebar-context';
 import type { SidebarMenuItem } from './types';
 
-const useMedia = vi.fn();
+const useMediaMock = vi.fn();
+const useLocalStorageMock = vi.fn();
 
 vi.mock('react-use', async () => {
   return {
-    useMedia: () => useMedia(),
+    useMedia: () => useMediaMock(),
+    useLocalStorage: () => useLocalStorageMock(),
   };
+});
+
+afterEach(() => {
+  vi.clearAllMocks();
+  localStorage.clear();
 });
 
 const ToggleButton = () => {
@@ -46,7 +53,8 @@ afterEach(() => {
 
 describe('Sidebar', () => {
   it('renders the navigation items open by default on desktop', () => {
-    useMedia.mockReturnValue(true);
+    useMediaMock.mockReturnValue(true);
+    useLocalStorageMock.mockReturnValue([true, () => {}]);
 
     const { getByText } = renderSidebar();
 
@@ -55,7 +63,8 @@ describe('Sidebar', () => {
   });
 
   it('keeps the sidebar closed by default on smaller views', () => {
-    useMedia.mockReturnValue(false);
+    useMediaMock.mockReturnValue(false);
+    useLocalStorageMock.mockReturnValue([false, () => {}]);
 
     const { queryByText } = renderSidebar();
 
@@ -63,7 +72,8 @@ describe('Sidebar', () => {
   });
 
   it('opens the sidebar on smaller views when toggled', async () => {
-    useMedia.mockReturnValue(false);
+    useMediaMock.mockReturnValue(false);
+    useLocalStorageMock.mockReturnValue([false, () => {}]);
 
     const { getByText, findByText } = renderSidebar();
 
@@ -73,7 +83,8 @@ describe('Sidebar', () => {
   });
 
   it('matches the snapshot on desktop', () => {
-    useMedia.mockReturnValue(true);
+    useMediaMock.mockReturnValue(true);
+    useLocalStorageMock.mockReturnValue([true, () => {}]);
 
     const { container } = renderSidebar();
 

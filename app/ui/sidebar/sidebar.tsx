@@ -14,13 +14,13 @@ export const Sidebar: FC<SidebarProps> = ({
     <SidebarPortal
       mobileChildren={(
         <SidebarMenu
+          initialState="close"
           bottomArea={bottomArea}
           items={items}
         />
       )}
       desktopChildren={(
         <SidebarMenu
-          initialState="open"
           showSlimSidebar
           bottomArea={bottomArea}
           items={items}

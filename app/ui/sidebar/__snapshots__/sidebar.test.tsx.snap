@@ -8,7 +8,7 @@ exports[`Sidebar > matches the snapshot on desktop 1`] = `
     Toggle
   </button>
   <div
-    class="fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-[100dvh] bg-pca-white dark:bg-pca-grey-900"
+    class="fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-dvh bg-pca-white dark:bg-pca-grey-900"
     style="transform: none;"
   >
     <nav
@@ -28,7 +28,7 @@ exports[`Sidebar > matches the snapshot on desktop 1`] = `
   </div>
   <div
     class="fixed top-0 left-0 flex flex-col pointer-events-auto z-10 pt-14 h-screen w-16"
-    style="transform: none;"
+    style="transform: translateX(-100%);"
   >
     <nav
       class=" relative flex flex-col grow"
