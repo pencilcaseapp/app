@@ -1,0 +1,173 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Notification > variant 'danger' — matches snapshot 1`] = `
+<div>
+  <div
+    aria-live="polite"
+    class="flex items-start justify-between rounded-xl border bg-pca-red-300 border-pca-red-900 pl-3 pr-8 py-3"
+    role="status"
+  >
+    <svg
+      aria-hidden="true"
+      class="text-pca-red-900 mr-3 shrink-0 self-start"
+      fill="transparent"
+      focusable="false"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+      />
+    </svg>
+    <div
+      class="flex flex-col gap-1 grow pt-0.5"
+    >
+      <p
+        class="antialiased font-inter text-sm text-pca-red-900 dark:text-pca-red-900 font-semibold"
+      >
+        Title
+      </p>
+      <p
+        class="antialiased font-inter text-sm font-normal text-pca-red-900 dark:text-pca-red-900 mb-1"
+      >
+        Description
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Notification > variant 'info' — matches snapshot 1`] = `
+<div>
+  <div
+    aria-live="polite"
+    class="flex items-start justify-between rounded-xl border bg-pca-blue-300 border-pca-blue-900 pl-3 pr-8 py-3"
+    role="status"
+  >
+    <svg
+      aria-hidden="true"
+      class="text-pca-blue-900 mr-3 shrink-0 self-start"
+      fill="transparent"
+      focusable="false"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+      />
+    </svg>
+    <div
+      class="flex flex-col gap-1 grow pt-0.5"
+    >
+      <p
+        class="antialiased font-inter text-sm text-pca-blue-900 dark:text-pca-blue-900 font-semibold"
+      >
+        Title
+      </p>
+      <p
+        class="antialiased font-inter text-sm font-normal text-pca-blue-900 dark:text-pca-blue-900 mb-1"
+      >
+        Description
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Notification > variant 'success' — matches snapshot 1`] = `
+<div>
+  <div
+    aria-live="polite"
+    class="flex items-start justify-between rounded-xl border bg-pca-green-300 border-pca-green-900 pl-3 pr-8 py-3"
+    role="status"
+  >
+    <svg
+      aria-hidden="true"
+      class="text-pca-green-900 mr-3 shrink-0 self-start"
+      fill="transparent"
+      focusable="false"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M7.5 12L10.5 15L16.5 9M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+      />
+    </svg>
+    <div
+      class="flex flex-col gap-1 grow pt-0.5"
+    >
+      <p
+        class="antialiased font-inter text-sm text-pca-green-900 dark:text-pca-green-900 font-semibold"
+      >
+        Title
+      </p>
+      <p
+        class="antialiased font-inter text-sm font-normal text-pca-green-900 dark:text-pca-green-900 mb-1"
+      >
+        Description
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Notification > variant 'warning' — matches snapshot 1`] = `
+<div>
+  <div
+    aria-live="polite"
+    class="flex items-start justify-between rounded-xl border bg-pca-orange-300 border-pca-orange-900 pl-3 pr-8 py-3"
+    role="status"
+  >
+    <svg
+      aria-hidden="true"
+      class="text-pca-orange-900 mr-3 shrink-0 self-start"
+      fill="transparent"
+      focusable="false"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M11.9998 8.99999V13M11.9998 17H12.0098M10.6151 3.89171L2.39019 18.0983C1.93398 18.8863 1.70588 19.2803 1.73959 19.6037C1.769 19.8857 1.91677 20.142 2.14613 20.3088C2.40908 20.5 2.86435 20.5 3.77487 20.5H20.2246C21.1352 20.5 21.5904 20.5 21.8534 20.3088C22.0827 20.142 22.2305 19.8857 22.2599 19.6037C22.2936 19.2803 22.0655 18.8863 21.6093 18.0983L13.3844 3.89171C12.9299 3.10654 12.7026 2.71396 12.4061 2.58211C12.1474 2.4671 11.8521 2.4671 11.5935 2.58211C11.2969 2.71396 11.0696 3.10655 10.6151 3.89171Z"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+      />
+    </svg>
+    <div
+      class="flex flex-col gap-1 grow pt-0.5"
+    >
+      <p
+        class="antialiased font-inter text-sm text-pca-orange-900 dark:text-pca-orange-900 font-semibold"
+      >
+        Title
+      </p>
+      <p
+        class="antialiased font-inter text-sm font-normal text-pca-orange-900 dark:text-pca-orange-900 mb-1"
+      >
+        Description
+      </p>
+    </div>
+  </div>
+</div>
+`;
