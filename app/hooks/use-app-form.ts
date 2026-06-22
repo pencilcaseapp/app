@@ -1,6 +1,7 @@
 import { createFormHook, type FormAsyncValidateOrFn, type FormOptions, type FormValidateOrFn } from '@tanstack/react-form';
 import { mergeForm, useTransform } from '@tanstack/react-form-remix';
 import { useActionData, useSubmit } from 'react-router';
+import { ControlledCheckbox } from '~/components/controlled-checkbox/controlled-checkbox';
 import { ControlledHiddenInput } from '~/components/controlled-hidden-input/controlled-hidden-input';
 import { ControlledOneTimePasswordField } from '~/components/controlled-one-time-password-field/controlled-one-time-password-field';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
@@ -16,6 +17,7 @@ export const formHook = createFormHook({
   formContext,
   fieldComponents: {
     TextField: ControlledTextField,
+    Checkbox: ControlledCheckbox,
     OneTimePasswordField: ControlledOneTimePasswordField,
     HiddenInput: ControlledHiddenInput,
   },

@@ -1,0 +1,114 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders disabled state 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-2 group"
+  >
+    <div
+      class="flex gap-2"
+    >
+      <input
+        aria-invalid="false"
+        class="bg-white dark:bg-pca-grey-800/60 border border-pca-grey-900 dark:border-transparent transition-all duration-300 ease-in-out rounded-xl outline-0 p-3 text-sm font-inter text-pca-grey-900 dark:text-white hover:border-pca-blue-700 dark:hover:border-transparent dark:hover:bg-pca-grey-800 focus:border-pca-blue-700 dark:focus:border-pca-grey-700 dark:active:border-pca-grey-700 focus:ring-2 dark:focus:ring-0 active:ring-2 dark:active:ring-0 ring-pca-blue-300 dark:focus:bg-pca-grey-800 dark:active:bg-pca-grey-800 placeholder-pca-grey-400 dark:placeholder-pca-grey-500 placeholder-sm placeholder-font-inter disabled:pointer-events-none disabled:bg-pca-grey-100 dark:disabled:bg-pca-grey-800/30 disabled:border-pca-grey-200 dark:disabled:border-transparent disabled:placeholder-pca-grey-300 dark:disabled:placeholder-pca-grey-800 disabled:text-pca-grey-400 dark:disabled:text-pca-grey-600 peer grid h-6 w-6 !p-0 !rounded-lg shrink-0 appearance-none cursor-pointer place-content-center after:hidden after:content-[''] checked:after:bg-checkmark-white checked:border-pca-grey-800 checked:bg-pca-grey-800 checked:after:block checked:hover:border-pca-grey-900 checked:hover:bg-pca-grey-900 checked:after:h-[13px] checked:after:w-[13px] disabled:checked:after:opacity-30 disabled:checked:after:bg-checkmark-black dark:disabled:checked:after:bg-checkmark-white"
+        disabled=""
+        id="test"
+        type="checkbox"
+      />
+      <label
+        class="antialiased font-inter text-xs text-pca-grey-300 dark:text-pca-grey-800 font-normal pt-1.25 select-none pointer-events-none"
+        for="test"
+      >
+        Test Label
+      </label>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders error state 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-2 group"
+  >
+    <div
+      class="flex gap-2"
+    >
+      <input
+        aria-errormessage="test-error"
+        aria-invalid="true"
+        class="bg-white dark:bg-pca-grey-800/60 border border-pca-grey-900 dark:border-transparent transition-all duration-300 ease-in-out rounded-xl outline-0 p-3 text-sm font-inter text-pca-grey-900 dark:text-white hover:border-pca-blue-700 dark:hover:border-transparent dark:hover:bg-pca-grey-800 focus:border-pca-blue-700 dark:focus:border-pca-grey-700 dark:active:border-pca-grey-700 focus:ring-2 dark:focus:ring-0 active:ring-2 dark:active:ring-0 ring-pca-blue-300 dark:focus:bg-pca-grey-800 dark:active:bg-pca-grey-800 placeholder-pca-grey-400 dark:placeholder-pca-grey-500 placeholder-sm placeholder-font-inter disabled:pointer-events-none disabled:bg-pca-grey-100 dark:disabled:bg-pca-grey-800/30 disabled:border-pca-grey-200 dark:disabled:border-transparent disabled:placeholder-pca-grey-300 dark:disabled:placeholder-pca-grey-800 disabled:text-pca-grey-400 dark:disabled:text-pca-grey-600 dark:bg-pca-red-500/10 dark:hover:bg-pca-red-500/20 dark:focus:bg-pca-red-500/20 dark:active:bg-pca-red-500/20 border-pca-red-500 dark:border-pca-red-500! hover:border-pca-red-700 dark:hover:border-pca-red-700 focus:border-pca-red-700 dark:focus:border-pca-red-700 focus:ring-pca-red-300 active:ring-pca-red-300 peer grid h-6 w-6 !p-0 !rounded-lg shrink-0 appearance-none cursor-pointer place-content-center after:hidden after:content-[''] checked:after:bg-checkmark-white checked:border-pca-grey-800 checked:bg-pca-grey-800 checked:after:block checked:hover:border-pca-grey-900 checked:hover:bg-pca-grey-900 checked:after:h-[13px] checked:after:w-[13px] disabled:checked:after:opacity-30 disabled:checked:after:bg-checkmark-black dark:disabled:checked:after:bg-checkmark-white"
+        id="test"
+        type="checkbox"
+      />
+      <label
+        class="antialiased font-inter text-xs text-pca-grey-900 dark:text-pca-grey-300 font-normal pt-1.25 select-none cursor-pointer"
+        for="test"
+      >
+        Test Label
+      </label>
+    </div>
+    <span
+      class="antialiased font-inter text-xs font-normal text-pca-red-500 dark:text-pca-red-500"
+      id="test-error"
+    >
+      Error message
+    </span>
+  </div>
+</div>
+`;
+
+exports[`renders hint text 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-2 group"
+  >
+    <div
+      class="flex gap-2"
+    >
+      <input
+        aria-invalid="false"
+        class="bg-white dark:bg-pca-grey-800/60 border border-pca-grey-900 dark:border-transparent transition-all duration-300 ease-in-out rounded-xl outline-0 p-3 text-sm font-inter text-pca-grey-900 dark:text-white hover:border-pca-blue-700 dark:hover:border-transparent dark:hover:bg-pca-grey-800 focus:border-pca-blue-700 dark:focus:border-pca-grey-700 dark:active:border-pca-grey-700 focus:ring-2 dark:focus:ring-0 active:ring-2 dark:active:ring-0 ring-pca-blue-300 dark:focus:bg-pca-grey-800 dark:active:bg-pca-grey-800 placeholder-pca-grey-400 dark:placeholder-pca-grey-500 placeholder-sm placeholder-font-inter disabled:pointer-events-none disabled:bg-pca-grey-100 dark:disabled:bg-pca-grey-800/30 disabled:border-pca-grey-200 dark:disabled:border-transparent disabled:placeholder-pca-grey-300 dark:disabled:placeholder-pca-grey-800 disabled:text-pca-grey-400 dark:disabled:text-pca-grey-600 peer grid h-6 w-6 !p-0 !rounded-lg shrink-0 appearance-none cursor-pointer place-content-center after:hidden after:content-[''] checked:after:bg-checkmark-white checked:border-pca-grey-800 checked:bg-pca-grey-800 checked:after:block checked:hover:border-pca-grey-900 checked:hover:bg-pca-grey-900 checked:after:h-[13px] checked:after:w-[13px] disabled:checked:after:opacity-30 disabled:checked:after:bg-checkmark-black dark:disabled:checked:after:bg-checkmark-white"
+        id="test"
+        type="checkbox"
+      />
+      <label
+        class="antialiased font-inter text-xs text-pca-grey-900 dark:text-pca-grey-300 font-normal pt-1.25 select-none cursor-pointer"
+        for="test"
+      >
+        Test Label
+      </label>
+    </div>
+    <span
+      class="antialiased font-inter text-xs font-normal text-pca-grey-900 dark:text-white"
+    >
+      Hint text
+    </span>
+  </div>
+</div>
+`;
+
+exports[`renders with label 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-2 group"
+  >
+    <div
+      class="flex gap-2"
+    >
+      <input
+        aria-invalid="false"
+        class="bg-white dark:bg-pca-grey-800/60 border border-pca-grey-900 dark:border-transparent transition-all duration-300 ease-in-out rounded-xl outline-0 p-3 text-sm font-inter text-pca-grey-900 dark:text-white hover:border-pca-blue-700 dark:hover:border-transparent dark:hover:bg-pca-grey-800 focus:border-pca-blue-700 dark:focus:border-pca-grey-700 dark:active:border-pca-grey-700 focus:ring-2 dark:focus:ring-0 active:ring-2 dark:active:ring-0 ring-pca-blue-300 dark:focus:bg-pca-grey-800 dark:active:bg-pca-grey-800 placeholder-pca-grey-400 dark:placeholder-pca-grey-500 placeholder-sm placeholder-font-inter disabled:pointer-events-none disabled:bg-pca-grey-100 dark:disabled:bg-pca-grey-800/30 disabled:border-pca-grey-200 dark:disabled:border-transparent disabled:placeholder-pca-grey-300 dark:disabled:placeholder-pca-grey-800 disabled:text-pca-grey-400 dark:disabled:text-pca-grey-600 peer grid h-6 w-6 !p-0 !rounded-lg shrink-0 appearance-none cursor-pointer place-content-center after:hidden after:content-[''] checked:after:bg-checkmark-white checked:border-pca-grey-800 checked:bg-pca-grey-800 checked:after:block checked:hover:border-pca-grey-900 checked:hover:bg-pca-grey-900 checked:after:h-[13px] checked:after:w-[13px] disabled:checked:after:opacity-30 disabled:checked:after:bg-checkmark-black dark:disabled:checked:after:bg-checkmark-white"
+        id="test"
+        type="checkbox"
+      />
+      <label
+        class="antialiased font-inter text-xs text-pca-grey-900 dark:text-pca-grey-300 font-normal pt-1.25 select-none cursor-pointer"
+        for="test"
+      >
+        Test Label
+      </label>
+    </div>
+  </div>
+</div>
+`;
