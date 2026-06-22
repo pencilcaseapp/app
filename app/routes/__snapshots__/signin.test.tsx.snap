@@ -22,11 +22,9 @@ exports[`matches snapshot 1`] = `
       with Magic
     </h2>
     <p
-      class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white mb-6 text-center"
+      class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white mb-6 text-center px-10"
     >
-      Please enter your e-mail address.
-      <br />
-      We’ll handle the magic (link) for you …
+      Enter your e-mail address to receive a one-time verification code.
     </p>
     <div
       class="flex flex-col gap-2 group mb-6"
