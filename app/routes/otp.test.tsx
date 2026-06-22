@@ -9,6 +9,8 @@ import { userEvent } from '@testing-library/user-event';
 import { VerifyMagicCodeError } from '~/services/auth';
 import { fireEvent } from '@testing-library/dom';
 import { act } from 'react';
+import { withSearchParams } from '~/utils/url';
+import { href } from 'react-router';
 
 const redirectMock = vi.fn();
 vi.mock('react-router', async () => {
@@ -28,11 +30,13 @@ vi.mock('~/repos/otp', () => ({
 }));
 
 const verifyMagicCodeMock = vi.fn();
+const initMagicCodeMock = vi.fn();
 const createSessionCookieMock = vi.fn();
 vi.mock('~/services/auth', async () => {
   const actual = await vi.importActual<typeof import('~/services/auth')>('~/services/auth');
   return {
     ...actual,
+    initMagicCode: () => initMagicCodeMock(),
     verifyMagicCode: () => verifyMagicCodeMock(),
     createSessionCookie: () => createSessionCookieMock(),
   };
@@ -157,5 +161,34 @@ test('redirects on expired code', async () => {
 
   await vi.waitFor(() => {
     expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true');
+  });
+});
+
+test('resends code', async () => {
+  getValidOtpMock.mockResolvedValue(otpFixture);
+  initMagicCodeMock.mockResolvedValueOnce([null, { otp: otpFixture }]);
+
+  const { findByText } = await renderRoute('/otp/:otpId', {
+    params: {
+      otpId: otpFixture.id,
+    },
+    searchParams: {
+      [SearchParamAuth.Email]: userFixture.email,
+    },
+  });
+
+  const button = await findByText('Resend code');
+
+  await act(async () => {
+    await fireEvent.submit(button);
+  });
+
+  await vi.waitFor(() => {
+    expect(redirectMock).toHaveBeenCalledWith(
+      withSearchParams(
+        href('/otp/:otpId', { otpId: otpFixture.id }),
+        { [SearchParamAuth.Email]: userFixture.email },
+      ),
+    );
   });
 });

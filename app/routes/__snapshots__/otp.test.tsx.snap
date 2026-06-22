@@ -6,13 +6,19 @@ exports[`matches snapshot 1`] = `
     action="/otp/5fb9220d-9b0f-4d32-a248-6492457c3890?email=Vita_Boyle44%40gmail.com"
     class="block"
     data-discover="true"
-    id="_r_1_"
+    id="_r_2_"
     method="post"
   >
     <input
       name="csrf"
       type="hidden"
       value="test-token"
+    />
+    <input
+      id="action"
+      name="action"
+      type="hidden"
+      value="verify"
     />
     <h2
       class="antialiased font-inter text-xl sm:text-2xl font-bold text-black dark:text-white mb-3 text-center"
@@ -107,13 +113,42 @@ exports[`matches snapshot 1`] = `
       </span>
     </div>
     <button
-      class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-grey-900 dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-yellow-300 mb-10 w-full"
+      class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-grey-900 dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-yellow-300 mb-4 w-full"
       type="submit"
     >
       <span
         class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
       >
         Continue
+      </span>
+    </button>
+  </form>
+  <form
+    action="/otp/5fb9220d-9b0f-4d32-a248-6492457c3890?email=Vita_Boyle44%40gmail.com"
+    class="block"
+    data-discover="true"
+    id="_r_3_"
+    method="post"
+  >
+    <input
+      name="csrf"
+      type="hidden"
+      value="test-token"
+    />
+    <input
+      id="action"
+      name="action"
+      type="hidden"
+      value="resend"
+    />
+    <button
+      class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 mb-10 w-full"
+      type="submit"
+    >
+      <span
+        class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+      >
+        Resend code
       </span>
     </button>
   </form>
