@@ -113,7 +113,7 @@ exports[`matches snapshot 1`] = `
       </span>
     </div>
     <button
-      class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-grey-900 dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-yellow-300 mb-4 w-full"
+      class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-800 dark:text-pca-grey-900 dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-yellow-300 dark:active:bg-pca-yellow-700 mb-4 w-full"
       type="submit"
     >
       <span
@@ -142,7 +142,7 @@ exports[`matches snapshot 1`] = `
       value="resend"
     />
     <button
-      class="relative overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 mb-10 w-full"
+      class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 mb-10 w-full"
       type="submit"
     >
       <span
