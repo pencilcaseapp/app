@@ -39,8 +39,8 @@ export function Button<C extends React.ElementType = 'button'>(
   }: ButtonProps<C>,
 ) {
   /*
-     * Filled Variants
-     */
+   * Filled Variants
+   */
   const filledClasses = classNames([
     'transition-all duration-300 ease-in-out h-9',
     (disabled || isLoading)
@@ -51,56 +51,56 @@ export function Button<C extends React.ElementType = 'button'>(
     'text-pca-white',
     disabled && 'bg-pca-grey-300 focus:outline-hidden',
     !disabled
-    && 'bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300',
+    && 'bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-800',
   ]);
 
   const primaryDarkFilledClasses = classNames([
     'dark:text-pca-grey-900',
     disabled && 'dark:bg-pca-grey-800 dark:text-pca-grey-700! dark:focus:outline-hidden',
     !disabled
-    && 'dark:bg-pca-white dark:hover:bg-pca-grey-300 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-300',
+    && 'dark:bg-pca-white dark:hover:bg-pca-grey-300 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-300 dark:active:bg-pca-grey-300',
   ]);
 
   const secondaryLightFilledClasses = classNames([
     'text-pca-grey-900',
     disabled && 'text-pca-grey-300! focus:outline-hidden',
     !disabled
-    && 'bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300',
+    && 'bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200',
   ]);
 
   const secondaryDarkFilledClasses = classNames([
     'dark:text-pca-white',
     disabled && 'dark:text-pca-grey-700! dark:focus:outline-hidden',
     !disabled
-    && 'dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700',
+    && 'dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800',
   ]);
 
   const upgradeLightFilledClasses = classNames([
     'text-pca-grey-900',
     disabled && 'bg-pca-yellow-300/50 text-pca-grey-300! focus:outline-hidden',
     !disabled
-    && 'bg-pca-yellow-500 hover:bg-pca-yellow-700 focus:outline-hidden focus:ring-2 focus:ring-pca-yellow-300',
+    && 'bg-pca-yellow-500 hover:bg-pca-yellow-700 focus:outline-hidden focus:ring-2 focus:ring-pca-yellow-300 active:bg-pca-yellow-700',
   ]);
 
   const upgradeDarkFilledClasses = classNames([
     'dark:text-pca-grey-900',
     disabled && 'dark:bg-pca-yellow-300/50 dark:text-pca-grey-300! dark:focus:outline-hidden',
     !disabled
-    && 'dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-yellow-300',
+    && 'dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-yellow-300 dark:active:bg-pca-yellow-700',
   ]);
 
   const dangerLightFilledClasses = classNames([
     'text-pca-white',
     disabled && 'bg-pca-red-300/50 text-pca-grey-300! focus:outline-hidden',
     !disabled
-    && 'bg-pca-red-500 hover:bg-pca-red-700 focus:outline-hidden focus:ring-2 focus:ring-pca-red-300',
+    && 'bg-pca-red-500 hover:bg-pca-red-700 focus:outline-hidden focus:ring-2 focus:ring-pca-red-300 active:bg-pca-red-700',
   ]);
 
   const dangerDarkFilledClasses = classNames([
     'dark:text-pca-white',
     disabled && 'dark:bg-pca-red-300/50 dark:text-pca-grey-300! dark:focus:outline-hidden',
     !disabled
-    && 'dark:bg-pca-red-500 dark:hover:bg-pca-red-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-red-300',
+    && 'dark:bg-pca-red-500 dark:hover:bg-pca-red-700 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-red-300 dark:active:bg-pca-red-700',
   ]);
 
   const colorClasses = classNames([
@@ -126,14 +126,14 @@ export function Button<C extends React.ElementType = 'button'>(
   ]);
 
   const iconOnlyClasses = classNames([
-    'rounded-xl w-9 h-9',
+    'rounded-xl w-10 h-10 lg:w-9 lg:h-9',
     'py-0',
     'px-0',
   ]);
   const isOnlyIcon = !children && icon;
 
   const classes = classNames([
-    'relative overflow-hidden',
+    'relative overflow-hidden active:scale-[0.98] active:translate-y-px',
     'flex items-center justify-center',
     'gap-2',
     filledClasses,
