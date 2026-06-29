@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react';
+import { type FC } from 'react';
 
 import { motion } from 'motion/react';
 import classNames from 'classnames';
@@ -10,6 +10,7 @@ import {
 } from './framer-animation';
 import { StickyBottomArea } from './sticky-bottom-area';
 import type { SidebarBaseProps } from './types';
+import { useMedia } from 'react-use';
 
 export type SidebarMenuProps = {
   initialState?: 'open' | 'close';
@@ -22,20 +23,18 @@ export const SidebarMenu: FC<SidebarMenuProps> = ({
   showSlimSidebar = false,
 }) => {
   const { isSidebarOpen } = useSidebarContext();
-  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const isMobile = useMedia('(max-width: 640px)', false);
 
   return (
     <>
       <motion.div
-        variants={toggleNavigation}
+        variants={toggleNavigation(isMobile)}
         animate={isSidebarOpen ? 'open' : 'close'}
-        onAnimationComplete={() => setIsAnimationComplete(true)}
-        onAnimationStart={() => setIsAnimationComplete(false)}
         exit="close"
         initial={initialState ?? (isSidebarOpen ? 'open' : 'close')}
         className={classNames([
           'fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-dvh bg-pca-white dark:bg-pca-grey-900',
-          isAnimationComplete && 'transition-shadow ease-in-out duration-200 sm:max-xl:shadow-md sm:max-xl:ring-1 ring-pca-grey-200 sm:max-xl:dark:ring-pca-grey-800',
+          'transition-shadow ease-in-out duration-200 sm:max-xl:shadow-md sm:max-xl:ring-1 ring-pca-grey-200 sm:max-xl:dark:ring-pca-grey-800',
         ])}
       >
         <nav className="top-0 left-0 h-[100dvh-56px] flex justify-between flex-col w-full max-w-none sm:max-w-62.5 overflow-hidden overscroll-y-none overflow-x-hidden">

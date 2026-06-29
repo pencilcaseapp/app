@@ -20,7 +20,8 @@ export const SidebarPortal: FC<SidebarPortalProps> = ({
   const { isSidebarOpen, setIsSidebarOpen, triggerRef } = useSidebarContext();
   const isDesktop = useMedia('(min-width: 1280px)', false);
 
-  const isScrollLocked = !isDesktop && isSidebarOpen;
+  const isMobile = useMedia('(max-width: 640px)', false);
+  const isScrollLocked = isMobile && isSidebarOpen;
 
   useEffect(() => {
     if (!isScrollLocked) {
@@ -51,6 +52,10 @@ export const SidebarPortal: FC<SidebarPortalProps> = ({
                         We need this to close the sidebar
                         when clicking outside of it (¯\_(ツ)_/¯)
                       */
+                      if (isMobile) {
+                        return;
+                      }
+
                       if (triggerRef.current?.contains(
                         event.target as Node,
                       )) {
