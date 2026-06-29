@@ -26,9 +26,9 @@ export const DocumentGroup: FC<DocumentGroupProps>
           ])}
           >
             <AccordionTrigger className={classNames([
-              'flex items-center gap-2 min-w-0 h-9 flex-1 pl-2 pr-0.5 py-1 cursor-pointer focus-visible:outline-none rounded-xl',
+              'transition-all flex items-center gap-2 min-w-0 h-12 lg:h-10 flex-1 pl-3 lg:pl-2 pr-0.5 py-1 cursor-pointer focus-visible:outline-none rounded-xl active:scale-[0.98]',
               'focus-visible:bg-pca-grey-200 dark:focus-visible:ring-0 active:bg-pca-grey-200 dark:active:bg-pca-grey-800 dark:active:ring-0 dark:focus-visible:bg-pca-grey-800',
-              'transition-colors data-[state=open]:bg-pca-grey-100 dark:data-[state=open]:bg-pca-grey-800 hover:bg-pca-grey-100 dark:hover:bg-pca-grey-800 has-data-[state=open]:bg-pca-grey-100 dark:has-data-[state=open]:bg-pca-grey-800',
+              'data-[state=open]:bg-pca-grey-100 data-[state=open]:active:bg-pca-grey-200 dark:data-[state=open]:bg-pca-grey-800 dark:active:data-[state=open]:bg-pca-grey-800 hover:bg-pca-grey-100 dark:hover:bg-pca-grey-800 has-data-[state=open]:bg-pca-grey-100 dark:has-data-[state=open]:bg-pca-grey-800',
             ])}
             >
               <Icon icon={icon} title={iconTitle} />

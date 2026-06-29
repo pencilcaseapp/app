@@ -32,9 +32,10 @@ export function NavigationItem<C extends React.ElementType = 'a'>(
   const isIconOnly = iconOnly ?? iconOnlyFromContext;
 
   const wrapperClasses = classNames([
-    'transition-colors group h-9 flex items-center justify-between gap-2 pl-2 pr-0.5 rounded-xl cursor-pointer',
+    'transition-all group flex items-center justify-between gap-2 h-10 lg:h-10 pl-3 lg:pl-2 pr-0.5 rounded-xl cursor-pointer active:scale-[0.98]',
     'has-aria-[current=page]:bg-pca-grey-200 dark:has-aria-[current=page]:bg-pca-grey-800',
     'hover:bg-pca-grey-100 dark:hover:bg-pca-grey-800',
+    'active:bg-pca-grey-100 dark:active:bg-pca-grey-800',
     'has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50',
     isIconOnly && 'w-10 pr-2',
     className,

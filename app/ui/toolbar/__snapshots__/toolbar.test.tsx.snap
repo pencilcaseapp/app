@@ -11,7 +11,7 @@ exports[`Toolbar > matches snapshot 1`] = `
       <button
         aria-label="Heading 1"
         aria-pressed="true"
-        class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 bg-pca-grey-900! text-pca-white! dark:text-pca-grey-900! dark:bg-pca-white! h-8!"
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 bg-pca-grey-900! text-pca-white! dark:text-pca-grey-900! dark:bg-pca-white! h-8!"
         data-state="closed"
       >
         <svg
@@ -36,7 +36,7 @@ exports[`Toolbar > matches snapshot 1`] = `
       <button
         aria-label="Heading 2"
         aria-pressed="false"
-        class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
         data-state="closed"
       >
         <svg
@@ -61,7 +61,7 @@ exports[`Toolbar > matches snapshot 1`] = `
       <button
         aria-label="Heading 3"
         aria-pressed="false"
-        class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
         data-state="closed"
       >
         <svg
@@ -96,7 +96,7 @@ exports[`Toolbar > matches snapshot 1`] = `
       <button
         aria-label="Bold"
         aria-pressed="false"
-        class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
         data-state="closed"
       >
         <svg
@@ -121,7 +121,7 @@ exports[`Toolbar > matches snapshot 1`] = `
       <button
         aria-label="Italic"
         aria-pressed="false"
-        class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
         data-state="closed"
       >
         <svg
@@ -146,7 +146,7 @@ exports[`Toolbar > matches snapshot 1`] = `
       <button
         aria-label="Underline"
         aria-pressed="false"
-        class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
         data-state="closed"
       >
         <svg
@@ -181,7 +181,7 @@ exports[`Toolbar > matches snapshot 1`] = `
       <button
         aria-label="Bulleted list"
         aria-pressed="false"
-        class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
         data-state="closed"
       >
         <svg
@@ -207,7 +207,7 @@ exports[`Toolbar > matches snapshot 1`] = `
       <button
         aria-label="Numbered list"
         aria-pressed="false"
-        class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
         data-state="closed"
       >
         <svg
@@ -232,7 +232,7 @@ exports[`Toolbar > matches snapshot 1`] = `
       <button
         aria-label="Checklist"
         aria-pressed="false"
-        class="relative overflow-hidden active:scale-[0.98] active:translate-y-px flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 h-8!"
         data-state="closed"
       >
         <svg

@@ -61,7 +61,7 @@ export default function LayoutEditor() {
                           key={`${item.label}-${item.to}`}
                           actionArea={(
                             <DropdownMenu>
-                              <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Item options" />
+                              <DropdownMenuTrigger iconTitle="Item options" />
                               <DropdownMenuPortal>
                                 <DropdownMenuContent align="start">
                                   <DropdownMenuItem as="button" onClick={() => console.log('clicked...')} icon="share">
@@ -99,7 +99,7 @@ export default function LayoutEditor() {
                         key={`${item.label}-${item.to}`}
                         actionArea={(
                           <DropdownMenu>
-                            <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Item options" />
+                            <DropdownMenuTrigger iconTitle="Item options" />
                             <DropdownMenuPortal>
                               <DropdownMenuContent align="start">
                                 <DropdownMenuItem as="button" onClick={() => console.log('clicked')} icon="share">
