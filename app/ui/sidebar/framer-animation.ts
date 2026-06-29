@@ -1,31 +1,40 @@
-export const toggleNavigation = {
+export const toggleNavigation = (isMobile: boolean) => ({
   open: {
     x: 0,
     transition: {
-      type: 'keyframes' as const,
+      delay: isMobile ? 0 : 0.3,
+      type: 'tween' as const,
+      duration: 0.3,
+      ease: 'easeInOut' as const,
     },
   },
   close: {
     x: '-100%',
     transition: {
-      delay: 0.3,
-      type: 'keyframes' as const,
+
+      type: 'tween' as const,
+      duration: 0.3,
+      ease: 'easeInOut' as const,
     },
   },
-};
+});
 
 export const slimNavigation = {
   open: {
     x: '-100%',
     transition: {
-      type: 'keyframes' as const,
+      type: 'tween' as const,
+      duration: 0.3,
+      ease: 'easeInOut' as const,
     },
   },
   close: {
     x: 0,
     transition: {
-      delay: 0.5,
-      type: 'keyframes' as const,
+      delay: 0.3,
+      type: 'tween' as const,
+      duration: 0.3,
+      ease: 'easeInOut' as const,
     },
   },
 };
