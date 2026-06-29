@@ -66,7 +66,7 @@ export const WithActionArea: Story = {
     value: 'work',
     actionArea: (
       <DropdownMenu>
-        <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Space options" />
+        <DropdownMenuTrigger iconTitle="Space options" />
         <DropdownMenuPortal>
           <DropdownMenuContent align="start">
             <DropdownMenuItem as="button" onClick={action('share')} icon="share">
@@ -106,7 +106,7 @@ export const MultipleItems: Story = {
           title="Le Cours Français (A.2.1)"
           actionArea={(
             <DropdownMenu>
-              <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Space options" />
+              <DropdownMenuTrigger iconTitle="Space options" />
               <DropdownMenuPortal>
                 <DropdownMenuContent align="start">
                   <DropdownMenuItem as="button" onClick={action('share')} icon="share">
@@ -130,7 +130,7 @@ export const MultipleItems: Story = {
           title="Le Cours Français (A.2.2)"
           actionArea={(
             <DropdownMenu>
-              <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Space options" />
+              <DropdownMenuTrigger iconTitle="Space options" />
               <DropdownMenuPortal>
                 <DropdownMenuContent align="start">
                   <DropdownMenuItem as="button" onClick={action('share')} icon="share">
@@ -154,7 +154,7 @@ export const MultipleItems: Story = {
           title="Le Cours Français (A.2.3) x5"
           actionArea={(
             <DropdownMenu>
-              <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Space options" />
+              <DropdownMenuTrigger iconTitle="Space options" />
               <DropdownMenuPortal>
                 <DropdownMenuContent align="start">
                   <DropdownMenuItem as="button" onClick={action('share')} icon="share">

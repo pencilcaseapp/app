@@ -133,7 +133,7 @@ export function Button<C extends React.ElementType = 'button'>(
   const isOnlyIcon = !children && icon;
 
   const classes = classNames([
-    'relative overflow-hidden active:scale-[0.98] active:translate-y-px',
+    'relative overflow-hidden active:scale-[0.97]',
     'flex items-center justify-center',
     'gap-2',
     filledClasses,
@@ -175,7 +175,7 @@ export function Button<C extends React.ElementType = 'button'>(
           title={iconTitle}
           className={classNames([hideClasses, [
             'shrink-0',
-            isOnlyIcon ? 'w-6 h-6' : 'w-4 h-4',
+            isOnlyIcon ? 'w-6 h-6' : 'w-4.5 h-4.5',
           ]])}
         />
       )}

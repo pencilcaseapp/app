@@ -21,7 +21,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
     ...rest }: DocumentItemProps<C>,
 ) {
   const wrapperClasses = classNames([
-    'transition-colors group h-9 flex items-center justify-between gap-2 pr-0.5 rounded-xl cursor-pointer',
+    'transition-all group h-12 lg:h-10 flex items-center justify-between gap-2 pr-1 lg:pr-0.5 rounded-xl cursor-pointer',
     // Hover / open state — covers the whole row including actionArea.
     // Scoped to non-active rows so the yellow active surface isn't overridden.
     'not-has-aria-[current=page]:hover:bg-pca-grey-100 dark:not-has-aria-[current=page]:hover:bg-pca-grey-800',

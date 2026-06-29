@@ -57,7 +57,7 @@ export const Default: Story = {
       title="Le Cours Français (A.2.1)"
       actionArea={(
         <DropdownMenu>
-          <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Document options" />
+          <DropdownMenuTrigger iconTitle="Document options" />
           <DropdownMenuPortal>
             <DropdownMenuContent align="start">
               <DropdownMenuItem as="button" onClick={action('share')} icon="share">
@@ -94,7 +94,7 @@ export const Active: Story = {
       title="Le Cours Français (A.2.1)"
       actionArea={(
         <DropdownMenu>
-          <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Document options" />
+          <DropdownMenuTrigger iconTitle="Document options" />
           <DropdownMenuPortal>
             <DropdownMenuContent align="start">
               <DropdownMenuItem as="button" onClick={action('share')} icon="share">
@@ -127,7 +127,7 @@ export const TruncatedTitle: Story = {
       title="A very long document title that will not fit inside the container and gets truncated"
       actionArea={(
         <DropdownMenu>
-          <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Document options" />
+          <DropdownMenuTrigger iconTitle="Document options" />
           <DropdownMenuPortal>
             <DropdownMenuContent align="start">
               <DropdownMenuItem as="button" onClick={action('share')} icon="share">
@@ -161,7 +161,7 @@ export const WithActionArea: Story = {
       title="Le Cours Français (A.2.1)"
       actionArea={(
         <DropdownMenu>
-          <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Document options" />
+          <DropdownMenuTrigger iconTitle="Document options" />
           <DropdownMenuPortal>
             <DropdownMenuContent align="start">
               <DropdownMenuItem as="button" onClick={action('share')} icon="share">
@@ -194,7 +194,7 @@ export const List: Story = {
         title="Le Cours Français (A.2.1)"
         actionArea={(
           <DropdownMenu>
-            <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Document options" />
+            <DropdownMenuTrigger iconTitle="Document options" />
             <DropdownMenuPortal>
               <DropdownMenuContent align="start">
                 <DropdownMenuItem as="button" onClick={action('share')} icon="share">
@@ -218,7 +218,7 @@ export const List: Story = {
         title="Le Cours Français (A.2.2)"
         actionArea={(
           <DropdownMenu>
-            <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Document options" />
+            <DropdownMenuTrigger iconTitle="Document options" />
             <DropdownMenuPortal>
               <DropdownMenuContent align="start">
                 <DropdownMenuItem as="button" onClick={action('share')} icon="share">
@@ -242,7 +242,7 @@ export const List: Story = {
         title="Le Cours Français (A.2.3)"
         actionArea={(
           <DropdownMenu>
-            <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Document options" />
+            <DropdownMenuTrigger iconTitle="Document options" />
             <DropdownMenuPortal>
               <DropdownMenuContent align="start">
                 <DropdownMenuItem as="button" onClick={action('share')} icon="share">

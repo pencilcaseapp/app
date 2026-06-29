@@ -71,7 +71,7 @@ export const WithActionArea: Story = {
     to: '/create-doc',
     actionArea: (
       <DropdownMenu>
-        <DropdownMenuTrigger className="w-8! h-8!" iconTitle="Item options" />
+        <DropdownMenuTrigger iconTitle="Item options" />
         <DropdownMenuPortal>
           <DropdownMenuContent align="start">
             <DropdownMenuItem as="button" onClick={action('share')} icon="share">
