@@ -1,5 +1,4 @@
-import { NavLink, Outlet, type MiddlewareFunction } from 'react-router';
-import { optionalAuthMiddleware } from '~/middleware/auth';
+import { NavLink, Outlet } from 'react-router';
 import { SocketClientProvider } from '~/contexts/socket-client';
 import { DocumentGroup } from '~/ui/document-group/document-group';
 import { DocumentGroupRoot } from '~/ui/document-group/document-root';
@@ -14,12 +13,8 @@ import type { IconName } from '~/ui/icon/icons';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
 import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import { Sidebar } from '~/ui/sidebar/sidebar';
-import { optionalUserSessionContext } from '~/contexts/user-session';
 import type { Route } from './+types/editor';
-
-export const middleware: MiddlewareFunction[] = [
-  optionalAuthMiddleware,
-];
+import { getAuthenticatedUser } from '~/services/auth';
 
 export const handle = {
   bodyClassName: 'w-full bg-pca-white dark:bg-pca-grey-900',
@@ -48,8 +43,8 @@ const bottomNavigation = [
   { label: 'Settings', to: '/settings', icon: 'settings' },
 ];
 
-export async function loader({ context }: Route.LoaderArgs) {
-  const user = context.get(optionalUserSessionContext);
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await getAuthenticatedUser(request);
 
   return {
     user,

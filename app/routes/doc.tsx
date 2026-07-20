@@ -5,16 +5,11 @@ import { useState } from 'react';
 import { ClientOnly } from '~/ui/client-only/client-only';
 import { Button } from '~/ui/button/button';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
-import { href, Link, type MiddlewareFunction } from 'react-router';
-import { optionalAuthMiddleware } from '~/middleware/auth';
-import { optionalUserSessionContext } from '~/contexts/user-session';
+import { href, Link } from 'react-router';
+import { getAuthenticatedUser } from '~/services/auth';
 
-export const middleware: MiddlewareFunction[] = [
-  optionalAuthMiddleware,
-];
-
-export async function loader({ params, context }: Route.LoaderArgs) {
-  const user = context.get(optionalUserSessionContext);
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const user = await getAuthenticatedUser(request);
   const documentTitle = await getDocumentTitle(params.id);
 
   return {
