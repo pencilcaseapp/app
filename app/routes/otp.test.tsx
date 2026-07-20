@@ -4,7 +4,7 @@ import { SearchParamAuth } from '~/constants/search-params';
 import { otpFixture } from '~/test/fixtures/otp';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
-import { sessionFixture } from '~/test/fixtures/session';
+import { userSessionFixture } from '~/test/fixtures/user';
 import { userEvent } from '@testing-library/user-event';
 import { VerifyMagicCodeError } from '~/services/auth';
 import { fireEvent } from '@testing-library/dom';
@@ -66,7 +66,7 @@ test('matches snapshot', async () => {
 test('redirects to onboarding on successful verification', async () => {
   getValidOtpMock.mockResolvedValueOnce(otpFixture);
   verifyMagicCodeMock.mockResolvedValueOnce([null, { otp: otpFixture }]);
-  createSessionCookieMock.mockResolvedValueOnce(sessionFixture);
+  createSessionCookieMock.mockResolvedValueOnce(userSessionFixture);
 
   const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {
     params: {

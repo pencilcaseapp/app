@@ -1,21 +1,24 @@
 import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, getValidOtp, markOtpAsUsed } from '~/repos/otp';
-import { getOrCreateUserByEmail } from '~/repos/user';
+import { createUserSession, getOrCreateUserByEmail, getUserBySessionTokenHash, type User } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
-import { randomBytes, randomInt } from 'node:crypto';
-import { createCookie } from 'react-router';
+import { createHash, randomBytes, randomInt } from 'node:crypto';
+import { createCookieSessionStorage } from 'react-router';
 import { getConfig } from '~/config';
-import { createSession } from '~/repos/session';
 
 const config = getConfig();
 
-const sessionCookie = createCookie('session', {
-  path: '/',
-  httpOnly: true,
-  secure: config.session.secure,
-  secrets: [config.session.secret],
-  sameSite: 'lax',
-});
+const { getSession, commitSession }
+  = createCookieSessionStorage<{ token: string }>({
+    cookie: {
+      name: 'session',
+      path: '/',
+      httpOnly: true,
+      secure: config.session.secure,
+      secrets: [config.session.secret],
+      sameSite: 'lax',
+    },
+  });
 
 export enum InitMagicCodeError {
   TooManyRequests,
@@ -79,12 +82,41 @@ export async function verifyMagicCode(
   return [null, { otp }];
 }
 
-export async function createSessionCookie(userId: string, userAgent?: string) {
-  const token = randomBytes(32);
-  const tokenHash = await argon2.hash(token);
-  const session = await createSession({ userId, tokenHash, userAgent });
+export async function getAuthenticatedUser(
+  request: Request,
+): Promise<User | null> {
+  const cookieSession = await getSession(request.headers.get('Cookie'));
+  const token = cookieSession.get('token');
+  if (!token) {
+    return null;
+  }
 
-  return sessionCookie.serialize(token, {
+  const tokenHash = hashUserSessionToken(token);
+  const user = await getUserBySessionTokenHash(tokenHash);
+  if (!user) {
+    return null;
+  }
+
+  return user;
+}
+
+export async function createSessionCookie(input: {
+  request: Request; userId: string; userAgent?: string; }) {
+  const { request, userId, userAgent } = input;
+  const cookieSession = await getSession(
+    request.headers.get('Cookie'),
+  );
+  const token = randomBytes(32).toString('base64url');
+  const tokenHash = hashUserSessionToken(token);
+  const session = await createUserSession({ userId, tokenHash, userAgent });
+
+  cookieSession.set('token', token);
+
+  return commitSession(cookieSession, {
     expires: session.expiresAt,
   });
+}
+
+function hashUserSessionToken(token: string) {
+  return createHash('sha256').update(token).digest('hex');
 }

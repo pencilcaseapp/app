@@ -85,10 +85,11 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
       }
 
       const userAgent = request.headers.get('user-agent') ?? undefined;
-      const sessionCookie = await createSessionCookie(
-        result.otp.userId,
+      const sessionCookie = await createSessionCookie({
+        request,
+        userId: result.otp.userId,
         userAgent,
-      );
+      });
 
       return redirect(
         href('/onboarding'),
