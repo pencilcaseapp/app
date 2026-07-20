@@ -5,12 +5,21 @@ import { useState } from 'react';
 import { ClientOnly } from '~/ui/client-only/client-only';
 import { Button } from '~/ui/button/button';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
+import { href, Link, type MiddlewareFunction } from 'react-router';
+import { optionalAuthMiddleware } from '~/middleware/auth';
+import { optionalUserSessionContext } from '~/contexts/user-session';
 
-export async function loader({ params }: Route.LoaderArgs) {
+export const middleware: MiddlewareFunction[] = [
+  optionalAuthMiddleware,
+];
+
+export async function loader({ params, context }: Route.LoaderArgs) {
+  const user = context.get(optionalUserSessionContext);
   const documentTitle = await getDocumentTitle(params.id);
 
   return {
     documentTitle,
+    user,
   };
 }
 
@@ -25,18 +34,29 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
         <CollaborativeEditor
           id={params.id}
           onTitleChange={setTitle}
-          topbarLeft={(
-            <>
-              <Button
-                colorLight="secondary"
-                colorDark="secondary"
-                icon="sidebar"
-                iconTitle={isSidebarOpen ? 'Close navigation' : 'Open navigation'}
-                ref={triggerRef}
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              />
-            </>
-          )}
+          topbarLeft={
+            loaderData.user
+              ? (
+                  <Button
+                    colorLight="secondary"
+                    colorDark="secondary"
+                    icon="sidebar"
+                    iconTitle={isSidebarOpen ? 'Close navigation' : 'Open navigation'}
+                    ref={triggerRef}
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  />
+                )
+              : (
+                  <Button
+                    as={Link}
+                    to={href('/signin')}
+                    colorLight="upgrade"
+                    colorDark="upgrade"
+                  >
+                    Sign In
+                  </Button>
+                )
+          }
         />
       </ClientOnly>
     </>

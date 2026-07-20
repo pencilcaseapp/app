@@ -3,7 +3,7 @@ import './onboarding';
 import { expect, test, vi } from 'vitest';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
-import { userSessionContext } from '~/contexts/user-session';
+import { requiredUserSessionContext } from '~/contexts/user-session';
 
 const redirectMock = vi.fn();
 vi.mock('react-router', async () => {
@@ -19,7 +19,7 @@ vi.mock('react-router', async () => {
 
 test('redirects to home when user is already onboarded', async () => {
   const context = new RouterContextProvider();
-  context.set(userSessionContext, { ...userFixture, onboarded: true });
+  context.set(requiredUserSessionContext, { ...userFixture, onboarded: true });
 
   await renderRoute('/onboarding', {
     params: {},
@@ -31,7 +31,7 @@ test('redirects to home when user is already onboarded', async () => {
 
 test('renders onboarding when user is not onboarded', async () => {
   const context = new RouterContextProvider();
-  context.set(userSessionContext, { ...userFixture, onboarded: false });
+  context.set(requiredUserSessionContext, { ...userFixture, onboarded: false });
 
   const { findByText } = await renderRoute('/onboarding', {
     params: {},

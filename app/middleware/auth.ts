@@ -1,8 +1,8 @@
 import { href, redirect, type MiddlewareFunction } from 'react-router';
-import { userSessionContext } from '~/contexts/user-session';
+import { requiredUserSessionContext, optionalUserSessionContext } from '~/contexts/user-session';
 import { getAuthenticatedUser } from '~/services/auth';
 
-export const authMiddleware: MiddlewareFunction = async ({
+export const requireAuthMiddleware: MiddlewareFunction = async ({
   request,
   context,
 }) => {
@@ -12,5 +12,13 @@ export const authMiddleware: MiddlewareFunction = async ({
     throw redirect(href('/signin'));
   }
 
-  context.set(userSessionContext, user);
+  context.set(requiredUserSessionContext, user);
+};
+
+export const optionalAuthMiddleware: MiddlewareFunction = async ({
+  request,
+  context,
+}) => {
+  const user = await getAuthenticatedUser(request);
+  context.set(optionalUserSessionContext, user);
 };

@@ -1,14 +1,14 @@
 import { href, redirect, type MiddlewareFunction } from 'react-router';
-import { userSessionContext } from '~/contexts/user-session';
-import { authMiddleware } from '~/middleware/auth';
+import { requiredUserSessionContext } from '~/contexts/user-session';
+import { requireAuthMiddleware } from '~/middleware/auth';
 import type { Route } from './+types/onboarding';
 
 export const middleware: MiddlewareFunction[] = [
-  authMiddleware,
+  requireAuthMiddleware,
 ];
 
 export function loader({ context }: Route.LoaderArgs) {
-  const user = context.get(userSessionContext);
+  const user = context.get(requiredUserSessionContext);
 
   if (user.onboarded) {
     return redirect(href('/home'));
