@@ -9,6 +9,7 @@ describe('createUser', () => {
       email: faker.internet.email(),
       name: faker.person.fullName(),
       newsletter: faker.datatype.boolean(),
+      onboarded: faker.datatype.boolean(),
     };
 
     const user = await createUser(userInput);
@@ -18,6 +19,7 @@ describe('createUser', () => {
       email: user.email,
       name: user.name,
       newsletter: user.newsletter,
+      onboarded: user.onboarded,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
@@ -77,6 +79,7 @@ describe('getOrCreateUserByEmail', () => {
       email,
       name: null,
       newsletter: false,
+      onboarded: false,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });

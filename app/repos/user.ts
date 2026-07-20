@@ -9,12 +9,14 @@ export async function createUser(input: {
   email: string;
   name?: string;
   newsletter?: boolean;
+  onboarded?: boolean;
 }) {
-  const { email, name, newsletter } = input;
+  const { email, name, newsletter, onboarded } = input;
   const response = await db.insert(users).values({
     email,
     name,
     newsletter,
+    onboarded,
   }).returning();
 
   return response[0];
@@ -61,13 +63,15 @@ export async function updateUser(id: string, input: {
   email?: string;
   name?: string;
   newsletter?: boolean;
+  onboarded?: boolean;
 }) {
-  const { email, name, newsletter } = input;
+  const { email, name, newsletter, onboarded } = input;
   const response = await db.update(users)
     .set({
       email,
       name,
       newsletter,
+      onboarded,
       updatedAt: new Date(),
     })
     .where(eq(users.id, id))
