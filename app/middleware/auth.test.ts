@@ -52,9 +52,13 @@ describe('requireAuthMiddleware', () => {
       set: vi.fn(),
     };
 
-    await requireAuthMiddleware({ request, context } as never, undefined as never);
+    await requireAuthMiddleware(
+      { request, context } as never, undefined as never,
+    );
 
     expect(redirectMock).not.toHaveBeenCalled();
-    expect(context.set).toHaveBeenCalledWith(requiredUserSessionContext, userFixture);
+    expect(context.set).toHaveBeenCalledWith(
+      requiredUserSessionContext, userFixture,
+    );
   });
 });
