@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { href } from 'react-router';
-import { authMiddleware } from './auth';
-import { userSessionContext } from '~/contexts/user-session';
+import { requireAuthMiddleware } from './auth';
+import { requiredUserSessionContext } from '~/contexts/user-session';
 import { userFixture } from '~/test/fixtures/user';
 
 const getAuthenticatedUserMock = vi.fn();
@@ -26,7 +26,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('authMiddleware', () => {
+describe('requireAuthMiddleware', () => {
   it('redirects to signin when no authenticated user exists', async () => {
     getAuthenticatedUserMock.mockResolvedValueOnce(null);
     const request = new Request('http://localhost/doc');
@@ -35,7 +35,7 @@ describe('authMiddleware', () => {
     };
 
     await expect(
-      authMiddleware({ request, context } as never, undefined as never),
+      requireAuthMiddleware({ request, context } as never, undefined as never),
     ).rejects.toMatchObject({
       status: 302,
       headers: expect.any(Headers),
@@ -52,9 +52,13 @@ describe('authMiddleware', () => {
       set: vi.fn(),
     };
 
-    await authMiddleware({ request, context } as never, undefined as never);
+    await requireAuthMiddleware(
+      { request, context } as never, undefined as never,
+    );
 
     expect(redirectMock).not.toHaveBeenCalled();
-    expect(context.set).toHaveBeenCalledWith(userSessionContext, userFixture);
+    expect(context.set).toHaveBeenCalledWith(
+      requiredUserSessionContext, userFixture,
+    );
   });
 });
