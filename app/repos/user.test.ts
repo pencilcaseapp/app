@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createUser, getOrCreateUserByEmail, getUser, getUserByEmail, updateUser } from './user';
-import { createTestUser } from '~/test/data-factories/user';
+import { createUser, createUserSession, getOrCreateUserByEmail, getUser, getUserByEmail, getUserBySessionTokenHash, updateUser } from './user';
+import { createExpiredUserSession, createTestUser, createValidUserSession } from '~/test/data-factories/user';
 import { faker } from '@faker-js/faker';
 
 describe('createUser', () => {
@@ -9,6 +9,7 @@ describe('createUser', () => {
       email: faker.internet.email(),
       name: faker.person.fullName(),
       newsletter: faker.datatype.boolean(),
+      onboarded: faker.datatype.boolean(),
     };
 
     const user = await createUser(userInput);
@@ -18,6 +19,7 @@ describe('createUser', () => {
       email: user.email,
       name: user.name,
       newsletter: user.newsletter,
+      onboarded: user.onboarded,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
@@ -77,6 +79,7 @@ describe('getOrCreateUserByEmail', () => {
       email,
       name: null,
       newsletter: false,
+      onboarded: false,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
@@ -98,5 +101,52 @@ describe('updateUser', () => {
       email: user.email,
       updatedAt: expect.any(Date),
     });
+  });
+});
+
+describe('createUserSession', () => {
+  it('creates a session', async () => {
+    const userFixture = await createTestUser();
+    const tokenHash = `hashed-code-${Date.now()}`;
+
+    const session = await createUserSession({
+      userId: userFixture.id,
+      tokenHash,
+      userAgent: 'test-agent',
+    });
+
+    expect(session).toStrictEqual({
+      id: expect.any(String),
+      userId: userFixture.id,
+      tokenHash,
+      userAgent: 'test-agent',
+      createdAt: expect.any(Date),
+      expiresAt: expect.any(Date),
+    });
+  });
+});
+
+describe('getUserBySessionTokenHash', () => {
+  it('returns a user by session token hash', async () => {
+    const userFixture = await createTestUser();
+    const sessionFixture = await createValidUserSession(userFixture.id);
+    const user = await getUserBySessionTokenHash(sessionFixture.tokenHash);
+
+    expect(user).toStrictEqual(userFixture);
+  });
+
+  it('returns undefined if no session is found', async () => {
+    const user = await getUserBySessionTokenHash('non-existent-token-hash');
+
+    expect(user).toBeUndefined();
+  });
+
+  it('returns undefined if session is expired', async () => {
+    const userFixture = await createTestUser();
+    const sessionFixture = await createExpiredUserSession(userFixture.id);
+
+    const user = await getUserBySessionTokenHash(sessionFixture.tokenHash);
+
+    expect(user).toBeUndefined();
   });
 });

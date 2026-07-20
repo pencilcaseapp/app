@@ -1,9 +1,10 @@
+// @vitest-environment node
+
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { createSessionCookie, initMagicCode, InitMagicCodeError, verifyMagicCode, VerifyMagicCodeError } from './auth';
-import { userFixture } from '~/test/fixtures/user';
+import { createSessionCookie, getAuthenticatedUser, initMagicCode, InitMagicCodeError, verifyMagicCode, VerifyMagicCodeError } from './auth';
+import { userFixture, userSessionFixture } from '~/test/fixtures/user';
 import argon2 from 'argon2';
 import { otpFixture } from '~/test/fixtures/otp';
-import { sessionFixture } from '~/test/fixtures/session';
 
 const canRequestNewOtpMock = vi.fn();
 const expireAllValidOtpsMock = vi.fn();
@@ -23,15 +24,15 @@ vi.mock('~/repos/otp', async (importOriginal) => {
   };
 });
 
+const getUserBySessionTokenHashMock = vi.fn();
 vi.mock('~/repos/user', () => ({
   getOrCreateUserByEmail: () => userFixture,
-}));
-
-vi.mock('~/repos/session', () => ({
-  createSession: () => ({
-    ...sessionFixture,
+  createUserSession: () => ({
+    ...userSessionFixture,
     expiresAt: new Date('2026-06-15T13:39:21.509Z'),
   }),
+  getUserBySessionTokenHash: (...args: unknown[]) =>
+    getUserBySessionTokenHashMock(...args),
 }));
 
 const sendEmailMagicCodeMock = vi.fn();
@@ -42,15 +43,21 @@ vi.mock('./email-templates', () => ({
 const code = 123456;
 const tokenBuffer = Buffer.from('test-token');
 vi.mock('node:crypto', () => ({
-  default: {
-    randomInt: vi.fn(() => code),
-    randomBytes: vi.fn(() => tokenBuffer),
-  },
+  randomInt: vi.fn(() => code),
+  randomBytes: vi.fn(() => tokenBuffer),
+  createHash: vi.fn(() => ({
+    update: vi.fn(() => ({
+      digest: vi.fn(() => 'hashed-token'),
+    })),
+  })),
 }));
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
+
+const validSessionCookie
+  = 'session=eyJ0b2tlbiI6InlwaW5LeFd3bkF1YWVFS1lrUnRRWVRGREtKSm5JdmU1a3I2NXZzUDU2LXcifQ%3D%3D.7FWkYgIL8Aj2ImIH%2F4VgSCgJf1XI4OWWzTi1GbutCBo; Path=/; HttpOnly; SameSite=Lax';
 
 describe('initMagicCode', () => {
   describe('when the user cannot request a new OTP', () => {
@@ -164,8 +171,48 @@ describe('initMagicCode', () => {
 
 describe('createSessionCookie', () => {
   it('creates a session cookie', async () => {
-    const cookie = await createSessionCookie(userFixture.id);
+    const cookie = await createSessionCookie({
+      request: new Request('http://localhost'),
+      userId: userFixture.id,
+    });
 
-    expect(cookie).toEqual('session=eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6WzExNiwxMDEsMTE1LDExNiw0NSwxMTYsMTExLDEwNywxMDEsMTEwXX0%3D.%2F3vkxbj7cWxDzrbM6IZt5QkflT2FjzAguou8P8fjDQg; Path=/; Expires=Mon, 15 Jun 2026 13:39:21 GMT; HttpOnly; SameSite=Lax');
+    expect(cookie).toEqual('session=eyJ0b2tlbiI6ImRHVnpkQzEwYjJ0bGJnIn0%3D.pE9RChiDigQ%2FRdGtdew12THRAUPdb198wbNhAe0l9fw; Path=/; Expires=Mon, 15 Jun 2026 13:39:21 GMT; HttpOnly; SameSite=Lax');
+  });
+});
+
+describe('getAuthenticatedUser', () => {
+  it('returns null if no session cookie is present', async () => {
+    const request = new Request('http://localhost');
+    const user = await getAuthenticatedUser(request);
+
+    expect(user).toBeNull();
+  });
+
+  it('returns null if session is not found', async () => {
+    getUserBySessionTokenHashMock.mockResolvedValueOnce(undefined);
+
+    const request = new Request('http://localhost', {
+      headers: {
+        Cookie: validSessionCookie,
+      },
+    });
+
+    const user = await getAuthenticatedUser(request);
+
+    expect(user).toBeNull();
+  });
+
+  it('returns authenticated user if session is valid', async () => {
+    getUserBySessionTokenHashMock.mockResolvedValueOnce(userFixture);
+
+    const request = new Request('http://localhost', {
+      headers: {
+        Cookie: validSessionCookie,
+      },
+    });
+
+    const user = await getAuthenticatedUser(request);
+
+    expect(user).toEqual(userFixture);
   });
 });
