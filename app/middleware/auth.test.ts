@@ -96,7 +96,8 @@ describe('sessionMiddleware', () => {
       context,
     } as never, undefined as never);
 
-    expect(context.set).toHaveBeenCalledWith(optionalUserSessionContext, userFixture);
+    expect(context.set)
+      .toHaveBeenCalledWith(optionalUserSessionContext, userFixture);
     expect(context.set).toHaveBeenCalledWith(sessionCookieHeaderContext, 'session=updated-cookie');
   });
 });
