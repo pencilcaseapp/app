@@ -191,7 +191,7 @@ describe('getAuthSession', () => {
   });
 
   it('returns null if session is not found', async () => {
-    getAndRefreshUserSessionMock.mockResolvedValueOnce(undefined);
+    getAndRefreshUserSessionMock.mockResolvedValueOnce(null);
 
     const request = new Request('http://localhost', {
       headers: {

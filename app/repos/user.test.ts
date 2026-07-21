@@ -146,6 +146,33 @@ describe('getAndRefreshUserSession', () => {
     });
   });
 
+  it('refreshes a session when it is within the refresh threshold', async () => {
+    const userFixture = await createTestUser();
+    const expiresAt = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
+    const sessionFixture = await createValidUserSession(
+      userFixture.id,
+      expiresAt,
+    );
+
+    const result = await getAndRefreshUserSession(sessionFixture.tokenHash);
+
+    expect(result).toStrictEqual({
+      session: {
+        id: sessionFixture.id,
+        userId: sessionFixture.userId,
+        tokenHash: sessionFixture.tokenHash,
+        userAgent: sessionFixture.userAgent,
+        createdAt: sessionFixture.createdAt,
+        expiresAt: expect.any(Date),
+      },
+      user: userFixture,
+      isRefreshed: true,
+    });
+
+    expect(result?.session.expiresAt.getTime())
+      .toBeGreaterThan(expiresAt.getTime());
+  });
+
   it('returns null if no session is found', async () => {
     const result = await getAndRefreshUserSession('non-existent-token-hash');
 
