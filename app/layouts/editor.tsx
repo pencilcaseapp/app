@@ -14,7 +14,7 @@ import { NavigationItem } from '~/ui/navigation-item/navigation-item';
 import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import { Sidebar } from '~/ui/sidebar/sidebar';
 import type { Route } from './+types/editor';
-import { getAuthenticatedUser } from '~/services/auth';
+import { optionalUserSessionContext } from '~/contexts/user-session';
 
 export const handle = {
   bodyClassName: 'w-full bg-pca-white dark:bg-pca-grey-900',
@@ -43,8 +43,8 @@ const bottomNavigation = [
   { label: 'Settings', to: '/settings', icon: 'settings' },
 ];
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const user = await getAuthenticatedUser(request);
+export async function loader({ context }: Route.LoaderArgs) {
+  const user = context.get(optionalUserSessionContext);
 
   return {
     user,

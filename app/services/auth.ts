@@ -1,5 +1,5 @@
 import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, getValidOtp, markOtpAsUsed } from '~/repos/otp';
-import { createUserSession, getOrCreateUserByEmail, getUserBySessionTokenHash, updateUser, type User } from '~/repos/user';
+import { createUserSession, getOrCreateUserByEmail, getAndRefreshUserSession, updateUser, type User } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
 import { createHash, randomBytes, randomInt } from 'node:crypto';
@@ -84,9 +84,9 @@ export async function verifyMagicCode(
   return [null, { otp }];
 }
 
-export async function getAuthenticatedUser(
+export async function getAuthSession(
   request: Request,
-): Promise<User | null> {
+): Promise<{ user: User; cookieHeader: string | null } | null> {
   const cookieSession = await getSession(request.headers.get('Cookie'));
   const token = cookieSession.get('token');
   if (!token) {
@@ -94,12 +94,22 @@ export async function getAuthenticatedUser(
   }
 
   const tokenHash = hashUserSessionToken(token);
-  const user = await getUserBySessionTokenHash(tokenHash);
-  if (!user) {
+  const userSession = await getAndRefreshUserSession(tokenHash);
+  if (!userSession) {
     return null;
   }
 
-  return user;
+  let cookieHeader: string | null = null;
+  if (userSession.isRefreshed) {
+    cookieHeader = await commitSession(cookieSession, {
+      expires: userSession.session.expiresAt,
+    });
+  }
+
+  return {
+    user: userSession.user,
+    cookieHeader,
+  };
 }
 
 export async function createSessionCookie(input: {

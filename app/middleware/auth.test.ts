@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { authMiddleware } from './auth';
-import { userSessionContext } from '~/contexts/user-session';
+import { authMiddleware, sessionMiddleware } from './auth';
+import { optionalUserSessionContext, sessionCookieHeaderContext, userSessionContext } from '~/contexts/user-session';
 import { userFixture } from '~/test/fixtures/user';
 
-const getAuthenticatedUserMock = vi.fn();
+const getAuthSessionMock = vi.fn();
 vi.mock('~/services/auth', async () => {
   const actual = await vi.importActual<typeof import('~/services/auth')>('~/services/auth');
   return {
     ...actual,
-    getAuthenticatedUser: (...args: unknown[]) =>
-      getAuthenticatedUserMock(...args),
+    getAuthSession: (...args: unknown[]) =>
+      getAuthSessionMock(...args),
   };
 });
 
@@ -31,9 +31,9 @@ beforeEach(() => {
 
 describe('authMiddleware', () => {
   it('redirects to signin when no authenticated user exists', async () => {
-    getAuthenticatedUserMock.mockResolvedValueOnce(null);
     const request = new Request('http://localhost/doc/123?foo=bar');
     const context = {
+      get: vi.fn(() => null),
       set: vi.fn(),
     };
 
@@ -49,9 +49,9 @@ describe('authMiddleware', () => {
   });
 
   it('stores the authenticated user in context', async () => {
-    getAuthenticatedUserMock.mockResolvedValueOnce(userFixture);
     const request = new Request('http://localhost/doc');
     const context = {
+      get: vi.fn(() => userFixture),
       set: vi.fn(),
     };
 
@@ -63,5 +63,40 @@ describe('authMiddleware', () => {
     expect(context.set).toHaveBeenCalledWith(
       userSessionContext, userFixture,
     );
+  });
+});
+
+describe('sessionMiddleware', () => {
+  it('stores null user and no session cookie when unauthenticated', async () => {
+    getAuthSessionMock.mockResolvedValueOnce(null);
+    const context = {
+      set: vi.fn(),
+    };
+
+    await sessionMiddleware({
+      request: new Request('http://localhost/doc'),
+      context,
+    } as never, undefined as never);
+
+    expect(context.set).toHaveBeenCalledWith(optionalUserSessionContext, null);
+    expect(context.set).toHaveBeenCalledWith(sessionCookieHeaderContext, null);
+  });
+
+  it('stores optional user and refreshed session cookie', async () => {
+    getAuthSessionMock.mockResolvedValueOnce({
+      user: userFixture,
+      cookieHeader: 'session=updated-cookie',
+    });
+    const context = {
+      set: vi.fn(),
+    };
+
+    await sessionMiddleware({
+      request: new Request('http://localhost/doc'),
+      context,
+    } as never, undefined as never);
+
+    expect(context.set).toHaveBeenCalledWith(optionalUserSessionContext, userFixture);
+    expect(context.set).toHaveBeenCalledWith(sessionCookieHeaderContext, 'session=updated-cookie');
   });
 });
