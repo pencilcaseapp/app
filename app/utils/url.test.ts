@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { withSearchParams } from './url';
+import { getNormalizedReturnUrl, withSearchParams } from './url';
+import { href } from 'react-router';
 
 describe('withSearchParams', () => {
   it('returns the path with search params', () => {
@@ -7,5 +8,18 @@ describe('withSearchParams', () => {
     const searchParams = { key: 'value' };
 
     expect(withSearchParams(path, searchParams)).toBe('/path?key=value');
+  });
+});
+
+describe('getNormalizedReturnUrl', () => {
+  it('returns a safe relative path unchanged', () => {
+    expect(getNormalizedReturnUrl('/doc/123')).toBe('/doc/123');
+  });
+
+  it('falls back to home for unsafe values', () => {
+    expect(getNormalizedReturnUrl('//evil.com')).toBe(href('/home'));
+    expect(getNormalizedReturnUrl('https://evil.com')).toBe(href('/home'));
+    expect(getNormalizedReturnUrl('javascript:alert(1)')).toBe(href('/home'));
+    expect(getNormalizedReturnUrl()).toBe(href('/home'));
   });
 });

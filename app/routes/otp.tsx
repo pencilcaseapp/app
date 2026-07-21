@@ -8,7 +8,7 @@ import { returnFormError, validateForm } from '~/utils/form';
 import { createSessionCookie, initMagicCode, verifyMagicCode, VerifyMagicCodeError } from '~/services/auth';
 import { href, redirect, Link as ReactRouterLink } from 'react-router';
 import { SearchParamAuth } from '~/constants/search-params';
-import { getRequiredSearchParam, withSearchParams } from '~/utils/url';
+import { getNormalizedReturnUrl, getOptionalSearchParam, getRequiredSearchParam, withSearchParams } from '~/utils/url';
 import { Link } from '~/ui/link/link';
 import { getValidOtp } from '~/repos/otp';
 
@@ -26,7 +26,9 @@ const formSchema = z.discriminatedUnion('action', [formSchemaVerify, formSchemaR
 export async function loader({ request, params: { otpId } }: Route.ActionArgs) {
   const email = getRequiredSearchParam(request, SearchParamAuth.Email);
   const otp = await getValidOtp(otpId);
-  const returnUrl = getRequiredSearchParam(request, SearchParamAuth.ReturnUrl);
+  const returnUrl = getNormalizedReturnUrl(
+    getOptionalSearchParam(request, SearchParamAuth.ReturnUrl),
+  );
 
   if (!otp) {
     return redirect(
@@ -47,7 +49,9 @@ export async function loader({ request, params: { otpId } }: Route.ActionArgs) {
 export async function action({ request, params: { otpId } }: Route.ActionArgs) {
   const form = await validateForm(request, formSchema);
   const email = getRequiredSearchParam(request, SearchParamAuth.Email);
-  const returnUrl = getRequiredSearchParam(request, SearchParamAuth.ReturnUrl);
+  const returnUrl = getNormalizedReturnUrl(
+    getOptionalSearchParam(request, SearchParamAuth.ReturnUrl),
+  );
 
   if (!form.ok) {
     return form.formState;

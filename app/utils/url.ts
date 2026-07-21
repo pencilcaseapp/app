@@ -1,4 +1,4 @@
-import { data } from 'react-router';
+import { data, href } from 'react-router';
 
 export function withSearchParams(
   path: string,
@@ -32,4 +32,12 @@ export function getOptionalSearchParam<Param = string>(
   const searchParam = url.searchParams.get(name);
 
   return searchParam ? (searchParam as Param) : undefined;
+}
+
+export function getNormalizedReturnUrl(returnUrl?: string | null): string {
+  if (!returnUrl || !returnUrl.startsWith('/') || returnUrl.startsWith('//')) {
+    return href('/home');
+  }
+
+  return returnUrl;
 }

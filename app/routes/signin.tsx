@@ -8,7 +8,7 @@ import { returnFormError, validateForm } from '~/utils/form';
 import { href, redirect } from 'react-router';
 import { commonCopies } from '~/constants/common-copies';
 import { initMagicCode } from '~/services/auth';
-import { getOptionalSearchParam, withSearchParams } from '~/utils/url';
+import { getNormalizedReturnUrl, getOptionalSearchParam, withSearchParams } from '~/utils/url';
 import { SearchParamAuth } from '~/constants/search-params';
 import { Notification } from '~/ui/notification/notification';
 
@@ -30,7 +30,9 @@ export function loader({ request }: Route.ActionArgs) {
 
 export async function action({ request }: Route.ActionArgs) {
   const form = await validateForm(request, formSchema);
-  const returnUrl = getOptionalSearchParam(request, SearchParamAuth.ReturnUrl);
+  const returnUrl = getNormalizedReturnUrl(
+    getOptionalSearchParam(request, SearchParamAuth.ReturnUrl),
+  );
 
   if (!form.ok) {
     return form.formState;
@@ -50,7 +52,7 @@ export async function action({ request }: Route.ActionArgs) {
       href('/otp/:otpId', { otpId: result.otp.id }),
       {
         [SearchParamAuth.Email]: form.data.email,
-        [SearchParamAuth.ReturnUrl]: returnUrl ?? href('/home'),
+        [SearchParamAuth.ReturnUrl]: returnUrl,
       },
     ),
   );

@@ -82,6 +82,27 @@ test('redirects after form submission', async () => {
   });
 });
 
+test('normalizes unsafe return urls on redirect', async () => {
+  const context = new RouterContextProvider();
+  context.set(userSessionContext, { ...userFixture, onboarded: false });
+
+  const { findByText } = await renderRoute('/onboarding', {
+    params: {},
+    searchParams: {
+      [SearchParamAuth.ReturnUrl]: '//evil.com',
+    },
+    context,
+  });
+
+  const button = await findByText('Skip it');
+
+  await act(async () => fireEvent.submit(button));
+
+  await vi.waitFor(() => {
+    expect(redirectMock).toHaveBeenCalledWith('/home');
+  });
+});
+
 test('persists user preferences', async () => {
   const context = new RouterContextProvider();
   context.set(userSessionContext, { ...userFixture, onboarded: false });
