@@ -1,5 +1,5 @@
 import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, getValidOtp, markOtpAsUsed } from '~/repos/otp';
-import { createUserSession, getOrCreateUserByEmail, getUserBySessionTokenHash, type User } from '~/repos/user';
+import { createUserSession, getOrCreateUserByEmail, getUserBySessionTokenHash, updateUser, type User } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
 import { createHash, randomBytes, randomInt } from 'node:crypto';
@@ -114,6 +114,18 @@ export async function createSessionCookie(input: {
 
   return commitSession(cookieSession, {
     expires: session.expiresAt,
+  });
+}
+
+export async function onboardUser(
+  userId: string,
+  input: { name?: string; newsletter?: boolean },
+) {
+  const { name, newsletter } = input;
+  await updateUser(userId, {
+    name,
+    newsletter,
+    onboarded: true,
   });
 }
 

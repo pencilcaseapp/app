@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { createSessionCookie, getAuthenticatedUser, initMagicCode, InitMagicCodeError, verifyMagicCode, VerifyMagicCodeError } from './auth';
+import { createSessionCookie, getAuthenticatedUser, initMagicCode, InitMagicCodeError, onboardUser, verifyMagicCode, VerifyMagicCodeError } from './auth';
 import { userFixture, userSessionFixture } from '~/test/fixtures/user';
 import argon2 from 'argon2';
 import { otpFixture } from '~/test/fixtures/otp';
@@ -25,6 +25,7 @@ vi.mock('~/repos/otp', async (importOriginal) => {
 });
 
 const getUserBySessionTokenHashMock = vi.fn();
+const updateUserMock = vi.fn();
 vi.mock('~/repos/user', () => ({
   getOrCreateUserByEmail: () => userFixture,
   createUserSession: () => ({
@@ -33,6 +34,7 @@ vi.mock('~/repos/user', () => ({
   }),
   getUserBySessionTokenHash: (...args: unknown[]) =>
     getUserBySessionTokenHashMock(...args),
+  updateUser: (...args: unknown[]) => updateUserMock(...args),
 }));
 
 const sendEmailMagicCodeMock = vi.fn();
@@ -214,5 +216,20 @@ describe('getAuthenticatedUser', () => {
     const user = await getAuthenticatedUser(request);
 
     expect(user).toEqual(userFixture);
+  });
+});
+
+describe('onboardUser', () => {
+  it('updates the user with the provided name and newsletter preference', async () => {
+    await onboardUser(userFixture.id, {
+      name: 'John Doe',
+      newsletter: true,
+    });
+
+    expect(updateUserMock).toHaveBeenCalledWith(userFixture.id, {
+      name: 'John Doe',
+      newsletter: true,
+      onboarded: true,
+    });
   });
 });

@@ -50,4 +50,72 @@ describe('validateForm', () => {
 
     expect(result.ok).toBe(false);
   });
+
+  test('should derive booleans from schema', async () => {
+    const boolSchema = z.object({
+      newsletter: z.boolean(),
+    });
+
+    const formData = new FormData();
+    formData.append('newsletter', 'on');
+
+    const request = new Request('http://example.com', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await validateForm(request, boolSchema);
+
+    expect(result.ok).toBe(true);
+
+    if (result.ok) {
+      expect(result.data).toEqual({ newsletter: true });
+    }
+  });
+
+  test('should derive numbers from schema', async () => {
+    const numSchema = z.object({
+      age: z.number(),
+    });
+
+    const formData = new FormData();
+    formData.append('age', '42');
+
+    const request = new Request('http://example.com', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await validateForm(request, numSchema);
+
+    expect(result.ok).toBe(true);
+
+    if (result.ok) {
+      expect(result.data).toEqual({ age: 42 });
+    }
+  });
+
+  test('should derive types from optional/wrapped fields', async () => {
+    const wrappedSchema = z.object({
+      opt: z.boolean().optional(),
+      def: z.number().default(0),
+    });
+
+    const formData = new FormData();
+    formData.append('opt', 'on');
+    formData.append('def', '7');
+
+    const request = new Request('http://example.com', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await validateForm(request, wrappedSchema);
+
+    expect(result.ok).toBe(true);
+
+    if (result.ok) {
+      expect(result.data).toEqual({ opt: true, def: 7 });
+    }
+  });
 });
