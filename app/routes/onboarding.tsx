@@ -10,7 +10,7 @@ import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { commonCopies } from '~/constants/common-copies';
 import { validateForm } from '~/utils/form';
 import { onboardUser } from '~/services/auth';
-import { getRequiredSearchParam } from '~/utils/url';
+import { getNormalizedReturnUrl, getOptionalSearchParam } from '~/utils/url';
 
 export const middleware: MiddlewareFunction[] = [
   authMiddleware,
@@ -25,7 +25,9 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userSessionContext);
-  const returnUrl = getRequiredSearchParam(request, SearchParamAuth.ReturnUrl);
+  const returnUrl = getNormalizedReturnUrl(
+    getOptionalSearchParam(request, SearchParamAuth.ReturnUrl),
+  );
 
   if (user.onboarded) {
     return redirect(returnUrl);
@@ -34,7 +36,9 @@ export function loader({ request, context }: Route.LoaderArgs) {
 
 export async function action({ request, context }: Route.ActionArgs) {
   const form = await validateForm(request, formSchema);
-  const returnUrl = getRequiredSearchParam(request, SearchParamAuth.ReturnUrl);
+  const returnUrl = getNormalizedReturnUrl(
+    getOptionalSearchParam(request, SearchParamAuth.ReturnUrl),
+  );
   const user = context.get(userSessionContext);
 
   if (!form.ok) {
