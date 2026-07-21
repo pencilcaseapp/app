@@ -12,7 +12,7 @@ export const ControlledCheckbox: React.FC<ControlledCheckboxProps>
         id={field.name}
         name={field.name}
         checked={field.state.value}
-        onChange={() => field.handleChange(!field.state.value)}
+        onChange={e => field.handleChange(e.target.checked)}
         onBlur={field.handleBlur}
         errorMessage={field.state.meta.errors[0]?.message}
         {...props}

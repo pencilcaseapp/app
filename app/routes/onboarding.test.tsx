@@ -38,5 +38,5 @@ test('renders onboarding when user is not onboarded', async () => {
     context,
   });
 
-  expect(await findByText(userFixture.email)).toBeInTheDocument();
+  expect(await findByText('Congrats. Welcome!')).toBeInTheDocument();
 });
