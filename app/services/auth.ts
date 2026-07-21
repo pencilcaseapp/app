@@ -3,8 +3,10 @@ import { createUserSession, getOrCreateUserByEmail, getUserBySessionTokenHash, u
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
 import { createHash, randomBytes, randomInt } from 'node:crypto';
-import { createCookieSessionStorage } from 'react-router';
+import { createCookieSessionStorage, href } from 'react-router';
 import { getConfig } from '~/config';
+import { withSearchParams } from '~/utils/url';
+import { SearchParamAuth } from '~/constants/search-params';
 
 const config = getConfig();
 
@@ -127,6 +129,17 @@ export async function onboardUser(
     newsletter,
     onboarded: true,
   });
+}
+
+export function getSignInUrl(returnUrl: string = href('/home')) {
+  if (!returnUrl.startsWith('/') || returnUrl.startsWith('//')) {
+    returnUrl = href('/home');
+  }
+
+  return withSearchParams(href('/signin'),
+    {
+      [SearchParamAuth.ReturnUrl]: returnUrl,
+    });
 }
 
 function hashUserSessionToken(token: string) {

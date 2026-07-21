@@ -6,6 +6,7 @@ import { renderRoute } from '~/utils/testing';
 import { userSessionContext } from '~/contexts/user-session';
 import userEvent from '@testing-library/user-event';
 import { act, fireEvent } from '@testing-library/react';
+import { SearchParamAuth } from '~/constants/search-params';
 
 const redirectMock = vi.fn();
 vi.mock('react-router', async () => {
@@ -34,6 +35,9 @@ test('redirects to home when user is already onboarded', async () => {
 
   await renderRoute('/onboarding', {
     params: {},
+    searchParams: {
+      [SearchParamAuth.ReturnUrl]: '/home',
+    },
     context,
   });
 
@@ -46,6 +50,9 @@ test('renders onboarding when user is not onboarded', async () => {
 
   const { findByText } = await renderRoute('/onboarding', {
     params: {},
+    searchParams: {
+      [SearchParamAuth.ReturnUrl]: '/home',
+    },
     context,
   });
 
@@ -58,6 +65,9 @@ test('redirects after form submission', async () => {
 
   const { findByLabelText, findByText } = await renderRoute('/onboarding', {
     params: {},
+    searchParams: {
+      [SearchParamAuth.ReturnUrl]: '/home',
+    },
     context,
   });
 
@@ -78,6 +88,9 @@ test('persists user preferences', async () => {
 
   const { findByLabelText, findByText, findByRole } = await renderRoute('/onboarding', {
     params: {},
+    searchParams: {
+      [SearchParamAuth.ReturnUrl]: '/home',
+    },
     context,
   });
 

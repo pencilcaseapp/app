@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { createSessionCookie, getAuthenticatedUser, initMagicCode, InitMagicCodeError, onboardUser, verifyMagicCode, VerifyMagicCodeError } from './auth';
+import { createSessionCookie, getAuthenticatedUser, getSignInUrl, initMagicCode, InitMagicCodeError, onboardUser, verifyMagicCode, VerifyMagicCodeError } from './auth';
 import { userFixture, userSessionFixture } from '~/test/fixtures/user';
 import argon2 from 'argon2';
 import { otpFixture } from '~/test/fixtures/otp';
@@ -231,5 +231,20 @@ describe('onboardUser', () => {
       newsletter: true,
       onboarded: true,
     });
+  });
+});
+
+describe('getSignInUrl', () => {
+  it('sets default return url to home', async () => {
+    const expectedReturnUrl = encodeURIComponent('/home');
+
+    expect(getSignInUrl()).toEqual(`/signin?returnUrl=${expectedReturnUrl}`);
+  });
+
+  it('discards external return urls', async () => {
+    const expectedReturnUrl = encodeURIComponent('/home');
+
+    expect(getSignInUrl('https://example.com')).toEqual(`/signin?returnUrl=${expectedReturnUrl}`);
+    expect(getSignInUrl('//example.com')).toEqual(`/signin?returnUrl=${expectedReturnUrl}`);
   });
 });

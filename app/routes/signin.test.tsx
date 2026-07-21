@@ -73,7 +73,10 @@ test('redirects after form submission', async () => {
     expect(redirectMock).toHaveBeenCalledWith(
       withSearchParams(
         href('/otp/:otpId', { otpId: otpFixture.id }),
-        { [SearchParamAuth.Email]: userFixture.email },
+        {
+          [SearchParamAuth.Email]: userFixture.email,
+          [SearchParamAuth.ReturnUrl]: '/home',
+        },
       ),
     );
   });
