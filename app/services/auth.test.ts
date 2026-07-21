@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { createSessionCookie, getAuthenticatedUser, getSignInUrl, initMagicCode, InitMagicCodeError, onboardUser, verifyMagicCode, VerifyMagicCodeError } from './auth';
+import { createSessionCookie, getAuthSession, getSignInUrl, initMagicCode, InitMagicCodeError, onboardUser, verifyMagicCode, VerifyMagicCodeError } from './auth';
 import { userFixture, userSessionFixture } from '~/test/fixtures/user';
 import argon2 from 'argon2';
 import { otpFixture } from '~/test/fixtures/otp';
@@ -24,7 +24,7 @@ vi.mock('~/repos/otp', async (importOriginal) => {
   };
 });
 
-const getUserBySessionTokenHashMock = vi.fn();
+const getAndRefreshUserSessionMock = vi.fn();
 const updateUserMock = vi.fn();
 vi.mock('~/repos/user', () => ({
   getOrCreateUserByEmail: () => userFixture,
@@ -32,8 +32,8 @@ vi.mock('~/repos/user', () => ({
     ...userSessionFixture,
     expiresAt: new Date('2026-06-15T13:39:21.509Z'),
   }),
-  getUserBySessionTokenHash: (...args: unknown[]) =>
-    getUserBySessionTokenHashMock(...args),
+  getAndRefreshUserSession: (...args: unknown[]) =>
+    getAndRefreshUserSessionMock(...args),
   updateUser: (...args: unknown[]) => updateUserMock(...args),
 }));
 
@@ -182,16 +182,16 @@ describe('createSessionCookie', () => {
   });
 });
 
-describe('getAuthenticatedUser', () => {
+describe('getAuthSession', () => {
   it('returns null if no session cookie is present', async () => {
     const request = new Request('http://localhost');
-    const user = await getAuthenticatedUser(request);
+    const session = await getAuthSession(request);
 
-    expect(user).toBeNull();
+    expect(session).toBeNull();
   });
 
   it('returns null if session is not found', async () => {
-    getUserBySessionTokenHashMock.mockResolvedValueOnce(undefined);
+    getAndRefreshUserSessionMock.mockResolvedValueOnce(null);
 
     const request = new Request('http://localhost', {
       headers: {
@@ -199,13 +199,21 @@ describe('getAuthenticatedUser', () => {
       },
     });
 
-    const user = await getAuthenticatedUser(request);
+    const session = await getAuthSession(request);
 
-    expect(user).toBeNull();
+    expect(session).toBeNull();
   });
 
-  it('returns authenticated user if session is valid', async () => {
-    getUserBySessionTokenHashMock.mockResolvedValueOnce(userFixture);
+  it('returns authenticated session and refreshed cookie when session is valid', async () => {
+    const expiresAt = new Date('2026-06-15T13:39:21.509Z');
+    getAndRefreshUserSessionMock.mockResolvedValueOnce({
+      session: {
+        ...userSessionFixture,
+        expiresAt,
+      },
+      user: userFixture,
+      isRefreshed: true,
+    });
 
     const request = new Request('http://localhost', {
       headers: {
@@ -213,9 +221,12 @@ describe('getAuthenticatedUser', () => {
       },
     });
 
-    const user = await getAuthenticatedUser(request);
+    const session = await getAuthSession(request);
 
-    expect(user).toEqual(userFixture);
+    expect(session).toEqual({
+      user: userFixture,
+      cookieHeader: 'session=eyJ0b2tlbiI6InlwaW5LeFd3bkF1YWVFS1lrUnRRWVRGREtKSm5JdmU1a3I2NXZzUDU2LXcifQ%3D%3D.7FWkYgIL8Aj2ImIH%2F4VgSCgJf1XI4OWWzTi1GbutCBo; Path=/; Expires=Mon, 15 Jun 2026 13:39:21 GMT; HttpOnly; SameSite=Lax',
+    });
   });
 });
 

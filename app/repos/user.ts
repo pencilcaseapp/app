@@ -1,4 +1,4 @@
-import { eq, type InferSelectModel } from 'drizzle-orm';
+import { and, eq, sql, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { users } from '~/db/schema';
@@ -7,6 +7,8 @@ import { sessions } from '~/db/schema';
 export type User = InferSelectModel<typeof users>;
 
 export type UserSession = InferSelectModel<typeof sessions>;
+
+const SESSION_REFRESH_THRESHOLD_MS = 28 * 24 * 60 * 60 * 1000;
 
 export async function createUser(input: {
   email: string;
@@ -99,15 +101,44 @@ export async function createUserSession(input: {
   return session;
 }
 
-export async function getUserBySessionTokenHash(tokenHash: string) {
-  return db.query.users.findFirst({
+export async function getAndRefreshUserSession(tokenHash: string) {
+  const response = await db.query.sessions.findFirst({
     where: {
-      sessions: {
-        tokenHash,
-        expiresAt: {
-          gt: new Date(),
-        },
+      tokenHash,
+      expiresAt: {
+        gt: new Date(),
       },
     },
+    with: {
+      user: true,
+    },
   });
+
+  if (!response) {
+    return null;
+  }
+
+  const { user, ...session } = response;
+  let refreshedSession: UserSession | undefined;
+  const refreshThreshold = new Date(Date.now() + SESSION_REFRESH_THRESHOLD_MS);
+
+  if (session.expiresAt < refreshThreshold) {
+    const [updateResponse] = await db
+      .update(sessions)
+      .set({
+        expiresAt: sql`(CURRENT_TIMESTAMP + INTERVAL '30 days')`,
+      })
+      .where(and(
+        eq(sessions.id, session.id),
+      ))
+      .returning();
+
+    refreshedSession = updateResponse;
+  }
+
+  return {
+    user,
+    session: refreshedSession ?? session,
+    isRefreshed: !!refreshedSession,
+  };
 }

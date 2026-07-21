@@ -6,10 +6,11 @@ import { ClientOnly } from '~/ui/client-only/client-only';
 import { Button } from '~/ui/button/button';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { href, Link } from 'react-router';
-import { getAuthenticatedUser, getSignInUrl } from '~/services/auth';
+import { optionalUserSessionContext } from '~/contexts/user-session';
+import { getSignInUrl } from '~/services/auth';
 
-export async function loader({ params, request }: Route.LoaderArgs) {
-  const user = await getAuthenticatedUser(request);
+export async function loader({ params, context }: Route.LoaderArgs) {
+  const user = context.get(optionalUserSessionContext);
   const documentTitle = await getDocumentTitle(params.id);
   const documentUrl = href(`/doc/:id`, { id: params.id });
   const signInUrl = user ? null : getSignInUrl(documentUrl);

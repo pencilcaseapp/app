@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createUser, createUserSession, getOrCreateUserByEmail, getUser, getUserByEmail, getUserBySessionTokenHash, updateUser } from './user';
+import { createUser, createUserSession, getOrCreateUserByEmail, getUser, getUserByEmail, getAndRefreshUserSession, updateUser } from './user';
 import { createExpiredUserSession, createTestUser, createValidUserSession } from '~/test/data-factories/user';
 import { faker } from '@faker-js/faker';
 
@@ -126,27 +126,65 @@ describe('createUserSession', () => {
   });
 });
 
-describe('getUserBySessionTokenHash', () => {
-  it('returns a user by session token hash', async () => {
+describe('getAndRefreshUserSession', () => {
+  it('returns a user session by token hash', async () => {
     const userFixture = await createTestUser();
     const sessionFixture = await createValidUserSession(userFixture.id);
-    const user = await getUserBySessionTokenHash(sessionFixture.tokenHash);
+    const result = await getAndRefreshUserSession(sessionFixture.tokenHash);
 
-    expect(user).toStrictEqual(userFixture);
+    expect(result).toStrictEqual({
+      session: {
+        id: sessionFixture.id,
+        userId: sessionFixture.userId,
+        tokenHash: sessionFixture.tokenHash,
+        userAgent: sessionFixture.userAgent,
+        createdAt: sessionFixture.createdAt,
+        expiresAt: expect.any(Date),
+      },
+      user: userFixture,
+      isRefreshed: false,
+    });
   });
 
-  it('returns undefined if no session is found', async () => {
-    const user = await getUserBySessionTokenHash('non-existent-token-hash');
+  it('refreshes a session when it is within the refresh threshold', async () => {
+    const userFixture = await createTestUser();
+    const expiresAt = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
+    const sessionFixture = await createValidUserSession(
+      userFixture.id,
+      expiresAt,
+    );
 
-    expect(user).toBeUndefined();
+    const result = await getAndRefreshUserSession(sessionFixture.tokenHash);
+
+    expect(result).toStrictEqual({
+      session: {
+        id: sessionFixture.id,
+        userId: sessionFixture.userId,
+        tokenHash: sessionFixture.tokenHash,
+        userAgent: sessionFixture.userAgent,
+        createdAt: sessionFixture.createdAt,
+        expiresAt: expect.any(Date),
+      },
+      user: userFixture,
+      isRefreshed: true,
+    });
+
+    expect(result?.session.expiresAt.getTime())
+      .toBeGreaterThan(expiresAt.getTime());
   });
 
-  it('returns undefined if session is expired', async () => {
+  it('returns null if no session is found', async () => {
+    const result = await getAndRefreshUserSession('non-existent-token-hash');
+
+    expect(result).toBeNull();
+  });
+
+  it('returns null if session is expired', async () => {
     const userFixture = await createTestUser();
     const sessionFixture = await createExpiredUserSession(userFixture.id);
 
-    const user = await getUserBySessionTokenHash(sessionFixture.tokenHash);
+    const result = await getAndRefreshUserSession(sessionFixture.tokenHash);
 
-    expect(user).toBeUndefined();
+    expect(result).toBeNull();
   });
 });

@@ -13,9 +13,13 @@ import type { Route } from './+types/root';
 import classNames from 'classnames';
 import { csrf } from './utils/csrf';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
+import { sessionCookieHeaderContext } from './contexts/user-session';
+import { sessionMiddleware } from './middleware/auth';
+import { Typography } from './ui/typography/typography';
 
 import './app.css';
-import { Typography } from './ui/typography/typography';
+
+export const middleware = [sessionMiddleware];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const matches = useMatches() as UIMatch<unknown, { bodyClassName: string }>[];
@@ -40,13 +44,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const [token, cookieHeader] = await csrf.commitToken(request, 64);
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const [token, csrfCookieHeader] = await csrf.commitToken(request, 64);
+  const sessionCookieHeader = context.get(sessionCookieHeaderContext);
+
+  const headers = new Headers();
+  if (csrfCookieHeader) {
+    headers.append('set-cookie', csrfCookieHeader);
+  }
+
+  if (sessionCookieHeader) {
+    headers.append('set-cookie', sessionCookieHeader);
+  }
+
   return data({ token }, {
-    headers: cookieHeader
-      ? {
-          'set-cookie': cookieHeader,
-        }
+    headers: headers.has('set-cookie')
+      ? headers
       : undefined,
   });
 }
