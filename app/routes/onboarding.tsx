@@ -1,4 +1,5 @@
-import { href, redirect, type MiddlewareFunction } from 'react-router';
+import { redirect, type MiddlewareFunction } from 'react-router';
+import { SearchParamAuth } from '~/constants/search-params';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
 import type { Route } from './+types/onboarding';
@@ -9,6 +10,7 @@ import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { commonCopies } from '~/constants/common-copies';
 import { validateForm } from '~/utils/form';
 import { onboardUser } from '~/services/auth';
+import { getRequiredSearchParam } from '~/utils/url';
 
 export const middleware: MiddlewareFunction[] = [
   authMiddleware,
@@ -21,16 +23,18 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function loader({ context }: Route.LoaderArgs) {
+export function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userSessionContext);
+  const returnUrl = getRequiredSearchParam(request, SearchParamAuth.ReturnUrl);
 
   if (user.onboarded) {
-    return redirect(href('/home'));
+    return redirect(returnUrl);
   }
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
   const form = await validateForm(request, formSchema);
+  const returnUrl = getRequiredSearchParam(request, SearchParamAuth.ReturnUrl);
   const user = context.get(userSessionContext);
 
   if (!form.ok) {
@@ -42,7 +46,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     newsletter: form.data.newsletter,
   });
 
-  return redirect(href('/home'));
+  return redirect(returnUrl);
 }
 
 export default function Onboarding() {

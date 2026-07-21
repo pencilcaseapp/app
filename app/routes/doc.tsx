@@ -6,15 +6,17 @@ import { ClientOnly } from '~/ui/client-only/client-only';
 import { Button } from '~/ui/button/button';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { href, Link } from 'react-router';
-import { getAuthenticatedUser } from '~/services/auth';
+import { getAuthenticatedUser, getSignInUrl } from '~/services/auth';
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthenticatedUser(request);
   const documentTitle = await getDocumentTitle(params.id);
+  const documentUrl = href(`/doc/:id`, { id: params.id });
+  const signInUrl = user ? null : getSignInUrl(documentUrl);
 
   return {
     documentTitle,
-    user,
+    signInUrl,
   };
 }
 
@@ -30,8 +32,18 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
           id={params.id}
           onTitleChange={setTitle}
           topbarLeft={
-            loaderData.user
+            loaderData.signInUrl
               ? (
+                  <Button
+                    as={Link}
+                    to={loaderData.signInUrl}
+                    colorLight="upgrade"
+                    colorDark="upgrade"
+                  >
+                    Sign In
+                  </Button>
+                )
+              : (
                   <Button
                     colorLight="secondary"
                     colorDark="secondary"
@@ -40,16 +52,6 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
                     ref={triggerRef}
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                   />
-                )
-              : (
-                  <Button
-                    as={Link}
-                    to={href('/signin')}
-                    colorLight="upgrade"
-                    colorDark="upgrade"
-                  >
-                    Sign In
-                  </Button>
                 )
           }
         />

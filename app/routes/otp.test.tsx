@@ -55,6 +55,7 @@ test('matches snapshot', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
+      [SearchParamAuth.ReturnUrl]: '/home',
     },
   });
 
@@ -74,6 +75,7 @@ test('redirects to onboarding on successful verification', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
+      [SearchParamAuth.ReturnUrl]: '/home',
     },
   });
 
@@ -87,7 +89,7 @@ test('redirects to onboarding on successful verification', async () => {
   });
 
   await vi.waitFor(() => {
-    expect(redirectMock).toHaveBeenCalledWith('/onboarding');
+    expect(redirectMock).toHaveBeenCalledWith('/onboarding?returnUrl=%2Fhome');
   });
 });
 
@@ -100,6 +102,7 @@ test('redirects to signin with expired param', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
+      [SearchParamAuth.ReturnUrl]: '/home',
     },
   });
 
@@ -118,6 +121,7 @@ test('shows form error on invalid code', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
+      [SearchParamAuth.ReturnUrl]: '/home',
     },
   });
 
@@ -147,6 +151,7 @@ test('redirects on expired code', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
+      [SearchParamAuth.ReturnUrl]: '/home',
     },
   });
 
@@ -160,7 +165,7 @@ test('redirects on expired code', async () => {
   });
 
   await vi.waitFor(() => {
-    expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true');
+    expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true&returnUrl=%2Fhome');
   });
 });
 
@@ -174,6 +179,7 @@ test('resends code', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
+      [SearchParamAuth.ReturnUrl]: '/home',
     },
   });
 
@@ -187,7 +193,11 @@ test('resends code', async () => {
     expect(redirectMock).toHaveBeenCalledWith(
       withSearchParams(
         href('/otp/:otpId', { otpId: otpFixture.id }),
-        { [SearchParamAuth.Email]: userFixture.email },
+        {
+          [SearchParamAuth.Email]: userFixture.email,
+          [SearchParamAuth.ReturnUrl]: '/home',
+        },
+
       ),
     );
   });

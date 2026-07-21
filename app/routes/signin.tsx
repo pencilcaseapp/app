@@ -30,6 +30,7 @@ export function loader({ request }: Route.ActionArgs) {
 
 export async function action({ request }: Route.ActionArgs) {
   const form = await validateForm(request, formSchema);
+  const returnUrl = getOptionalSearchParam(request, SearchParamAuth.ReturnUrl);
 
   if (!form.ok) {
     return form.formState;
@@ -47,7 +48,10 @@ export async function action({ request }: Route.ActionArgs) {
   return redirect(
     withSearchParams(
       href('/otp/:otpId', { otpId: result.otp.id }),
-      { [SearchParamAuth.Email]: form.data.email },
+      {
+        [SearchParamAuth.Email]: form.data.email,
+        [SearchParamAuth.ReturnUrl]: returnUrl ?? href('/home'),
+      },
     ),
   );
 }

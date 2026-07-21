@@ -26,6 +26,7 @@ const formSchema = z.discriminatedUnion('action', [formSchemaVerify, formSchemaR
 export async function loader({ request, params: { otpId } }: Route.ActionArgs) {
   const email = getRequiredSearchParam(request, SearchParamAuth.Email);
   const otp = await getValidOtp(otpId);
+  const returnUrl = getRequiredSearchParam(request, SearchParamAuth.ReturnUrl);
 
   if (!otp) {
     return redirect(
@@ -39,12 +40,14 @@ export async function loader({ request, params: { otpId } }: Route.ActionArgs) {
 
   return {
     email,
+    returnUrl,
   };
 }
 
 export async function action({ request, params: { otpId } }: Route.ActionArgs) {
   const form = await validateForm(request, formSchema);
   const email = getRequiredSearchParam(request, SearchParamAuth.Email);
+  const returnUrl = getRequiredSearchParam(request, SearchParamAuth.ReturnUrl);
 
   if (!form.ok) {
     return form.formState;
@@ -72,6 +75,7 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
               withSearchParams(
                 href('/signin'), {
                   [SearchParamAuth.IsExpired]: 'true',
+                  [SearchParamAuth.ReturnUrl]: returnUrl,
                 },
               ),
             );
@@ -92,7 +96,11 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
       });
 
       return redirect(
-        href('/onboarding'),
+        withSearchParams(
+          href('/onboarding'),
+          {
+            [SearchParamAuth.ReturnUrl]: returnUrl,
+          }),
         {
           headers: {
             'Set-Cookie': sessionCookie,
@@ -110,7 +118,10 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
       return redirect(
         withSearchParams(
           href('/otp/:otpId', { otpId: result.otp.id }),
-          { [SearchParamAuth.Email]: email },
+          {
+            [SearchParamAuth.Email]: email,
+            [SearchParamAuth.ReturnUrl]: returnUrl,
+          },
         ),
       );
     }
@@ -175,6 +186,7 @@ export default function Otp({ loaderData }: Route.ComponentProps) {
                 href('/signin'),
                 {
                   [SearchParamAuth.Email]: loaderData.email,
+                  [SearchParamAuth.ReturnUrl]: loaderData.returnUrl,
                 },
               )
             }
