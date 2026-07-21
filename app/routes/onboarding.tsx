@@ -70,9 +70,13 @@ export default function Onboarding() {
     <>
       <title>Onboarding</title>
       <ControlledForm form={formOnboarding}>
-        <picture role="presentation" className="block w-45 h-45 ml-auto mr-auto mb-6">
+        <picture>
           <source srcSet="welcoming-pencil-dark.svg" media="(prefers-color-scheme: dark)" />
-          <img src="welcoming-pencil-light.svg" />
+          <img
+            src="welcoming-pencil-light.svg"
+            className="block w-45 h-45 ml-auto mr-auto mb-6"
+            alt=""
+          />
         </picture>
         <Typography
           variant="heading2"
