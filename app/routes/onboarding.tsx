@@ -37,7 +37,10 @@ export async function action({ request, context }: Route.ActionArgs) {
     return form.formState;
   }
 
-  await onboardUser(user.id, form.data);
+  await onboardUser(user.id, {
+    name: form.data.name,
+    newsletter: form.data.newsletter,
+  });
 
   return redirect(href('/home'));
 }
