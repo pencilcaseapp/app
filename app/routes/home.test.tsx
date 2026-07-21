@@ -1,8 +1,24 @@
-import { expect, test } from 'vitest';
+import { beforeEach, expect, test, vi } from 'vitest';
 import { renderRoute } from '~/utils/testing';
 
-test('GET /home renders link to new doc', async () => {
-  const { findByText } = await renderRoute('/home');
+const redirectMock = vi.fn();
+vi.mock('react-router', async () => {
+  const actual = await vi.importActual<typeof import('react-router')>('react-router');
+  return {
+    ...actual,
+    redirect: (url: string, init?: number | ResponseInit) => {
+      redirectMock(url);
+      return actual.redirect(url, init);
+    },
+  };
+});
 
-  expect(await findByText('New doc')).toBeInTheDocument();
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
+test('redirects to new doc', async () => {
+  await renderRoute('/home');
+
+  expect(redirectMock).toHaveBeenCalledWith('/new');
 });
