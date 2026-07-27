@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import * as Y from 'yjs';
 import { extractTitleFromYDoc } from '~/utils/yjs';
 
-export const useDocumentTitle = (
+export const useExtractDocumentTitle = (
   doc: Y.Doc,
   onTitleChange?: (title: string | null) => void,
 ) => {

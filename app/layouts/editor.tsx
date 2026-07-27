@@ -1,4 +1,8 @@
-import { href, NavLink, Outlet } from 'react-router';
+import { href, NavLink, Outlet, useLocation } from 'react-router';
+import {
+  DocumentTitleProvider,
+  useDocumentTitle,
+} from '~/contexts/document-title';
 import { SocketClientProvider } from '~/contexts/socket-client';
 import { DocumentGroup } from '~/ui/document-group/document-group';
 import { DocumentGroupRoot } from '~/ui/document-group/document-root';
@@ -40,78 +44,103 @@ export async function loader({ context }: Route.LoaderArgs) {
   };
 }
 
-export default function LayoutEditor({ loaderData }: Route.ComponentProps) {
+export default function LayoutEditor({
+  loaderData: {
+    user,
+    navigation,
+  },
+}: Route.ComponentProps) {
   return (
-    <SocketClientProvider>
-      <SidebarProvider>
-        {loaderData.user && (
-          <Sidebar
-            items={[
-              {
-                key: 'all-docs',
-                content: (
-                  <>
-                    <DocumentGroupRoot defaultValue={['all-docs']}>
-                      <DocumentGroup icon="space" title="All Docs" value="all-docs">
-                        {loaderData.navigation.map(item => (
-                          <DocumentItem
-                            title={item.label}
-                            as={NavLink}
-                            to={item.to}
-                            key={`${item.label}-${item.to}`}
-                            actionArea={(
-                              <DropdownMenu>
-                                <DropdownMenuTrigger iconTitle="Item options" />
-                                <DropdownMenuPortal>
-                                  <DropdownMenuContent align="start">
-                                    <DropdownMenuItem as="button" onClick={() => console.log('clicked...')} icon="share">
-                                      Share
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem as="button" onClick={() => console.log('clicked')} color="danger" icon="trash">
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenuPortal>
-                              </DropdownMenu>
-                            )}
-                          >
-                            {item.label}
-                          </DocumentItem>
-                        ))}
-                      </DocumentGroup>
-                    </DocumentGroupRoot>
-                  </>
-                ),
-              },
-              {
-                key: 'Deleted',
-                content: (
-                  <DocumentGroupRoot>
-                    <DocumentGroup icon="trash" title="Deleted" value="deleted">
-                      No deleted documents
-                    </DocumentGroup>
-                  </DocumentGroupRoot>
-                ),
-              },
-            ]}
-            bottomArea={(
-              <>
-                {bottomNavigation?.map(item => (
-                  <NavigationItem
-                    key={`${item.label}-${item.to}`}
-                    title={item.label}
-                    to={item.to}
-                    icon={item.icon as IconName}
-                    as={NavLink}
-                  />
-                ))}
-              </>
-            )}
-          />
-        )}
-        <Outlet />
-      </SidebarProvider>
-    </SocketClientProvider>
+    <DocumentTitleProvider>
+      <SocketClientProvider>
+        <SidebarProvider>
+          {user && (
+            <EditorSidebar navigation={navigation} />
+          )}
+          <Outlet />
+        </SidebarProvider>
+      </SocketClientProvider>
+    </DocumentTitleProvider>
   );
 };
+
+type EditorSidebarProps = {
+  navigation: { label: string; to: string }[];
+};
+
+function EditorSidebar({ navigation }: EditorSidebarProps) {
+  const location = useLocation();
+  const [activeDocumentTitle] = useDocumentTitle();
+
+  return (
+    <Sidebar
+      items={[
+        {
+          key: 'all-docs',
+          content: (
+            <>
+              <DocumentGroupRoot defaultValue={['all-docs']}>
+                <DocumentGroup icon="space" title="All Docs" value="all-docs">
+                  {navigation.map((item) => {
+                    const isActive = item.to === location.pathname;
+                    const label = isActive ? activeDocumentTitle : item.label;
+
+                    return (
+                      <DocumentItem
+                        title={label}
+                        as={NavLink}
+                        to={item.to}
+                        key={item.to}
+                        actionArea={(
+                          <DropdownMenu>
+                            <DropdownMenuTrigger iconTitle="Item options" />
+                            <DropdownMenuPortal>
+                              <DropdownMenuContent align="start">
+                                <DropdownMenuItem as="button" onClick={() => console.log('clicked...')} icon="share">
+                                  Share
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem as="button" onClick={() => console.log('clicked')} color="danger" icon="trash">
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenuPortal>
+                          </DropdownMenu>
+                        )}
+                      >
+                        {label}
+                      </DocumentItem>
+                    );
+                  })}
+                </DocumentGroup>
+              </DocumentGroupRoot>
+            </>
+          ),
+        },
+        {
+          key: 'Deleted',
+          content: (
+            <DocumentGroupRoot>
+              <DocumentGroup icon="trash" title="Deleted" value="deleted">
+                No deleted documents
+              </DocumentGroup>
+            </DocumentGroupRoot>
+          ),
+        },
+      ]}
+      bottomArea={(
+        <>
+          {bottomNavigation?.map(item => (
+            <NavigationItem
+              key={`${item.label}-${item.to}`}
+              title={item.label}
+              to={item.to}
+              icon={item.icon as IconName}
+              as={NavLink}
+            />
+          ))}
+        </>
+      )}
+    />
+  );
+}
