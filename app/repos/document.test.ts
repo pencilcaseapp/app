@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createDocument, getDocument, getDocumentTitle, updateDocument } from './document';
+import { createDocument, getDocument, getDocumentList, getDocumentTitle, updateDocument } from './document';
 import { db } from '~/db';
 import { createDocumentWithTitle, createEmptyDocument } from '~/test/data-factories/document';
 import { createTestUser } from '~/test/data-factories/user';
@@ -77,5 +77,26 @@ describe('updateDocument', () => {
       updatedAt: expect.any(Date),
       userId: null,
     });
+  });
+});
+
+describe('getDocumentList', () => {
+  it('returns a list of documents', async () => {
+    const user = await createTestUser();
+    const document1 = await createDocumentWithTitle(user.id);
+    const document2 = await createDocumentWithTitle(user.id);
+
+    const documents = await getDocumentList(user.id);
+
+    expect(documents).toStrictEqual([
+      {
+        id: document2.id,
+        title: document2.title,
+      },
+      {
+        id: document1.id,
+        title: document1.title,
+      },
+    ]);
   });
 });

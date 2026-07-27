@@ -6,7 +6,7 @@ import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui/editor/editor';
 import { useEffect, useRef, useState } from 'react';
 import { useSocketClient } from '~/contexts/socket-client';
-import { useDocumentTitle } from '~/hooks/use-document-title';
+import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 import { createPortal } from 'react-dom';
 
@@ -25,7 +25,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     const [avatars, setAvatars] = useState<string[]>([]);
     const socketClient = useSocketClient();
     const [doc] = useState(() => new Y.Doc());
-    useDocumentTitle(doc, onTitleChange);
+    useExtractDocumentTitle(doc, onTitleChange);
     const [provider] = useState(() => new HocuspocusProvider({
       name: id,
       websocketProvider: socketClient,

@@ -1,13 +1,13 @@
 import type { Route } from './+types/doc';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
 import { getDocumentTitle } from '~/repos/document';
-import { useState } from 'react';
 import { ClientOnly } from '~/ui/client-only/client-only';
 import { Button } from '~/ui/button/button';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { href, Link } from 'react-router';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import { getSignInUrl } from '~/services/auth';
+import { useDocumentTitle } from '~/contexts/document-title';
 
 export async function loader({ params, context }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
@@ -22,14 +22,15 @@ export async function loader({ params, context }: Route.LoaderArgs) {
 }
 
 export default function ({ params, loaderData }: Route.ComponentProps) {
-  const [title, setTitle] = useState(loaderData.documentTitle);
+  const [title, setTitle] = useDocumentTitle(loaderData.documentTitle);
   const { isSidebarOpen, setIsSidebarOpen, triggerRef } = useSidebarContext();
 
   return (
     <>
-      <title>{title ?? 'Untitled'}</title>
+      <title>{title}</title>
       <ClientOnly>
         <CollaborativeEditor
+          key={params.id}
           id={params.id}
           onTitleChange={setTitle}
           topbarLeft={

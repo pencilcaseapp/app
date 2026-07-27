@@ -7,9 +7,10 @@ export async function createEmptyDocument() {
   return document;
 }
 
-export async function createDocumentWithTitle() {
+export async function createDocumentWithTitle(userId?: string) {
   const [document] = await db.insert(documents).values({
     title: faker.lorem.sentence({ min: 3, max: 10 }),
+    userId: userId ?? null,
   }).returning();
 
   return document;
