@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router';
+import { href, NavLink, Outlet } from 'react-router';
 import { SocketClientProvider } from '~/contexts/socket-client';
 import { DocumentGroup } from '~/ui/document-group/document-group';
 import { DocumentGroupRoot } from '~/ui/document-group/document-root';
@@ -38,8 +38,7 @@ const navigation = [
 ];
 
 const bottomNavigation = [
-  { label: 'Create Doc', to: '/create-doc', icon: 'create-doc' },
-  { label: 'Create Space', to: '/create-space', icon: 'create-space' },
+  { label: 'Create Doc', to: href('/new'), icon: 'create-doc' },
   { label: 'Settings', to: '/settings', icon: 'settings' },
 ];
 

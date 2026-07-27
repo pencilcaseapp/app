@@ -10,7 +10,7 @@ export async function renderRoute<P extends keyof Register['pages']>(
   const flatRoutes = routes.map(r => [r, ...(r.children ?? [])]).flat();
   const route = flatRoutes.find(r => `/${r.path}` === path);
   const file = await import(`~/${route?.file}`);
-  const Component = file.default;
+  const Component = file.default ?? (() => null);
 
   let replacedPath: string = path;
   if (options?.params) {

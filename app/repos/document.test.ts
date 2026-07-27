@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createDocument, getDocument, getDocumentTitle, updateDocument } from './document';
 import { db } from '~/db';
 import { createDocumentWithTitle, createEmptyDocument } from '~/test/data-factories/document';
+import { createTestUser } from '~/test/data-factories/user';
 
 describe('createDocument', () => {
   it('creates an empty document', async () => {
@@ -20,6 +21,24 @@ describe('createDocument', () => {
       updatedAt: expect.any(Date),
       userId: null,
     });
+  });
+
+  it('sets document owner', async () => {
+    const user = await createTestUser();
+    const document = await createDocument({
+      userId: user.id,
+    });
+    const dbDocument = await db.query.documents.findFirst({
+      where: {
+        id: document.id,
+      },
+    });
+
+    expect(dbDocument).toEqual(
+      expect.objectContaining({
+        userId: user.id,
+      }),
+    );
   });
 });
 

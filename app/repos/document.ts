@@ -5,8 +5,18 @@ import { documents } from '~/db/schema';
 
 export type Document = InferSelectModel<typeof documents>;
 
-export async function createDocument() {
-  const [document] = await db.insert(documents).values({}).returning();
+export interface CreateDocumentInput {
+  userId?: string;
+}
+
+export async function createDocument(input: CreateDocumentInput = {}) {
+  const { userId } = input;
+  const [document] = await db.insert(documents)
+    .values({
+      userId,
+    })
+    .returning();
+
   return document;
 }
 
