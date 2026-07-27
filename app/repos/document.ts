@@ -49,6 +49,25 @@ export async function getDocumentTitle(id: string) {
   return doc?.title ?? null;
 }
 
+export async function getDocumentList(userId: string) {
+  if (!isUuid(userId)) {
+    return [];
+  }
+
+  return db.query.documents.findMany({
+    columns: {
+      id: true,
+      title: true,
+    },
+    where: {
+      userId,
+    },
+    orderBy: {
+      updatedAt: 'desc',
+    },
+  });
+}
+
 export async function updateDocument(
   id: string,
   input: { title?: string | null; content?: Buffer<ArrayBufferLike> | null },
