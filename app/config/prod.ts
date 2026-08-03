@@ -29,6 +29,7 @@ export function getConfigProd(): Config {
     session: {
       secure: true,
       secret: env.get('SESSION_SECRET').required().asString(),
+      domain: '*.pencilcase.app',
     },
   };
 }

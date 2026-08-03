@@ -19,6 +19,7 @@ const { getSession, commitSession }
       secure: config.session.secure,
       secrets: [config.session.secret],
       sameSite: 'lax',
+      domain: config.session.domain,
     },
   });
 
