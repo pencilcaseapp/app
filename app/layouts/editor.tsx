@@ -11,7 +11,6 @@ import { DropdownMenu } from '~/ui/dropdown-menu/dropdown-menu';
 import { DropdownMenuContent } from '~/ui/dropdown-menu/dropdown-menu-content';
 import { DropdownMenuItem } from '~/ui/dropdown-menu/dropdown-menu-item';
 import { DropdownMenuPortal } from '~/ui/dropdown-menu/dropdown-menu-portal';
-import { DropdownMenuSeparator } from '~/ui/dropdown-menu/dropdown-menu-separator';
 import { DropdownMenuTrigger } from '~/ui/dropdown-menu/dropdown-menu-trigger';
 import type { IconName } from '~/ui/icon/icons';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
