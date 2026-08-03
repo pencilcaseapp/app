@@ -20,6 +20,7 @@ import { Sidebar } from '~/ui/sidebar/sidebar';
 import type { Route } from './+types/editor';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import { getDocumentList } from '~/repos/document';
+import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 
 export const handle = {
   bodyClassName: 'w-full bg-pca-white dark:bg-pca-grey-900',
@@ -71,6 +72,7 @@ type EditorSidebarProps = {
 function EditorSidebar({ navigation }: EditorSidebarProps) {
   const location = useLocation();
   const [activeDocumentTitle] = useDocumentTitle();
+  const { closeOnNavigate } = useSidebarContext();
 
   return (
     <Sidebar
@@ -91,6 +93,7 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
                         as={NavLink}
                         to={item.to}
                         key={item.to}
+                        onClick={closeOnNavigate}
                         actionArea={(
                           <DropdownMenu>
                             <DropdownMenuTrigger iconTitle="Item options" />
@@ -132,6 +135,7 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
         <>
           {bottomNavigation?.map(item => (
             <NavigationItem
+              onClick={closeOnNavigate}
               key={`${item.label}-${item.to}`}
               title={item.label}
               to={item.to}

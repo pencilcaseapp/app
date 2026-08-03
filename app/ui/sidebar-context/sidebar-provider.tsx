@@ -31,12 +31,17 @@ export const SidebarProvider: FC<PropsWithChildren> = ({
     setMobileSidebarOpen(next);
   }, [isDesktop, setDesktopSidebarOpen]);
 
+  const closeOnNavigate = useCallback(() => {
+    if (!isDesktop) setMobileSidebarOpen(false);
+  }, [isDesktop]);
+
   return (
     <SidebarContext
       value={{
         isSidebarOpen,
         setIsSidebarOpen,
         triggerRef,
+        closeOnNavigate,
       }}
     >
       {children}
