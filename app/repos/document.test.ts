@@ -6,7 +6,10 @@ import { createTestUser } from '~/test/data-factories/user';
 
 describe('createDocument', () => {
   it('creates an empty document', async () => {
-    const document = await createDocument();
+    const user = await createTestUser();
+    const document = await createDocument({
+      userId: user.id,
+    });
     const dbDocument = await db.query.documents.findFirst({
       where: {
         id: document.id,
@@ -19,32 +22,15 @@ describe('createDocument', () => {
       content: null,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
-      userId: null,
-    });
-  });
-
-  it('sets document owner', async () => {
-    const user = await createTestUser();
-    const document = await createDocument({
       userId: user.id,
     });
-    const dbDocument = await db.query.documents.findFirst({
-      where: {
-        id: document.id,
-      },
-    });
-
-    expect(dbDocument).toEqual(
-      expect.objectContaining({
-        userId: user.id,
-      }),
-    );
   });
 });
 
 describe('getDocument', () => {
   it('returns a document by id', async () => {
-    const fixture = await createEmptyDocument();
+    const user = await createTestUser();
+    const fixture = await createEmptyDocument(user.id);
     const document = await getDocument(fixture.id);
 
     expect(document).toStrictEqual(fixture);
@@ -53,7 +39,8 @@ describe('getDocument', () => {
 
 describe('getDocumentTitle', () => {
   it('returns a document title by id', async () => {
-    const fixture = await createDocumentWithTitle();
+    const user = await createTestUser();
+    const fixture = await createDocumentWithTitle(user.id);
     const documentTitle = await getDocumentTitle(fixture.id);
 
     expect(documentTitle).toBe(fixture.title);
@@ -62,7 +49,8 @@ describe('getDocumentTitle', () => {
 
 describe('updateDocument', () => {
   it('updates a document', async () => {
-    const fixture = await createEmptyDocument();
+    const user = await createTestUser();
+    const fixture = await createEmptyDocument(user.id);
 
     const updatedDocument = await updateDocument(fixture.id, {
       title: 'Test Document',
@@ -75,7 +63,7 @@ describe('updateDocument', () => {
       content: Buffer.from('Hello, World!'),
       createdAt: fixture.createdAt,
       updatedAt: expect.any(Date),
-      userId: null,
+      userId: user.id,
     });
   });
 });
