@@ -99,10 +99,6 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
                             <DropdownMenuTrigger iconTitle="Item options" />
                             <DropdownMenuPortal>
                               <DropdownMenuContent align="start">
-                                <DropdownMenuItem as="button" onClick={() => console.log('clicked...')} icon="share">
-                                  Share
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
                                 <DropdownMenuItem as="button" onClick={() => console.log('clicked')} color="danger" icon="trash">
                                   Delete
                                 </DropdownMenuItem>
