@@ -48,7 +48,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
       <Component
         {...rest}
         ref={ref}
-        className="flex items-center gap-2 min-w-0 flex-1 pl-3 py-1 focus:outline-none"
+        className="flex items-center gap-2 min-w-0 flex-1 pl-3 h-12 lg:h-10 focus:outline-none"
       >
         <Typography
           variant="bodySmall"
