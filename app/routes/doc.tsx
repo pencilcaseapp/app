@@ -23,13 +23,13 @@ export async function loader({ params, context }: Route.LoaderArgs) {
   const documentTitle = document.title;
   const documentUrl = href(`/doc/:id`, { id: params.id });
 
-  if (document.userId && user && user.id !== document.userId) {
+  if (user && user.id !== document.userId) {
     throw new Response('Forbidden', {
       status: 403,
     });
   }
 
-  if (document.userId && !user) {
+  if (!user) {
     return redirect(getSignInUrl(documentUrl));
   }
 

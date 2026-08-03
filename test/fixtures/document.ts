@@ -9,5 +9,5 @@ export const documentFixture: Document = {
   content: null,
   createdAt: faker.date.past(),
   updatedAt: faker.date.past(),
-  userId: null,
+  userId: faker.string.uuid(),
 };

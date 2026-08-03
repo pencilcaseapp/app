@@ -6,10 +6,10 @@ import { documents } from '~/db/schema';
 export type Document = InferSelectModel<typeof documents>;
 
 export interface CreateDocumentInput {
-  userId?: string;
+  userId: string;
 }
 
-export async function createDocument(input: CreateDocumentInput = {}) {
+export async function createDocument(input: CreateDocumentInput) {
   const { userId } = input;
   const [document] = await db.insert(documents)
     .values({

@@ -45,7 +45,7 @@ export const documents = pgTable('documents', {
   content: bytea('content'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  userId: uuid('user_id').references(() => users.id),
+  userId: uuid('user_id').notNull().references(() => users.id),
 }, table => [
   index('documents_user_id_idx').on(table.userId),
 ]);
