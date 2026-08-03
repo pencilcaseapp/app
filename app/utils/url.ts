@@ -36,7 +36,7 @@ export function getOptionalSearchParam<Param = string>(
 
 export function getNormalizedReturnUrl(returnUrl?: string | null): string {
   if (!returnUrl || !returnUrl.startsWith('/') || returnUrl.startsWith('//')) {
-    return href('/home');
+    return href('/');
   }
 
   return returnUrl;

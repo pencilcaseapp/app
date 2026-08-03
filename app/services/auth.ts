@@ -142,7 +142,7 @@ export async function onboardUser(
   });
 }
 
-export function getSignInUrl(returnUrl: string = href('/home')) {
+export function getSignInUrl(returnUrl: string = href('/')) {
   return withSearchParams(href('/signin'),
     {
       [SearchParamAuth.ReturnUrl]: getNormalizedReturnUrl(returnUrl),

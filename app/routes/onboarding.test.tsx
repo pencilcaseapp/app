@@ -29,19 +29,19 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-test('redirects to home when user is already onboarded', async () => {
+test('redirects to startpage when user is already onboarded', async () => {
   const context = new RouterContextProvider();
   context.set(userSessionContext, { ...userFixture, onboarded: true });
 
   await renderRoute('/onboarding', {
     params: {},
     searchParams: {
-      [SearchParamAuth.ReturnUrl]: '/home',
+      [SearchParamAuth.ReturnUrl]: '/',
     },
     context,
   });
 
-  expect(redirectMock).toHaveBeenCalledWith('/home');
+  expect(redirectMock).toHaveBeenCalledWith('/');
 });
 
 test('renders onboarding when user is not onboarded', async () => {
@@ -51,7 +51,7 @@ test('renders onboarding when user is not onboarded', async () => {
   const { findByText } = await renderRoute('/onboarding', {
     params: {},
     searchParams: {
-      [SearchParamAuth.ReturnUrl]: '/home',
+      [SearchParamAuth.ReturnUrl]: '/',
     },
     context,
   });
@@ -66,7 +66,7 @@ test('redirects after form submission', async () => {
   const { findByLabelText, findByText } = await renderRoute('/onboarding', {
     params: {},
     searchParams: {
-      [SearchParamAuth.ReturnUrl]: '/home',
+      [SearchParamAuth.ReturnUrl]: '/',
     },
     context,
   });
@@ -78,7 +78,7 @@ test('redirects after form submission', async () => {
   await act(async () => fireEvent.submit(button));
 
   await vi.waitFor(() => {
-    expect(redirectMock).toHaveBeenCalledWith('/home');
+    expect(redirectMock).toHaveBeenCalledWith('/');
   });
 });
 
@@ -99,7 +99,7 @@ test('normalizes unsafe return urls on redirect', async () => {
   await act(async () => fireEvent.submit(button));
 
   await vi.waitFor(() => {
-    expect(redirectMock).toHaveBeenCalledWith('/home');
+    expect(redirectMock).toHaveBeenCalledWith('/');
   });
 });
 
@@ -110,7 +110,7 @@ test('persists user preferences', async () => {
   const { findByLabelText, findByText, findByRole } = await renderRoute('/onboarding', {
     params: {},
     searchParams: {
-      [SearchParamAuth.ReturnUrl]: '/home',
+      [SearchParamAuth.ReturnUrl]: '/',
     },
     context,
   });

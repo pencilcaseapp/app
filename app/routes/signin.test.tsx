@@ -75,7 +75,7 @@ test('redirects after form submission', async () => {
         href('/otp/:otpId', { otpId: otpFixture.id }),
         {
           [SearchParamAuth.Email]: userFixture.email,
-          [SearchParamAuth.ReturnUrl]: '/home',
+          [SearchParamAuth.ReturnUrl]: '/',
         },
       ),
     );

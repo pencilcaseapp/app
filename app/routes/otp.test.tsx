@@ -55,7 +55,7 @@ test('matches snapshot', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
-      [SearchParamAuth.ReturnUrl]: '/home',
+      [SearchParamAuth.ReturnUrl]: '/',
     },
   });
 
@@ -75,7 +75,7 @@ test('redirects to onboarding on successful verification', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
-      [SearchParamAuth.ReturnUrl]: '/home',
+      [SearchParamAuth.ReturnUrl]: '/',
     },
   });
 
@@ -89,7 +89,7 @@ test('redirects to onboarding on successful verification', async () => {
   });
 
   await vi.waitFor(() => {
-    expect(redirectMock).toHaveBeenCalledWith('/onboarding?returnUrl=%2Fhome');
+    expect(redirectMock).toHaveBeenCalledWith('/onboarding?returnUrl=%2F');
   });
 });
 
@@ -102,7 +102,7 @@ test('redirects to signin with expired param', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
-      [SearchParamAuth.ReturnUrl]: '/home',
+      [SearchParamAuth.ReturnUrl]: '/',
     },
   });
 
@@ -121,7 +121,7 @@ test('shows form error on invalid code', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
-      [SearchParamAuth.ReturnUrl]: '/home',
+      [SearchParamAuth.ReturnUrl]: '/',
     },
   });
 
@@ -151,7 +151,7 @@ test('redirects on expired code', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
-      [SearchParamAuth.ReturnUrl]: '/home',
+      [SearchParamAuth.ReturnUrl]: '/',
     },
   });
 
@@ -165,7 +165,7 @@ test('redirects on expired code', async () => {
   });
 
   await vi.waitFor(() => {
-    expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true&returnUrl=%2Fhome');
+    expect(redirectMock).toHaveBeenCalledWith('/signin?isExpired=true&returnUrl=%2F');
   });
 });
 
@@ -179,7 +179,7 @@ test('resends code', async () => {
     },
     searchParams: {
       [SearchParamAuth.Email]: userFixture.email,
-      [SearchParamAuth.ReturnUrl]: '/home',
+      [SearchParamAuth.ReturnUrl]: '/',
     },
   });
 
@@ -195,7 +195,7 @@ test('resends code', async () => {
         href('/otp/:otpId', { otpId: otpFixture.id }),
         {
           [SearchParamAuth.Email]: userFixture.email,
-          [SearchParamAuth.ReturnUrl]: '/home',
+          [SearchParamAuth.ReturnUrl]: '/',
         },
 
       ),

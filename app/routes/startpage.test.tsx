@@ -31,7 +31,7 @@ test('redirects to new doc if user session exists but no documents', async () =>
   context.set(userSessionContext, userFixture);
   getDocumentListMock.mockResolvedValue([]);
 
-  await renderRoute('/home', {
+  await renderRoute('/', {
     params: {},
     context,
   });
@@ -53,7 +53,7 @@ test('redirects to last updated doc if user session exists', async () => {
     },
   ]);
 
-  await renderRoute('/home', {
+  await renderRoute('/', {
     params: {},
     context,
   });
