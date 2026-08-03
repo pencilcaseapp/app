@@ -1,7 +1,7 @@
 import { href, RouterContextProvider } from 'react-router';
 import { beforeEach, expect, test, vi } from 'vitest';
-import { optionalUserSessionContext } from '~/contexts/user-session';
-import { documentFixture } from '~/test/fixtures/doucment';
+import { userSessionContext } from '~/contexts/user-session';
+import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
 
@@ -26,21 +26,9 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-test('redirects to new doc if no user session exists', async () => {
-  const context = new RouterContextProvider();
-  context.set(optionalUserSessionContext, null);
-
-  await renderRoute('/home', {
-    params: {},
-    context,
-  });
-
-  expect(redirectMock).toHaveBeenCalledWith('/new');
-});
-
 test('redirects to new doc if user session exists but no documents', async () => {
   const context = new RouterContextProvider();
-  context.set(optionalUserSessionContext, userFixture);
+  context.set(userSessionContext, userFixture);
   getDocumentListMock.mockResolvedValue([]);
 
   await renderRoute('/home', {
@@ -53,7 +41,7 @@ test('redirects to new doc if user session exists but no documents', async () =>
 
 test('redirects to last updated doc if user session exists', async () => {
   const context = new RouterContextProvider();
-  context.set(optionalUserSessionContext, userFixture);
+  context.set(userSessionContext, userFixture);
   getDocumentListMock.mockResolvedValue([
     {
       ...documentFixture,

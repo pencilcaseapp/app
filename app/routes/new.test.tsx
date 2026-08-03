@@ -1,7 +1,7 @@
 import { href, RouterContextProvider } from 'react-router';
 import { beforeEach, expect, test, vi } from 'vitest';
-import { optionalUserSessionContext } from '~/contexts/user-session';
-import { documentFixture } from '~/test/fixtures/doucment';
+import { userSessionContext } from '~/contexts/user-session';
+import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
 
@@ -28,7 +28,7 @@ beforeEach(() => {
 
 test('creates a new document and redirects', async () => {
   const context = new RouterContextProvider();
-  context.set(optionalUserSessionContext, null);
+  context.set(userSessionContext, userFixture);
 
   createDocumentMock.mockResolvedValue({
     ...documentFixture,
@@ -47,7 +47,7 @@ test('creates a new document and redirects', async () => {
 
 test('sets document owner if user is logged in', async () => {
   const context = new RouterContextProvider();
-  context.set(optionalUserSessionContext, userFixture);
+  context.set(userSessionContext, userFixture);
   createDocumentMock.mockResolvedValue(documentFixture);
 
   await renderRoute('/new', {
