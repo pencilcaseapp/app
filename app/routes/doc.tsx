@@ -1,6 +1,7 @@
 import type { Route } from './+types/doc';
+import { redirect } from 'react-router';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
-import { getDocumentTitle } from '~/repos/document';
+import { getDocument } from '~/repos/document';
 import { ClientOnly } from '~/ui/client-only/client-only';
 import { Button } from '~/ui/button/button';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
@@ -11,8 +12,27 @@ import { useDocumentTitle } from '~/contexts/document-title';
 
 export async function loader({ params, context }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
-  const documentTitle = await getDocumentTitle(params.id);
+  const document = await getDocument(params.id);
+
+  if (!document) {
+    throw new Response('Not Found', {
+      status: 404,
+    });
+  }
+
+  const documentTitle = document.title;
   const documentUrl = href(`/doc/:id`, { id: params.id });
+
+  if (document.userId && user && user.id !== document.userId) {
+    throw new Response('Forbidden', {
+      status: 403,
+    });
+  }
+
+  if (document.userId && !user) {
+    return redirect(getSignInUrl(documentUrl));
+  }
+
   const signInUrl = user ? null : getSignInUrl(documentUrl);
 
   return {

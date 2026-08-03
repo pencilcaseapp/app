@@ -1,11 +1,16 @@
-import { href, redirect } from 'react-router';
+import { href, redirect, type MiddlewareFunction } from 'react-router';
 import type { Route } from './+types/home';
-import { optionalUserSessionContext } from '~/contexts/user-session';
+import { userSessionContext } from '~/contexts/user-session';
 import { getDocumentList } from '~/repos/document';
+import { authMiddleware } from '~/middleware/auth';
+
+export const middleware: MiddlewareFunction[] = [
+  authMiddleware,
+];
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const user = context.get(optionalUserSessionContext);
-  const documentList = user ? await getDocumentList(user.id) : [];
+  const user = context.get(userSessionContext);
+  const documentList = await getDocumentList(user.id);
 
   if (documentList.length > 0) {
     return redirect(href('/doc/:id', { id: documentList[0].id }));
