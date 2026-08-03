@@ -8,7 +8,9 @@ export async function renderRoute<P extends keyof Register['pages']>(
   options?: Register['pages'][P] & { searchParams?: Record<string, string>; context?: RouterContextProvider },
 ) {
   const flatRoutes = routes.map(r => [r, ...(r.children ?? [])]).flat();
-  const route = flatRoutes.find(r => `/${r.path}` === path);
+  const route = flatRoutes.find(r =>
+    path === '/' ? r.index === true : `/${r.path}` === path,
+  );
   const file = await import(`~/${route?.file}`);
   const Component = file.default ?? (() => null);
 

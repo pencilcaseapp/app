@@ -29,6 +29,7 @@ export interface Config {
   session: {
     secure: boolean;
     secret: string;
+    domain?: string;
   };
 }
 

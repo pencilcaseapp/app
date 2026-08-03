@@ -19,6 +19,7 @@ const { getSession, commitSession }
       secure: config.session.secure,
       secrets: [config.session.secret],
       sameSite: 'lax',
+      domain: config.session.domain,
     },
   });
 
@@ -141,7 +142,7 @@ export async function onboardUser(
   });
 }
 
-export function getSignInUrl(returnUrl: string = href('/home')) {
+export function getSignInUrl(returnUrl: string = href('/')) {
   return withSearchParams(href('/signin'),
     {
       [SearchParamAuth.ReturnUrl]: getNormalizedReturnUrl(returnUrl),

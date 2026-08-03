@@ -246,14 +246,14 @@ describe('onboardUser', () => {
 });
 
 describe('getSignInUrl', () => {
-  it('sets default return url to home', async () => {
-    const expectedReturnUrl = encodeURIComponent('/home');
+  it('sets default return url to startpage', async () => {
+    const expectedReturnUrl = encodeURIComponent('/');
 
     expect(getSignInUrl()).toEqual(`/signin?returnUrl=${expectedReturnUrl}`);
   });
 
   it('discards external return urls', async () => {
-    const expectedReturnUrl = encodeURIComponent('/home');
+    const expectedReturnUrl = encodeURIComponent('/');
 
     expect(getSignInUrl('https://example.com')).toEqual(`/signin?returnUrl=${expectedReturnUrl}`);
     expect(getSignInUrl('//example.com')).toEqual(`/signin?returnUrl=${expectedReturnUrl}`);

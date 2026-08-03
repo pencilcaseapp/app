@@ -16,10 +16,10 @@ describe('getNormalizedReturnUrl', () => {
     expect(getNormalizedReturnUrl('/doc/123')).toBe('/doc/123');
   });
 
-  it('falls back to home for unsafe values', () => {
-    expect(getNormalizedReturnUrl('//evil.com')).toBe(href('/home'));
-    expect(getNormalizedReturnUrl('https://evil.com')).toBe(href('/home'));
-    expect(getNormalizedReturnUrl('javascript:alert(1)')).toBe(href('/home'));
-    expect(getNormalizedReturnUrl()).toBe(href('/home'));
+  it('falls back to startpage for unsafe values', () => {
+    expect(getNormalizedReturnUrl('//evil.com')).toBe(href('/'));
+    expect(getNormalizedReturnUrl('https://evil.com')).toBe(href('/'));
+    expect(getNormalizedReturnUrl('javascript:alert(1)')).toBe(href('/'));
+    expect(getNormalizedReturnUrl()).toBe(href('/'));
   });
 });
