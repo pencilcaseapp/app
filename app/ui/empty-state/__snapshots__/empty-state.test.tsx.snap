@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EmptyState > renders empty state 1`] = `
+<div>
+  <div
+    class="w-full h-full gap-6 flex flex-col justify-center items-center"
+  >
+    <picture>
+      <source
+        media="(prefers-color-scheme: dark)"
+        srcset="welcoming-pencil-dark.svg"
+      />
+      <img
+        alt=""
+        class="block w-45 h-45 ml-auto mr-auto"
+        src="welcoming-pencil-light.svg"
+      />
+    </picture>
+    <div
+      class="flex flex-col justify-center items-center gap-3"
+    >
+      <h2
+        class="antialiased font-inter text-xl sm:text-2xl font-bold text-black dark:text-white text-center"
+      >
+        No items
+      </h2>
+      <p
+        class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-pca-grey-100 text-center max-w-[30ch]"
+      >
+        There are no items to display.
+      </p>
+    </div>
+    <button>
+      Retry
+    </button>
+  </div>
+</div>
+`;
