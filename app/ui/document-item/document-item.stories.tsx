@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 import { action } from 'storybook/actions';
 import { MemoryRouter, NavLink } from 'react-router';
 import { DocumentItem } from './document-item';
@@ -263,3 +264,44 @@ export const List: Story = {
     </>
   ),
 };
+
+/**
+ * When the list is reordered — for instance because the document you are
+ * editing becomes the most recently updated one — the rows that lose a place
+ * glide over that one row, and the row that came out on top settles in where
+ * it landed. Nothing travels the length of the list, so a reorder looks the
+ * same in a list of three documents and in a list of three hundred.
+ * Reordering respects `prefers-reduced-motion`.
+ */
+export const Reordering: Story = {
+  render: () => <ReorderingList />,
+};
+
+function ReorderingList() {
+  const [documents, setDocuments] = useState([
+    { id: '1', title: 'Le Cours Français (A.2.1)' },
+    { id: '2', title: 'Le Cours Français (A.2.2)' },
+    { id: '3', title: 'Le Cours Français (A.2.3)' },
+  ]);
+
+  const moveToTop = (id: string) => {
+    setDocuments(current => [
+      ...current.filter(document => document.id === id),
+      ...current.filter(document => document.id !== id),
+    ]);
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {documents.map(document => (
+        <DocumentItem
+          key={document.id}
+          as="button"
+          type="button"
+          onClick={() => moveToTop(document.id)}
+          title={document.title}
+        />
+      ))}
+    </div>
+  );
+}

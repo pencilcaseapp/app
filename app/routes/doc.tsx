@@ -7,6 +7,8 @@ import { href } from 'react-router';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import { getSignInUrl } from '~/services/auth';
 import { useDocumentTitle } from '~/contexts/document-title';
+import { useEditedDocument } from '~/contexts/edited-document';
+import { useCallback } from 'react';
 import { MenuOrSignInButton } from '~/components/menu-or-sign-in-button/menu-or-sign-in-button';
 import { Button } from '~/ui/button/button';
 import { DocEmptyState } from '~/components/doc-empty-state/doc-empty-state';
@@ -57,6 +59,11 @@ export async function loader({ params, context }: Route.LoaderArgs) {
 
 export default function ({ params, loaderData }: Route.ComponentProps) {
   const [title, setTitle] = useDocumentTitle(loaderData.ok ? loaderData.documentTitle : '');
+  const { reportDocumentEdit } = useEditedDocument();
+  const onFirstEdit = useCallback(
+    () => reportDocumentEdit(params.id),
+    [reportDocumentEdit, params.id],
+  );
 
   if (!loaderData.ok && loaderData.error === DocumentError.NotFound) {
     return (
@@ -87,6 +94,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
           key={params.id}
           id={params.id}
           onTitleChange={setTitle}
+          onFirstEdit={onFirstEdit}
           topbarLeft={(
             <MenuOrSignInButton
               signInUrl={loaderData.signInUrl}

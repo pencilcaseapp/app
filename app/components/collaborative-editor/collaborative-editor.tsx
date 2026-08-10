@@ -7,17 +7,19 @@ import { Editor } from '~/ui/editor/editor';
 import { useEffect, useRef, useState } from 'react';
 import { useSocketClient } from '~/contexts/socket-client';
 import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
+import { useFirstLocalEdit } from '~/hooks/use-first-local-edit';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 import { createPortal } from 'react-dom';
 
 export interface CollaborativeEditorProps {
   id: string;
   onTitleChange?: (title: string | null) => void;
+  onFirstEdit?: () => void;
   topbarLeft?: React.ReactNode;
 }
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
-  = ({ id, onTitleChange, topbarLeft }) => {
+  = ({ id, onTitleChange, onFirstEdit, topbarLeft }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -37,6 +39,8 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
         setAvatars(states.map(state => state.name));
       },
     }));
+
+    useFirstLocalEdit(doc, provider, onFirstEdit);
 
     const [providerFactory] = useState(() => (
       id: string,

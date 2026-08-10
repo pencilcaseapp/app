@@ -107,6 +107,12 @@
   --animate-accordion-down: accordionDown 0.2s ease-out;
   --animate-accordion-up: accordionUp 0.2s ease-out;
 
+  /* Reordering a document list: rows that make room glide over the one row
+     they lost or gained (`--pca-row-shift`), while the row arriving at the
+     top only settles in — it never travels the length of the list. */
+  --animate-row-shift: rowShift 0.18s ease-out;
+  --animate-row-settle: rowSettle 0.18s ease-out;
+
   @keyframes slideDownAndFadeIn {
     from {
       opacity: 0;
@@ -231,6 +237,25 @@
     to {
       height: 0;
       opacity: 0;
+    }
+  }
+
+  @keyframes rowShift {
+    from {
+      transform: translateY(var(--pca-row-shift, 0));
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  @keyframes rowSettle {
+    from {
+      opacity: 0.4;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
