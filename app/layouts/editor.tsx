@@ -20,6 +20,7 @@ import type { Route } from './+types/editor';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import { getDocumentList } from '~/repos/document';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
+import { useStableOrder } from '~/hooks/use-stable-order';
 
 export const handle = {
   bodyClassName: 'w-full bg-pca-white dark:bg-pca-grey-900',
@@ -64,14 +65,19 @@ export default function LayoutEditor({
   );
 };
 
+type NavigationItemData = { label: string; to: string };
+
 type EditorSidebarProps = {
-  navigation: { label: string; to: string }[];
+  navigation: NavigationItemData[];
 };
+
+const getNavigationKey = (item: NavigationItemData) => item.to;
 
 function EditorSidebar({ navigation }: EditorSidebarProps) {
   const location = useLocation();
   const [activeDocumentTitle] = useDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
+  const stableNavigation = useStableOrder(navigation, getNavigationKey);
 
   return (
     <Sidebar
@@ -82,7 +88,7 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
             <>
               <DocumentGroupRoot defaultValue={['all-docs']}>
                 <DocumentGroup icon="space" title="All Docs" value="all-docs">
-                  {navigation.map((item) => {
+                  {stableNavigation.map((item) => {
                     const isActive = item.to === location.pathname;
                     const label = isActive ? activeDocumentTitle : item.label;
 
