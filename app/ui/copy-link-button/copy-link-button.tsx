@@ -42,7 +42,7 @@ export const CopyLinkButton: React.FC<CopyLinkButtonProps> = ({
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(event);
-    void copyToClipboard();
+    copyToClipboard();
   };
 
   return (
