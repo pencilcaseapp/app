@@ -267,9 +267,11 @@ export const List: Story = {
 
 /**
  * When the list is reordered — for instance because the document you are
- * editing becomes the most recently updated one — the items slide to their
- * new position instead of jumping. Reordering respects
- * `prefers-reduced-motion`.
+ * editing becomes the most recently updated one — the rows that lose a place
+ * glide over that one row, and the row that came out on top settles in where
+ * it landed. Nothing travels the length of the list, so a reorder looks the
+ * same in a list of three documents and in a list of three hundred.
+ * Reordering respects `prefers-reduced-motion`.
  */
 export const Reordering: Story = {
   render: () => <ReorderingList />,

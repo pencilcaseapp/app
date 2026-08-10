@@ -2,9 +2,9 @@ import { Typography } from '../typography/typography';
 import type { PolymorphicComponentPropWithRef } from '../polymorphic-types/polymorphic-types';
 import classNames from 'classnames';
 import { useMedia } from 'react-use';
-import { motion, useReducedMotion } from 'motion/react';
+import { useReducedMotion } from 'motion/react';
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { REORDER_DURATION_MS, reorderItem } from './framer-animation';
+import { REORDER_DURATION_MS } from './reorder-animation';
 
 export type DocumentItemProps<C extends React.ElementType>
   = PolymorphicComponentPropWithRef<
@@ -27,34 +27,46 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
   const shouldReduceMotion = useReducedMotion();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const previousTopRef = useRef<number | null>(null);
-  const movingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const reorderTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Flag which way the row is about to travel, measured before the browser
-  // paints the new order. `offsetTop` ignores the transform the layout
-  // animation puts on the row, so it always reports the new slot. The flag
-  // lives on the element instead of in state so that marking it does not cost
-  // another render right when the animation starts.
+  // Measure the move before the browser paints the new order, then let CSS
+  // animate it. A row that lost or gained a place glides over that distance,
+  // while the row that came out on top only settles in — travelling the whole
+  // list would drag the eye away from the document, the more so the longer
+  // the list. The flags live on the element instead of in state so that
+  // marking a move does not cost another render.
   useLayoutEffect(() => {
     const element = wrapperRef.current;
     const top = element?.offsetTop ?? null;
     const previousTop = previousTopRef.current;
     previousTopRef.current = top;
 
-    if (shouldReduceMotion || !element || top === null) {
+    if (
+      shouldReduceMotion
+      || !element
+      || top === null
+      || previousTop === null
+      || top === previousTop
+    ) {
       return;
     }
 
-    if (previousTop !== null && top !== previousTop) {
-      element.dataset.moving = top < previousTop ? 'up' : 'down';
-
-      clearTimeout(movingTimeoutRef.current);
-      movingTimeoutRef.current = setTimeout(() => {
-        delete element.dataset.moving;
-      }, REORDER_DURATION_MS);
+    if (top < previousTop) {
+      element.dataset.reorder = 'settle';
     }
+    else {
+      element.dataset.reorder = 'shift';
+      element.style.setProperty('--pca-row-shift', `${previousTop - top}px`);
+    }
+
+    clearTimeout(reorderTimeoutRef.current);
+    reorderTimeoutRef.current = setTimeout(() => {
+      delete element.dataset.reorder;
+      element.style.removeProperty('--pca-row-shift');
+    }, REORDER_DURATION_MS);
   });
 
-  useEffect(() => () => clearTimeout(movingTimeoutRef.current), []);
+  useEffect(() => () => clearTimeout(reorderTimeoutRef.current), []);
 
   const wrapperClasses = classNames([
     // Only colors transition — `transition-all` would fight the layout
@@ -75,25 +87,17 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
     'has-[[aria-current=page]:active]:bg-pca-yellow-700 dark:has-[[aria-current=page]:active]:bg-pca-yellow-700',
     // Disabled
     'has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50',
-    // A travelling row needs an opaque surface of its own, otherwise the
-    // titles it passes show through it. Active rows already have one.
-    'not-has-aria-[current=page]:data-[moving]:bg-pca-white',
-    'dark:not-has-aria-[current=page]:data-[moving]:bg-pca-grey-900',
-    // Only the row moving up is lifted out of the flow, so it reads as one
-    // item rising to the top. `z-20` clears the rest of the navigation on the
-    // way, including the sticky group header and the bottom area, which both
-    // sit at `z-10`.
-    'data-[moving=up]:relative data-[moving=up]:z-20',
+    // Reordering — see the layout effect above.
+    'data-[reorder=shift]:animate-row-shift',
+    'data-[reorder=settle]:animate-row-settle',
     className,
   ]);
 
   const Component = as as React.ElementType;
 
   return (
-    <motion.div
+    <div
       ref={wrapperRef}
-      layout={shouldReduceMotion ? false : 'position'}
-      transition={{ layout: reorderItem }}
       className={wrapperClasses}
     >
       <Component
@@ -127,6 +131,6 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
           {actionArea}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 };
