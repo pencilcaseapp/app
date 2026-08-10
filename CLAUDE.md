@@ -30,9 +30,16 @@ Migrations live in `drizzle/` and are applied automatically at server start
 (`app/db/migrate.ts`) and before the test suite (`test/global-setup.ts`, which
 drops and recreates the whole test schema first).
 
+`.claude/launch.json` defines the `dev` (:3000) and `storybook` (:6006) servers,
+so they can be started and previewed in a browser without a manual shell.
+
 CI (`.github/workflows/ci.yml`) runs lint, test, typecheck, build, and
 build-storybook. Pushing to `main` deploys to Clever Cloud via
-`.github/workflows/cd.yml`.
+`.github/workflows/cd.yml`. A red `test` job that reports every test as passed
+plus "Errors" is a known flake: `input-otp` fires a timer that calls `setState`
+after happy-dom tore the window down, so
+`one-time-password-field.test.tsx` produces `window is not defined` as an
+unhandled error and Vitest exits non-zero. Re-running clears it.
 
 ## Architecture
 
@@ -73,6 +80,18 @@ refreshed, a `set-cookie` header context that `root.tsx`'s loader commits;
 setting the non-optional `userSessionContext`. Loaders read the user from
 `context.get(...)`, never by re-parsing the request.
 
+**Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
+`updatedAt`, and the live server bumps it on every persist, so the raw loader
+order would reshuffle the navigation on each revalidation. `useStableOrder`
+(`app/hooks/use-stable-order.ts`) therefore freezes the order for as long as the
+layout stays mounted — items still come from the loader (titles stay fresh),
+only their positions are remembered; unseen items go to the front. Its
+`moveToTop` applies a one-off move, which is how the document you start editing
+catches up: `useFirstLocalEdit` reports the first Y.Doc update that does not
+originate from the Hocuspocus provider, and `EditedDocumentProvider`
+(`app/contexts/edited-document.tsx`) carries that from `routes/doc.tsx` up to
+the sidebar, which renders below the same layout but outside its `<Outlet />`.
+
 **Layering.** `app/routes/` and `app/layouts/` (loaders/actions) → `app/services/`
 (business logic) → `app/repos/` (Drizzle queries, one module per table) →
 `app/db/`. Repos validate UUIDs before querying and return `undefined`/`[]`
@@ -97,6 +116,16 @@ colors. Components take explicit `colorLight`/`colorDark`, `textColorLight`/
 relying on a runtime theme. Polymorphism goes through the `as` prop and
 `PolymorphicComponentPropWithRef`.
 
+**Animation.** Keyframes and their `--animate-*` tokens live in the `@theme`
+block in `app/app.css` and are used through Tailwind (`animate-row-shift`,
+`animate-accordion-down`, …); `motion/react` is reserved for animations that
+need JS (the sidebar slide in `app/ui/sidebar/sidebar-menu.tsx`, presence).
+Never leave `transition-all` on an element whose `transform` is animated by
+Motion or by a keyframe — the CSS transition and the animation fight over the
+property and the result reads as a bounce. Gate JS-driven motion on
+`useReducedMotion()`. Sidebar stacking: the sidebar itself is `z-20`, the sticky
+group header and the sticky bottom area are `z-10`.
+
 ## Conventions
 
 - `~/*` maps to `app/*`, `~/test/*` maps to `test/*`.
@@ -120,8 +149,16 @@ in `test/setup.ts`.
   factories in `test/data-factories/` (faker-backed, they insert), not by hand.
 - Route tests use `renderRoute(path, { params, context, searchParams })` from
   `app/utils/testing.tsx`, which resolves the module from `app/routes.ts`, wraps
-  it in `createRoutesStub` plus the CSRF/document-title/sidebar providers, and
-  strips middleware. Inject the session by setting `userSessionContext` on a
-  `RouterContextProvider` and `vi.mock` the repos the route imports.
+  it in `createRoutesStub` plus the CSRF/document-title/edited-document/sidebar
+  providers, and strips middleware. Inject the session by setting
+  `userSessionContext` on a `RouterContextProvider` and `vi.mock` the repos the
+  route imports. A route that consumes a new context needs its provider added to
+  that wrapper, otherwise every route test using it throws.
 - Plain objects for non-DB assertions live in `test/fixtures/`.
-- Many UI tests are snapshot-based; update with `npx vitest run -u`.
+- Many UI tests snapshot the **full** class string, so any change to a
+  component's `className`s breaks one. Run `npx vitest run -u` and commit the
+  updated `__snapshots__` as part of the change.
+- Hooks are testable with `renderHook` from `@testing-library/react` (see
+  `app/hooks/use-stable-order.test.ts`); anything depending on layout
+  (`offsetTop`, `getBoundingClientRect`) is not — happy-dom reports zeroes, so
+  verify that in Storybook instead.
