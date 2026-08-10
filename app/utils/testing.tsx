@@ -1,6 +1,8 @@
 import { act, render } from '@testing-library/react';
 import { createRoutesStub, RouterContextProvider, type Register } from 'react-router';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
+import { DocumentTitleProvider } from '~/contexts/document-title';
+import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import routes from '~/routes';
 
 export async function renderRoute<P extends keyof Register['pages']>(
@@ -24,7 +26,7 @@ export async function renderRoute<P extends keyof Register['pages']>(
   const Stub = createRoutesStub([
     {
       ...file,
-      path: replacedPath,
+      path,
       Component,
       middleware: [],
       HydrateFallback: () => null,
@@ -39,7 +41,11 @@ export async function renderRoute<P extends keyof Register['pages']>(
 
   const result = render(
     <AuthenticityTokenProvider token="test-token">
-      <Stub initialEntries={[replacedPath]} />
+      <DocumentTitleProvider>
+        <SidebarProvider>
+          <Stub initialEntries={[replacedPath]} />
+        </SidebarProvider>
+      </DocumentTitleProvider>
     </AuthenticityTokenProvider>,
   );
 

@@ -9,6 +9,12 @@ vi.mock('~/ui/sidebar-context/use-sidebar-context', () => ({
   useSidebarContext: () => useSidebarContextMock(),
 }));
 
+vi.mock('react-router', () => ({
+  Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
+    <a href={to}>{children}</a>
+  ),
+}));
+
 afterEach(() => {
   vi.clearAllMocks();
 });

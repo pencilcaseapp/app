@@ -1,0 +1,102 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DocEmptyState > matches snapshot 1`] = `
+<div>
+  <div
+    class="h-dvh"
+  >
+    <header
+      class="fixed z-50 w-full top-0 left-0 h-14 px-2 grid grid-cols-1 grid-rows-1 items-center bg-pca-white dark:bg-pca-grey-900 lg:bg-transparent dark:lg:bg-transparent"
+    >
+      <div
+        class="col-start-1 row-start-1 justify-self-start z-10 flex min-w-max"
+      >
+        <button
+          class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800"
+        >
+          <svg
+            aria-hidden="false"
+            aria-labelledby="_r_0_"
+            class="shrink-0 w-6 h-6"
+            fill="transparent"
+            focusable="false"
+            height="24"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <title
+              id="_r_0_"
+            >
+              Open navigation
+            </title>
+            <path
+              d="M9 3V21M7.8 3H16.2C17.8802 3 18.7202 3 19.362 3.32698C19.9265 3.6146 20.3854 4.07354 20.673 4.63803C21 5.27976 21 6.11984 21 7.8V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H7.8C6.11984 21 5.27976 21 4.63803 20.673C4.07354 20.3854 3.6146 19.9265 3.32698 19.362C3 18.7202 3 17.8802 3 16.2V7.8C3 6.11984 3 5.27976 3.32698 4.63803C3.6146 4.07354 4.07354 3.6146 4.63803 3.32698C5.27976 3 6.11984 3 7.8 3Z"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+            />
+          </svg>
+        </button>
+      </div>
+      <div
+        class="col-start-1 row-start-1 justify-self-center max-w-full"
+        style="padding-left: 0px; padding-right: 0px;"
+      >
+        <div
+          class="md:block relative overflow-clip after:content-[''] after:absolute after:w-12 after:h-full after:bg-overflow-gradient-light dark:after:bg-overflow-gradient-dark after:top-0 after:-right-[1px] before:content-[''] before:absolute before:w-12 before:h-full before:bg-overflow-gradient-light dark:before:bg-overflow-gradient-dark before:top-0 before:-left-[1px] before:z-10 before:rotate-180 before:transition before:duration-300 after:transition after:duration-300 before:pointer-events-none after:pointer-events-none before:opacity-0 after:opacity-0"
+        >
+          <div
+            class="relative overflow-x-auto scrollbar-none"
+          >
+            <div
+              class="flex gap-4 md:gap-2 flex-nowrap h-14 items-center"
+              style="padding-left: 0px; padding-right: 0px;"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="col-start-1 row-start-1 justify-self-end z-10 flex min-w-max items-center"
+      >
+        <div
+          class="inline-flex min-w-max items-center gap-2"
+        />
+      </div>
+    </header>
+    <div
+      class="w-full h-full gap-6 flex flex-col justify-center items-center"
+    >
+      <picture>
+        <source
+          media="(prefers-color-scheme: dark)"
+          srcset="/welcoming-pencil-dark.svg"
+        />
+        <img
+          alt=""
+          class="block w-45 h-45 ml-auto mr-auto"
+          src="/welcoming-pencil-light.svg"
+        />
+      </picture>
+      <div
+        class="flex flex-col justify-center items-center gap-3"
+      >
+        <h2
+          class="antialiased font-inter text-xl sm:text-2xl font-bold text-black dark:text-white text-center"
+        >
+          Not Found
+        </h2>
+        <p
+          class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-pca-grey-100 text-center max-w-[30ch]"
+        >
+          It may have been deleted.
+        </p>
+      </div>
+      <button>
+        Go home
+      </button>
+    </div>
+  </div>
+</div>
+`;

@@ -1,5 +1,5 @@
+import { Link } from 'react-router';
 import { Button } from '~/ui/button/button';
-import { Link } from '~/ui/link/link';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 
 export interface MenuOrSignInButtonProps {

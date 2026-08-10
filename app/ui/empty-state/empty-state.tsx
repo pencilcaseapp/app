@@ -24,9 +24,9 @@ export const EmptyState: FC<EmptyStateProps> = ({
       )}
     >
       <picture>
-        <source srcSet="welcoming-pencil-dark.svg" media="(prefers-color-scheme: dark)" />
+        <source srcSet="/welcoming-pencil-dark.svg" media="(prefers-color-scheme: dark)" />
         <img
-          src="welcoming-pencil-light.svg"
+          src="/welcoming-pencil-light.svg"
           className="block w-45 h-45 ml-auto mr-auto"
           alt=""
         />
