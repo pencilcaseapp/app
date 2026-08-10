@@ -1,5 +1,5 @@
 import type { Route } from './+types/doc';
-import { Link, redirect } from 'react-router';
+import { Link, redirect, data } from 'react-router';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
 import { getDocument } from '~/repos/document';
 import { ClientOnly } from '~/ui/client-only/client-only';
@@ -21,10 +21,12 @@ export async function loader({ params, context }: Route.LoaderArgs) {
   const document = await getDocument(params.id);
 
   if (!document) {
-    return {
+    return data({
       error: DocumentError.NotFound,
       signInUrl: user ? null : getSignInUrl(href('/')),
-    };
+    }, {
+      status: 404,
+    });
   }
 
   const documentTitle = document.title;
@@ -32,10 +34,12 @@ export async function loader({ params, context }: Route.LoaderArgs) {
   const signInUrl = user ? null : getSignInUrl(documentUrl);
 
   if (user && user.id !== document.userId) {
-    return {
+    return data({
       error: DocumentError.PermissionDenied,
       signInUrl,
-    };
+    }, {
+      status: 403,
+    });
   }
 
   if (!user) {
