@@ -3,7 +3,8 @@ import type { PolymorphicComponentPropWithRef } from '../polymorphic-types/polym
 import classNames from 'classnames';
 import { useMedia } from 'react-use';
 import { motion, useReducedMotion } from 'motion/react';
-import { reorderItem } from './framer-animation';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import { REORDER_DURATION_MS, reorderItem } from './framer-animation';
 
 export type DocumentItemProps<C extends React.ElementType>
   = PolymorphicComponentPropWithRef<
@@ -22,8 +23,43 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
     ref,
     ...rest }: DocumentItemProps<C>,
 ) {
+  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
+  const shouldReduceMotion = useReducedMotion();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const previousTopRef = useRef<number | null>(null);
+  const movingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Flag which way the row is about to travel, measured before the browser
+  // paints the new order. `offsetTop` ignores the transform the layout
+  // animation puts on the row, so it always reports the new slot. The flag
+  // lives on the element instead of in state so that marking it does not cost
+  // another render right when the animation starts.
+  useLayoutEffect(() => {
+    const element = wrapperRef.current;
+    const top = element?.offsetTop ?? null;
+    const previousTop = previousTopRef.current;
+    previousTopRef.current = top;
+
+    if (shouldReduceMotion || !element || top === null) {
+      return;
+    }
+
+    if (previousTop !== null && top !== previousTop) {
+      element.dataset.moving = top < previousTop ? 'up' : 'down';
+
+      clearTimeout(movingTimeoutRef.current);
+      movingTimeoutRef.current = setTimeout(() => {
+        delete element.dataset.moving;
+      }, REORDER_DURATION_MS);
+    }
+  });
+
+  useEffect(() => () => clearTimeout(movingTimeoutRef.current), []);
+
   const wrapperClasses = classNames([
-    'transition-all group h-12 lg:h-10 flex items-center justify-between gap-2 pr-1 lg:pr-0.5 rounded-xl cursor-pointer',
+    // Only colors transition — `transition-all` would fight the layout
+    // animation for control over `transform`.
+    'transition-colors group h-12 lg:h-10 flex items-center justify-between gap-2 pr-1 lg:pr-0.5 rounded-xl cursor-pointer',
     // Hover / open state — covers the whole row including actionArea.
     // Scoped to non-active rows so the yellow active surface isn't overridden.
     'not-has-aria-[current=page]:hover:bg-pca-grey-100 dark:not-has-aria-[current=page]:hover:bg-pca-grey-800',
@@ -39,17 +75,23 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
     'has-[[aria-current=page]:active]:bg-pca-yellow-700 dark:has-[[aria-current=page]:active]:bg-pca-yellow-700',
     // Disabled
     'has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50',
+    // A travelling row needs an opaque surface of its own, otherwise the
+    // titles it passes show through it. Active rows already have one.
+    'not-has-aria-[current=page]:data-[moving]:bg-pca-white',
+    'dark:not-has-aria-[current=page]:data-[moving]:bg-pca-grey-900',
+    // Only the row moving up is positioned, which paints it above the rows
+    // making room for it — so it reads as one item rising to the top.
+    'data-[moving=up]:relative',
     className,
   ]);
-  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
-  const shouldReduceMotion = useReducedMotion();
 
   const Component = as as React.ElementType;
 
   return (
     <motion.div
+      ref={wrapperRef}
       layout={shouldReduceMotion ? false : 'position'}
-      transition={reorderItem}
+      transition={{ layout: reorderItem }}
       className={wrapperClasses}
     >
       <Component
