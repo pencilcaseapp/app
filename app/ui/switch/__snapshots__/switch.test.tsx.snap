@@ -1,0 +1,277 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders checked state 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-2"
+  >
+    <div
+      class="flex gap-2"
+    >
+      <span
+        aria-checked="true"
+        aria-invalid="false"
+        aria-labelledby="test-label"
+        class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-pointer bg-pca-grey-400 dark:bg-pca-grey-600 hover:bg-pca-grey-600 dark:hover:bg-pca-grey-800 focus:bg-pca-grey-300 dark:focus:bg-pca-grey-700 focus:ring-2 focus:ring-pca-grey-200 dark:focus:ring-pca-grey-500 data-checked:bg-pca-green-700 data-checked:hover:bg-pca-green-900 data-checked:focus:bg-pca-green-700 data-checked:focus:ring-pca-green-300"
+        data-checked=""
+        id="base-ui-_r_2_"
+        role="switch"
+        tabindex="0"
+      >
+        <span
+          class="block size-5 rounded-full shadow-primary transition-transform duration-200 ease-in-out data-checked:translate-x-5 bg-pca-white"
+          data-checked=""
+        />
+      </span>
+      <input
+        aria-hidden="true"
+        checked=""
+        id="test"
+        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        tabindex="-1"
+        type="checkbox"
+      />
+      <label
+        class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold py-0.5 select-none cursor-pointer"
+        for="test"
+        id="test-label"
+      >
+        Test Label
+      </label>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders disabled checked state 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-2"
+  >
+    <div
+      class="flex gap-2"
+    >
+      <span
+        aria-checked="true"
+        aria-disabled="true"
+        aria-invalid="false"
+        aria-labelledby="test-label"
+        class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-not-allowed bg-pca-grey-100 dark:bg-pca-grey-800 data-checked:bg-pca-green-100"
+        data-checked=""
+        data-disabled=""
+        id="base-ui-_r_6_"
+        role="switch"
+        tabindex="-1"
+      >
+        <span
+          class="block size-5 rounded-full shadow-primary transition-transform duration-200 ease-in-out data-checked:translate-x-5 bg-pca-grey-100 dark:bg-pca-grey-700 data-checked:bg-pca-white"
+          data-checked=""
+          data-disabled=""
+        />
+      </span>
+      <input
+        aria-hidden="true"
+        checked=""
+        disabled=""
+        id="test"
+        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        tabindex="-1"
+        type="checkbox"
+      />
+      <label
+        class="antialiased font-inter text-sm text-pca-grey-300 dark:text-pca-grey-800 font-semibold py-0.5 select-none pointer-events-none"
+        for="test"
+        id="test-label"
+      >
+        Test Label
+      </label>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders disabled state 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-2"
+  >
+    <div
+      class="flex gap-2"
+    >
+      <span
+        aria-checked="false"
+        aria-disabled="true"
+        aria-invalid="false"
+        aria-labelledby="test-label"
+        class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-not-allowed bg-pca-grey-100 dark:bg-pca-grey-800 data-checked:bg-pca-green-100"
+        data-disabled=""
+        data-unchecked=""
+        id="base-ui-_r_4_"
+        role="switch"
+        tabindex="-1"
+      >
+        <span
+          class="block size-5 rounded-full shadow-primary transition-transform duration-200 ease-in-out data-checked:translate-x-5 bg-pca-grey-100 dark:bg-pca-grey-700 data-checked:bg-pca-white"
+          data-disabled=""
+          data-unchecked=""
+        />
+      </span>
+      <input
+        aria-hidden="true"
+        disabled=""
+        id="test"
+        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        tabindex="-1"
+        type="checkbox"
+      />
+      <label
+        class="antialiased font-inter text-sm text-pca-grey-300 dark:text-pca-grey-800 font-semibold py-0.5 select-none pointer-events-none"
+        for="test"
+        id="test-label"
+      >
+        Test Label
+      </label>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders error state 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-2"
+  >
+    <div
+      class="flex gap-2"
+    >
+      <span
+        aria-checked="false"
+        aria-errormessage="test-error"
+        aria-invalid="true"
+        aria-labelledby="test-label"
+        class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-pointer bg-pca-grey-400 dark:bg-pca-grey-600 hover:bg-pca-grey-600 dark:hover:bg-pca-grey-800 focus:bg-pca-grey-300 dark:focus:bg-pca-grey-700 focus:ring-2 focus:ring-pca-grey-200 dark:focus:ring-pca-grey-500 data-checked:bg-pca-green-700 data-checked:hover:bg-pca-green-900 data-checked:focus:bg-pca-green-700 data-checked:focus:ring-pca-green-300"
+        data-unchecked=""
+        id="base-ui-_r_8_"
+        role="switch"
+        tabindex="0"
+      >
+        <span
+          class="block size-5 rounded-full shadow-primary transition-transform duration-200 ease-in-out data-checked:translate-x-5 bg-pca-white"
+          data-unchecked=""
+        />
+      </span>
+      <input
+        aria-hidden="true"
+        id="test"
+        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        tabindex="-1"
+        type="checkbox"
+      />
+      <label
+        class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold py-0.5 select-none cursor-pointer"
+        for="test"
+        id="test-label"
+      >
+        Test Label
+      </label>
+    </div>
+    <span
+      class="antialiased font-inter text-xs font-normal text-pca-red-500 dark:text-pca-red-500"
+      id="test-error"
+    >
+      Error message
+    </span>
+  </div>
+</div>
+`;
+
+exports[`renders hint text 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-2"
+  >
+    <div
+      class="flex gap-2"
+    >
+      <span
+        aria-checked="false"
+        aria-describedby="test-hint"
+        aria-invalid="false"
+        aria-labelledby="test-label"
+        class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-pointer bg-pca-grey-400 dark:bg-pca-grey-600 hover:bg-pca-grey-600 dark:hover:bg-pca-grey-800 focus:bg-pca-grey-300 dark:focus:bg-pca-grey-700 focus:ring-2 focus:ring-pca-grey-200 dark:focus:ring-pca-grey-500 data-checked:bg-pca-green-700 data-checked:hover:bg-pca-green-900 data-checked:focus:bg-pca-green-700 data-checked:focus:ring-pca-green-300"
+        data-unchecked=""
+        id="base-ui-_r_a_"
+        role="switch"
+        tabindex="0"
+      >
+        <span
+          class="block size-5 rounded-full shadow-primary transition-transform duration-200 ease-in-out data-checked:translate-x-5 bg-pca-white"
+          data-unchecked=""
+        />
+      </span>
+      <input
+        aria-hidden="true"
+        id="test"
+        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        tabindex="-1"
+        type="checkbox"
+      />
+      <label
+        class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold py-0.5 select-none cursor-pointer"
+        for="test"
+        id="test-label"
+      >
+        Test Label
+      </label>
+    </div>
+    <span
+      class="antialiased font-inter text-xs font-normal text-pca-grey-900 dark:text-white"
+      id="test-hint"
+    >
+      Hint text
+    </span>
+  </div>
+</div>
+`;
+
+exports[`renders with label 1`] = `
+<div>
+  <div
+    class="flex flex-col gap-2"
+  >
+    <div
+      class="flex gap-2"
+    >
+      <span
+        aria-checked="false"
+        aria-invalid="false"
+        aria-labelledby="test-label"
+        class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-pointer bg-pca-grey-400 dark:bg-pca-grey-600 hover:bg-pca-grey-600 dark:hover:bg-pca-grey-800 focus:bg-pca-grey-300 dark:focus:bg-pca-grey-700 focus:ring-2 focus:ring-pca-grey-200 dark:focus:ring-pca-grey-500 data-checked:bg-pca-green-700 data-checked:hover:bg-pca-green-900 data-checked:focus:bg-pca-green-700 data-checked:focus:ring-pca-green-300"
+        data-unchecked=""
+        id="base-ui-_r_0_"
+        role="switch"
+        tabindex="0"
+      >
+        <span
+          class="block size-5 rounded-full shadow-primary transition-transform duration-200 ease-in-out data-checked:translate-x-5 bg-pca-white"
+          data-unchecked=""
+        />
+      </span>
+      <input
+        aria-hidden="true"
+        id="test"
+        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        tabindex="-1"
+        type="checkbox"
+      />
+      <label
+        class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-300 font-semibold py-0.5 select-none cursor-pointer"
+        for="test"
+        id="test-label"
+      >
+        Test Label
+      </label>
+    </div>
+  </div>
+</div>
+`;
