@@ -8,12 +8,12 @@ exports[`EmptyState > renders empty state 1`] = `
     <picture>
       <source
         media="(prefers-color-scheme: dark)"
-        srcset="welcoming-pencil-dark.svg"
+        srcset="/welcoming-pencil-dark.svg"
       />
       <img
         alt=""
         class="block w-45 h-45 ml-auto mr-auto"
-        src="welcoming-pencil-light.svg"
+        src="/welcoming-pencil-light.svg"
       />
     </picture>
     <div
