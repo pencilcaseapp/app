@@ -79,9 +79,11 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
     // titles it passes show through it. Active rows already have one.
     'not-has-aria-[current=page]:data-[moving]:bg-pca-white',
     'dark:not-has-aria-[current=page]:data-[moving]:bg-pca-grey-900',
-    // Only the row moving up is positioned, which paints it above the rows
-    // making room for it — so it reads as one item rising to the top.
-    'data-[moving=up]:relative',
+    // Only the row moving up is lifted out of the flow, so it reads as one
+    // item rising to the top. `z-20` clears the rest of the navigation on the
+    // way, including the sticky group header and the bottom area, which both
+    // sit at `z-10`.
+    'data-[moving=up]:relative data-[moving=up]:z-20',
     className,
   ]);
 
