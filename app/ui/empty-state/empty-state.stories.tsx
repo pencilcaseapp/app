@@ -29,7 +29,7 @@ export const Default: Story = {
   args: {
     title: 'Permission Denied',
     description:
-        'You don’t have a permission to access this doc. Please ask the owner to share the doc with you.',
+        'You don’t have permission to access this doc. Please ask the owner to share the doc with you.',
   },
 };
 
@@ -41,7 +41,7 @@ export const ActionArea: Story = {
   args: {
     title: 'Permission Denied',
     description:
-        'You don’t have a permission to access this doc. Please ask the owner to share the doc with you.',
+        'You don’t have permission to access this doc. Please ask the owner to share the doc with you.',
     actionArea: (
       <Button>
         Request Access
