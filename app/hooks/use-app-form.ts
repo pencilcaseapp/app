@@ -5,6 +5,7 @@ import { ControlledCheckbox } from '~/components/controlled-checkbox/controlled-
 import { ControlledHiddenInput } from '~/components/controlled-hidden-input/controlled-hidden-input';
 import { ControlledOneTimePasswordField } from '~/components/controlled-one-time-password-field/controlled-one-time-password-field';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
+import { ControlledSwitch } from '~/components/controlled-switch/controlled-switch';
 import { ControlledTextField } from '~/components/controlled-text-field/controlled-text-field';
 import { fieldContext, formContext } from '~/contexts/form';
 
@@ -18,6 +19,7 @@ export const formHook = createFormHook({
   fieldComponents: {
     TextField: ControlledTextField,
     Checkbox: ControlledCheckbox,
+    Switch: ControlledSwitch,
     OneTimePasswordField: ControlledOneTimePasswordField,
     HiddenInput: ControlledHiddenInput,
   },

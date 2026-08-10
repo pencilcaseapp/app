@@ -3,6 +3,7 @@ import type { PropsWithChildren } from 'react';
 
 export interface Label extends PropsWithChildren {
   htmlFor: string;
+  id?: string;
   disabled?: boolean;
   className?: string;
   variant?: TypographyProps['variant'];
@@ -11,6 +12,7 @@ export interface Label extends PropsWithChildren {
 
 export const Label: React.FC<Label>
   = ({ htmlFor,
+    id,
     disabled,
     className,
     variant = 'bodySmall',
@@ -19,6 +21,7 @@ export const Label: React.FC<Label>
   }) => {
     return (
       <Typography
+        id={id}
         htmlFor={htmlFor}
         as="label"
         variant={variant}

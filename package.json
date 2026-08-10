@@ -17,6 +17,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@base-ui/react": "^1.7.0",
     "@fontsource/inter": "^5.3.0",
     "@hocuspocus/extension-database": "^4.5.0",
     "@hocuspocus/provider": "^4.5.0",
