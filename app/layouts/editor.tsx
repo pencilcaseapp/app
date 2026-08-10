@@ -21,6 +21,11 @@ import { optionalUserSessionContext } from '~/contexts/user-session';
 import { getDocumentList } from '~/repos/document';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { useStableOrder } from '~/hooks/use-stable-order';
+import {
+  EditedDocumentProvider,
+  useEditedDocument,
+} from '~/contexts/edited-document';
+import { useEffect } from 'react';
 
 export const handle = {
   bodyClassName: 'w-full bg-pca-white dark:bg-pca-grey-900',
@@ -53,14 +58,16 @@ export default function LayoutEditor({
 }: Route.ComponentProps) {
   return (
     <DocumentTitleProvider>
-      <SocketClientProvider>
-        <SidebarProvider>
-          {user && (
-            <EditorSidebar navigation={navigation} />
-          )}
-          <Outlet />
-        </SidebarProvider>
-      </SocketClientProvider>
+      <EditedDocumentProvider>
+        <SocketClientProvider>
+          <SidebarProvider>
+            {user && (
+              <EditorSidebar navigation={navigation} />
+            )}
+            <Outlet />
+          </SidebarProvider>
+        </SocketClientProvider>
+      </EditedDocumentProvider>
     </DocumentTitleProvider>
   );
 };
@@ -77,7 +84,19 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
   const location = useLocation();
   const [activeDocumentTitle] = useDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
-  const stableNavigation = useStableOrder(navigation, getNavigationKey);
+  const { editedDocumentId } = useEditedDocument();
+  const [stableNavigation, moveToTop] = useStableOrder(
+    navigation,
+    getNavigationKey,
+  );
+
+  useEffect(() => {
+    if (!editedDocumentId) {
+      return;
+    }
+
+    moveToTop(href('/doc/:id', { id: editedDocumentId }));
+  }, [editedDocumentId, moveToTop]);
 
   return (
     <Sidebar

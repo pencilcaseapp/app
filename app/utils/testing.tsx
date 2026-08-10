@@ -2,6 +2,7 @@ import { act, render } from '@testing-library/react';
 import { createRoutesStub, RouterContextProvider, type Register } from 'react-router';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 import { DocumentTitleProvider } from '~/contexts/document-title';
+import { EditedDocumentProvider } from '~/contexts/edited-document';
 import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import routes from '~/routes';
 
@@ -42,9 +43,11 @@ export async function renderRoute<P extends keyof Register['pages']>(
   const result = render(
     <AuthenticityTokenProvider token="test-token">
       <DocumentTitleProvider>
-        <SidebarProvider>
-          <Stub initialEntries={[replacedPath]} />
-        </SidebarProvider>
+        <EditedDocumentProvider>
+          <SidebarProvider>
+            <Stub initialEntries={[replacedPath]} />
+          </SidebarProvider>
+        </EditedDocumentProvider>
       </DocumentTitleProvider>
     </AuthenticityTokenProvider>,
   );

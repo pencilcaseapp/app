@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { useStableOrder } from './use-stable-order';
 
@@ -14,11 +14,14 @@ const renderStableOrder = (initialItems: Item[]) =>
     { initialProps: { list: initialItems } },
   );
 
+const keysOf = (result: { current: readonly [Item[], unknown] }) =>
+  result.current[0].map(getKey);
+
 describe('useStableOrder', () => {
   it('should keep the initial order on first render', () => {
     const { result } = renderStableOrder(items('a', 'b', 'c'));
 
-    expect(result.current.map(getKey)).toEqual(['a', 'b', 'c']);
+    expect(keysOf(result)).toEqual(['a', 'b', 'c']);
   });
 
   it('should ignore a resorting of known items', () => {
@@ -26,7 +29,7 @@ describe('useStableOrder', () => {
 
     rerender({ list: items('c', 'a', 'b') });
 
-    expect(result.current.map(getKey)).toEqual(['a', 'b', 'c']);
+    expect(keysOf(result)).toEqual(['a', 'b', 'c']);
   });
 
   it('should prepend new items in the given order', () => {
@@ -34,7 +37,7 @@ describe('useStableOrder', () => {
 
     rerender({ list: items('d', 'c', 'b', 'a') });
 
-    expect(result.current.map(getKey)).toEqual(['d', 'c', 'a', 'b']);
+    expect(keysOf(result)).toEqual(['d', 'c', 'a', 'b']);
   });
 
   it('should drop items that are gone', () => {
@@ -42,7 +45,7 @@ describe('useStableOrder', () => {
 
     rerender({ list: items('c', 'a') });
 
-    expect(result.current.map(getKey)).toEqual(['a', 'c']);
+    expect(keysOf(result)).toEqual(['a', 'c']);
   });
 
   it('should not remember items that came back', () => {
@@ -51,7 +54,7 @@ describe('useStableOrder', () => {
     rerender({ list: items('a', 'c') });
     rerender({ list: items('a', 'b', 'c') });
 
-    expect(result.current.map(getKey)).toEqual(['b', 'a', 'c']);
+    expect(keysOf(result)).toEqual(['b', 'a', 'c']);
   });
 
   it('should return the latest version of a known item', () => {
@@ -63,6 +66,51 @@ describe('useStableOrder', () => {
 
     rerender({ list: [{ id: 'a', label: 'new' }] });
 
-    expect(result.current).toEqual([{ id: 'a', label: 'new' }]);
+    expect(result.current[0]).toEqual([{ id: 'a', label: 'new' }]);
+  });
+
+  describe('moveToTop', () => {
+    it('should pull the given item to the top', () => {
+      const { result } = renderStableOrder(items('a', 'b', 'c'));
+
+      act(() => result.current[1]('c'));
+
+      expect(keysOf(result)).toEqual(['c', 'a', 'b']);
+    });
+
+    it('should keep the item on top across resortings', () => {
+      const { result, rerender } = renderStableOrder(items('a', 'b', 'c'));
+
+      act(() => result.current[1]('c'));
+      rerender({ list: items('b', 'a', 'c') });
+
+      expect(keysOf(result)).toEqual(['c', 'a', 'b']);
+    });
+
+    it('should keep an earlier moved item below the latest one', () => {
+      const { result } = renderStableOrder(items('a', 'b', 'c'));
+
+      act(() => result.current[1]('c'));
+      act(() => result.current[1]('b'));
+
+      expect(keysOf(result)).toEqual(['b', 'c', 'a']);
+    });
+
+    it('should ignore an unknown item', () => {
+      const { result } = renderStableOrder(items('a', 'b'));
+
+      act(() => result.current[1]('z'));
+
+      expect(keysOf(result)).toEqual(['a', 'b']);
+    });
+
+    it('should place a moved item on top once it shows up', () => {
+      const { result, rerender } = renderStableOrder(items('a', 'b'));
+
+      act(() => result.current[1]('c'));
+      rerender({ list: items('a', 'b', 'c') });
+
+      expect(keysOf(result)).toEqual(['c', 'a', 'b']);
+    });
   });
 });
