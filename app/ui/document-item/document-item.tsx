@@ -2,6 +2,8 @@ import { Typography } from '../typography/typography';
 import type { PolymorphicComponentPropWithRef } from '../polymorphic-types/polymorphic-types';
 import classNames from 'classnames';
 import { useMedia } from 'react-use';
+import { motion, useReducedMotion } from 'motion/react';
+import { reorderItem } from './framer-animation';
 
 export type DocumentItemProps<C extends React.ElementType>
   = PolymorphicComponentPropWithRef<
@@ -40,11 +42,16 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
     className,
   ]);
   const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
+  const shouldReduceMotion = useReducedMotion();
 
   const Component = as as React.ElementType;
 
   return (
-    <div className={wrapperClasses}>
+    <motion.div
+      layout={shouldReduceMotion ? false : 'position'}
+      transition={reorderItem}
+      className={wrapperClasses}
+    >
       <Component
         {...rest}
         ref={ref}
@@ -76,6 +83,6 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
           {actionArea}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
