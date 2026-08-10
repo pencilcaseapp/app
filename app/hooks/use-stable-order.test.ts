@@ -112,5 +112,34 @@ describe('useStableOrder', () => {
 
       expect(keysOf(result)).toEqual(['c', 'a', 'b']);
     });
+
+    it('should let a new item outrank the moved one', () => {
+      const { result, rerender } = renderStableOrder(items('a', 'b'));
+
+      act(() => result.current[1]('b'));
+      rerender({ list: items('c', 'a', 'b') });
+
+      expect(keysOf(result)).toEqual(['c', 'b', 'a']);
+    });
+
+    it('should keep a new item on top of the moved one afterwards', () => {
+      const { result, rerender } = renderStableOrder(items('a', 'b'));
+
+      act(() => result.current[1]('b'));
+      rerender({ list: items('c', 'a', 'b') });
+      rerender({ list: items('b', 'a', 'c') });
+
+      expect(keysOf(result)).toEqual(['c', 'b', 'a']);
+    });
+
+    it('should move the same item again on a later call', () => {
+      const { result, rerender } = renderStableOrder(items('a', 'b'));
+
+      act(() => result.current[1]('b'));
+      rerender({ list: items('c', 'a', 'b') });
+      act(() => result.current[1]('b'));
+
+      expect(keysOf(result)).toEqual(['b', 'c', 'a']);
+    });
   });
 });
