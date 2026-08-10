@@ -1,4 +1,4 @@
-import { Switch as BaseSwitch } from '@base-ui-components/react/switch';
+import { Switch as BaseSwitch } from '@base-ui/react/switch';
 import classNames from 'classnames';
 import { Label } from '../label/label';
 import { Typography } from '../typography/typography';

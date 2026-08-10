@@ -14,7 +14,7 @@ exports[`renders checked state 1`] = `
         aria-labelledby="test-label"
         class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-pointer bg-pca-grey-400 dark:bg-pca-grey-600 hover:bg-pca-grey-600 dark:hover:bg-pca-grey-800 focus:bg-pca-grey-300 dark:focus:bg-pca-grey-700 focus:ring-2 focus:ring-pca-grey-200 dark:focus:ring-pca-grey-500 data-checked:bg-pca-green-700 data-checked:hover:bg-pca-green-900 data-checked:focus:bg-pca-green-700 data-checked:focus:ring-pca-green-300"
         data-checked=""
-        id="base-ui-_r_2_"
+        id="base-ui-_r_3_"
         role="switch"
         tabindex="0"
       >
@@ -27,7 +27,7 @@ exports[`renders checked state 1`] = `
         aria-hidden="true"
         checked=""
         id="test"
-        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
         tabindex="-1"
         type="checkbox"
       />
@@ -59,7 +59,7 @@ exports[`renders disabled checked state 1`] = `
         class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-not-allowed bg-pca-grey-100 dark:bg-pca-grey-800 data-checked:bg-pca-green-100"
         data-checked=""
         data-disabled=""
-        id="base-ui-_r_6_"
+        id="base-ui-_r_9_"
         role="switch"
         tabindex="-1"
       >
@@ -74,7 +74,7 @@ exports[`renders disabled checked state 1`] = `
         checked=""
         disabled=""
         id="test"
-        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
         tabindex="-1"
         type="checkbox"
       />
@@ -106,7 +106,7 @@ exports[`renders disabled state 1`] = `
         class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-not-allowed bg-pca-grey-100 dark:bg-pca-grey-800 data-checked:bg-pca-green-100"
         data-disabled=""
         data-unchecked=""
-        id="base-ui-_r_4_"
+        id="base-ui-_r_6_"
         role="switch"
         tabindex="-1"
       >
@@ -120,7 +120,7 @@ exports[`renders disabled state 1`] = `
         aria-hidden="true"
         disabled=""
         id="test"
-        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
         tabindex="-1"
         type="checkbox"
       />
@@ -151,7 +151,7 @@ exports[`renders error state 1`] = `
         aria-labelledby="test-label"
         class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-pointer bg-pca-grey-400 dark:bg-pca-grey-600 hover:bg-pca-grey-600 dark:hover:bg-pca-grey-800 focus:bg-pca-grey-300 dark:focus:bg-pca-grey-700 focus:ring-2 focus:ring-pca-grey-200 dark:focus:ring-pca-grey-500 data-checked:bg-pca-green-700 data-checked:hover:bg-pca-green-900 data-checked:focus:bg-pca-green-700 data-checked:focus:ring-pca-green-300"
         data-unchecked=""
-        id="base-ui-_r_8_"
+        id="base-ui-_r_c_"
         role="switch"
         tabindex="0"
       >
@@ -163,7 +163,7 @@ exports[`renders error state 1`] = `
       <input
         aria-hidden="true"
         id="test"
-        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
         tabindex="-1"
         type="checkbox"
       />
@@ -200,7 +200,7 @@ exports[`renders hint text 1`] = `
         aria-labelledby="test-label"
         class="relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out cursor-pointer bg-pca-grey-400 dark:bg-pca-grey-600 hover:bg-pca-grey-600 dark:hover:bg-pca-grey-800 focus:bg-pca-grey-300 dark:focus:bg-pca-grey-700 focus:ring-2 focus:ring-pca-grey-200 dark:focus:ring-pca-grey-500 data-checked:bg-pca-green-700 data-checked:hover:bg-pca-green-900 data-checked:focus:bg-pca-green-700 data-checked:focus:ring-pca-green-300"
         data-unchecked=""
-        id="base-ui-_r_a_"
+        id="base-ui-_r_f_"
         role="switch"
         tabindex="0"
       >
@@ -212,7 +212,7 @@ exports[`renders hint text 1`] = `
       <input
         aria-hidden="true"
         id="test"
-        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
         tabindex="-1"
         type="checkbox"
       />
@@ -260,7 +260,7 @@ exports[`renders with label 1`] = `
       <input
         aria-hidden="true"
         id="test"
-        style="overflow: hidden; white-space: nowrap; position: fixed; top: 0px; left: 0px; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px;"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
         tabindex="-1"
         type="checkbox"
       />
