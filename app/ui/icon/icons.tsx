@@ -19,6 +19,7 @@ export type IconName
     | 'search'
     | 'settings'
     | 'info'
+    | 'link'
     | 'check'
     | 'danger'
     | 'warning'
@@ -213,6 +214,15 @@ export const icons: {
   'info': (
     <path
       d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'link': (
+    <path
+      d="M9 17H7C4.23858 17 2 14.7614 2 12C2 9.23858 4.23858 7 7 7H9M15 17H17C19.7614 17 22 14.7614 22 12C22 9.23858 19.7614 7 17 7H15M7 12H17"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"

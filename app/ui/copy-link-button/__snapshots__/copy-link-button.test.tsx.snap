@@ -1,0 +1,101 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CopyLinkButton > snapshots > copied state 1`] = `
+<div>
+  <button
+    aria-live="polite"
+    class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row-reverse text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-800 dark:text-pca-grey-900 dark:bg-pca-white dark:hover:bg-pca-grey-300 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-300 dark:active:bg-pca-grey-300"
+  >
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+    >
+      Link copied!
+    </span>
+    <svg
+      aria-hidden="true"
+      class="shrink-0 w-4.5 h-4.5"
+      fill="transparent"
+      focusable="false"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M7.5 12L10.5 15L16.5 9M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+      />
+    </svg>
+  </button>
+</div>
+`;
+
+exports[`CopyLinkButton > snapshots > default state 1`] = `
+<div>
+  <button
+    aria-live="polite"
+    class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row-reverse text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-800 dark:text-pca-grey-900 dark:bg-pca-white dark:hover:bg-pca-grey-300 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-300 dark:active:bg-pca-grey-300"
+  >
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+    >
+      Copy link
+    </span>
+    <svg
+      aria-hidden="true"
+      class="shrink-0 w-4.5 h-4.5"
+      fill="transparent"
+      focusable="false"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M9 17H7C4.23858 17 2 14.7614 2 12C2 9.23858 4.23858 7 7 7H9M15 17H17C19.7614 17 22 14.7614 22 12C22 9.23858 19.7614 7 17 7H15M7 12H17"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+      />
+    </svg>
+  </button>
+</div>
+`;
+
+exports[`CopyLinkButton > snapshots > disabled state 1`] = `
+<div>
+  <button
+    aria-live="polite"
+    class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 pointer-events-none rounded-xl px-3 py-2 flex-row-reverse text-pca-white bg-pca-grey-300 focus:outline-hidden dark:text-pca-grey-900 dark:bg-pca-grey-800 dark:text-pca-grey-700! dark:focus:outline-hidden"
+    disabled=""
+  >
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+    >
+      Copy link
+    </span>
+    <svg
+      aria-hidden="true"
+      class="shrink-0 w-4.5 h-4.5"
+      fill="transparent"
+      focusable="false"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M9 17H7C4.23858 17 2 14.7614 2 12C2 9.23858 4.23858 7 7 7H9M15 17H17C19.7614 17 22 14.7614 22 12C22 9.23858 19.7614 7 17 7H15M7 12H17"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+      />
+    </svg>
+  </button>
+</div>
+`;
