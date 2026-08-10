@@ -22,6 +22,7 @@ export async function loader({ params, context }: Route.LoaderArgs) {
 
   if (!document) {
     return data({
+      ok: false as const,
       error: DocumentError.NotFound,
       signInUrl: user ? null : getSignInUrl(href('/')),
     }, {
@@ -35,6 +36,7 @@ export async function loader({ params, context }: Route.LoaderArgs) {
 
   if (user && user.id !== document.userId) {
     return data({
+      ok: false as const,
       error: DocumentError.PermissionDenied,
       signInUrl,
     }, {
@@ -47,15 +49,16 @@ export async function loader({ params, context }: Route.LoaderArgs) {
   }
 
   return {
+    ok: true as const,
     documentTitle,
     signInUrl,
   };
 }
 
 export default function ({ params, loaderData }: Route.ComponentProps) {
-  const [title, setTitle] = useDocumentTitle(loaderData.documentTitle);
+  const [title, setTitle] = useDocumentTitle(loaderData.ok ? loaderData.documentTitle : '');
 
-  if (loaderData.error === DocumentError.NotFound) {
+  if (!loaderData.ok && loaderData.error === DocumentError.NotFound) {
     return (
       <DocEmptyState
         title="Not Found"
@@ -66,7 +69,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
     );
   }
 
-  if (loaderData.error === DocumentError.PermissionDenied) {
+  if (!loaderData.ok && loaderData.error === DocumentError.PermissionDenied) {
     return (
       <DocEmptyState
         title="Permission Denied"
