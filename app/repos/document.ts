@@ -1,9 +1,12 @@
-import { eq, sql, type InferSelectModel } from 'drizzle-orm';
+import { and, desc, eq, exists, or, sql, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
-import { documents } from '~/db/schema';
+import { documentCollaborators, documents } from '~/db/schema';
 
 export type Document = InferSelectModel<typeof documents>;
+
+export type DocumentCollaborator
+  = InferSelectModel<typeof documentCollaborators>;
 
 export interface CreateDocumentInput {
   userId: string;
@@ -54,18 +57,23 @@ export async function getDocumentList(userId: string) {
     return [];
   }
 
-  return db.query.documents.findMany({
-    columns: {
-      id: true,
-      title: true,
-    },
-    where: {
-      userId,
-    },
-    orderBy: {
-      updatedAt: 'desc',
-    },
-  });
+  return db.select({
+    id: documents.id,
+    title: documents.title,
+  })
+    .from(documents)
+    .where(or(
+      eq(documents.userId, userId),
+      exists(
+        db.select({ one: sql`1` })
+          .from(documentCollaborators)
+          .where(and(
+            eq(documentCollaborators.documentId, documents.id),
+            eq(documentCollaborators.userId, userId),
+          )),
+      ),
+    ))
+    .orderBy(desc(documents.updatedAt));
 }
 
 export async function updateDocument(
@@ -80,4 +88,75 @@ export async function updateDocument(
     .returning();
 
   return document;
+}
+
+export async function setDocumentShared(id: string, shared: boolean) {
+  if (!isUuid(id)) {
+    return undefined;
+  }
+
+  const [document] = await db.update(documents)
+    .set({ shared, updatedAt: sql`NOW()` })
+    .where(eq(documents.id, id))
+    .returning();
+
+  return document;
+}
+
+export interface ConnectCollaboratorInput {
+  documentId: string;
+  userId: string;
+}
+
+export async function connectCollaborator(input: ConnectCollaboratorInput) {
+  const { documentId, userId } = input;
+
+  if (!isUuid(documentId) || !isUuid(userId)) {
+    return undefined;
+  }
+
+  const [collaborator] = await db.insert(documentCollaborators)
+    .values({
+      documentId,
+      userId,
+    })
+    .onConflictDoNothing({
+      target: [
+        documentCollaborators.documentId,
+        documentCollaborators.userId,
+      ],
+    })
+    .returning();
+
+  return collaborator;
+}
+
+export async function removeCollaboratorsForDocument(documentId: string) {
+  if (!isUuid(documentId)) {
+    return;
+  }
+
+  await db.delete(documentCollaborators)
+    .where(eq(documentCollaborators.documentId, documentId));
+}
+
+export async function isDocumentCollaborator(
+  documentId: string,
+  userId: string,
+) {
+  if (!isUuid(documentId) || !isUuid(userId)) {
+    return false;
+  }
+
+  const collaborator = await db.query.documentCollaborators.findFirst({
+    columns: {
+      id: true,
+    },
+    where: {
+      documentId,
+      userId,
+    },
+  });
+
+  return collaborator !== undefined;
 }

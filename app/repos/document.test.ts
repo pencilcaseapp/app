@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { createDocument, getDocument, getDocumentList, getDocumentTitle, updateDocument } from './document';
+import { connectCollaborator, createDocument, getDocument, getDocumentList, getDocumentTitle, isDocumentCollaborator, removeCollaboratorsForDocument, setDocumentShared, updateDocument } from './document';
 import { db } from '~/db';
-import { createDocumentWithTitle, createEmptyDocument } from '~/test/data-factories/document';
+import { connectDocumentCollaborator, createDocumentWithTitle, createEmptyDocument, createSharedDocument } from '~/test/data-factories/document';
 import { createTestUser } from '~/test/data-factories/user';
 
 describe('createDocument', () => {
@@ -20,6 +20,7 @@ describe('createDocument', () => {
       id: document.id,
       title: null,
       content: null,
+      shared: false,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
       userId: user.id,
@@ -61,10 +62,28 @@ describe('updateDocument', () => {
       id: fixture.id,
       title: 'Test Document',
       content: Buffer.from('Hello, World!'),
+      shared: false,
       createdAt: fixture.createdAt,
       updatedAt: expect.any(Date),
       userId: user.id,
     });
+  });
+});
+
+describe('setDocumentShared', () => {
+  it('toggles the shared flag', async () => {
+    const user = await createTestUser();
+    const fixture = await createEmptyDocument(user.id);
+
+    const shared = await setDocumentShared(fixture.id, true);
+    expect(shared?.shared).toBe(true);
+
+    const unshared = await setDocumentShared(fixture.id, false);
+    expect(unshared?.shared).toBe(false);
+  });
+
+  it('returns undefined for an invalid id', async () => {
+    expect(await setDocumentShared('not-a-uuid', true)).toBeUndefined();
   });
 });
 
@@ -86,5 +105,135 @@ describe('getDocumentList', () => {
         title: document1.title,
       },
     ]);
+  });
+
+  it('includes documents shared with the user as a collaborator', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const ownDocument = await createDocumentWithTitle(collaborator.id);
+    const sharedDocument = await createSharedDocument(owner.id);
+    await connectDocumentCollaborator(sharedDocument.id, collaborator.id);
+
+    const documents = await getDocumentList(collaborator.id);
+
+    expect(documents).toContainEqual({
+      id: ownDocument.id,
+      title: ownDocument.title,
+    });
+    expect(documents).toContainEqual({
+      id: sharedDocument.id,
+      title: sharedDocument.title,
+    });
+  });
+
+  it('does not duplicate a document that is both owned and connected', async () => {
+    const user = await createTestUser();
+    const document = await createSharedDocument(user.id);
+    await connectDocumentCollaborator(document.id, user.id);
+
+    const documents = await getDocumentList(user.id);
+
+    expect(documents.filter(item => item.id === document.id)).toHaveLength(1);
+  });
+});
+
+describe('connectCollaborator', () => {
+  it('connects a user to a document', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const document = await createSharedDocument(owner.id);
+
+    const connection = await connectCollaborator({
+      documentId: document.id,
+      userId: collaborator.id,
+    });
+
+    expect(connection).toMatchObject({
+      documentId: document.id,
+      userId: collaborator.id,
+    });
+  });
+
+  it('is idempotent for an existing connection', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const document = await createSharedDocument(owner.id);
+
+    await connectCollaborator({
+      documentId: document.id,
+      userId: collaborator.id,
+    });
+    await connectCollaborator({
+      documentId: document.id,
+      userId: collaborator.id,
+    });
+
+    const rows = await db.query.documentCollaborators.findMany({
+      where: {
+        documentId: document.id,
+        userId: collaborator.id,
+      },
+    });
+
+    expect(rows).toHaveLength(1);
+  });
+
+  it('returns undefined for an invalid id', async () => {
+    expect(await connectCollaborator({
+      documentId: 'not-a-uuid',
+      userId: 'not-a-uuid',
+    })).toBeUndefined();
+  });
+});
+
+describe('removeCollaboratorsForDocument', () => {
+  it('removes every collaborator connection for a document', async () => {
+    const owner = await createTestUser();
+    const collaboratorA = await createTestUser();
+    const collaboratorB = await createTestUser();
+    const document = await createSharedDocument(owner.id);
+
+    await connectCollaborator({
+      documentId: document.id,
+      userId: collaboratorA.id,
+    });
+    await connectCollaborator({
+      documentId: document.id,
+      userId: collaboratorB.id,
+    });
+
+    await removeCollaboratorsForDocument(document.id);
+
+    const rows = await db.query.documentCollaborators.findMany({
+      where: {
+        documentId: document.id,
+      },
+    });
+
+    expect(rows).toHaveLength(0);
+  });
+});
+
+describe('isDocumentCollaborator', () => {
+  it('is true once the user is connected', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const document = await createSharedDocument(owner.id);
+
+    expect(await isDocumentCollaborator(document.id, collaborator.id))
+      .toBe(false);
+
+    await connectCollaborator({
+      documentId: document.id,
+      userId: collaborator.id,
+    });
+
+    expect(await isDocumentCollaborator(document.id, collaborator.id))
+      .toBe(true);
+  });
+
+  it('returns false for an invalid id', async () => {
+    expect(await isDocumentCollaborator('not-a-uuid', 'not-a-uuid'))
+      .toBe(false);
   });
 });

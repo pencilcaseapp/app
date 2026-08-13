@@ -23,10 +23,11 @@ import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
 
 export interface EditorPluginToolbarProps {
   topbarLeft?: React.ReactNode;
+  topbarRight?: React.ReactNode;
 }
 
 export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
-  = ({ topbarLeft }) => {
+  = ({ topbarLeft, topbarRight }) => {
     const [editor] = useLexicalComposerContext();
     const [formatBlock, setFormatBlock] = useState<EditorFormatBlock>('p');
     const [textStyle, setTextStyle] = useState({
@@ -143,7 +144,7 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
         ref={topbarRef}
         hasBorder={isVirtualKeyboardOpen || isSidebarOpen}
         left={!isVirtualKeyboardOpen ? topbarLeft : <Button colorLight="secondary" icon="close" className="text-pca-grey-400!" iconTitle="close" />}
-        right={!isVirtualKeyboardOpen && (<Button icon="share" colorLight="secondary">Share</Button>)}
+        right={!isVirtualKeyboardOpen && topbarRight}
         center={(
           (isWide || isVirtualKeyboardOpen) && (
             <Toolbar isScrolling={isScrolling}>
