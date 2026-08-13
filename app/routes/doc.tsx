@@ -1,10 +1,10 @@
 import type { Route } from './+types/doc';
-import { Link, redirect, data } from 'react-router';
+import { Link, redirect, data, useFetcher } from 'react-router';
 import { z } from 'zod';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
 import {
-  connectCollaborator,
   getDocument,
+  isDocumentCollaborator,
   removeCollaboratorsForDocument,
   setDocumentShared,
 } from '~/repos/document';
@@ -15,7 +15,8 @@ import { getSignInUrl } from '~/services/auth';
 import { validateForm } from '~/utils/form';
 import { useDocumentTitle } from '~/contexts/document-title';
 import { useEditedDocument } from '~/contexts/edited-document';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useAuthenticityToken } from 'remix-utils/csrf/react';
 import { MenuOrSignInButton } from '~/components/menu-or-sign-in-button/menu-or-sign-in-button';
 import { SharePanel } from '~/components/share-panel/share-panel';
 import { Button } from '~/ui/button/button';
@@ -62,12 +63,8 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     });
   }
 
-  if (user && !isOwner) {
-    await connectCollaborator({
-      documentId: document.id,
-      userId: user.id,
-    });
-  }
+  const needsConnect = !!user && !isOwner
+    && !(await isDocumentCollaborator(document.id, user.id));
 
   return {
     ok: true as const,
@@ -76,6 +73,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     isOwner,
     shared: document.shared,
     shareUrl: new URL(documentUrl, request.url).toString(),
+    needsConnect,
   };
 }
 
@@ -111,6 +109,21 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
     () => reportDocumentEdit(params.id),
     [reportDocumentEdit, params.id],
   );
+
+  const joinFetcher = useFetcher();
+  const csrfToken = useAuthenticityToken();
+  const needsConnect = loaderData.ok && loaderData.needsConnect;
+
+  useEffect(() => {
+    if (!needsConnect || joinFetcher.state !== 'idle' || joinFetcher.data) {
+      return;
+    }
+
+    joinFetcher.submit(
+      { csrf: csrfToken },
+      { method: 'post', action: href('/doc/:id/join', { id: params.id }) },
+    );
+  }, [needsConnect, joinFetcher, csrfToken, params.id]);
 
   if (!loaderData.ok && loaderData.error === DocumentError.NotFound) {
     return (

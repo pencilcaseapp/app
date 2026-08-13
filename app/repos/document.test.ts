@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { connectCollaborator, createDocument, getDocument, getDocumentList, getDocumentTitle, removeCollaboratorsForDocument, setDocumentShared, updateDocument } from './document';
+import { connectCollaborator, createDocument, getDocument, getDocumentList, getDocumentTitle, isDocumentCollaborator, removeCollaboratorsForDocument, setDocumentShared, updateDocument } from './document';
 import { db } from '~/db';
 import { connectDocumentCollaborator, createDocumentWithTitle, createEmptyDocument, createSharedDocument } from '~/test/data-factories/document';
 import { createTestUser } from '~/test/data-factories/user';
@@ -211,5 +211,29 @@ describe('removeCollaboratorsForDocument', () => {
     });
 
     expect(rows).toHaveLength(0);
+  });
+});
+
+describe('isDocumentCollaborator', () => {
+  it('is true once the user is connected', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const document = await createSharedDocument(owner.id);
+
+    expect(await isDocumentCollaborator(document.id, collaborator.id))
+      .toBe(false);
+
+    await connectCollaborator({
+      documentId: document.id,
+      userId: collaborator.id,
+    });
+
+    expect(await isDocumentCollaborator(document.id, collaborator.id))
+      .toBe(true);
+  });
+
+  it('returns false for an invalid id', async () => {
+    expect(await isDocumentCollaborator('not-a-uuid', 'not-a-uuid'))
+      .toBe(false);
   });
 });

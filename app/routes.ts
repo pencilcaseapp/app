@@ -6,6 +6,7 @@ export default [
     route('new', 'routes/new.tsx'),
     route('doc/:id', 'routes/doc.tsx'),
   ]),
+  route('doc/:id/join', 'routes/join-document.ts'),
   layout('layouts/auth.tsx', [
     route('signin', 'routes/signin.tsx'),
     route('otp/:otpId', 'routes/otp.tsx'),

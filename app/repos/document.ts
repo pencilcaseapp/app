@@ -139,3 +139,24 @@ export async function removeCollaboratorsForDocument(documentId: string) {
   await db.delete(documentCollaborators)
     .where(eq(documentCollaborators.documentId, documentId));
 }
+
+export async function isDocumentCollaborator(
+  documentId: string,
+  userId: string,
+) {
+  if (!isUuid(documentId) || !isUuid(userId)) {
+    return false;
+  }
+
+  const collaborator = await db.query.documentCollaborators.findFirst({
+    columns: {
+      id: true,
+    },
+    where: {
+      documentId,
+      userId,
+    },
+  });
+
+  return collaborator !== undefined;
+}

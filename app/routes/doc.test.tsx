@@ -4,7 +4,7 @@ import { optionalUserSessionContext } from '~/contexts/user-session';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
-import { action } from './doc';
+import { action, loader } from './doc';
 
 const redirectMock = vi.fn();
 vi.mock('react-router', async () => {
@@ -20,13 +20,14 @@ vi.mock('react-router', async () => {
 
 const getDocumentMock = vi.fn();
 const setDocumentSharedMock = vi.fn();
-const connectCollaboratorMock = vi.fn();
+const isDocumentCollaboratorMock = vi.fn();
 const removeCollaboratorsForDocumentMock = vi.fn();
 vi.mock('~/repos/document', async () => ({
   getDocument: (id: string) => getDocumentMock(id),
   setDocumentShared: (id: string, shared: boolean) =>
     setDocumentSharedMock(id, shared),
-  connectCollaborator: (input: unknown) => connectCollaboratorMock(input),
+  isDocumentCollaborator: (documentId: string, userId: string) =>
+    isDocumentCollaboratorMock(documentId, userId),
   removeCollaboratorsForDocument: (id: string) =>
     removeCollaboratorsForDocumentMock(id),
 }));
@@ -69,7 +70,16 @@ test('renders permission denied for a private document', async () => {
   expect(await findByText('Permission Denied')).toBeInTheDocument();
 });
 
-test('connects a signed-in visitor to a shared document', async () => {
+function callLoader(context: RouterContextProvider) {
+  return loader({
+    request: new Request(`http://localhost/doc/${documentFixture.id}`),
+    params: { id: documentFixture.id },
+    context,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any);
+}
+
+test('flags that a shared-document visitor still needs connecting', async () => {
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, userFixture);
   getDocumentMock.mockResolvedValue({
@@ -77,22 +87,28 @@ test('connects a signed-in visitor to a shared document', async () => {
     shared: true,
     userId: 'different-user-id',
   });
+  isDocumentCollaboratorMock.mockResolvedValue(false);
 
-  const { queryByText } = await renderRoute('/doc/:id', {
-    params: {
-      id: documentFixture.id,
-    },
-    context,
-  });
-
-  expect(queryByText('Permission Denied')).not.toBeInTheDocument();
-  expect(connectCollaboratorMock).toHaveBeenCalledWith({
-    documentId: documentFixture.id,
-    userId: userFixture.id,
+  expect(await callLoader(context)).toMatchObject({
+    ok: true,
+    needsConnect: true,
   });
 });
 
-test('does not connect the owner to their own document', async () => {
+test('does not flag connect once the visitor is a collaborator', async () => {
+  const context = new RouterContextProvider();
+  context.set(optionalUserSessionContext, userFixture);
+  getDocumentMock.mockResolvedValue({
+    ...documentFixture,
+    shared: true,
+    userId: 'different-user-id',
+  });
+  isDocumentCollaboratorMock.mockResolvedValue(true);
+
+  expect(await callLoader(context)).toMatchObject({ needsConnect: false });
+});
+
+test('does not flag connect for the owner', async () => {
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, userFixture);
   getDocumentMock.mockResolvedValue({
@@ -101,14 +117,8 @@ test('does not connect the owner to their own document', async () => {
     userId: userFixture.id,
   });
 
-  await renderRoute('/doc/:id', {
-    params: {
-      id: documentFixture.id,
-    },
-    context,
-  });
-
-  expect(connectCollaboratorMock).not.toHaveBeenCalled();
+  expect(await callLoader(context)).toMatchObject({ needsConnect: false });
+  expect(isDocumentCollaboratorMock).not.toHaveBeenCalled();
 });
 
 function shareRequest(shared: boolean) {
