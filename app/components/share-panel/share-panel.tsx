@@ -60,7 +60,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
               textColorDark="grey-300"
               className="max-w-54"
             >
-              Turn on/off link sharing to let others view or edit this document.
+              Anyone with the link can view and edit this document.
             </Typography>
             <Switch
               id="document-sharing"
