@@ -44,21 +44,22 @@ export const SharePanel: React.FC<SharePanelProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
-        <DropdownMenuContent align="end" className="w-75 gap-3 p-3">
+        <DropdownMenuContent align="end" className="w-75 gap-1 p-3">
           <Typography
             variant="bodySmall"
             fontWeight="semibold"
             textColorLight="grey-900"
             textColorDark="white"
+            className="pb-1"
           >
             Share document
           </Typography>
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-4 pb-8">
             <Typography
               variant="bodyTiny"
               textColorLight="grey-600"
               textColorDark="grey-300"
-              className="max-w-54"
+              className="flex-1"
             >
               Anyone with the link can view and edit this document.
             </Typography>
