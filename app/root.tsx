@@ -11,7 +11,7 @@ import {
 } from 'react-router';
 import type { Route } from './+types/root';
 import classNames from 'classnames';
-import { csrf } from './utils/csrf';
+import { commitCsrfToken } from './utils/csrf';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 import { sessionCookieHeaderContext } from './contexts/user-session';
 import { sessionMiddleware } from './middleware/auth';
@@ -45,7 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  const [token, csrfCookieHeader] = await csrf.commitToken(request, 64);
+  const [token, csrfCookieHeader] = await commitCsrfToken(request);
   const sessionCookieHeader = context.get(sessionCookieHeaderContext);
 
   const headers = new Headers();
