@@ -63,8 +63,12 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     });
   }
 
-  const needsConnect = !!user && !isOwner
-    && !(await isDocumentCollaborator(document.id, user.id));
+  let needsConnect = false;
+  if (user && !isOwner) {
+    needsConnect = !(await isDocumentCollaborator(document.id, user.id));
+  }
+
+  const shareUrl = new URL(documentUrl, request.url).toString();
 
   return {
     ok: true as const,
@@ -72,7 +76,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     signInUrl,
     isOwner,
     shared: document.shared,
-    shareUrl: new URL(documentUrl, request.url).toString(),
+    shareUrl,
     needsConnect,
   };
 }
