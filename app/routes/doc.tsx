@@ -48,9 +48,6 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
   const isOwner = !!user && user.id === document.userId;
   const signInUrl = user ? null : getSignInUrl(documentUrl);
 
-  // Access is granted to the owner, and to anyone (including anonymous
-  // visitors) while the document is shared. Unsharing therefore blocks access
-  // again on the very next request.
   if (!isOwner && !document.shared) {
     if (!user) {
       return redirect(getSignInUrl(documentUrl));
@@ -65,8 +62,6 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     });
   }
 
-  // Connect a signed-in visitor to the shared document so it also appears in
-  // their navigation under all docs. The owner is never their own collaborator.
   if (user && !isOwner) {
     await connectCollaborator({
       documentId: document.id,
@@ -88,7 +83,6 @@ export async function action({ request, params, context }: Route.ActionArgs) {
   const user = context.get(optionalUserSessionContext);
   const document = await getDocument(params.id);
 
-  // Only the owner may change the sharing state of a document.
   if (!document || !user || user.id !== document.userId) {
     throw data('Forbidden', { status: 403 });
   }
@@ -103,7 +97,6 @@ export async function action({ request, params, context }: Route.ActionArgs) {
 
   await setDocumentShared(document.id, shared);
 
-  // Unsharing removes the connected copies from every collaborator's account.
   if (!shared) {
     await removeCollaboratorsForDocument(document.id);
   }

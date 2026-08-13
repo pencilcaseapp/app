@@ -57,8 +57,6 @@ export async function getDocumentList(userId: string) {
     return [];
   }
 
-  // Documents the user owns, plus documents shared with them (connected
-  // through the collaborators join table), newest first.
   return db.select({
     id: documents.id,
     title: documents.title,
@@ -110,8 +108,6 @@ export interface ConnectCollaboratorInput {
   userId: string;
 }
 
-// Connects a user to a shared document. Idempotent: opening the same shared
-// document again keeps the single existing membership row.
 export async function connectCollaborator(input: ConnectCollaboratorInput) {
   const { documentId, userId } = input;
 
@@ -135,8 +131,6 @@ export async function connectCollaborator(input: ConnectCollaboratorInput) {
   return collaborator;
 }
 
-// Drops every collaborator connection for a document. Used when a document is
-// unshared so it disappears from collaborators' navigation immediately.
 export async function removeCollaboratorsForDocument(documentId: string) {
   if (!isUuid(documentId)) {
     return;

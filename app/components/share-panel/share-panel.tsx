@@ -13,7 +13,6 @@ export interface SharePanelProps {
   documentId: string;
   shared: boolean;
   shareUrl: string;
-  /** Opens the panel initially. Only used by stories and tests. */
   defaultOpen?: boolean;
 }
 
@@ -26,8 +25,6 @@ export const SharePanel: React.FC<SharePanelProps> = ({
   const fetcher = useFetcher();
   const csrfToken = useAuthenticityToken();
 
-  // Reflect the in-flight toggle optimistically so the switch responds
-  // instantly while the submission is handled in the background.
   const isShared = fetcher.formData
     ? fetcher.formData.get('shared') === 'true'
     : shared;

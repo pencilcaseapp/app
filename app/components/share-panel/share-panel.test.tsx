@@ -76,8 +76,6 @@ describe('SharePanel', () => {
   });
 
   test('submits the new sharing state to the document action', async () => {
-    // happy-dom leaves the popover content with inherited `pointer-events:
-    // none` until a real pointer event, so skip that guard here.
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     let submittedShared: FormDataEntryValue | null = null;
 
@@ -99,7 +97,6 @@ describe('SharePanel', () => {
 
     renderSharePanel({
       shared: false,
-      // Never resolves, so the in-flight (optimistic) state is observable.
       action: () => new Promise(() => {}),
     });
 
