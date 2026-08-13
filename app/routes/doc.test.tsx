@@ -20,15 +20,12 @@ vi.mock('react-router', async () => {
 
 const getDocumentMock = vi.fn();
 const setDocumentSharedMock = vi.fn();
+const connectCollaboratorMock = vi.fn();
+const removeCollaboratorsForDocumentMock = vi.fn();
 vi.mock('~/repos/document', async () => ({
   getDocument: (id: string) => getDocumentMock(id),
   setDocumentShared: (id: string, shared: boolean) =>
     setDocumentSharedMock(id, shared),
-}));
-
-const connectCollaboratorMock = vi.fn();
-const removeCollaboratorsForDocumentMock = vi.fn();
-vi.mock('~/repos/document-collaborator', async () => ({
   connectCollaborator: (input: unknown) => connectCollaboratorMock(input),
   removeCollaboratorsForDocument: (id: string) =>
     removeCollaboratorsForDocumentMock(id),

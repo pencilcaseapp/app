@@ -2,11 +2,12 @@ import type { Route } from './+types/doc';
 import { Link, redirect, data } from 'react-router';
 import { z } from 'zod';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
-import { getDocument, setDocumentShared } from '~/repos/document';
 import {
   connectCollaborator,
+  getDocument,
   removeCollaboratorsForDocument,
-} from '~/repos/document-collaborator';
+  setDocumentShared,
+} from '~/repos/document';
 import { ClientOnly } from '~/ui/client-only/client-only';
 import { href } from 'react-router';
 import { optionalUserSessionContext } from '~/contexts/user-session';
