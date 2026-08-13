@@ -57,8 +57,8 @@ export const SharePanel: React.FC<SharePanelProps> = ({
           <div className="flex items-start gap-4 pb-8">
             <Typography
               variant="bodyTiny"
-              textColorLight="grey-600"
-              textColorDark="grey-300"
+              textColorLight="black"
+              textColorDark="white"
               className="flex-1"
             >
               Anyone with the link can view and edit this document.
