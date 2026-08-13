@@ -34,7 +34,7 @@ export async function validateForm<T extends z.ZodTypeAny>(
   }
   catch (e) {
     if (e instanceof CSRFError) {
-      throw new Response('Invalid CSRF token', { status: 403 });
+      throw new Response(`Invalid CSRF token: ${e.message}`, { status: 403 });
     }
 
     if (e instanceof ServerValidateError) {
