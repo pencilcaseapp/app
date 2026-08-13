@@ -2,6 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Principles
+
+- **Simplicity over complexity.** We are a small team and everyone has to
+  maintain and understand this code. Favour the readable, obvious solution
+  over the clever one.
+- **Thin loaders and actions.** Loaders and actions control the route and
+  nothing more. Push business logic into `app/services/` and data access into
+  `app/repos/` (see **Layering** below).
+- **Few comments.** Let the code explain itself; only comment genuinely
+  complex business logic.
+- **Pull requests and commits.** Follow the `pull-request` skill
+  (`.claude/skills/pull-request/`) — Angular commit format and short,
+  human-readable PR descriptions.
+
 ## Commands
 
 ```bash
