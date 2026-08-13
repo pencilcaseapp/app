@@ -16,10 +16,11 @@ export interface CollaborativeEditorProps {
   onTitleChange?: (title: string | null) => void;
   onFirstEdit?: () => void;
   topbarLeft?: React.ReactNode;
+  topbarRight?: React.ReactNode;
 }
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
-  = ({ id, onTitleChange, onFirstEdit, topbarLeft }) => {
+  = ({ id, onTitleChange, onFirstEdit, topbarLeft, topbarRight }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -79,7 +80,11 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
 
     return (
       <LexicalCollaboration>
-        <Editor avatars={avatars} topbarLeft={topbarLeft}>
+        <Editor
+          avatars={avatars}
+          topbarLeft={topbarLeft}
+          topbarRight={topbarRight}
+        >
           <CollaborationPlugin
             id={id}
             providerFactory={providerFactory}

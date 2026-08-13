@@ -54,18 +54,48 @@ export async function getDocumentList(userId: string) {
     return [];
   }
 
-  return db.query.documents.findMany({
+  const owned = await db.query.documents.findMany({
     columns: {
       id: true,
       title: true,
+      updatedAt: true,
     },
     where: {
       userId,
     },
-    orderBy: {
-      updatedAt: 'desc',
+  });
+
+  // Documents shared with the user get connected to their account through the
+  // collaborators join table, so they surface in the same navigation list.
+  const collaborations = await db.query.documentCollaborators.findMany({
+    columns: {},
+    where: {
+      userId,
+    },
+    with: {
+      document: {
+        columns: {
+          id: true,
+          title: true,
+          updatedAt: true,
+        },
+      },
     },
   });
+
+  const collaboratorDocuments = collaborations.map(
+    collaboration => collaboration.document,
+  );
+
+  const documentsById = new Map(
+    [...owned, ...collaboratorDocuments].map(
+      document => [document.id, document],
+    ),
+  );
+
+  return [...documentsById.values()]
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+    .map(({ id, title }) => ({ id, title }));
 }
 
 export async function updateDocument(
@@ -76,6 +106,19 @@ export async function updateDocument(
 
   const [document] = await db.update(documents)
     .set({ title, content, updatedAt: sql`NOW()` })
+    .where(eq(documents.id, id))
+    .returning();
+
+  return document;
+}
+
+export async function setDocumentShared(id: string, shared: boolean) {
+  if (!isUuid(id)) {
+    return undefined;
+  }
+
+  const [document] = await db.update(documents)
+    .set({ shared, updatedAt: sql`NOW()` })
     .where(eq(documents.id, id))
     .returning();
 

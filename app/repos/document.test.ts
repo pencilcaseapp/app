@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { createDocument, getDocument, getDocumentList, getDocumentTitle, updateDocument } from './document';
+import { createDocument, getDocument, getDocumentList, getDocumentTitle, setDocumentShared, updateDocument } from './document';
 import { db } from '~/db';
-import { createDocumentWithTitle, createEmptyDocument } from '~/test/data-factories/document';
+import { connectDocumentCollaborator, createDocumentWithTitle, createEmptyDocument, createSharedDocument } from '~/test/data-factories/document';
 import { createTestUser } from '~/test/data-factories/user';
 
 describe('createDocument', () => {
@@ -20,6 +20,7 @@ describe('createDocument', () => {
       id: document.id,
       title: null,
       content: null,
+      shared: false,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
       userId: user.id,
@@ -61,10 +62,28 @@ describe('updateDocument', () => {
       id: fixture.id,
       title: 'Test Document',
       content: Buffer.from('Hello, World!'),
+      shared: false,
       createdAt: fixture.createdAt,
       updatedAt: expect.any(Date),
       userId: user.id,
     });
+  });
+});
+
+describe('setDocumentShared', () => {
+  it('toggles the shared flag', async () => {
+    const user = await createTestUser();
+    const fixture = await createEmptyDocument(user.id);
+
+    const shared = await setDocumentShared(fixture.id, true);
+    expect(shared?.shared).toBe(true);
+
+    const unshared = await setDocumentShared(fixture.id, false);
+    expect(unshared?.shared).toBe(false);
+  });
+
+  it('returns undefined for an invalid id', async () => {
+    expect(await setDocumentShared('not-a-uuid', true)).toBeUndefined();
   });
 });
 
@@ -86,5 +105,34 @@ describe('getDocumentList', () => {
         title: document1.title,
       },
     ]);
+  });
+
+  it('includes documents shared with the user as a collaborator', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const ownDocument = await createDocumentWithTitle(collaborator.id);
+    const sharedDocument = await createSharedDocument(owner.id);
+    await connectDocumentCollaborator(sharedDocument.id, collaborator.id);
+
+    const documents = await getDocumentList(collaborator.id);
+
+    expect(documents).toContainEqual({
+      id: ownDocument.id,
+      title: ownDocument.title,
+    });
+    expect(documents).toContainEqual({
+      id: sharedDocument.id,
+      title: sharedDocument.title,
+    });
+  });
+
+  it('does not duplicate a document that is both owned and connected', async () => {
+    const user = await createTestUser();
+    const document = await createSharedDocument(user.id);
+    await connectDocumentCollaborator(document.id, user.id);
+
+    const documents = await getDocumentList(user.id);
+
+    expect(documents.filter(item => item.id === document.id)).toHaveLength(1);
   });
 });
