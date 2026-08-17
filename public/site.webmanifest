@@ -1,0 +1,19 @@
+{
+  "name": "pencil case",
+  "short_name": "pencil case",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#FFE049",
+  "background_color": "#FFE049",
+  "display": "standalone"
+}
