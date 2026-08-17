@@ -1,0 +1,12 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Logo > renders the lockup at its designed size 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--$--><img
+  alt="pencil case"
+  height="31"
+  src="https://pencilcase.app/emails/pencil-case-logo.png"
+  style="display:block;outline:none;border:none;text-decoration:none;margin-right:auto;margin-left:auto"
+  width="138" /><!--/$-->
+"
+`;

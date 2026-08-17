@@ -1,10 +1,10 @@
 import React from 'react';
 import { useIsClient } from '@uidotdev/usehooks';
 
-type ClientOnlyProps = {
+export interface ClientOnlyProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
-};
+}
 
 export const ClientOnly: React.FC<ClientOnlyProps> = ({
   children,

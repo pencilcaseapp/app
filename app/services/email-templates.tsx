@@ -1,3 +1,4 @@
+import { OtpCodeEmail, otpCodeEmailSubject } from '~/emails/templates/otp-code';
 import { sendEmail, type EmailData } from './email';
 
 export async function sendEmailMagicCode(
@@ -7,7 +8,7 @@ export async function sendEmailMagicCode(
 
   await sendEmail({
     to,
-    subject: 'Your Magic Sign-In Code',
-    html: `<p>Use the following code to sign in:</p><h2>${code}</h2>`,
+    subject: otpCodeEmailSubject(code),
+    email: <OtpCodeEmail code={code} />,
   });
 }

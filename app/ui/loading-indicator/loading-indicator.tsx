@@ -1,8 +1,9 @@
 import classNames from 'classnames';
 
-type LoadingIndicatorProps = {
+export interface LoadingIndicatorProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
-} & React.HTMLAttributes<HTMLDivElement>;
+}
 
 const dots = [0, 1, 2] as const;
 

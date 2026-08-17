@@ -6,6 +6,7 @@ const lettermintEmailMock = {
   to: vi.fn().mockReturnThis(),
   subject: vi.fn().mockReturnThis(),
   html: vi.fn().mockReturnThis(),
+  text: vi.fn().mockReturnThis(),
   send: vi.fn(),
 };
 
@@ -39,13 +40,26 @@ describe('sendEmail', () => {
         email: 'john@example.com',
       },
       subject: 'Test Email',
-      html: '<p>This is a test email.</p>',
+      email: <p>This is a test email.</p>,
     });
 
     expect(lettermintEmailMock.from).toHaveBeenCalledWith('pencil case <inbox@pencilcaseapp.com>');
     expect(lettermintEmailMock.to).toHaveBeenCalledWith('John Doe <john@example.com>');
     expect(lettermintEmailMock.subject).toHaveBeenCalledWith('Test Email');
-    expect(lettermintEmailMock.html).toHaveBeenCalledWith('<p>This is a test email.</p>');
     expect(lettermintEmailMock.send).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the template to both an HTML and a plain text body', async () => {
+    await sendEmail({
+      to: { email: 'john@example.com' },
+      subject: 'Test Email',
+      email: <p>This is a test email.</p>,
+    });
+
+    const [html] = lettermintEmailMock.html.mock.calls[0];
+    const [text] = lettermintEmailMock.text.mock.calls[0];
+
+    expect(html).toContain('<p>This is a test email.</p>');
+    expect(text).toBe('This is a test email.');
   });
 });

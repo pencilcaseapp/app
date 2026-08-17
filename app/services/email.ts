@@ -1,4 +1,6 @@
+import { render } from 'react-email';
 import { Lettermint } from 'lettermint';
+import type React from 'react';
 import { getConfig } from '~/config';
 
 export type EmailData = {
@@ -9,10 +11,10 @@ export type EmailData = {
 export type SendEmailInput = {
   to: EmailData;
   subject: string;
-  html: string;
+  email: React.ReactElement;
 };
 
-export async function sendEmail({ to, subject, html }: SendEmailInput) {
+export async function sendEmail({ to, subject, email }: SendEmailInput) {
   const config = getConfig();
   const apiToken = config.email.apiToken;
 
@@ -20,6 +22,11 @@ export async function sendEmail({ to, subject, html }: SendEmailInput) {
     console.warn('Email API token is not set. Skipping email sending …');
     return;
   }
+
+  const [html, text] = await Promise.all([
+    render(email),
+    render(email, { plainText: true }),
+  ]);
 
   const lettermint = new Lettermint({
     apiToken,
@@ -30,6 +37,7 @@ export async function sendEmail({ to, subject, html }: SendEmailInput) {
     .to(formatEmailData(to))
     .subject(subject)
     .html(html)
+    .text(text)
     .send();
 }
 

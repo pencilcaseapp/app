@@ -25,6 +25,7 @@ npm run test           # vitest (watch mode); requires the test Postgres on :543
 npm run typecheck      # react-router typegen && tsc
 npm run lint           # eslint
 npm run storybook      # Storybook on :6006
+npm run email          # React Email preview of app/emails on :3001
 npm run build          # react-router build + esbuild bundle of server.ts -> server.js
 ```
 
@@ -102,6 +103,21 @@ refreshed, a `set-cookie` header context that `root.tsx`'s loader commits;
 `authMiddleware` is opted into per route and redirects to `/signin?returnUrl=…`,
 setting the non-optional `userSessionContext`. Loaders read the user from
 `context.get(...)`, never by re-parsing the request.
+
+**Emails — `app/emails/`.** Transactional emails are React Email components.
+`app/services/email-templates.tsx` picks the template and subject,
+`app/services/email.ts` renders it to HTML *and* plain text and hands both to
+Lettermint. `app/emails/templates/` holds one template per file (the only
+directory the preview server reads) and `app/emails/ui/` the shared email UI.
+Templates are styled with the same `pca-*` Tailwind classes as the app:
+`Layout` wraps them in `<Tailwind>` with the `@theme` block from
+`app/emails/theme.ts`, which repeats the palette because the two Tailwind
+pipelines cannot share `app/app.css` — `theme.test.ts` fails when they drift.
+`pixelBasedPreset` is not optional; without it sizes render in `rem`. Preview
+with `npm run email`. Email components snapshot the *inlined* CSS through
+`renderEmail` (`app/emails/testing.tsx`), which is what pins the Tailwind
+pipeline across React Email upgrades. The OTP template's copy is load bearing
+for iOS one-time-code detection — read `docs/emails.md` before rewording it.
 
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader

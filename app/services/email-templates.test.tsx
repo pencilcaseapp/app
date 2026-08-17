@@ -1,3 +1,4 @@
+import { render } from 'react-email';
 import { describe, it, expect, vi } from 'vitest';
 import { sendEmailMagicCode } from './email-templates';
 
@@ -7,7 +8,7 @@ vi.mock('./email', () => ({
 }));
 
 describe('sendEmailMagicCode', () => {
-  it('sends an email with the correct subject and HTML content', async () => {
+  it('sends the OTP template with the code in the subject', async () => {
     await sendEmailMagicCode({
       to: {
         email: 'test@example.com',
@@ -21,8 +22,11 @@ describe('sendEmailMagicCode', () => {
         email: 'test@example.com',
         name: 'Test User',
       },
-      subject: 'Your Magic Sign-In Code',
-      html: `<p>Use the following code to sign in:</p><h2>123456</h2>`,
+      subject: 'Verification Code: 123456 – pencil case',
+      email: expect.anything(),
     });
+
+    const [{ email }] = sendEMailMock.mock.calls[0];
+    expect(await render(email, { plainText: true })).toContain('123456');
   });
 });
