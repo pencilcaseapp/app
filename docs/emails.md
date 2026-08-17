@@ -4,6 +4,12 @@ We build transactional emails as React components with
 [React Email](https://react.email/), render them to HTML on the server, and send
 them through Lettermint.
 
+Everything — the components, `render()`, and the preview CLI — comes from the
+single `react-email` package. It is a runtime dependency, not a dev one, because
+the server renders templates with it. Do not reach for `@react-email/components`
+or the individual `@react-email/<component>` packages: React Email v6 folded them
+into `react-email` and npm now warns that they are deprecated.
+
 ## Layout
 
 ```
@@ -53,10 +59,10 @@ exist as CSS custom properties in `app/app.css`, which never reaches an inbox.
 `app/emails/theme.ts` mirrors the values we need by hand; **change it whenever
 the `@theme` block changes.**
 
-We deliberately do not use React Email's `<Tailwind>` component. It ships its
-own Tailwind v3 processor and wants a JS config object, so adopting it would mean
-maintaining a second copy of the theme in a different format — the same
-duplication as `theme.ts` with a build step on top.
+We deliberately do not use React Email's `<Tailwind>` component. Adopting it
+would mean handing it a config that repeats the theme in a form it understands —
+the same duplication as `theme.ts`, with a build step on top and a second
+Tailwind pipeline in the request path.
 
 Layout goes through the React Email primitives (`Container`, `Section`, `Row`,
 `Column`) rather than hand-written `<table>`s. They emit the table markup Outlook
@@ -93,9 +99,8 @@ backgrounds so the clients that ignore those metas still land somewhere sane.
    depends on the payload. Keeping it next to the copy means the two are
    reviewed together.
 4. Add a `sendEmail<Name>()` function to `app/services/email-templates.tsx`.
-5. Test the template directly with `render()` from `@react-email/components`
-   (which re-exports it, so there is only ever one copy of the renderer) rather
-   than snapshotting the markup — the assertions stay about behaviour instead of
+5. Test the template directly with `render()` from `react-email` rather than
+   snapshotting the markup — the assertions stay about behaviour instead of
    breaking on every spacing change.
 
 ## One-time codes and the iOS keyboard

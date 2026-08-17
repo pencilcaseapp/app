@@ -1,4 +1,4 @@
-import { Heading } from '@react-email/components';
+import { Heading } from 'react-email';
 import type React from 'react';
 import { colors, fontFamily, text } from '../../theme';
 

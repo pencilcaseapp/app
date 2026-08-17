@@ -5,7 +5,7 @@ import {
   Html,
   Preview,
   Section,
-} from '@react-email/components';
+} from 'react-email';
 import type React from 'react';
 import { colors, contentWidth, fontFamily } from '../../theme';
 import { EmailLogo } from '../email-logo/email-logo';

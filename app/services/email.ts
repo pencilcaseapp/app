@@ -1,4 +1,4 @@
-import { render } from '@react-email/components';
+import { render } from 'react-email';
 import { Lettermint } from 'lettermint';
 import type React from 'react';
 import { getConfig } from '~/config';

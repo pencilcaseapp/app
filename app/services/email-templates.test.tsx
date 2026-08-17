@@ -1,4 +1,4 @@
-import { render } from '@react-email/components';
+import { render } from 'react-email';
 import { describe, it, expect, vi } from 'vitest';
 import { sendEmailMagicCode } from './email-templates';
 

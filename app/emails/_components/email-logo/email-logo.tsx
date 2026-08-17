@@ -1,4 +1,4 @@
-import { Img } from '@react-email/components';
+import { Img } from 'react-email';
 import type React from 'react';
 import { assetsUrl } from '../../theme';
 
