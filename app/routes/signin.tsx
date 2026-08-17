@@ -4,6 +4,7 @@ import type { Route } from './+types/signin';
 import { z } from 'zod';
 import { useAppForm } from '~/hooks/use-app-form';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
+import { PageTitle } from '~/components/page-title/page-title';
 import { returnFormError, validateForm } from '~/utils/form';
 import { href, redirect } from 'react-router';
 import { commonCopies } from '~/constants/common-copies';
@@ -70,7 +71,7 @@ export default function SignIn({ loaderData }: Route.ComponentProps) {
 
   return (
     <ControlledForm form={form}>
-      <title>Sign In or Sign Up</title>
+      <PageTitle>Sign In or Sign Up</PageTitle>
       <Typography variant="heading2" textColorLight="black" textColorDark="white" className="mb-3 text-center">
         Sign In or Sign Up
         <br />

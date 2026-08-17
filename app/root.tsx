@@ -16,6 +16,7 @@ import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 import { sessionCookieHeaderContext } from './contexts/user-session';
 import { sessionMiddleware } from './middleware/auth';
 import { Typography } from './ui/typography/typography';
+import { PageTitle } from './components/page-title/page-title';
 
 import './app.css';
 
@@ -86,6 +87,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
   return (
     <main className="pt-16 p-4 container mx-auto">
+      <PageTitle>{message}</PageTitle>
       <Typography variant="heading1" textColorLight="black" textColorDark="white" className="mb-4 text-center">
         {message}
       </Typography>
