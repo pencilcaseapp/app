@@ -43,12 +43,12 @@ export const DialogContent: FC<DialogContentProps>
   }) => {
     return (
       <BaseDialog.Portal {...dialogPortalProps}>
-        <BaseDialog.Backdrop {...dialogBackdropProps} className="[--backdrop-opacity:0.2] fixed inset-0 min-h-dvh bg-pca-grey-700 opacity-(--backdrop-opacity) transition-opacity duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] dark:[--backdrop-opacity:0.7] data-starting-style:opacity-0 data-ending-style:opacity-0 motion-reduce:transition-none" />
+        <BaseDialog.Backdrop {...dialogBackdropProps} className="[--backdrop-opacity:0.2] fixed inset-0 min-h-dvh bg-pca-grey-700 opacity-(--backdrop-opacity) transition-opacity duration-200 ease-out dark:[--backdrop-opacity:0.7] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-150 data-ending-style:ease-in motion-reduce:transition-none" />
         <BaseDialog.Viewport {...dialogViewportProps} className="fixed inset-0 flex items-center justify-center p-4">
           <BaseDialog.Popup
             {...dialogPopupProps}
             className={classNames(
-              'relative flex w-full max-h-full flex-col overflow-hidden rounded-3xl bg-pca-white outline-none shadow-glass transition-[opacity,transform] duration-200 ease-out data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 motion-reduce:transition-none dark:border dark:border-pca-grey-800 dark:bg-pca-grey-900 dark:shadow-glass-dark',
+              'relative flex w-full max-h-full flex-col overflow-hidden rounded-3xl bg-pca-white outline-none shadow-glass transition-[opacity,scale] duration-200 ease-out data-starting-style:opacity-0 data-starting-style:scale-[0.98] data-ending-style:opacity-0 data-ending-style:scale-[0.98] data-ending-style:duration-150 data-ending-style:ease-in motion-reduce:transition-none dark:border dark:border-pca-grey-800 dark:bg-pca-grey-900 dark:shadow-glass-dark',
               sizeClasses[size],
               isFullHeight && 'h-[32.5rem]',
               className,

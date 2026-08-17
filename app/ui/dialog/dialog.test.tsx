@@ -171,6 +171,15 @@ describe('DialogContent', () => {
     expect(screen.getByRole('dialog')).not.toHaveClass('h-[32.5rem]');
   });
 
+  test('transitions the scale of the popup, not its transform', () => {
+    renderDialog({ defaultOpen: true });
+
+    // Tailwind sets the standalone `scale` property, so transitioning
+    // `transform` would make the popup snap instead of animate.
+    expect(screen.getByRole('dialog'))
+      .toHaveClass('transition-[opacity,scale]');
+  });
+
   test('merges a custom class name onto the popup', () => {
     renderDialog({ defaultOpen: true, contentProps: { className: 'w-96' } });
 
