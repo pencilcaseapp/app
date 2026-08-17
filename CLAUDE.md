@@ -84,6 +84,19 @@ edited directly — client side the same extraction runs through
 and `<title>` stay live. `app/utils/headless.ts` uses a headless Lexical editor
 to produce valid Yjs updates on the server.
 
+**Live authorisation — `app/live/connections.ts`.** The upgrade request never
+passes through the route middleware, so `onConnect` resolves the session from
+the cookie itself (`getAuthUserByCookie`) and asks `canOpenDocument`; throwing
+there rejects that one document, not the whole socket, which is shared between
+all documents a client has open. Unsharing calls `closeDocumentConnections`,
+which closes the live connections of everybody but the owner, so access is
+revoked immediately instead of at the next request. The client turns that into
+the permission denied screen via `useAccessRevoked` → `revalidate()`. The two
+sides find each other through `globalThis`: `server.ts` and the routes are
+separate bundles in prod, so importing the instance would give each of them
+their own. `closeConnections` is per process — scaling out needs
+`@hocuspocus/extension-redis`.
+
 **Auth.** Passwordless magic code. `app/services/auth.ts` owns the flow
 (argon2-hashed OTP → cookie session with a sha256-hashed token stored in
 `sessions`); `app/repos/` holds the raw queries. Two React Router middlewares in

@@ -4,6 +4,7 @@ import {
   removeCollaboratorsForDocument,
   setDocumentShared,
 } from '~/repos/document';
+import { closeDocumentConnections } from '~/live/connections';
 
 export enum OpenDocumentError {
   NotFound,
@@ -35,12 +36,11 @@ export async function openDocument(
     return [OpenDocumentError.NotFound];
   }
 
-  const isOwner = !!userId && userId === document.userId;
-
-  if (!isOwner && !document.shared) {
+  if (!hasAccess(document, userId)) {
     return [OpenDocumentError.PermissionDenied];
   }
 
+  const isOwner = isOwnedBy(document, userId);
   let hasJoined = false;
 
   if (userId && !isOwner && !document.isCollaborator) {
@@ -54,6 +54,12 @@ export async function openDocument(
     isOwner,
     hasJoined,
   }];
+}
+
+export async function canOpenDocument(documentId: string, userId?: string) {
+  const document = await getDocumentForViewer(documentId, userId);
+
+  return !!document && hasAccess(document, userId);
 }
 
 export enum ShareDocumentError {
@@ -89,7 +95,24 @@ export async function shareDocument(
 
   if (!shared) {
     await removeCollaboratorsForDocument(document.id);
+    closeDocumentConnections({
+      documentId: document.id,
+      keepUserId: userId,
+    });
   }
 
   return [null, { shared: document.shared }];
+}
+
+interface DocumentAccess {
+  userId: string;
+  shared: boolean;
+}
+
+function isOwnedBy(document: DocumentAccess, viewerId?: string) {
+  return !!viewerId && document.userId === viewerId;
+}
+
+function hasAccess(document: DocumentAccess, viewerId?: string) {
+  return isOwnedBy(document, viewerId) || document.shared;
 }
