@@ -49,11 +49,7 @@ so they can be started and previewed in a browser without a manual shell.
 
 CI (`.github/workflows/ci.yml`) runs lint, test, typecheck, build, and
 build-storybook. Pushing to `main` deploys to Clever Cloud via
-`.github/workflows/cd.yml`. A red `test` job that reports every test as passed
-plus "Errors" is a known flake: `input-otp` fires a timer that calls `setState`
-after happy-dom tore the window down, so
-`one-time-password-field.test.tsx` produces `window is not defined` as an
-unhandled error and Vitest exits non-zero. Re-running clears it.
+`.github/workflows/cd.yml`.
 
 ## Architecture
 
@@ -170,7 +166,10 @@ group header and the sticky bottom area are `z-10`.
 ## Tests
 
 Vitest with `happy-dom` and globals enabled. CSRF validation is stubbed globally
-in `test/setup.ts`.
+in `test/setup.ts`, which also cancels the timeouts a test leaves pending —
+`input-otp` never clears its own, and one firing after happy-dom tore the window
+down used to fail the run with `window is not defined` even though every test
+passed.
 
 - Repo/service tests hit the **real** test database. Build rows with the
   factories in `test/data-factories/` (faker-backed, they insert), not by hand.
