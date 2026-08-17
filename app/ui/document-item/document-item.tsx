@@ -108,7 +108,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
         <Typography
           variant="bodySmall"
           as="span"
-          className="block truncate min-w-0 flex-1 dark:group-has-aria-[current=page]:text-pca-grey-900!"
+          className="block truncate min-w-0 flex-1 group-has-aria-[current=page]:font-semibold! dark:group-has-aria-[current=page]:text-pca-grey-900!"
           title={title}
         >
           {title}

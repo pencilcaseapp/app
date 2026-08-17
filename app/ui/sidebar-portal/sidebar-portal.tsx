@@ -1,8 +1,8 @@
 import type { FC, ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useMedia } from 'react-use';
-import { AnimatePresence } from 'motion/react';
-import { Root, Overlay, Content, Title } from '@radix-ui/react-dialog';
+import { AnimatePresence, motion } from 'motion/react';
+import { Root, Content, Title } from '@radix-ui/react-dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { useSidebarContext } from '../sidebar-context/use-sidebar-context';
 
@@ -43,7 +43,18 @@ export const SidebarPortal: FC<SidebarPortalProps> = ({
             <AnimatePresence>
               {isSidebarOpen && (
                 <Root open={isSidebarOpen} modal={false}>
-                  <Overlay />
+                  {isMobile && (
+                    <motion.div
+                      data-testid="sidebar-backdrop"
+                      aria-hidden
+                      onClick={() => setIsSidebarOpen(false)}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      className="fixed inset-0 z-10 min-h-dvh bg-pca-grey-700/20 dark:bg-pca-grey-700/70"
+                    />
+                  )}
                   <Content
                     onOpenAutoFocus={event => event.preventDefault()}
                     className="outline-hidden"

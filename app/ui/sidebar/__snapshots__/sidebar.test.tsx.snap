@@ -8,11 +8,11 @@ exports[`Sidebar > matches the snapshot on desktop 1`] = `
     Toggle
   </button>
   <div
-    class="fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-dvh bg-pca-white dark:bg-pca-grey-900 transition-shadow ease-in-out duration-200 sm:max-xl:shadow-md sm:max-xl:ring-1 ring-pca-grey-200 sm:max-xl:dark:ring-pca-grey-800"
+    class="fixed flex max-w-70 sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-dvh bg-pca-white dark:bg-pca-grey-900 transition-shadow ease-in-out duration-200 sm:max-xl:shadow-md sm:max-xl:ring-1 ring-pca-grey-200 sm:max-xl:dark:ring-pca-grey-800"
     style="transform: none;"
   >
     <nav
-      class="top-0 left-0 h-[100dvh-56px] flex justify-between flex-col w-full max-w-none sm:max-w-62.5 overflow-hidden overscroll-y-none overflow-x-hidden"
+      class="top-0 left-0 h-[100dvh-56px] flex justify-between flex-col w-full max-w-70 sm:max-w-62.5 overflow-hidden overscroll-y-none overflow-x-hidden"
     >
       <ul
         class="flex gap-2 flex-col px-1.5 pt-4 grow overflow-scroll scrollbar-none pb-42"

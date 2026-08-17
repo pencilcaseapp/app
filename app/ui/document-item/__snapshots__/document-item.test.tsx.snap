@@ -10,7 +10,7 @@ exports[`DocumentItem > matches snapshot 1`] = `
       href="/documents/1"
     >
       <span
-        class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white block truncate min-w-0 flex-1 dark:group-has-aria-[current=page]:text-pca-grey-900!"
+        class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white block truncate min-w-0 flex-1 group-has-aria-[current=page]:font-semibold! dark:group-has-aria-[current=page]:text-pca-grey-900!"
         title="My document"
       >
         My document
