@@ -4,6 +4,7 @@ import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 import { DocumentTitleProvider } from '~/contexts/document-title';
 import { EditedDocumentProvider } from '~/contexts/edited-document';
 import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
+import { SocketClientProvider } from '~/contexts/socket-client';
 import routes from '~/routes';
 
 export async function renderRoute<P extends keyof Register['pages']>(
@@ -45,7 +46,9 @@ export async function renderRoute<P extends keyof Register['pages']>(
       <DocumentTitleProvider>
         <EditedDocumentProvider>
           <SidebarProvider>
-            <Stub initialEntries={[replacedPath]} />
+            <SocketClientProvider>
+              <Stub initialEntries={[replacedPath]} />
+            </SocketClientProvider>
           </SidebarProvider>
         </EditedDocumentProvider>
       </DocumentTitleProvider>
