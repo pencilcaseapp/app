@@ -69,4 +69,4 @@ export const theme = `@theme {
 
 export const contentWidth = 'max-w-[296px]';
 
-export const assetsUrl = 'https://pencilcase.app';
+export const assetsUrl = 'https://docs.pencilcase.app';

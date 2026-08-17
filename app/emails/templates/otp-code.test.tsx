@@ -33,11 +33,15 @@ describe('OtpCodeEmail', () => {
     expect(text.match(/\d{4,8}/g)).toEqual([code]);
   });
 
-  it('repeats the code in the preheader', async () => {
-    const html = await render(<OtpCodeEmail code={code} />);
+  it('leaves the code out of the preheader, which sits next to the subject',
+    async () => {
+      const html = await render(<OtpCodeEmail code={code} />);
+      const preheader = html.match(/data-skip-in-text="true">([^<]*)/)?.[1];
 
-    expect(html).toContain(`Your verification code is ${code}`);
-  });
+      expect(preheader?.trim()).toBe(
+        'Use it within 15 minutes to verify your email address.',
+      );
+    });
 
   it('renders every size in pixels rather than rem', async () => {
     const html = await render(<OtpCodeEmail code={code} />);

@@ -1,5 +1,6 @@
 import { render } from 'react-email';
 import { describe, it, expect, vi } from 'vitest';
+import { otpCodeEmailSubject } from '~/emails/templates/otp-code';
 import { sendEmailMagicCode } from './email-templates';
 
 const sendEMailMock = vi.fn();
@@ -22,7 +23,7 @@ describe('sendEmailMagicCode', () => {
         email: 'test@example.com',
         name: 'Test User',
       },
-      subject: 'Verification Code: 123456 – pencil case',
+      subject: otpCodeEmailSubject('123456'),
       email: expect.anything(),
     });
 
