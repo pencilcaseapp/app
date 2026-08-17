@@ -1,7 +1,8 @@
 import { Toast as BaseToast } from '@base-ui/react/toast';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '../button/button';
-import { Toast, ToastProvider, type ToastVariant } from './toast';
+import { Toast, type ToastVariant } from './toast';
+import { ToastProvider } from './toast-provider';
 
 /**
  * 🍞 The `Toast` component is used to give the user a short feedback message.
@@ -19,18 +20,20 @@ type Story = StoryObj<typeof Toast>;
 
 const variants: ToastVariant[] = ['info', 'success', 'warning', 'danger'];
 
-const staticToast = (variant: ToastVariant) => ({
-  id: variant,
-  type: variant,
-  title: 'Toast messages are helpful...',
-});
-
 export const ToastExample: Story = {
   render: () => (
     <BaseToast.Provider>
       <div className="flex flex-col gap-3">
         {variants.map(variant => (
-          <Toast key={variant} toast={staticToast(variant)} />
+          <div key={variant} className="relative h-12 w-[285px]">
+            <Toast
+              toast={{
+                id: variant,
+                type: variant,
+                title: 'Toast messages are helpful...',
+              }}
+            />
+          </div>
         ))}
       </div>
     </BaseToast.Provider>
@@ -58,8 +61,9 @@ const ToastTriggers = () => {
 };
 
 /**
- * Emitted toasts stack at the bottom of the screen and dismiss themselves
- * after five seconds.
+ * Emitted toasts stack at the bottom of the screen and dismiss themselves after
+ * five seconds. Hover the stack to lay it out, or swipe a toast down or to the
+ * right to dismiss it by hand.
  */
 export const ToastEmitted: Story = {
   render: () => (

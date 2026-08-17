@@ -2,7 +2,7 @@ import { act, render, screen } from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { SearchParamToast } from '~/constants/search-params';
-import { ToastProvider } from '~/ui/toast/toast';
+import { ToastProvider } from '~/ui/toast/toast-provider';
 import { useToast } from './use-toast';
 
 const renderUseToast = async (searchParams: Record<string, string>) => {

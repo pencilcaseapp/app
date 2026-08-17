@@ -1,0 +1,22 @@
+import { Toast as BaseToast } from '@base-ui/react/toast';
+import type { FC } from 'react';
+import { Toast } from './toast';
+
+/**
+ * Anchors the toast stack to the bottom of the screen. The toasts inside are
+ * positioned absolutely, so the viewport only takes the height of the frontmost
+ * one — just enough to be the hover target that expands the stack.
+ */
+export const ToastViewport: FC = () => {
+  const { toasts } = BaseToast.useToastManager();
+
+  return (
+    <BaseToast.Portal>
+      <BaseToast.Viewport className="fixed bottom-4 left-1/2 z-50 h-[var(--toast-frontmost-height)] w-[285px] max-w-[calc(100vw-2rem)] -translate-x-1/2 outline-hidden">
+        {toasts.map(toast => (
+          <Toast key={toast.id} toast={toast} />
+        ))}
+      </BaseToast.Viewport>
+    </BaseToast.Portal>
+  );
+};
