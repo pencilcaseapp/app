@@ -25,6 +25,7 @@ npm run test           # vitest (watch mode); requires the test Postgres on :543
 npm run typecheck      # react-router typegen && tsc
 npm run lint           # eslint
 npm run storybook      # Storybook on :6006
+npm run email          # React Email preview of app/emails on :3001
 npm run build          # react-router build + esbuild bundle of server.ts -> server.js
 ```
 
@@ -102,6 +103,16 @@ refreshed, a `set-cookie` header context that `root.tsx`'s loader commits;
 `authMiddleware` is opted into per route and redirects to `/signin?returnUrl=…`,
 setting the non-optional `userSessionContext`. Loaders read the user from
 `context.get(...)`, never by re-parsing the request.
+
+**Emails — `app/emails/`.** Transactional emails are React Email components.
+`app/services/email-templates.tsx` picks the template and subject,
+`app/services/email.ts` renders it to HTML *and* plain text and hands both to
+Lettermint. Shared email UI lives in `app/emails/_components/` (the `_` prefix
+keeps it out of the preview server's template list) and tokens in
+`app/emails/theme.ts`, mirrored by hand from the `@theme` block in `app/app.css`
+because mail clients strip class names. Preview with `npm run email`. The OTP
+template's copy is load bearing for iOS one-time-code detection — read
+`docs/emails.md` before rewording it.
 
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader
