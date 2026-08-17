@@ -52,7 +52,7 @@ export const SidebarPortal: FC<SidebarPortalProps> = ({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
-                      className="fixed inset-0 z-10 min-h-dvh bg-pca-grey-700/20 dark:bg-pca-grey-700/70"
+                      className="fixed inset-0 z-10 bg-pca-grey-700/20 dark:bg-pca-grey-700/70"
                     />
                   )}
                   <Content
