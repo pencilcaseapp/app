@@ -2,6 +2,7 @@ import { EmptyState } from '~/ui/empty-state/empty-state';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { Topbar } from '~/ui/topbar/topbar';
 import { MenuOrSignInButton } from '../menu-or-sign-in-button/menu-or-sign-in-button';
+import { PageTitle } from '../page-title/page-title';
 
 export interface DocEmptyStateProps {
   title: string;
@@ -16,7 +17,7 @@ export const DocEmptyState: React.FC<DocEmptyStateProps>
 
     return (
       <div className="h-dvh">
-        <title>{title}</title>
+        <PageTitle>{title}</PageTitle>
         <Topbar
           hasBorder={isSidebarOpen}
           left={<MenuOrSignInButton signInUrl={signInUrl} />}

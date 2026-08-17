@@ -7,6 +7,7 @@ import { Typography } from '~/ui/typography/typography';
 import { z } from 'zod';
 import { useAppForm } from '~/hooks/use-app-form';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
+import { PageTitle } from '~/components/page-title/page-title';
 import { commonCopies } from '~/constants/common-copies';
 import { validateForm } from '~/utils/form';
 import { onboardUser } from '~/services/auth';
@@ -76,7 +77,7 @@ export default function Onboarding() {
 
   return (
     <>
-      <title>Onboarding</title>
+      <PageTitle>Onboarding</PageTitle>
       <ControlledForm form={formOnboarding}>
         <picture>
           <source srcSet="welcoming-pencil-dark.svg" media="(prefers-color-scheme: dark)" />

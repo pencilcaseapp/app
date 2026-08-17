@@ -1,4 +1,5 @@
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
+import { PageTitle } from '~/components/page-title/page-title';
 import { useAppForm } from '~/hooks/use-app-form';
 import { z } from 'zod';
 import { Typography } from '~/ui/typography/typography';
@@ -155,7 +156,7 @@ export default function Otp({ loaderData }: Route.ComponentProps) {
   return (
     <>
       <ControlledForm form={formVerify}>
-        <title>Verify Magic Code</title>
+        <PageTitle>Verify Magic Code</PageTitle>
         <formVerify.AppField name="action">
           {field => <field.HiddenInput />}
         </formVerify.AppField>

@@ -19,6 +19,7 @@ import { MenuOrSignInButton } from '~/components/menu-or-sign-in-button/menu-or-
 import { SharePanel } from '~/components/share-panel/share-panel';
 import { Button } from '~/ui/button/button';
 import { DocEmptyState } from '~/components/doc-empty-state/doc-empty-state';
+import { PageTitle } from '~/components/page-title/page-title';
 
 enum DocumentError {
   NotFound,
@@ -144,7 +145,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
 
   return (
     <>
-      <title>{title}</title>
+      <PageTitle>{title}</PageTitle>
       <ClientOnly>
         <CollaborativeEditor
           key={params.id}
