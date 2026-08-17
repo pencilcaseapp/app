@@ -74,9 +74,9 @@ export default function LayoutEditor({
 
 type NavigationItemData = { label: string; to: string };
 
-export type EditorSidebarProps = {
+export interface EditorSidebarProps {
   navigation: NavigationItemData[];
-};
+}
 
 const getNavigationKey = (item: NavigationItemData) => item.to;
 

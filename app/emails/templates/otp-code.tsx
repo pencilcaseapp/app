@@ -7,9 +7,9 @@ const expiryMinutes = 15;
 const body = `This code expires after ${expiryMinutes} minutes. Use this code `
   + 'to verify your email address with your pencil case account. Booyah!';
 
-export type OtpCodeEmailProps = {
+export interface OtpCodeEmailProps {
   code: string;
-};
+}
 
 export function otpCodeEmailSubject(code: string) {
   return `Verification Code: ${code} – pencil case`;

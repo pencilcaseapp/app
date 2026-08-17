@@ -1,9 +1,9 @@
 import { Section } from 'react-email';
 import { Typography } from '../typography/typography';
 
-export type OneTimeCodeProps = {
+export interface OneTimeCodeProps {
   code: string;
-};
+}
 
 export const OneTimeCode: React.FC<OneTimeCodeProps> = ({ code }) => {
   return (

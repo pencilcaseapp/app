@@ -49,7 +49,7 @@ type Variant
 
 type Level = 'h1' | 'h2' | 'h3' | 'p';
 
-export type TypographyProps = {
+export interface TypographyProps {
   children: React.ReactNode;
   variant?: Variant;
   as?: Level;
@@ -58,7 +58,7 @@ export type TypographyProps = {
   fontWeight?: 'regular' | 'medium' | 'semibold' | 'bold';
   textTransform?: 'uppercase' | 'capitalize' | 'lowercase';
   className?: string;
-};
+}
 
 const variantClasses: { [index in Variant]: string } = {
   title: 'text-5xl',

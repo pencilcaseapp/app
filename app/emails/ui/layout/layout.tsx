@@ -11,10 +11,10 @@ import {
 import { theme } from '../../theme';
 import { Logo } from '../logo/logo';
 
-export type LayoutProps = {
+export interface LayoutProps {
   preview: string;
   children: React.ReactNode;
-};
+}
 
 export const Layout: React.FC<LayoutProps> = ({ preview, children }) => {
   return (
