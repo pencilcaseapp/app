@@ -385,9 +385,10 @@ body {
     transform: translateY(-150%);
   }
 
-  /* Leaving, the frontmost toast slides on down and out. The ones stacked
-     behind it only fade, holding the position they already sit at — sliding
-     them would drag a half-covered pill across the toast in front. */
+  /* Leaving, the frontmost toast slides back up and out the way it came in.
+     The ones stacked behind it only fade, holding the position they already sit
+     at — sliding them would drag a half-covered pill across the toast in
+     front. */
   &[data-ending-style] {
     opacity: 0;
     transform:
@@ -396,7 +397,7 @@ body {
       translateY(calc(
         var(--toast-swipe-movement-y, 0px)
         + var(--toast-index, 0) * 20%
-        + 150% * var(--toast-is-frontmost)
+        - 150% * var(--toast-is-frontmost)
       ));
   }
 
