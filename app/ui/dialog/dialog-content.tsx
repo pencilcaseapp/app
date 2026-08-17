@@ -1,0 +1,80 @@
+import { Dialog as BaseDialog } from '@base-ui/react/dialog';
+import type {
+  DialogPortalProps,
+  DialogBackdropProps,
+  DialogViewportProps,
+  DialogPopupProps,
+} from '@base-ui/react';
+import type { FC, PropsWithChildren, ReactNode } from 'react';
+import classNames from 'classnames';
+
+export type DialogSize = 'small' | 'medium' | 'large';
+
+export type DialogContentProps = {
+  dialogPortalProps?: DialogPortalProps;
+  dialogBackdropProps?: DialogBackdropProps;
+  dialogViewportProps?: DialogViewportProps;
+  dialogPopupProps?: DialogPopupProps;
+  topArea?: ReactNode;
+  footerArea?: ReactNode;
+  size?: DialogSize;
+  isFullHeight?: boolean;
+  className?: string;
+} & PropsWithChildren;
+
+const sizeClasses: { [index in DialogSize]: string } = {
+  small: 'max-w-sm',
+  medium: 'max-w-lg',
+  large: 'max-w-3xl',
+};
+
+export const DialogContent: FC<DialogContentProps>
+  = ({
+    children,
+    dialogPortalProps,
+    dialogBackdropProps,
+    dialogViewportProps,
+    dialogPopupProps,
+    topArea,
+    footerArea,
+    size = 'medium',
+    isFullHeight = false,
+    className,
+  }) => {
+    return (
+      <BaseDialog.Portal {...dialogPortalProps}>
+        <BaseDialog.Backdrop {...dialogBackdropProps} className="[--backdrop-opacity:0.2] fixed inset-0 min-h-dvh bg-pca-grey-700 opacity-(--backdrop-opacity) transition-opacity duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] dark:[--backdrop-opacity:0.7] data-starting-style:opacity-0 data-ending-style:opacity-0 motion-reduce:transition-none" />
+        <BaseDialog.Viewport {...dialogViewportProps} className="fixed inset-0 flex items-center justify-center p-4">
+          <BaseDialog.Popup
+            {...dialogPopupProps}
+            className={classNames(
+              'relative flex w-full max-h-full flex-col overflow-hidden rounded-3xl bg-pca-white outline-none shadow-glass transition-[opacity,transform] duration-200 ease-out data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95 motion-reduce:transition-none dark:border dark:border-pca-grey-800 dark:bg-pca-grey-900 dark:shadow-glass-dark',
+              sizeClasses[size],
+              isFullHeight && 'h-[32.5rem]',
+              className,
+            )}
+          >
+            {topArea && (
+              <div className="shrink-0">
+                {topArea}
+              </div>
+            )}
+            <div
+              className={classNames(
+                'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
+                topArea ? 'pt-2' : 'pt-6',
+                footerArea ? 'pb-2' : 'pb-6',
+              )}
+            >
+              {children}
+            </div>
+            {footerArea && (
+              <div className="shrink-0 px-6 pt-2 pb-6">
+                {footerArea}
+              </div>
+            )}
+          </BaseDialog.Popup>
+        </BaseDialog.Viewport>
+      </BaseDialog.Portal>
+    );
+  };
