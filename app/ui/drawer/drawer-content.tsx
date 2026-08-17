@@ -42,11 +42,14 @@ export const DrawerContent: FC<DrawerContentProps>
             <Drawer.Popup
               {...drawerPopupProps}
               className={classNames(
-                'relative z-1 -mb-(--bleed) flex h-[calc(100%-1rem+var(--bleed))] max-h-[calc(100%-1rem+var(--bleed))] w-full flex-col overflow-visible border-t rounded-t-3xl border-white bg-white outline-none touch-none shadow-[0.25rem_0.25rem_0] shadow-black/12 [--bleed:3rem] transform-[translateY(var(--drawer-swipe-movement-y))] transition-[transform,box-shadow] duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform data-swiping:select-none data-ending-style:transform-[translateY(calc(100%-var(--bleed)+2px))] data-starting-style:transform-[translateY(calc(100%-var(--bleed)+2px))] data-starting-style:shadow-[0.25rem_0.25rem_0] data-starting-style:shadow-black/0 data-ending-style:shadow-[0.25rem_0.25rem_0] data-ending-style:shadow-black/0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] dark:border-pca-grey-800 dark:bg-pca-grey-900 dark:shadow-none',
+                'relative z-1 -mb-(--bleed) flex w-full flex-col overflow-visible border-t rounded-t-3xl border-white bg-white outline-none touch-none shadow-[0.25rem_0.25rem_0] shadow-black/12 [--bleed:3rem] transform-[translateY(var(--drawer-swipe-movement-y))] transition-[transform,box-shadow] duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform data-swiping:select-none data-ending-style:transform-[translateY(calc(100%-var(--bleed)+2px))] data-starting-style:transform-[translateY(calc(100%-var(--bleed)+2px))] data-starting-style:shadow-[0.25rem_0.25rem_0] data-starting-style:shadow-black/0 data-ending-style:shadow-[0.25rem_0.25rem_0] data-ending-style:shadow-black/0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] dark:border-pca-grey-800 dark:bg-pca-grey-900 dark:shadow-none',
                 `[--footer-reserved-height:calc(${reservedFooterHeight}px+var(--bleed))]`,
+                'max-h-[calc(95dvh+var(--bleed))]',
+                isFullHeight && 'min-h-[calc(95dvh+var(--bleed))]',
+                footerArea === undefined && 'pb-[calc(env(safe-area-inset-bottom,0px)+var(--bleed))]',
               )}
             >
-              <div className="w-12 h-1.5 bg-pca-grey-200 rounded-full dark:bg-pca-grey-800 mx-auto mb-4 mt-4" />
+              <div className="w-12 h-1.5 bg-pca-grey-200 shrink-0 rounded-full dark:bg-pca-grey-800 mx-auto mb-4 mt-4" />
               {topArea && (
                 <div className="px-4 border-b border-pca-grey-200 dark:border-pca-grey-800">
                   {topArea}

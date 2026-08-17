@@ -28,11 +28,6 @@ const meta: Meta<typeof Sheet> = {
       control: 'boolean',
       description: 'Whether the drawer traps focus and locks page scroll.',
     },
-    swipeDirection: {
-      control: 'inline-radio',
-      options: ['up', 'down', 'left', 'right'],
-      description: 'The swipe direction used to dismiss the drawer.',
-    },
   },
 };
 
@@ -103,7 +98,10 @@ export const Controlled: Story = {
                 />
               )}
             >
-              You can change your preferences here.
+              This drawer is fully controlled by the parent component.
+              Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+              sed diam nonumy eirmod tempor invidunt ut labore et dolore
+              magna aliquyam erat, sed diam voluptua. At vero eos et accusam
             </Drawer.Description>
             <Drawer.Close render={<Button colorLight="primary">Close</Button>} />
           </DrawerContent>
@@ -132,7 +130,7 @@ export const WithTopAndFooterAreas: Story = {
               </div>
             )}
             footerArea={(
-              <div className="flex justify-between items-center ">
+              <div className="flex justify-between items-center">
                 <Drawer.Close render={<Button colorLight="secondary" className="mr-2">Cancel</Button>} />
                 <Button>Save</Button>
               </div>
@@ -141,10 +139,39 @@ export const WithTopAndFooterAreas: Story = {
             <div className="h-200 bg-ws-grey-100">
               Content area
             </div>
-
           </DrawerContent>
         </Sheet>
       </div>
     );
   },
+};
+
+export const FullHeight: Story = {
+  render: args => (
+    <div className="flex min-h-dvh items-center justify-center">
+      <Sheet {...args}>
+        <Drawer.Trigger
+          render={<Button colorLight="primary">Open drawer</Button>}
+        />
+        <DrawerContent isFullHeight>
+          <Drawer.Title
+            render={<Typography variant="heading2" as="h2" />}
+          >
+            Delete document
+          </Drawer.Title>
+          <Drawer.Description
+            render={(
+              <Typography
+                variant="bodySmall"
+                as="p"
+                className="text-pca-grey-600 dark:text-pca-grey-400"
+              />
+            )}
+          >
+            This action cannot be undone.
+          </Drawer.Description>
+        </DrawerContent>
+      </Sheet>
+    </div>
+  ),
 };
