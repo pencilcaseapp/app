@@ -7,7 +7,7 @@ export interface PageTitleProps {
 export const PageTitle: React.FC<PageTitleProps> = ({ children }) => (
   <title>
     {children
-      ? `${children} - ${commonCopies.appName}`
+      ? `${children} – ${commonCopies.appName}`
       : commonCopies.appName}
   </title>
 );

@@ -6,7 +6,7 @@ describe('PageTitle', () => {
   it('appends the app name to the given title', () => {
     render(<PageTitle>Hello World</PageTitle>);
 
-    expect(document.title).toBe('Hello World - pencil case');
+    expect(document.title).toBe('Hello World – pencil case');
   });
 
   it('renders the app name alone without a title', () => {
