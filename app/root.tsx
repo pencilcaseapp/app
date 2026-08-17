@@ -83,9 +83,9 @@ function SearchParamToasts() {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
+  useToast();
   return (
     <AuthenticityTokenProvider token={loaderData.token}>
-      <SearchParamToasts />
       <Outlet />
     </AuthenticityTokenProvider>
   );
