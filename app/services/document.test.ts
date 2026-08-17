@@ -2,6 +2,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  canOpenDocument,
   openDocument,
   OpenDocumentError,
   shareDocument,
@@ -21,6 +22,12 @@ vi.mock('~/repos/document', () => ({
   setDocumentShared: (...args: unknown[]) => setDocumentSharedMock(...args),
   removeCollaboratorsForDocument: (...args: unknown[]) =>
     removeCollaboratorsForDocumentMock(...args),
+}));
+
+const closeDocumentConnectionsMock = vi.fn();
+vi.mock('~/live/connections', () => ({
+  closeDocumentConnections: (...args: unknown[]) =>
+    closeDocumentConnectionsMock(...args),
 }));
 
 const otherUserId = 'e6d9c8f1-0000-4000-8000-000000000000';
@@ -167,6 +174,7 @@ describe('shareDocument', () => {
       shared: true,
     });
     expect(removeCollaboratorsForDocumentMock).not.toHaveBeenCalled();
+    expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
   });
 
   it('drops the collaborators when a document is unshared', async () => {
@@ -187,6 +195,24 @@ describe('shareDocument', () => {
       .toHaveBeenCalledWith(documentFixture.id);
   });
 
+  it('disconnects the collaborators editing right now', async () => {
+    setDocumentSharedMock.mockResolvedValue({
+      id: documentFixture.id,
+      shared: false,
+    });
+
+    await shareDocument({
+      documentId: documentFixture.id,
+      userId: userFixture.id,
+      shared: false,
+    });
+
+    expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      keepUserId: userFixture.id,
+    });
+  });
+
   it('denies somebody who does not own the document', async () => {
     setDocumentSharedMock.mockResolvedValue(undefined);
 
@@ -198,5 +224,49 @@ describe('shareDocument', () => {
 
     expect(error).toBe(ShareDocumentError.PermissionDenied);
     expect(removeCollaboratorsForDocumentMock).not.toHaveBeenCalled();
+    expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('canOpenDocument', () => {
+  it('rejects an unknown document', async () => {
+    getDocumentForViewerMock.mockResolvedValue(undefined);
+
+    expect(await canOpenDocument(documentFixture.id, userFixture.id))
+      .toBe(false);
+  });
+
+  it('lets the owner into a private document', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument());
+
+    expect(await canOpenDocument(documentFixture.id, userFixture.id))
+      .toBe(true);
+  });
+
+  it('rejects a visitor of a private document', async () => {
+    getDocumentForViewerMock.mockResolvedValue(
+      viewerDocument({ userId: otherUserId }),
+    );
+
+    expect(await canOpenDocument(documentFixture.id, userFixture.id))
+      .toBe(false);
+  });
+
+  it('lets an anonymous visitor into a shared document', async () => {
+    getDocumentForViewerMock.mockResolvedValue(
+      viewerDocument({ userId: otherUserId, shared: true }),
+    );
+
+    expect(await canOpenDocument(documentFixture.id)).toBe(true);
+  });
+
+  it('does not connect a collaborator', async () => {
+    getDocumentForViewerMock.mockResolvedValue(
+      viewerDocument({ userId: otherUserId, shared: true }),
+    );
+
+    await canOpenDocument(documentFixture.id, userFixture.id);
+
+    expect(connectCollaboratorMock).not.toHaveBeenCalled();
   });
 });

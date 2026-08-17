@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSocketClient } from '~/contexts/socket-client';
 import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
 import { useFirstLocalEdit } from '~/hooks/use-first-local-edit';
+import { useAccessRevoked } from '~/hooks/use-access-revoked';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 import { createPortal } from 'react-dom';
 
@@ -15,12 +16,20 @@ export interface CollaborativeEditorProps {
   id: string;
   onTitleChange?: (title: string | null) => void;
   onFirstEdit?: () => void;
+  onAccessRevoked?: () => void;
   topbarLeft?: React.ReactNode;
   topbarRight?: React.ReactNode;
 }
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
-  = ({ id, onTitleChange, onFirstEdit, topbarLeft, topbarRight }) => {
+  = ({
+    id,
+    onTitleChange,
+    onFirstEdit,
+    onAccessRevoked,
+    topbarLeft,
+    topbarRight,
+  }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -42,6 +51,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     }));
 
     useFirstLocalEdit(doc, provider, onFirstEdit);
+    useAccessRevoked(provider, onAccessRevoked);
 
     const [providerFactory] = useState(() => (
       id: string,

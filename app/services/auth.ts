@@ -88,17 +88,12 @@ export async function verifyMagicCode(
 export async function getAuthSession(
   request: Request,
 ): Promise<{ user: User; cookieHeader: string | null } | null> {
-  const cookieSession = await getSession(request.headers.get('Cookie'));
-  const token = cookieSession.get('token');
-  if (!token) {
+  const result = await readUserSession(request.headers.get('Cookie'));
+  if (!result) {
     return null;
   }
 
-  const tokenHash = hashUserSessionToken(token);
-  const userSession = await getAndRefreshUserSession(tokenHash);
-  if (!userSession) {
-    return null;
-  }
+  const { cookieSession, userSession } = result;
 
   let cookieHeader: string | null = null;
   if (userSession.isRefreshed) {
@@ -111,6 +106,14 @@ export async function getAuthSession(
     user: userSession.user,
     cookieHeader,
   };
+}
+
+export async function getAuthUserByCookie(
+  cookieHeader: string | null,
+): Promise<User | null> {
+  const result = await readUserSession(cookieHeader);
+
+  return result?.userSession.user ?? null;
 }
 
 export async function createSessionCookie(input: {
@@ -147,6 +150,22 @@ export function getSignInUrl(returnUrl: string = href('/')) {
     {
       [SearchParamAuth.ReturnUrl]: getNormalizedReturnUrl(returnUrl),
     });
+}
+
+async function readUserSession(cookieHeader: string | null) {
+  const cookieSession = await getSession(cookieHeader);
+  const token = cookieSession.get('token');
+  if (!token) {
+    return null;
+  }
+
+  const tokenHash = hashUserSessionToken(token);
+  const userSession = await getAndRefreshUserSession(tokenHash);
+  if (!userSession) {
+    return null;
+  }
+
+  return { cookieSession, userSession };
 }
 
 function hashUserSessionToken(token: string) {

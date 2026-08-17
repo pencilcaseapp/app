@@ -1,5 +1,5 @@
 import type { Route } from './+types/doc';
-import { Link, redirect, data } from 'react-router';
+import { Link, redirect, data, useRevalidator } from 'react-router';
 import { z } from 'zod';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
 import {
@@ -112,10 +112,14 @@ export async function action({ request, params, context }: Route.ActionArgs) {
 export default function ({ params, loaderData }: Route.ComponentProps) {
   const [title, setTitle] = useDocumentTitle(loaderData.ok ? loaderData.documentTitle : '');
   const { reportDocumentEdit } = useEditedDocument();
+  const { revalidate } = useRevalidator();
   const onFirstEdit = useCallback(
     () => reportDocumentEdit(params.id),
     [reportDocumentEdit, params.id],
   );
+  const onAccessRevoked = useCallback(() => {
+    void revalidate();
+  }, [revalidate]);
 
   if (!loaderData.ok && loaderData.error === DocumentError.NotFound) {
     return (
@@ -147,6 +151,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
           id={params.id}
           onTitleChange={setTitle}
           onFirstEdit={onFirstEdit}
+          onAccessRevoked={onAccessRevoked}
           topbarLeft={(
             <MenuOrSignInButton
               signInUrl={loaderData.ok ? loaderData.signInUrl : null}

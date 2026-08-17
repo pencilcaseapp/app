@@ -2,6 +2,9 @@
 import { Hocuspocus, type WebSocketLike } from '@hocuspocus/server';
 import { Database } from '@hocuspocus/extension-database';
 import { getDocument, updateDocument } from '~/repos/document';
+import { canOpenDocument } from '~/services/document';
+import { getAuthUserByCookie } from '~/services/auth';
+import { ForbiddenError, registerLiveServer } from './connections';
 import { extractTitleFromYDoc } from '~/utils/yjs';
 import { createInitialDocumentContent } from '~/utils/headless';
 import crossws from 'crossws/adapters/node';
@@ -9,6 +12,15 @@ import type { Server } from 'node:http';
 
 const hocuspocus = new Hocuspocus({
   name: 'hocuspocus-01',
+  onConnect: async ({ documentName, requestHeaders }) => {
+    const user = await getAuthUserByCookie(requestHeaders.get('cookie'));
+
+    if (!await canOpenDocument(documentName, user?.id)) {
+      throw new ForbiddenError();
+    }
+
+    return { userId: user?.id };
+  },
   extensions: [
     new Database({
       fetch: async ({ documentName }) => {
@@ -23,6 +35,8 @@ const hocuspocus = new Hocuspocus({
     }),
   ],
 });
+
+registerLiveServer(hocuspocus);
 
 export const ws = crossws({
   hooks: {
