@@ -45,10 +45,8 @@ export const Toast: FC<ToastProps> = ({ className, toast }) => {
         variant === 'success' && 'bg-pca-green-300 border-pca-green-900',
         variant === 'warning' && 'bg-pca-orange-300 border-pca-orange-900',
         variant === 'danger' && 'bg-pca-red-300 border-pca-red-900',
-        'transition-[opacity,transform] duration-200 ease-out',
-        'data-starting-style:translate-y-4 data-starting-style:opacity-0',
-        'data-ending-style:translate-y-4 data-ending-style:opacity-0',
-        'motion-reduce:transition-none',
+        'animate-toast-slide-in data-ending-style:animate-toast-slide-out',
+        'motion-reduce:animate-none',
         className,
       ])}
     >

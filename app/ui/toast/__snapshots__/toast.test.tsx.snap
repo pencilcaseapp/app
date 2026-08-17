@@ -4,7 +4,7 @@ exports[`Toast > variant 'danger' — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_l_"
   aria-modal="false"
-  class="flex w-[285px] max-w-[calc(100vw-2rem)] items-center gap-3 rounded-3xl border py-3 pl-3 pr-8 bg-pca-red-300 border-pca-red-900 transition-[opacity,transform] duration-200 ease-out data-starting-style:translate-y-4 data-starting-style:opacity-0 data-ending-style:translate-y-4 data-ending-style:opacity-0 motion-reduce:transition-none"
+  class="flex w-[285px] max-w-[calc(100vw-2rem)] items-center gap-3 rounded-3xl border py-3 pl-3 pr-8 bg-pca-red-300 border-pca-red-900 animate-toast-slide-in data-ending-style:animate-toast-slide-out motion-reduce:animate-none"
   data-type="danger"
   role="dialog"
   style="--toast-swipe-movement-x: 0px; --toast-swipe-movement-y: 0px; --toast-index: -1; --toast-offset-y: 0px;"
@@ -42,7 +42,7 @@ exports[`Toast > variant 'info' — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_f_"
   aria-modal="false"
-  class="flex w-[285px] max-w-[calc(100vw-2rem)] items-center gap-3 rounded-3xl border py-3 pl-3 pr-8 bg-pca-blue-300 border-pca-blue-900 transition-[opacity,transform] duration-200 ease-out data-starting-style:translate-y-4 data-starting-style:opacity-0 data-ending-style:translate-y-4 data-ending-style:opacity-0 motion-reduce:transition-none"
+  class="flex w-[285px] max-w-[calc(100vw-2rem)] items-center gap-3 rounded-3xl border py-3 pl-3 pr-8 bg-pca-blue-300 border-pca-blue-900 animate-toast-slide-in data-ending-style:animate-toast-slide-out motion-reduce:animate-none"
   data-type="info"
   role="dialog"
   style="--toast-swipe-movement-x: 0px; --toast-swipe-movement-y: 0px; --toast-index: -1; --toast-offset-y: 0px;"
@@ -80,7 +80,7 @@ exports[`Toast > variant 'success' — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_h_"
   aria-modal="false"
-  class="flex w-[285px] max-w-[calc(100vw-2rem)] items-center gap-3 rounded-3xl border py-3 pl-3 pr-8 bg-pca-green-300 border-pca-green-900 transition-[opacity,transform] duration-200 ease-out data-starting-style:translate-y-4 data-starting-style:opacity-0 data-ending-style:translate-y-4 data-ending-style:opacity-0 motion-reduce:transition-none"
+  class="flex w-[285px] max-w-[calc(100vw-2rem)] items-center gap-3 rounded-3xl border py-3 pl-3 pr-8 bg-pca-green-300 border-pca-green-900 animate-toast-slide-in data-ending-style:animate-toast-slide-out motion-reduce:animate-none"
   data-type="success"
   role="dialog"
   style="--toast-swipe-movement-x: 0px; --toast-swipe-movement-y: 0px; --toast-index: -1; --toast-offset-y: 0px;"
@@ -118,7 +118,7 @@ exports[`Toast > variant 'warning' — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_j_"
   aria-modal="false"
-  class="flex w-[285px] max-w-[calc(100vw-2rem)] items-center gap-3 rounded-3xl border py-3 pl-3 pr-8 bg-pca-orange-300 border-pca-orange-900 transition-[opacity,transform] duration-200 ease-out data-starting-style:translate-y-4 data-starting-style:opacity-0 data-ending-style:translate-y-4 data-ending-style:opacity-0 motion-reduce:transition-none"
+  class="flex w-[285px] max-w-[calc(100vw-2rem)] items-center gap-3 rounded-3xl border py-3 pl-3 pr-8 bg-pca-orange-300 border-pca-orange-900 animate-toast-slide-in data-ending-style:animate-toast-slide-out motion-reduce:animate-none"
   data-type="warning"
   role="dialog"
   style="--toast-swipe-movement-x: 0px; --toast-swipe-movement-y: 0px; --toast-index: -1; --toast-offset-y: 0px;"

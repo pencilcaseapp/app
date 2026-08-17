@@ -118,6 +118,12 @@
   --animate-row-shift: rowShift 0.18s ease-out;
   --animate-row-settle: rowSettle 0.18s ease-out;
 
+  /* Toasts always travel the same path: in from below the bottom edge of the
+     viewport, and back out the way they came. `forwards` holds the last frame
+     until base UI has removed the toast from the DOM. */
+  --animate-toast-slide-in: toastSlideIn 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-toast-slide-out: toastSlideOut 0.2s ease-in forwards;
+
   @keyframes slideDownAndFadeIn {
     from {
       opacity: 0;
@@ -261,6 +267,27 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes toastSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(calc(100% + 1rem));
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes toastSlideOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(calc(100% + 1rem));
     }
   }
 
