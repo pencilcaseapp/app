@@ -46,6 +46,12 @@ describe('OtpCodeEmail', () => {
     expect(html).not.toMatch(/padding[^:]*:[\d.]+rem/);
   });
 
+  it('breaks the headline onto two lines', async () => {
+    const html = await render(<OtpCodeEmail code={code} />);
+
+    expect(html).toContain('One-Time<br/>Verification Code');
+  });
+
   it('matches the rendered markup', async () => {
     const html = await render(<OtpCodeEmail code={code} />, { pretty: true });
 

@@ -19,7 +19,9 @@ export function OtpCodeEmail({ code }: OtpCodeEmailProps) {
   return (
     <Layout preview={`Your verification code is ${code}`}>
       <Typography variant="heading2" as="h1" textAlign="center" className="mb-3">
-        One-Time Verification Code
+        One-Time
+        <br />
+        Verification Code
       </Typography>
       <Typography variant="bodySmall" textAlign="center" className="mb-6">
         {body}
