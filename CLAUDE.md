@@ -175,8 +175,9 @@ passed.
   factories in `test/data-factories/` (faker-backed, they insert), not by hand.
 - Route tests use `renderRoute(path, { params, context, searchParams })` from
   `app/utils/testing.tsx`, which resolves the module from `app/routes.ts`, wraps
-  it in `createRoutesStub` plus the CSRF/document-title/edited-document/sidebar
-  providers, and strips middleware. Inject the session by setting
+  it in `createRoutesStub` plus the
+  CSRF/document-title/edited-document/sidebar/socket-client providers, and
+  strips middleware. Inject the session by setting
   `userSessionContext` on a `RouterContextProvider` and `vi.mock` the repos the
   route imports. A route that consumes a new context needs its provider added to
   that wrapper, otherwise every route test using it throws.
