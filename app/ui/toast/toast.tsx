@@ -44,7 +44,8 @@ export const Toast: FC<ToastProps> = ({ className, toast }) => {
       toast={toast}
       className={classNames([
         'toast-stack absolute inset-x-0 bottom-0 overflow-hidden',
-        'flex items-center rounded-3xl border py-3 pl-3 pr-8',
+        'flex max-w-[calc(100vw-1rem)] lg:max-w-lg items-center gap-3',
+        'rounded-full border py-3 pl-3 pr-8',
         variant === 'info' && 'bg-pca-blue-300 border-pca-blue-900',
         variant === 'success' && 'bg-pca-green-300 border-pca-green-900',
         variant === 'warning' && 'bg-pca-orange-300 border-pca-orange-900',
