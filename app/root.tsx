@@ -17,6 +17,8 @@ import { sessionCookieHeaderContext } from './contexts/user-session';
 import { sessionMiddleware } from './middleware/auth';
 import { Typography } from './ui/typography/typography';
 import { PageTitle } from './components/page-title/page-title';
+import { ToastProvider } from './ui/toast/toast';
+import { useToast } from './hooks/use-toast';
 
 import './app.css';
 
@@ -72,10 +74,19 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   });
 }
 
+function SearchParamToasts() {
+  useToast();
+
+  return null;
+}
+
 export default function App({ loaderData }: Route.ComponentProps) {
   return (
     <AuthenticityTokenProvider token={loaderData.token}>
-      <Outlet />
+      <ToastProvider>
+        <SearchParamToasts />
+        <Outlet />
+      </ToastProvider>
     </AuthenticityTokenProvider>
   );
 }
