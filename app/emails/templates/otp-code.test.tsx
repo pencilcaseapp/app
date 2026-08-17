@@ -45,4 +45,18 @@ describe('OtpCodeEmail', () => {
     expect(html).not.toMatch(/font-size:[\d.]+rem/);
     expect(html).not.toMatch(/padding[^:]*:[\d.]+rem/);
   });
+
+  it('matches the rendered markup', async () => {
+    const html = await render(<OtpCodeEmail code={code} />, { pretty: true });
+
+    expect(html).toMatchSnapshot();
+  });
+
+  it('matches the plain text body', async () => {
+    const text = await render(<OtpCodeEmail code={code} />, {
+      plainText: true,
+    });
+
+    expect(text).toMatchSnapshot();
+  });
 });

@@ -19,6 +19,7 @@ app/emails/
   templates/               one template per file, default export
     otp-code.tsx
     otp-code.test.tsx
+  testing.tsx              renderEmail(), for component snapshots
   ui/                      shared email UI, one directory per component
     layout/
     logo/
@@ -49,6 +50,31 @@ compatibility warnings show up.
 There are no Storybook stories for email components. A template renders a whole
 `<html>` document, so the preview server is the better tool, and keeping one
 source of truth avoids two sets of fixtures drifting apart.
+
+## Testing
+
+Email components are snapshotted like the ones in `app/ui/`, but the snapshot
+buys something extra here: what it records is the *inlined* CSS, so it pins the
+whole Tailwind pipeline — theme tokens, `pixelBasedPreset`, and whatever the
+current React Email version emits. A version bump that quietly moves padding
+onto a different element or swaps `24px` back to `1.5rem` shows up as a diff
+instead of as a broken email.
+
+Render components through `renderEmail()` from `app/emails/testing.tsx`, which
+wraps them in the same `<Tailwind>` provider `Layout` uses — without it the
+classes stay as class names, which no mail client will read. Templates already
+carry their own provider through `Layout`, so they go through `render()`
+directly.
+
+Each template gets two snapshots: the prettified HTML, and the plain text body.
+The plain text one is short enough to read at a glance, which makes it the place
+a reviewer will actually notice copy changes — including the ones that would
+break iOS code detection.
+
+Snapshots do not replace the behavioural assertions. Things like "the code is
+one unbroken run of digits" or "nothing else in the copy is code-shaped" are
+rules, and a snapshot only records that today's output happens to satisfy them.
+Update snapshots with `npx vitest run -u` and read the diff.
 
 ## Styling
 
@@ -114,9 +140,8 @@ clients that ignore those metas still land somewhere sane.
    depends on the payload. Keeping it next to the copy means the two are
    reviewed together.
 4. Add a `sendEmail<Name>()` function to `app/services/email-templates.tsx`.
-5. Test the template directly with `render()` from `react-email` rather than
-   snapshotting the markup — the assertions stay about behaviour instead of
-   breaking on every spacing change.
+5. Test it with `render()` from `react-email`: assertions for the behaviour that
+   matters, plus the two snapshots described below.
 
 ## One-time codes and the iOS keyboard
 

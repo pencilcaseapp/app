@@ -1,0 +1,100 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Typography > inlined styles > inlines an overridden weight, colour and alignment 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--$-->
+<p
+  style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:600;color:rgb(128,128,128);text-align:center;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+  Text
+</p>
+<!--/$-->
+"
+`;
+
+exports[`Typography > inlined styles > inlines the base colours without the pca prefix 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--$-->
+<p
+  style='font-size:16px;line-height:24px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(255,255,255);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+  Text
+</p>
+<!--/$-->
+"
+`;
+
+exports[`Typography > inlined styles > inlines the body variant 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--$-->
+<p
+  style='font-size:16px;line-height:24px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+  Text
+</p>
+<!--/$-->
+"
+`;
+
+exports[`Typography > inlined styles > inlines the bodySmall variant 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--$-->
+<p
+  style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+  Text
+</p>
+<!--/$-->
+"
+`;
+
+exports[`Typography > inlined styles > inlines the bodyTiny variant 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--$-->
+<p
+  style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+  Text
+</p>
+<!--/$-->
+"
+`;
+
+exports[`Typography > inlined styles > inlines the heading1 variant 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--$-->
+<h1
+  style='font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-size:36px;line-height:36px;font-weight:700;color:rgb(16,16,16)'>
+  Text
+</h1>
+<!--/$-->
+"
+`;
+
+exports[`Typography > inlined styles > inlines the heading2 variant 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--$-->
+<h2
+  style='font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-size:24px;line-height:29px;font-weight:700;color:rgb(16,16,16)'>
+  Text
+</h2>
+<!--/$-->
+"
+`;
+
+exports[`Typography > inlined styles > inlines the heading3 variant 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--$-->
+<h3
+  style='font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-size:18px;line-height:22px;font-weight:600;color:rgb(16,16,16)'>
+  Text
+</h3>
+<!--/$-->
+"
+`;
+
+exports[`Typography > inlined styles > inlines the title variant 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--$-->
+<h1
+  style='font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-size:48px;line-height:1;font-weight:700;color:rgb(16,16,16)'>
+  Text
+</h1>
+<!--/$-->
+"
+`;
