@@ -112,6 +112,7 @@ export default function Onboarding() {
               placeholder="e.g. John Doe"
               label="Name"
               className="mb-5"
+              autoComplete="name"
             />
           )}
         </formOnboarding.AppField>
