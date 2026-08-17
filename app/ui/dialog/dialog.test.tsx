@@ -177,7 +177,7 @@ describe('DialogContent', () => {
     // Tailwind sets the standalone `scale` property, so transitioning
     // `transform` would make the popup snap instead of animate.
     expect(screen.getByRole('dialog'))
-      .toHaveClass('transition-[opacity,scale]');
+      .toHaveClass('transition-[scale,opacity]');
   });
 
   test('merges a custom class name onto the popup', () => {
