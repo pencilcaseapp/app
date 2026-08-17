@@ -11,13 +11,16 @@ export interface OtpCodeEmailProps {
   code: string;
 }
 
+const preview = `Use it within ${expiryMinutes} minutes to verify your email `
+  + 'address.';
+
 export function otpCodeEmailSubject(code: string) {
-  return `Verification Code: ${code} – pencil case`;
+  return `Verification Code: ${code}`;
 }
 
 export function OtpCodeEmail({ code }: OtpCodeEmailProps) {
   return (
-    <Layout preview={`Your verification code is ${code}`}>
+    <Layout preview={preview}>
       <Typography variant="heading2" as="h1" textAlign="center" className="mb-3">
         One-Time
         <br />

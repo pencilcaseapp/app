@@ -125,7 +125,9 @@ Gmail drops inline SVG, so the design system's SVG components cannot be reused
 in an email. Rasterise to a 2x PNG, commit it under `public/emails/`, and link it
 with an absolute URL built from `assetsUrl` in `theme.ts`.
 
-That URL always points at production. The recipient's mail client is what
+That URL always points at production — at the host that actually serves these
+files, which is the docs domain and not the app one: `pencilcase.app/emails/…`
+answers with a 404. The recipient's mail client is what
 fetches the image, so a localhost URL would never resolve — not even for an
 email triggered from a dev machine.
 
@@ -178,7 +180,12 @@ load bearing.
   short to qualify. `otp-code.test.tsx` guards this.
 - **Carry the code in the subject line.** That is what lets iOS offer it from
   the notification without the message being opened. `otpCodeEmailSubject()`
-  does it, and the preheader repeats it so it is also the first text in the body.
+  does it, and keeps the subject to just that — the sender name already says
+  "pencil case", so repeating the brand there only pushes the code out of the
+  truncated line. The preheader deliberately does *not* repeat the code: it sits
+  right under the subject in the inbox, where a second copy of the digits reads
+  as noise, so it carries the expiry instead. The code still reaches the body
+  under its `Verification Code:` label, which is the placement detection needs.
 - **Always send the plain text alternative.** It is the part some clients read,
   and it has to satisfy the same rules. `sendEmail()` renders it from the same
   component, so there is nothing to keep in sync.
