@@ -45,6 +45,26 @@ export const theme = `@theme {
 
   --font-inter: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Helvetica, Arial, sans-serif;
+
+  --text-title: 48px;
+  --text-title--line-height: 1;
+  --text-heading-1: 36px;
+  --text-heading-1--line-height: 36px;
+  --text-heading-2: 24px;
+  --text-heading-2--line-height: 29px;
+  --text-heading-3: 18px;
+  --text-heading-3--line-height: 22px;
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-body-small: 14px;
+  --text-body-small--line-height: 20px;
+  --text-body-tiny: 12px;
+  --text-body-tiny--line-height: 16px;
+
+  --container-email: 296px;
+
+  --spacing-gutter: 18px;
+  --spacing-content-end: 86px;
 }`;
 
 export const contentWidth = 'max-w-[296px]';

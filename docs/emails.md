@@ -92,6 +92,16 @@ Two things are handed to it:
   `rem`, which Outlook renders unpredictably and which is relative to a root font
   size we do not control. `otp-code.test.tsx` fails if `rem` reaches the output.
 
+Sizes come from named tokens — `text-heading-2`, `max-w-email`, `px-gutter` —
+rather than arbitrary values, and that is not only cosmetic. `pixelBasedPreset`
+only covers Tailwind's classic scale, so anything off it falls back to
+`calc(var(--spacing) * n)` and lands in `rem`. **Ignore your editor when it
+offers to rewrite `max-w-[296px]` as `max-w-74`**: the two are equivalent on the
+web but not here, where the second renders `18.5rem`. The same trap catches
+`px-4.5`, `pb-21.5` and `leading-7.25`. A named token keeps the pixels and drops
+the warning, which is why the type scale in `theme.ts` names every Figma text
+style instead of leaning on `text-2xl` plus a `leading-[…]` override.
+
 `theme.ts` still has to repeat the palette, because there is no way to hand
 `app/app.css` to both Tailwind pipelines: the app's runs through Vite, the
 emails' runs inside `render()`. `theme.test.ts` parses both files and fails when

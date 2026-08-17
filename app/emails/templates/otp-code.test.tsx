@@ -39,11 +39,10 @@ describe('OtpCodeEmail', () => {
     expect(html).toContain(`Your verification code is ${code}`);
   });
 
-  it('renders sizes in pixels rather than rem', async () => {
+  it('renders every size in pixels rather than rem', async () => {
     const html = await render(<OtpCodeEmail code={code} />);
 
-    expect(html).not.toMatch(/font-size:[\d.]+rem/);
-    expect(html).not.toMatch(/padding[^:]*:[\d.]+rem/);
+    expect(html).not.toMatch(/[\d.]+rem/);
   });
 
   it('breaks the headline onto two lines', async () => {

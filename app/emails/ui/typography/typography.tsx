@@ -61,13 +61,13 @@ export interface TypographyProps {
 }
 
 const variantClasses: { [index in Variant]: string } = {
-  title: 'text-5xl',
-  heading1: 'text-4xl',
-  heading2: 'text-2xl leading-[29px]',
-  heading3: 'text-lg leading-[22px]',
-  body: 'text-base leading-6',
-  bodySmall: 'text-sm leading-5',
-  bodyTiny: 'text-xs leading-4',
+  title: 'text-title',
+  heading1: 'text-heading-1',
+  heading2: 'text-heading-2',
+  heading3: 'text-heading-3',
+  body: 'text-body',
+  bodySmall: 'text-body-small',
+  bodyTiny: 'text-body-tiny',
 };
 
 const variantWeights: { [index in Variant]: string } = {

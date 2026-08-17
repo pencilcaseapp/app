@@ -25,8 +25,8 @@ export const Layout: React.FC<LayoutProps> = ({ preview, children }) => {
           <meta name="supported-color-schemes" content="light" />
         </Head>
         <Preview>{preview}</Preview>
-        <Body className="bg-pca-white font-inter m-0 py-6 px-[18px]">
-          <Container className="w-full max-w-[296px] mx-auto pb-[86px]">
+        <Body className="bg-pca-white font-inter m-0 py-6 px-gutter">
+          <Container className="w-full max-w-email mx-auto pb-content-end">
             <Section className="p-8 text-center">
               <Logo />
             </Section>
