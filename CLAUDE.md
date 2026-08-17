@@ -107,12 +107,15 @@ setting the non-optional `userSessionContext`. Loaders read the user from
 **Emails — `app/emails/`.** Transactional emails are React Email components.
 `app/services/email-templates.tsx` picks the template and subject,
 `app/services/email.ts` renders it to HTML *and* plain text and hands both to
-Lettermint. Shared email UI lives in `app/emails/_components/` (the `_` prefix
-keeps it out of the preview server's template list) and tokens in
-`app/emails/theme.ts`, mirrored by hand from the `@theme` block in `app/app.css`
-because mail clients strip class names. Preview with `npm run email`. The OTP
-template's copy is load bearing for iOS one-time-code detection — read
-`docs/emails.md` before rewording it.
+Lettermint. `app/emails/templates/` holds one template per file (the only
+directory the preview server reads) and `app/emails/ui/` the shared email UI.
+Templates are styled with the same `pca-*` Tailwind classes as the app:
+`Layout` wraps them in `<Tailwind>` with the `@theme` block from
+`app/emails/theme.ts`, which repeats the palette because the two Tailwind
+pipelines cannot share `app/app.css` — `theme.test.ts` fails when they drift.
+`pixelBasedPreset` is not optional; without it sizes render in `rem`. Preview
+with `npm run email`. The OTP template's copy is load bearing for iOS
+one-time-code detection — read `docs/emails.md` before rewording it.
 
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader

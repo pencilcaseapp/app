@@ -1,54 +1,52 @@
-/**
- * Email design tokens.
- *
- * Mail clients strip `<style>` blocks and class names, so everything an email
- * renders has to end up in a `style` attribute. That rules out the Tailwind
- * `pca-*` tokens from `app/app.css`, and the values below mirror them by hand —
- * keep the two in sync.
- */
+export const theme = `@theme {
+  --color-pca-white: #FFFFFF;
 
-export const colors = {
-  white: '#FFFFFF',
-  grey100: '#F8F8F8',
-  grey900: '#101010',
-} as const;
+  --color-pca-grey-100: #F8F8F8;
+  --color-pca-grey-200: #EDEDED;
+  --color-pca-grey-300: #C8C8C8;
+  --color-pca-grey-400: #A4A4A4;
+  --color-pca-grey-500: #808080;
+  --color-pca-grey-600: #5B5B5B;
+  --color-pca-grey-700: #505050;
+  --color-pca-grey-800: #303030;
+  --color-pca-grey-900: #101010;
 
-/**
- * Inter is not installed on the recipient's machine, so the stack falls
- * straight through to the system UI font that mail clients render best.
- */
-export const fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, '
-  + '"Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+  --color-pca-blue-300: #C2D2FC;
+  --color-pca-blue-500: #398BF6;
+  --color-pca-blue-700: #0839B7;
+  --color-pca-blue-900: #051C66;
 
-export const text = {
-  heading2: {
-    fontSize: '24px',
-    lineHeight: '29px',
-    fontWeight: 700,
-  },
-  heading3: {
-    fontSize: '18px',
-    lineHeight: '22px',
-    fontWeight: 700,
-  },
-  bodySmall: {
-    fontSize: '14px',
-    lineHeight: '20px',
-    fontWeight: 400,
-  },
-  bodySmallSemibold: {
-    fontSize: '14px',
-    lineHeight: '20px',
-    fontWeight: 600,
-  },
-} as const;
+  --color-pca-yellow-300: #FFEEA8;
+  --color-pca-yellow-500: #FFE365;
+  --color-pca-yellow-700: #D9B93A;
+  --color-pca-yellow-900: #8B7521;
 
-/** The content column the designs lay every email out on. */
-export const contentWidth = '296px';
+  --color-pca-pink-300: #FFE5E5;
+  --color-pca-pink-500: #FECCCC;
+  --color-pca-pink-700: #E89A9A;
+  --color-pca-pink-900: #C94747;
 
-/**
- * Images in an email are fetched by the recipient's mail client, so they always
- * have to point at production — a localhost URL would never resolve, not even
- * for an email triggered locally.
- */
+  --color-pca-orange-300: #FFD1A8;
+  --color-pca-orange-500: #FF9C41;
+  --color-pca-orange-700: #D9771E;
+  --color-pca-orange-900: #A84C11;
+
+  --color-pca-green-100: #DDFBD0;
+  --color-pca-green-300: #A9F58A;
+  --color-pca-green-500: #52E01F;
+  --color-pca-green-700: #2FA80F;
+  --color-pca-green-900: #1F6B07;
+
+  --color-pca-red-100: #FFF0F0;
+  --color-pca-red-300: #FECCCC;
+  --color-pca-red-500: #EF4444;
+  --color-pca-red-700: #9E1C1C;
+  --color-pca-red-900: #6B1414;
+
+  --font-inter: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+}`;
+
+export const contentWidth = 'max-w-[296px]';
+
 export const assetsUrl = 'https://pencilcase.app';

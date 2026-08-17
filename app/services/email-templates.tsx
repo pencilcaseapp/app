@@ -1,4 +1,4 @@
-import { OtpCodeEmail, otpCodeEmailSubject } from '~/emails/otp-code';
+import { OtpCodeEmail, otpCodeEmailSubject } from '~/emails/templates/otp-code';
 import { sendEmail, type EmailData } from './email';
 
 export async function sendEmailMagicCode(

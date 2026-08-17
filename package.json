@@ -11,7 +11,7 @@
     "build:react-router": "react-router build",
     "build:server": "esbuild ./server.ts --outdir=./ --bundle --format=esm --platform=node --target=node24 --packages=external --external:./build/server/index.js",
     "test": "vitest",
-    "email": "email dev --dir app/emails --port 3001",
+    "email": "email dev --dir app/emails/templates --port 3001",
     "typecheck": "react-router typegen && tsc",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

@@ -14,8 +14,6 @@ describe('OtpCodeEmail', () => {
   it('keeps the code a single unbroken run of digits', async () => {
     const html = await render(<OtpCodeEmail code={code} />);
 
-    // A per-digit span or a space between the digits stops iOS from
-    // recognising the code at all.
     expect(html).toMatch(new RegExp(`>${code}<`));
   });
 
@@ -32,17 +30,19 @@ describe('OtpCodeEmail', () => {
       plainText: true,
     });
 
-    // iOS looks for runs of four to eight digits, so a second one anywhere in
-    // the copy gives it something wrong to suggest. The expiry reads "15",
-    // which is short enough not to compete.
     expect(text.match(/\d{4,8}/g)).toEqual([code]);
   });
 
   it('repeats the code in the preheader', async () => {
     const html = await render(<OtpCodeEmail code={code} />);
 
-    // The preheader is the first text in the HTML body, which makes it the
-    // first place iOS looks — and it is what the inbox list shows.
     expect(html).toContain(`Your verification code is ${code}`);
+  });
+
+  it('renders sizes in pixels rather than rem', async () => {
+    const html = await render(<OtpCodeEmail code={code} />);
+
+    expect(html).not.toMatch(/font-size:[\d.]+rem/);
+    expect(html).not.toMatch(/padding[^:]*:[\d.]+rem/);
   });
 });
