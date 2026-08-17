@@ -45,7 +45,7 @@
     "cross-env": "^10.1.0",
     "crossws": "^0.4.10",
     "dotenv": "^17.4.2",
-    "drizzle-orm": "^1.0.0-rc.4",
+    "drizzle-orm": "^1.0.0-rc.5-169397b",
     "env-var": "^7.5.0",
     "express": "^5.2.1",
     "input-otp": "^1.4.2",
