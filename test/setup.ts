@@ -19,6 +19,20 @@ afterEach(() => {
   pendingTimeouts.clear();
 });
 
+// Browsers queue `selectionchange` as a task; happy-dom dispatches it
+// synchronously, so Lexical re-enters itself while committing its own update
+// and warns that the command came from a read-only context. It recovers on its
+// own and no app code is involved, so drop just that one message.
+const nativeConsoleWarn = console.warn;
+
+console.warn = (...args: Parameters<typeof console.warn>) => {
+  if (typeof args[0] === 'string' && args[0].startsWith('updateEditorSync:')) {
+    return;
+  }
+
+  nativeConsoleWarn(...args);
+};
+
 vi.mock('~/utils/csrf', async (importOriginal) => {
   const actual = await importOriginal<typeof import('~/utils/csrf')>();
   return {
