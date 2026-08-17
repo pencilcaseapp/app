@@ -3,12 +3,10 @@ import { Link, redirect, data } from 'react-router';
 import { z } from 'zod';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
 import {
-  connectCollaborator,
-  getDocument,
-  isDocumentCollaborator,
-  removeCollaboratorsForDocument,
-  setDocumentShared,
-} from '~/repos/document';
+  openDocument,
+  OpenDocumentError,
+  shareDocument,
+} from '~/services/document';
 import { ClientOnly } from '~/ui/client-only/client-only';
 import { href } from 'react-router';
 import { optionalUserSessionContext } from '~/contexts/user-session';
@@ -33,65 +31,62 @@ const shareSchema = z.object({
 
 export async function loader({ params, context, request }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
-  const document = await getDocument(params.id);
   const documentUrl = href(`/doc/:id`, { id: params.id });
+  const [error, document] = await openDocument(params.id, user?.id);
 
-  if (!document) {
-    return data({
-      ok: false as const,
-      error: DocumentError.NotFound,
-      signInUrl: user ? null : getSignInUrl(href('/')),
-    }, {
-      status: 404,
-    });
-  }
+  if (error !== null) {
+    switch (error) {
+      case OpenDocumentError.NotFound: {
+        return data({
+          ok: false as const,
+          error: DocumentError.NotFound,
+          signInUrl: user ? null : getSignInUrl(href('/')),
+        }, {
+          status: 404,
+        });
+      }
 
-  const isOwner = !!user && user.id === document.userId;
-  const signInUrl = user ? null : getSignInUrl(documentUrl);
+      case OpenDocumentError.PermissionDenied: {
+        if (!user) {
+          return redirect(getSignInUrl(documentUrl));
+        }
 
-  if (!isOwner && !document.shared) {
-    if (!user) {
-      return redirect(getSignInUrl(documentUrl));
-    }
+        return data({
+          ok: false as const,
+          error: DocumentError.PermissionDenied,
+          signInUrl: null,
+        }, {
+          status: 403,
+        });
+      }
 
-    return data({
-      ok: false as const,
-      error: DocumentError.PermissionDenied,
-      signInUrl,
-    }, {
-      status: 403,
-    });
-  }
-
-  // On a visitor's first open of a shared document, connect them and redirect
-  // so the sidebar loader re-runs and the document shows up in their nav.
-  // Subsequent visits skip this, so the redirect only happens once.
-  if (user && !isOwner) {
-    const alreadyJoined = await isDocumentCollaborator(document.id, user.id);
-
-    if (!alreadyJoined) {
-      await connectCollaborator({ documentId: document.id, userId: user.id });
-      return redirect(documentUrl);
+      default: {
+        const exhaustiveCheck: never = error;
+        throw new Error('Unhandled error case: ' + exhaustiveCheck);
+      }
     }
   }
 
-  const shareUrl = new URL(documentUrl, request.url).toString();
+  // A visitor who just joined the document is redirected so the sidebar loader
+  // re-runs and the document shows up in their nav. Only happens once.
+  if (document.hasJoined) {
+    return redirect(documentUrl);
+  }
 
   return {
     ok: true as const,
     documentTitle: document.title,
-    signInUrl,
-    isOwner,
+    signInUrl: user ? null : getSignInUrl(documentUrl),
+    isOwner: document.isOwner,
     shared: document.shared,
-    shareUrl,
+    shareUrl: new URL(documentUrl, request.url).toString(),
   };
 }
 
 export async function action({ request, params, context }: Route.ActionArgs) {
   const user = context.get(optionalUserSessionContext);
-  const document = await getDocument(params.id);
 
-  if (!document || !user || user.id !== document.userId) {
+  if (!user) {
     throw data('Forbidden', { status: 403 });
   }
 
@@ -101,15 +96,17 @@ export async function action({ request, params, context }: Route.ActionArgs) {
     return form.formState;
   }
 
-  const { shared } = form.data;
+  const [error, result] = await shareDocument({
+    documentId: params.id,
+    userId: user.id,
+    shared: form.data.shared,
+  });
 
-  await setDocumentShared(document.id, shared);
-
-  if (!shared) {
-    await removeCollaboratorsForDocument(document.id);
+  if (error !== null) {
+    throw data('Forbidden', { status: 403 });
   }
 
-  return { ok: true as const, shared };
+  return { ok: true as const, shared: result.shared };
 }
 
 export default function ({ params, loaderData }: Route.ComponentProps) {
