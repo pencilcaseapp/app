@@ -55,7 +55,7 @@ export const DrawerContent: FC<DrawerContentProps>
                   {topArea}
                 </div>
               )}
-              <Drawer.Content {...drawerContentProps} className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-auto px-6 pt-4 pb-6">
+              <Drawer.Content {...drawerContentProps} className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-auto px-4 pt-4 pb-6">
                 {children}
               </Drawer.Content>
               {footerArea && (
