@@ -94,7 +94,11 @@ export default function SignIn({ loaderData }: Route.ComponentProps) {
             placeholder="e.g. your@example.com"
             label="E-Mail"
             className="mb-6"
-            autoComplete="username"
+            autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            enterKeyHint="go"
           />
         )}
       </form.AppField>
