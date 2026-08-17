@@ -105,7 +105,9 @@
   --shadow-glass-dark: 0 0.5px 1px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.08), 0 8px 16px rgba(0,0,0,0.08), 0 16px 32px rgba(0,0,0,0.06), inset 0 0.5px 0 rgba(255,255,255,0.06);
 
   --animate-scale-in: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  --animate-scale-out: scaleOut 0.15s cubic-bezier(0.4, 0, 1, 1);
+  /* `forwards` matters: the element stays mounted for a frame or two after the
+     animation ends, and without it those frames snap back to full opacity. */
+  --animate-scale-out: scaleOut 0.15s cubic-bezier(0.4, 0, 1, 1) forwards;
 
   --animate-accordion-down: accordionDown 0.2s ease-out;
   --animate-accordion-up: accordionUp 0.2s ease-out;
@@ -217,7 +219,7 @@
       transform: scale(1);
     }
     to {
-      opacity: 0.3;
+      opacity: 0;
       transform: scale(0.9);
     }
   }
@@ -323,4 +325,14 @@ body {
 
 @utility glass-surface {
   @apply bg-pca-white/75 dark:bg-pca-grey-900/55 backdrop-blur-lg backdrop-saturate-150;
+}
+
+/* Safari counts an element with an opacity below 1 as a backdrop root, so the
+   first frame of a fade drops the backdrop blur and the surface flips from
+   frosted to plain translucent in one frame. Anything fading out should swap
+   the blur for the colour it resolves to, so only the opacity changes. */
+@utility glass-surface-opaque {
+  @apply bg-pca-white dark:bg-pca-grey-900;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
