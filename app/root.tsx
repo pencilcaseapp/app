@@ -15,6 +15,7 @@ import { commitCsrfToken } from './utils/csrf';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 import { sessionCookieHeaderContext } from './contexts/user-session';
 import { sessionMiddleware } from './middleware/auth';
+import { useFaviconColorScheme } from './hooks/use-favicon-color-scheme';
 import { Typography } from './ui/typography/typography';
 import { PageTitle } from './components/page-title/page-title';
 
@@ -29,6 +30,8 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  useFaviconColorScheme();
+
   const matches = useMatches() as UIMatch<unknown, { bodyClassName: string }>[];
   const routeBodyClassNames = matches
     .filter(match => match.handle?.bodyClassName)
