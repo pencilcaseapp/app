@@ -43,7 +43,7 @@ export const Toast: FC<ToastProps> = ({ className, toast }) => {
     <BaseToast.Root
       toast={toast}
       className={classNames([
-        'toast-stack absolute inset-x-0 bottom-0 overflow-hidden',
+        'toast-stack absolute inset-x-0 top-0 overflow-hidden',
         'flex max-w-[calc(100vw-1rem)] lg:max-w-lg items-center gap-3',
         'rounded-full border py-3 pl-3 pr-8',
         variant === 'info' && 'bg-pca-blue-300 border-pca-blue-900',

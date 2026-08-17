@@ -61,8 +61,9 @@ const ToastTriggers = () => {
 };
 
 /**
- * Emitted toasts stack at the bottom of the screen and dismiss themselves after
- * five seconds. Hover the stack to lay it out, or swipe a toast down or to the
+ * Emitted toasts stack at the top of the screen and dismiss themselves after
+ * five seconds — the frontmost one slides on down and out, the ones behind it
+ * only fade. Hover the stack to lay it out, or swipe a toast down or to the
  * right to dismiss it by hand.
  */
 export const ToastEmitted: Story = {

@@ -341,19 +341,24 @@ body {
    summed height of the toasts in front of it, and the swipe movement vars
    follow the pointer. Every state writes the same `transform`, so a toast
    arriving, leaving or expanding moves the whole stack instead of jumping it.
-   Collapsed, the toasts behind peek out by a fifth of their height, shrink, and
-   borrow the frontmost height so the stack reads as one card; hovering or
-   focusing the viewport (`data-expanded`) lays them out at their real heights,
-   one `--toast-gap` apart. */
+   The stack hangs from the top of the screen: collapsed, the toasts behind peek
+   out below the frontmost one by a fifth of their height, shrink, and borrow
+   its height so the stack reads as one card; hovering or focusing the viewport
+   (`data-expanded`) lays them out at their real heights, one `--toast-gap`
+   apart. */
 @utility toast-stack {
   --toast-gap: 0.5rem;
+
+  /* 1 for the frontmost toast, 0 for every toast stacked behind it. Lets a
+     single rule treat the two differently without a selector for each depth. */
+  --toast-is-frontmost: max(0, 1 - var(--toast-index, 0));
 
   z-index: calc(10 - var(--toast-index, 0));
   height: var(--toast-frontmost-height, var(--toast-height));
   transform:
     scale(calc(max(0, 1 - var(--toast-index, 0) * 0.1)))
     translateX(var(--toast-swipe-movement-x, 0px))
-    translateY(calc(var(--toast-swipe-movement-y, 0px) + var(--toast-index, 0) * -20%));
+    translateY(calc(var(--toast-swipe-movement-y, 0px) + var(--toast-index, 0) * 20%));
   transition-property: transform, height, opacity;
   transition-duration: 0.3s;
   transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
@@ -363,9 +368,9 @@ body {
     transform:
       translateX(var(--toast-swipe-movement-x, 0px))
       translateY(calc(
-        var(--toast-offset-y, 0px) * -1
+        var(--toast-offset-y, 0px)
         + var(--toast-swipe-movement-y, 0px)
-        + var(--toast-index, 0) * -1 * var(--toast-gap)
+        + var(--toast-index, 0) * var(--toast-gap)
       ));
   }
 
@@ -374,12 +379,25 @@ body {
     transition-duration: 0s;
   }
 
-  /* In from below the viewport, and back out the way it came — or the way it
-     was swiped, when the toast was dismissed by hand. */
-  &[data-starting-style],
+  /* In from above the top edge. */
+  &[data-starting-style] {
+    opacity: 0;
+    transform: translateY(-150%);
+  }
+
+  /* Leaving, the frontmost toast slides on down and out. The ones stacked
+     behind it only fade, holding the position they already sit at — sliding
+     them would drag a half-covered pill across the toast in front. */
   &[data-ending-style] {
     opacity: 0;
-    transform: translateY(150%);
+    transform:
+      scale(calc(max(0, 1 - var(--toast-index, 0) * 0.1)))
+      translateX(var(--toast-swipe-movement-x, 0px))
+      translateY(calc(
+        var(--toast-swipe-movement-y, 0px)
+        + var(--toast-index, 0) * 20%
+        + 150% * var(--toast-is-frontmost)
+      ));
   }
 
   &[data-ending-style][data-swipe-direction='down'] {

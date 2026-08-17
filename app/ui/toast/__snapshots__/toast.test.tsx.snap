@@ -4,7 +4,7 @@ exports[`Toast > variant 'danger' — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_l_"
   aria-modal="false"
-  class="toast-stack absolute inset-x-0 bottom-0 overflow-hidden flex items-center rounded-3xl border py-3 pl-3 pr-8 bg-pca-red-300 border-pca-red-900"
+  class="toast-stack absolute inset-x-0 top-0 overflow-hidden flex max-w-[calc(100vw-1rem)] lg:max-w-lg items-center gap-3 rounded-full border py-3 pl-3 pr-8 bg-pca-red-300 border-pca-red-900"
   data-type="danger"
   role="dialog"
   style="--toast-swipe-movement-x: 0px; --toast-swipe-movement-y: 0px; --toast-index: -1; --toast-offset-y: 0px;"
@@ -46,7 +46,7 @@ exports[`Toast > variant 'info' — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_f_"
   aria-modal="false"
-  class="toast-stack absolute inset-x-0 bottom-0 overflow-hidden flex items-center rounded-3xl border py-3 pl-3 pr-8 bg-pca-blue-300 border-pca-blue-900"
+  class="toast-stack absolute inset-x-0 top-0 overflow-hidden flex max-w-[calc(100vw-1rem)] lg:max-w-lg items-center gap-3 rounded-full border py-3 pl-3 pr-8 bg-pca-blue-300 border-pca-blue-900"
   data-type="info"
   role="dialog"
   style="--toast-swipe-movement-x: 0px; --toast-swipe-movement-y: 0px; --toast-index: -1; --toast-offset-y: 0px;"
@@ -88,7 +88,7 @@ exports[`Toast > variant 'success' — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_h_"
   aria-modal="false"
-  class="toast-stack absolute inset-x-0 bottom-0 overflow-hidden flex items-center rounded-3xl border py-3 pl-3 pr-8 bg-pca-green-300 border-pca-green-900"
+  class="toast-stack absolute inset-x-0 top-0 overflow-hidden flex max-w-[calc(100vw-1rem)] lg:max-w-lg items-center gap-3 rounded-full border py-3 pl-3 pr-8 bg-pca-green-300 border-pca-green-900"
   data-type="success"
   role="dialog"
   style="--toast-swipe-movement-x: 0px; --toast-swipe-movement-y: 0px; --toast-index: -1; --toast-offset-y: 0px;"
@@ -130,7 +130,7 @@ exports[`Toast > variant 'warning' — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_j_"
   aria-modal="false"
-  class="toast-stack absolute inset-x-0 bottom-0 overflow-hidden flex items-center rounded-3xl border py-3 pl-3 pr-8 bg-pca-orange-300 border-pca-orange-900"
+  class="toast-stack absolute inset-x-0 top-0 overflow-hidden flex max-w-[calc(100vw-1rem)] lg:max-w-lg items-center gap-3 rounded-full border py-3 pl-3 pr-8 bg-pca-orange-300 border-pca-orange-900"
   data-type="warning"
   role="dialog"
   style="--toast-swipe-movement-x: 0px; --toast-swipe-movement-y: 0px; --toast-index: -1; --toast-offset-y: 0px;"
