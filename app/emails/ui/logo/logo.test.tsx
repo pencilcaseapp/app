@@ -10,6 +10,6 @@ describe('Logo', () => {
   it('links the image at an absolute production URL', async () => {
     const html = await renderEmail(<Logo />);
 
-    expect(html).toContain('src="https://pencilcase.app/emails/');
+    expect(html).toContain('src="https://docs.pencilcase.app/emails/');
   });
 });

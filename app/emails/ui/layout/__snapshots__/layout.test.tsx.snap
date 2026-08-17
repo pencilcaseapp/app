@@ -63,7 +63,7 @@ exports[`Layout > renders the shell around its children 1`] = `
                             <img
                               alt="pencil case"
                               height="31"
-                              src="https://pencilcase.app/emails/pencil-case-logo.png"
+                              src="https://docs.pencilcase.app/emails/pencil-case-logo.png"
                               style="display:block;outline:none;border:none;text-decoration:none;margin-right:auto;margin-left:auto"
                               width="138" />
                           </td>
