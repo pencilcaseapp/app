@@ -35,6 +35,39 @@ export async function getDocument(id: string) {
   });
 }
 
+/**
+ * Reads the document alongside the viewer's collaborator status in a single
+ * query. Leaves out `content`, which only the live server needs.
+ */
+export async function getDocumentForViewer(id: string, viewerId?: string) {
+  if (!isUuid(id)) {
+    return undefined;
+  }
+
+  const collaborates = viewerId && isUuid(viewerId)
+    ? exists(
+        db.select({ one: sql`1` })
+          .from(documentCollaborators)
+          .where(and(
+            eq(documentCollaborators.documentId, documents.id),
+            eq(documentCollaborators.userId, viewerId),
+          )),
+      )
+    : sql`FALSE`;
+
+  const [document] = await db.select({
+    id: documents.id,
+    title: documents.title,
+    shared: documents.shared,
+    userId: documents.userId,
+    isCollaborator: sql<boolean>`${collaborates}`,
+  })
+    .from(documents)
+    .where(eq(documents.id, id));
+
+  return document;
+}
+
 export async function getDocumentTitle(id: string) {
   if (!isUuid(id)) {
     return undefined;
@@ -90,15 +123,34 @@ export async function updateDocument(
   return document;
 }
 
-export async function setDocumentShared(id: string, shared: boolean) {
-  if (!isUuid(id)) {
+export interface SetDocumentSharedInput {
+  documentId: string;
+  ownerId: string;
+  shared: boolean;
+}
+
+/**
+ * Flips the shared flag only when the document belongs to `ownerId`, so the
+ * authorisation check does not need a query of its own. Returns `undefined`
+ * when the document does not exist or is owned by somebody else.
+ */
+export async function setDocumentShared(input: SetDocumentSharedInput) {
+  const { documentId, ownerId, shared } = input;
+
+  if (!isUuid(documentId) || !isUuid(ownerId)) {
     return undefined;
   }
 
   const [document] = await db.update(documents)
     .set({ shared, updatedAt: sql`NOW()` })
-    .where(eq(documents.id, id))
-    .returning();
+    .where(and(
+      eq(documents.id, documentId),
+      eq(documents.userId, ownerId),
+    ))
+    .returning({
+      id: documents.id,
+      shared: documents.shared,
+    });
 
   return document;
 }
@@ -138,25 +190,4 @@ export async function removeCollaboratorsForDocument(documentId: string) {
 
   await db.delete(documentCollaborators)
     .where(eq(documentCollaborators.documentId, documentId));
-}
-
-export async function isDocumentCollaborator(
-  documentId: string,
-  userId: string,
-) {
-  if (!isUuid(documentId) || !isUuid(userId)) {
-    return false;
-  }
-
-  const collaborator = await db.query.documentCollaborators.findFirst({
-    columns: {
-      id: true,
-    },
-    where: {
-      documentId,
-      userId,
-    },
-  });
-
-  return collaborator !== undefined;
 }

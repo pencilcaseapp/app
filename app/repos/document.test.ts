@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { connectCollaborator, createDocument, getDocument, getDocumentList, getDocumentTitle, isDocumentCollaborator, removeCollaboratorsForDocument, setDocumentShared, updateDocument } from './document';
+import { connectCollaborator, createDocument, getDocument, getDocumentForViewer, getDocumentList, getDocumentTitle, removeCollaboratorsForDocument, setDocumentShared, updateDocument } from './document';
 import { db } from '~/db';
 import { connectDocumentCollaborator, createDocumentWithTitle, createEmptyDocument, createSharedDocument } from '~/test/data-factories/document';
 import { createTestUser } from '~/test/data-factories/user';
@@ -71,19 +71,46 @@ describe('updateDocument', () => {
 });
 
 describe('setDocumentShared', () => {
-  it('toggles the shared flag', async () => {
+  it('toggles the shared flag for the owner', async () => {
     const user = await createTestUser();
     const fixture = await createEmptyDocument(user.id);
 
-    const shared = await setDocumentShared(fixture.id, true);
+    const shared = await setDocumentShared({
+      documentId: fixture.id,
+      ownerId: user.id,
+      shared: true,
+    });
     expect(shared?.shared).toBe(true);
 
-    const unshared = await setDocumentShared(fixture.id, false);
+    const unshared = await setDocumentShared({
+      documentId: fixture.id,
+      ownerId: user.id,
+      shared: false,
+    });
     expect(unshared?.shared).toBe(false);
   });
 
+  it('returns undefined for somebody who is not the owner', async () => {
+    const owner = await createTestUser();
+    const other = await createTestUser();
+    const fixture = await createEmptyDocument(owner.id);
+
+    expect(await setDocumentShared({
+      documentId: fixture.id,
+      ownerId: other.id,
+      shared: true,
+    })).toBeUndefined();
+
+    const document = await getDocument(fixture.id);
+    expect(document?.shared).toBe(false);
+  });
+
   it('returns undefined for an invalid id', async () => {
-    expect(await setDocumentShared('not-a-uuid', true)).toBeUndefined();
+    expect(await setDocumentShared({
+      documentId: 'not-a-uuid',
+      ownerId: 'not-a-uuid',
+      shared: true,
+    })).toBeUndefined();
   });
 });
 
@@ -214,26 +241,43 @@ describe('removeCollaboratorsForDocument', () => {
   });
 });
 
-describe('isDocumentCollaborator', () => {
-  it('is true once the user is connected', async () => {
+describe('getDocumentForViewer', () => {
+  it('returns the document with the collaborator status', async () => {
     const owner = await createTestUser();
     const collaborator = await createTestUser();
-    const document = await createSharedDocument(owner.id);
+    const fixture = await createSharedDocument(owner.id);
 
-    expect(await isDocumentCollaborator(document.id, collaborator.id))
-      .toBe(false);
+    expect(await getDocumentForViewer(fixture.id, collaborator.id))
+      .toStrictEqual({
+        id: fixture.id,
+        title: fixture.title,
+        shared: true,
+        userId: owner.id,
+        isCollaborator: false,
+      });
 
     await connectCollaborator({
-      documentId: document.id,
+      documentId: fixture.id,
       userId: collaborator.id,
     });
 
-    expect(await isDocumentCollaborator(document.id, collaborator.id))
-      .toBe(true);
+    expect(await getDocumentForViewer(fixture.id, collaborator.id))
+      .toMatchObject({ isCollaborator: true });
   });
 
-  it('returns false for an invalid id', async () => {
-    expect(await isDocumentCollaborator('not-a-uuid', 'not-a-uuid'))
-      .toBe(false);
+  it('reports no collaborator status without a viewer', async () => {
+    const owner = await createTestUser();
+    const fixture = await createSharedDocument(owner.id);
+
+    expect(await getDocumentForViewer(fixture.id))
+      .toMatchObject({ isCollaborator: false });
+    expect(await getDocumentForViewer(fixture.id, 'not-a-uuid'))
+      .toMatchObject({ isCollaborator: false });
+  });
+
+  it('returns undefined for an unknown or invalid id', async () => {
+    expect(await getDocumentForViewer('not-a-uuid')).toBeUndefined();
+    expect(await getDocumentForViewer(crypto.randomUUID()))
+      .toBeUndefined();
   });
 });

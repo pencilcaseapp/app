@@ -1,6 +1,7 @@
 import { RouterContextProvider } from 'react-router';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { optionalUserSessionContext } from '~/contexts/user-session';
+import { OpenDocumentError } from '~/services/document';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
@@ -17,21 +18,20 @@ vi.mock('react-router', async () => {
   };
 });
 
-const getDocumentMock = vi.fn();
-const isDocumentCollaboratorMock = vi.fn();
-const connectCollaboratorMock = vi.fn();
-vi.mock('~/repos/document', async () => ({
-  getDocument: (id: string) => getDocumentMock(id),
-  isDocumentCollaborator: (documentId: string, userId: string) =>
-    isDocumentCollaboratorMock(documentId, userId),
-  connectCollaborator: (input: unknown) => connectCollaboratorMock(input),
-}));
+const openDocumentMock = vi.fn();
+vi.mock('~/services/document', async (importOriginal) => {
+  const actual = await importOriginal();
+
+  return {
+    ...actual as object,
+    openDocument: (...args: unknown[]) => openDocumentMock(...args),
+  };
+});
 
 const documentUrl = `/doc/${documentFixture.id}`;
 
 beforeEach(() => {
   vi.clearAllMocks();
-  isDocumentCollaboratorMock.mockResolvedValue(true);
 });
 
 function renderDoc(context: RouterContextProvider) {
@@ -41,81 +41,93 @@ function renderDoc(context: RouterContextProvider) {
   });
 }
 
+function openedDocument(overrides?: Partial<{
+  isOwner: boolean;
+  shared: boolean;
+  hasJoined: boolean;
+}>) {
+  return [null, {
+    title: documentFixture.title,
+    shared: false,
+    isOwner: true,
+    hasJoined: false,
+    ...overrides,
+  }];
+}
+
+test('opens the document for the signed in viewer', async () => {
+  const context = new RouterContextProvider();
+  context.set(optionalUserSessionContext, userFixture);
+  openDocumentMock.mockResolvedValue(openedDocument());
+
+  const { queryByText } = await renderDoc(context);
+
+  expect(openDocumentMock)
+    .toHaveBeenCalledWith(documentFixture.id, userFixture.id);
+  expect(queryByText('Permission Denied')).not.toBeInTheDocument();
+  expect(redirectMock).not.toHaveBeenCalled();
+});
+
 test('renders not found state', async () => {
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, userFixture);
-  getDocumentMock.mockResolvedValue(null);
+  openDocumentMock.mockResolvedValue([OpenDocumentError.NotFound]);
 
   const { findByText } = await renderDoc(context);
 
   expect(await findByText('Not Found')).toBeInTheDocument();
 });
 
-test('denies access to a private document', async () => {
+test('renders permission denied state', async () => {
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, userFixture);
-  getDocumentMock.mockResolvedValue({
-    ...documentFixture,
-    shared: false,
-    userId: 'different-user-id',
-  });
+  openDocumentMock.mockResolvedValue([OpenDocumentError.PermissionDenied]);
 
   const { findByText } = await renderDoc(context);
 
   expect(await findByText('Permission Denied')).toBeInTheDocument();
 });
 
-test('connects a first-time visitor and redirects to refresh the nav', async () => {
+test('sends an anonymous visitor to sign in', async () => {
   const context = new RouterContextProvider();
-  context.set(optionalUserSessionContext, userFixture);
-  getDocumentMock.mockResolvedValue({
-    ...documentFixture,
-    shared: true,
-    userId: 'different-user-id',
-  });
-  isDocumentCollaboratorMock
-    .mockResolvedValueOnce(false)
-    .mockResolvedValue(true);
+  context.set(optionalUserSessionContext, null);
+  openDocumentMock.mockResolvedValue([OpenDocumentError.PermissionDenied]);
 
   await renderDoc(context);
 
   await vi.waitFor(() => {
-    expect(connectCollaboratorMock).toHaveBeenCalledWith({
-      documentId: documentFixture.id,
-      userId: userFixture.id,
-    });
-    expect(redirectMock).toHaveBeenCalledWith(documentUrl);
+    expect(redirectMock)
+      .toHaveBeenCalledWith(`/signin?returnUrl=${encodeURIComponent(documentUrl)}`);
   });
 });
 
-test('does not reconnect a returning visitor', async () => {
+test('redirects a visitor who just joined to refresh the nav', async () => {
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, userFixture);
-  getDocumentMock.mockResolvedValue({
-    ...documentFixture,
-    shared: true,
-    userId: 'different-user-id',
+  openDocumentMock
+    .mockResolvedValueOnce(
+      openedDocument({ isOwner: false, shared: true, hasJoined: true }),
+    )
+    .mockResolvedValue(openedDocument({ isOwner: false, shared: true }));
+
+  await renderDoc(context);
+
+  await vi.waitFor(() => {
+    expect(redirectMock).toHaveBeenCalledWith(documentUrl);
   });
-  isDocumentCollaboratorMock.mockResolvedValue(true);
-
-  const { queryByText } = await renderDoc(context);
-
-  expect(connectCollaboratorMock).not.toHaveBeenCalled();
-  expect(redirectMock).not.toHaveBeenCalled();
-  expect(queryByText('Permission Denied')).not.toBeInTheDocument();
 });
 
 test('lets an anonymous visitor read a shared document', async () => {
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, null);
-  getDocumentMock.mockResolvedValue({
-    ...documentFixture,
-    shared: true,
-    userId: 'different-user-id',
-  });
+  openDocumentMock.mockResolvedValue(
+    openedDocument({ isOwner: false, shared: true }),
+  );
 
   const { queryByText } = await renderDoc(context);
 
-  expect(connectCollaboratorMock).not.toHaveBeenCalled();
+  expect(openDocumentMock)
+    .toHaveBeenCalledWith(documentFixture.id, undefined);
   expect(queryByText('Permission Denied')).not.toBeInTheDocument();
+  expect(redirectMock).not.toHaveBeenCalled();
 });
