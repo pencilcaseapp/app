@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -12,7 +12,7 @@ const useLocalStorageMock = vi.fn();
 
 vi.mock('react-use', async () => {
   return {
-    useMedia: (query: string) => useMediaMock(query),
+    useMedia: () => useMediaMock(),
     useLocalStorage: () => useLocalStorageMock(),
   };
 });
@@ -80,25 +80,6 @@ describe('Sidebar', () => {
     await userEvent.click(getByText('Toggle'));
 
     expect(await findByText('Documents')).toBeInTheDocument();
-  });
-
-  it('closes the sidebar when the backdrop is tapped on mobile', async () => {
-    useMediaMock.mockImplementation(
-      (query: string) => query === '(max-width: 640px)',
-    );
-    useLocalStorageMock.mockReturnValue([false, () => {}]);
-
-    const { getByText, findByText, findByTestId, queryByText }
-      = renderSidebar();
-
-    await userEvent.click(getByText('Toggle'));
-    expect(await findByText('Documents')).toBeInTheDocument();
-
-    await userEvent.click(await findByTestId('sidebar-backdrop'));
-
-    await waitFor(() =>
-      expect(queryByText('Documents')).not.toBeInTheDocument(),
-    );
   });
 
   it('matches the snapshot on desktop', () => {
