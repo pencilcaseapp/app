@@ -1,7 +1,7 @@
 import { Section } from 'react-email';
 import { Typography } from '../typography/typography';
 
-type OneTimeCodeProps = {
+export type OneTimeCodeProps = {
   code: string;
 };
 

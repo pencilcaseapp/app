@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 
-type LoadingIndicatorProps = {
+export type LoadingIndicatorProps = {
   className?: string;
 } & React.HTMLAttributes<HTMLDivElement>;
 

@@ -11,7 +11,7 @@ import {
 import { theme } from '../../theme';
 import { Logo } from '../logo/logo';
 
-type LayoutProps = {
+export type LayoutProps = {
   preview: string;
   children: React.ReactNode;
 };
