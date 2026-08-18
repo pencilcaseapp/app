@@ -1,6 +1,9 @@
 {
+  "id": "/",
   "name": "pencil case",
   "short_name": "pencil case",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
     {
       "src": "/icon-192.png",
