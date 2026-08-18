@@ -1,6 +1,16 @@
 {
+  "id": "/",
   "name": "pencil case",
   "short_name": "pencil case",
+  "start_url": "/",
+  "scope": "/",
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
+  },
   "icons": [
     {
       "src": "/icon-192.png",
