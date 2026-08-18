@@ -20,14 +20,18 @@ import {
 } from '@lexical/list';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
+import { StackedAvatars } from '~/ui/stacked-avatar/stacked-avatar';
+import { MAX_VISIBLE_COLLABORATORS } from '~/constants/presence';
+import type { Collaborator } from '~/utils/presence';
 
 export interface EditorPluginToolbarProps {
+  avatars: Collaborator[];
   topbarLeft?: React.ReactNode;
   topbarRight?: React.ReactNode;
 }
 
 export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
-  = ({ topbarLeft, topbarRight }) => {
+  = ({ avatars, topbarLeft, topbarRight }) => {
     const [editor] = useLexicalComposerContext();
     const [formatBlock, setFormatBlock] = useState<EditorFormatBlock>('p');
     const [textStyle, setTextStyle] = useState({
@@ -144,7 +148,17 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
         ref={topbarRef}
         hasBorder={isVirtualKeyboardOpen || isSidebarOpen}
         left={!isVirtualKeyboardOpen ? topbarLeft : <Button colorLight="secondary" icon="close" className="text-pca-grey-400!" iconTitle="close" />}
-        right={!isVirtualKeyboardOpen && topbarRight}
+        right={!isVirtualKeyboardOpen && (
+          <>
+            {avatars.length > 0 && (
+              <StackedAvatars
+                avatars={avatars}
+                maxVisible={MAX_VISIBLE_COLLABORATORS}
+              />
+            )}
+            {topbarRight}
+          </>
+        )}
         center={(
           (isWide || isVirtualKeyboardOpen) && (
             <Toolbar isScrolling={isScrolling}>

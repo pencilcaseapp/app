@@ -15,6 +15,7 @@ import { EditorPluginCodePrism } from './plugins/editor-plugin-code-prism';
 import { EditorPluginToolbar } from './plugins/editor-plugin-toolbar';
 import { EditorPluginRichText } from './plugins/editor-plugin-rich-text';
 import editorTheme from './editor-theme';
+import type { Collaborator } from '~/utils/presence';
 
 import './editor.css';
 import { EditorPluginAutoFocus } from './plugins/editor-plugin-auto-focus';
@@ -23,13 +24,14 @@ export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig
 
 export interface EditorProps extends React.PropsWithChildren {
   initialEditorState?: EditorConfig['editorState'];
-  avatars: string[];
+  avatars: Collaborator[];
   topbarLeft?: React.ReactNode;
   topbarRight?: React.ReactNode;
 }
 
 export const Editor: React.FC<EditorProps> = ({
   initialEditorState,
+  avatars,
   topbarLeft,
   topbarRight,
   children,
@@ -56,6 +58,7 @@ export const Editor: React.FC<EditorProps> = ({
     <div className="w-full relative">
       <LexicalComposer initialConfig={config}>
         <EditorPluginToolbar
+          avatars={avatars}
           topbarLeft={topbarLeft}
           topbarRight={topbarRight}
         />

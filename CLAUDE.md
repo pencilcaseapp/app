@@ -119,6 +119,21 @@ with `npm run email`. Email components snapshot the *inlined* CSS through
 pipeline across React Email upgrades. The OTP template's copy is load bearing
 for iOS one-time-code detection — read `docs/emails.md` before rewording it.
 
+**Presence — `app/utils/presence.ts`.** The avatars next to the Share button
+are the other people in the document, read from the Yjs awareness the
+Hocuspocus server broadcasts on every join and drops on every leave
+(`useCollaborators`). Lexical writes `name` and `color` into awareness for its
+remote cursors, so identity is handed to `CollaborationPlugin` as
+`username`/`cursorColor` and read back out of awareness — one source for both
+the cursors and the avatars. A signed in user gets their name (or their email
+when they have none) and a colour hashed from their user id; a signed out
+visitor gets a name from `ANONYMOUS_NAMES` hashed from a guest id kept in
+`localStorage` (`app/utils/guest-id.ts`), which is what makes both stable
+across rejoins. Colours come from `PRESENCE_COLORS`, all of which clear 4.5:1
+against the white initial and 3:1 against either page background. The local
+connection is filtered out by client id and names are deduplicated, so your own
+tabs never show up as collaborators.
+
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader
 order would reshuffle the navigation on each revalidation. `useStableOrder`

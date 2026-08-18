@@ -11,8 +11,9 @@ import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { EditorPluginToolbar } from './editor-plugin-toolbar';
 import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
+import type { Collaborator } from '~/utils/presence';
 
-function renderToolbar() {
+function renderToolbar(avatars: Collaborator[] = []) {
   return render(
     <SidebarProvider>
       <LexicalComposer
@@ -24,7 +25,7 @@ function renderToolbar() {
           nodes: [HeadingNode, ListNode, ListItemNode],
         }}
       >
-        <EditorPluginToolbar />
+        <EditorPluginToolbar avatars={avatars} />
         <RichTextPlugin
           contentEditable={
             <ContentEditable aria-label="editor" />
@@ -38,7 +39,40 @@ function renderToolbar() {
   );
 }
 
+const collaborators: Collaborator[] = [
+  { name: 'Caroline', color: '#2563EB' },
+  { name: 'Harold', color: '#C2410C' },
+  { name: 'Alfred', color: '#7C3AED' },
+  { name: 'Nova', color: '#15803D' },
+];
+
 describe('EditorPluginToolbar', () => {
+  test('renders no avatars when nobody else is in the document', () => {
+    renderToolbar();
+
+    expect(screen.queryByLabelText('Caroline')).not.toBeInTheDocument();
+  });
+
+  test('renders an avatar per collaborator', () => {
+    renderToolbar(collaborators.slice(0, 3));
+
+    expect(screen.getByLabelText('Caroline')).toBeInTheDocument();
+    expect(screen.getByLabelText('Harold')).toBeInTheDocument();
+    expect(screen.getByLabelText('Alfred')).toBeInTheDocument();
+    expect(screen.queryByText('+')).not.toBeInTheDocument();
+  });
+
+  test('collapses the fourth collaborator into the overflow', () => {
+    renderToolbar(collaborators);
+
+    expect(screen.getByLabelText('Caroline')).toBeInTheDocument();
+    expect(screen.getByLabelText('Harold')).toBeInTheDocument();
+    expect(screen.getByLabelText('Alfred')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Nova')).not.toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('+')).toBeInTheDocument();
+  });
+
   test('renders all toggle buttons', () => {
     renderToolbar();
 

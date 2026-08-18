@@ -20,6 +20,7 @@ import { SharePanel } from '~/components/share-panel/share-panel';
 import { Button } from '~/ui/button/button';
 import { DocEmptyState } from '~/components/doc-empty-state/doc-empty-state';
 import { PageTitle } from '~/components/page-title/page-title';
+import { getUserPresenceIdentity } from '~/utils/presence';
 
 enum DocumentError {
   NotFound,
@@ -80,6 +81,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     signInUrl: user ? null : getSignInUrl(documentUrl),
     isOwner: document.isOwner,
     shared: document.shared,
+    presence: user ? getUserPresenceIdentity(user) : null,
     shareUrl: new URL(documentUrl, request.url).toString(),
   };
 }
@@ -150,6 +152,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
         <CollaborativeEditor
           key={params.id}
           id={params.id}
+          presence={loaderData.ok ? loaderData.presence : null}
           onTitleChange={setTitle}
           onFirstEdit={onFirstEdit}
           onAccessRevoked={onAccessRevoked}
