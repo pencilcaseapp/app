@@ -32,9 +32,9 @@ export const Primary: Story = {
 export const WithCollaborators: Story = {
   args: {
     avatars: [
-      { name: 'Caroline', color: PRESENCE_COLORS[0] },
-      { name: 'Harold', color: PRESENCE_COLORS[4] },
-      { name: 'Alfred', color: PRESENCE_COLORS[1] },
+      { name: 'Caroline', color: PRESENCE_COLORS[9] },
+      { name: 'Harold', color: PRESENCE_COLORS[1] },
+      { name: 'Alfred', color: PRESENCE_COLORS[11] },
     ],
     initialEditorState: JSON.stringify(initialEditorStateFixture),
   },
@@ -43,11 +43,11 @@ export const WithCollaborators: Story = {
 export const WithCollaboratorOverflow: Story = {
   args: {
     avatars: [
-      { name: 'Caroline', color: PRESENCE_COLORS[0] },
-      { name: 'Harold', color: PRESENCE_COLORS[4] },
-      { name: 'Alfred', color: PRESENCE_COLORS[1] },
-      { name: 'Nova', color: PRESENCE_COLORS[6] },
-      { name: 'Zephyr', color: PRESENCE_COLORS[2] },
+      { name: 'Caroline', color: PRESENCE_COLORS[9] },
+      { name: 'Harold', color: PRESENCE_COLORS[1] },
+      { name: 'Alfred', color: PRESENCE_COLORS[11] },
+      { name: 'Otter', color: PRESENCE_COLORS[5] },
+      { name: 'Quokka', color: PRESENCE_COLORS[14] },
     ],
     initialEditorState: JSON.stringify(initialEditorStateFixture),
   },

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Avatar } from './avatar';
+import { ANONYMOUS_NAMES, PRESENCE_COLORS } from '~/constants/presence';
 
 /** 🧑‍🎨 The `Avatar` component is used to display a user's avatar. */
 const meta: Meta<typeof Avatar> = {
@@ -44,6 +45,22 @@ export const CustomColors: Story = {
       <Avatar name="Charlie" color="oklch(60.6% 0.25 292.717)" size="small" />
       <Avatar name="Diana" color="oklch(76.9% 0.188 70.08)" size="small" />
       <Avatar name="Eve" color="oklch(58.5% 0.233 277.117)" size="small" />
+    </div>
+  ),
+};
+
+/** The presence palette, to check every colour against both backgrounds. */
+export const PresencePalette: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-2">
+      {PRESENCE_COLORS.map((color, index) => (
+        <Avatar
+          key={color}
+          name={ANONYMOUS_NAMES[index * 2]}
+          color={color}
+          size="large"
+        />
+      ))}
     </div>
   ),
 };
