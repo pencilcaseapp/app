@@ -1,5 +1,9 @@
 import type { StatesArray } from '@hocuspocus/provider';
-import { ANONYMOUS_NAMES, PRESENCE_COLORS } from '~/constants/presence';
+import {
+  ANONYMOUS_NAMES,
+  MAX_PRESENCE_NAME_LENGTH,
+  PRESENCE_COLORS,
+} from '~/constants/presence';
 
 export interface Collaborator {
   /** The person behind the connection: a user id, or a guest id. */
@@ -68,6 +72,31 @@ export function getGuestPresenceIdentity(guestId: string): Collaborator {
 }
 
 /**
+ * Awareness state is written by the other clients, so it is only as
+ * trustworthy as they are. Clamping the name and insisting the colour comes
+ * from the palette means a hostile peer can misrepresent itself but cannot
+ * wreck the layout or the contrast of everybody else's document.
+ */
+function toDisplayName(name: string): string | null {
+  const trimmed = name.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  return trimmed.length > MAX_PRESENCE_NAME_LENGTH
+    ? `${trimmed.slice(0, MAX_PRESENCE_NAME_LENGTH - 1)}…`
+    : trimmed;
+}
+
+function toPresenceColor(color: unknown, key: string): string {
+  const isFromPalette = typeof color === 'string'
+    && (PRESENCE_COLORS as readonly string[]).includes(color);
+
+  return isFromPalette ? color : getPresenceColor(key);
+}
+
+/**
  * The other people in the document, read from the awareness states the
  * Hocuspocus server broadcasts. Lexical writes `name` and `color` there for
  * the remote cursors, which is the same identity the avatars show.
@@ -86,19 +115,25 @@ export function getRemoteCollaborators(
   for (const state of states) {
     const { clientId, name, color, awarenessData } = state;
 
-    if (
-      clientId === localClientId
-      || typeof name !== 'string'
-      || typeof color !== 'string'
-    ) {
+    if (clientId === localClientId || typeof name !== 'string') {
+      continue;
+    }
+
+    const displayName = toDisplayName(name);
+
+    if (displayName === null) {
       continue;
     }
 
     const presenceId = awarenessData?.presenceId;
-    const id = typeof presenceId === 'string' ? presenceId : name;
+    const id = typeof presenceId === 'string' ? presenceId : displayName;
 
     if (!collaborators.has(id)) {
-      collaborators.set(id, { id, name, color });
+      collaborators.set(id, {
+        id,
+        name: displayName,
+        color: toPresenceColor(color, id),
+      });
     }
   }
 

@@ -64,6 +64,14 @@ export const ANONYMOUS_NAMES = [
   'Wombat',
 ] as const;
 
+/**
+ * How much of a collaborator's name we are willing to render. Awareness state
+ * comes from the other clients, and Lexical draws the cursor label with
+ * `white-space: nowrap`, so an unbounded name would stripe across everybody
+ * else's document.
+ */
+export const MAX_PRESENCE_NAME_LENGTH = 40;
+
 export const GUEST_ID_STORAGE_KEY = 'pca-guest-id';
 
 export const MAX_VISIBLE_COLLABORATORS = 3;

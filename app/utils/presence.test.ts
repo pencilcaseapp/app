@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { ANONYMOUS_NAMES, PRESENCE_COLORS } from '~/constants/presence';
+import {
+  ANONYMOUS_NAMES,
+  MAX_PRESENCE_NAME_LENGTH,
+  PRESENCE_COLORS,
+} from '~/constants/presence';
 import {
   getAnonymousName,
   getGuestPresenceIdentity,
@@ -154,12 +158,47 @@ describe('getRemoteCollaborators', () => {
   });
 
   it('should skip connections that have no identity yet', () => {
-    const connecting = [
-      ...states,
-      { clientId: 4 },
-      { clientId: 5, name: 'Bob' },
-    ];
+    const connecting = [...states, { clientId: 4 }, { clientId: 5, name: '' }];
 
     expect(getRemoteCollaborators(connecting, 1)).toHaveLength(2);
+  });
+
+  it('should clamp a name long enough to stripe across the document', () => {
+    const shouting = [state(2, 'guest-a', { name: 'a'.repeat(500) })];
+
+    const [collaborator] = getRemoteCollaborators(shouting, 1);
+
+    expect(collaborator.name).toHaveLength(MAX_PRESENCE_NAME_LENGTH);
+    expect(collaborator.name.endsWith('…')).toBe(true);
+  });
+
+  it('should leave a name of a reasonable length alone', () => {
+    const named = [state(2, 'guest-a', { name: 'Ada Lovelace' })];
+
+    expect(getRemoteCollaborators(named, 1)[0].name).toBe('Ada Lovelace');
+  });
+
+  it('should replace a colour that is not in the palette', () => {
+    const offPalette = [state(2, 'guest-a', { color: 'transparent' })];
+
+    expect(PRESENCE_COLORS)
+      .toContain(getRemoteCollaborators(offPalette, 1)[0].color);
+  });
+
+  it('should replace a missing colour rather than hide the collaborator',
+    () => {
+      const colorless = [{ clientId: 2, name: 'Otter' }];
+
+      const [collaborator] = getRemoteCollaborators(colorless, 1);
+
+      expect(collaborator.name).toBe('Otter');
+      expect(PRESENCE_COLORS).toContain(collaborator.color);
+    });
+
+  it('should keep a colour that is in the palette', () => {
+    const onPalette = [state(2, 'guest-a', { color: PRESENCE_COLORS[7] })];
+
+    expect(getRemoteCollaborators(onPalette, 1)[0].color)
+      .toBe(PRESENCE_COLORS[7]);
   });
 });

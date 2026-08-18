@@ -137,7 +137,13 @@ presence id, which keeps your own second tab out without merging two guests who
 happened to draw the same animal. Pass that object to `CollaborationPlugin` as
 a stable reference — it is one of the plugin's effect dependencies. Colours
 come from `PRESENCE_COLORS`, all of which clear 4.5:1 against the white initial
-and 3:1 against either page background.
+and 3:1 against either page background. Awareness is written by the other
+clients, so `getRemoteCollaborators` treats it as untrusted input: names are
+clamped to `MAX_PRESENCE_NAME_LENGTH` (Lexical draws the cursor label
+`nowrap`, so an unbounded one stripes across the document) and anything
+outside the palette falls back to a hashed colour. That bounds the damage to
+misrepresenting yourself; a name is still free text, which only server-side
+identity would fix.
 
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader
