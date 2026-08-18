@@ -44,10 +44,16 @@ describe('useCollaborators', () => {
 
     changeAwareness([
       { clientId: LOCAL_CLIENT_ID, name: 'Ada', color: '#2563EB' },
-      { clientId: 2, name: 'Grace', color: '#DB2777' },
+      {
+        clientId: 2,
+        name: 'Grace',
+        color: '#DB2777',
+        awarenessData: { presenceId: 'grace' },
+      },
     ]);
 
-    expect(result.current).toEqual([{ name: 'Grace', color: '#DB2777' }]);
+    expect(result.current)
+      .toEqual([{ id: 'grace', name: 'Grace', color: '#DB2777' }]);
   });
 
   it('should report somebody leaving', () => {

@@ -32,9 +32,9 @@ export const Primary: Story = {
 export const WithCollaborators: Story = {
   args: {
     avatars: [
-      { name: 'Caroline', color: PRESENCE_COLORS[9] },
-      { name: 'Harold', color: PRESENCE_COLORS[1] },
-      { name: 'Alfred', color: PRESENCE_COLORS[11] },
+      { id: 'caroline', name: 'Caroline', color: PRESENCE_COLORS[9] },
+      { id: 'harold', name: 'Harold', color: PRESENCE_COLORS[1] },
+      { id: 'alfred', name: 'Alfred', color: PRESENCE_COLORS[11] },
     ],
     initialEditorState: JSON.stringify(initialEditorStateFixture),
   },
@@ -43,11 +43,11 @@ export const WithCollaborators: Story = {
 export const WithCollaboratorOverflow: Story = {
   args: {
     avatars: [
-      { name: 'Caroline', color: PRESENCE_COLORS[9] },
-      { name: 'Harold', color: PRESENCE_COLORS[1] },
-      { name: 'Alfred', color: PRESENCE_COLORS[11] },
-      { name: 'Otter', color: PRESENCE_COLORS[5] },
-      { name: 'Quokka', color: PRESENCE_COLORS[14] },
+      { id: 'caroline', name: 'Caroline', color: PRESENCE_COLORS[9] },
+      { id: 'harold', name: 'Harold', color: PRESENCE_COLORS[1] },
+      { id: 'alfred', name: 'Alfred', color: PRESENCE_COLORS[11] },
+      { id: 'otter', name: 'Otter', color: PRESENCE_COLORS[5] },
+      { id: 'quokka', name: 'Quokka', color: PRESENCE_COLORS[14] },
     ],
     initialEditorState: JSON.stringify(initialEditorStateFixture),
   },

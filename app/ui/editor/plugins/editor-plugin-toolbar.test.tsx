@@ -40,10 +40,10 @@ function renderToolbar(avatars: Collaborator[] = []) {
 }
 
 const collaborators: Collaborator[] = [
-  { name: 'Caroline', color: '#2563EB' },
-  { name: 'Harold', color: '#C2410C' },
-  { name: 'Alfred', color: '#7C3AED' },
-  { name: 'Nova', color: '#15803D' },
+  { id: 'caroline', name: 'Caroline', color: '#2563EB' },
+  { id: 'harold', name: 'Harold', color: '#C2410C' },
+  { id: 'alfred', name: 'Alfred', color: '#7C3AED' },
+  { id: 'otter', name: 'Otter', color: '#15803D' },
 ];
 
 describe('EditorPluginToolbar', () => {
@@ -68,7 +68,7 @@ describe('EditorPluginToolbar', () => {
     expect(screen.getByLabelText('Caroline')).toBeInTheDocument();
     expect(screen.getByLabelText('Harold')).toBeInTheDocument();
     expect(screen.getByLabelText('Alfred')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Nova')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Otter')).not.toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
     expect(screen.getByText('+')).toBeInTheDocument();
   });

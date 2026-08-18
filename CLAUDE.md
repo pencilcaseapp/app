@@ -129,10 +129,15 @@ the cursors and the avatars. A signed in user gets their name (or their email
 when they have none) and a colour hashed from their user id; a signed out
 visitor gets a name from `ANONYMOUS_NAMES` hashed from a guest id kept in
 `localStorage` (`app/utils/guest-id.ts`), which is what makes both stable
-across rejoins. Colours come from `PRESENCE_COLORS`, all of which clear 4.5:1
-against the white initial and 3:1 against either page background. The local
-connection is filtered out by client id and names are deduplicated, so your own
-tabs never show up as collaborators.
+across rejoins. That same id rides along in awareness as `awarenessData`
+(`PresenceAwarenessData`), which Lexical preserves through its own updates, so
+the list holds one entry per person rather than per connection: the local
+connection is dropped by client id and the remaining ones are deduplicated by
+presence id, which keeps your own second tab out without merging two guests who
+happened to draw the same animal. Pass that object to `CollaborationPlugin` as
+a stable reference — it is one of the plugin's effect dependencies. Colours
+come from `PRESENCE_COLORS`, all of which clear 4.5:1 against the white initial
+and 3:1 against either page background.
 
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader

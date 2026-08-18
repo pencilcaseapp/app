@@ -51,6 +51,10 @@ describe('getAnonymousName', () => {
 });
 
 describe('getUserPresenceIdentity', () => {
+  it('should identify the collaborator by the user id', () => {
+    expect(getUserPresenceIdentity(user).id).toBe(user.id);
+  });
+
   it('should use the name of the user', () => {
     expect(getUserPresenceIdentity(user).name).toBe('Ada Lovelace');
   });
@@ -77,6 +81,10 @@ describe('getUserPresenceIdentity', () => {
 });
 
 describe('getGuestPresenceIdentity', () => {
+  it('should identify the collaborator by the guest id', () => {
+    expect(getGuestPresenceIdentity('guest-1').id).toBe('guest-1');
+  });
+
   it('should keep name and colour of a returning guest', () => {
     expect(getGuestPresenceIdentity('guest-1'))
       .toEqual(getGuestPresenceIdentity('guest-1'));
@@ -91,17 +99,23 @@ describe('getGuestPresenceIdentity', () => {
 });
 
 describe('getRemoteCollaborators', () => {
+  const state = (clientId: number, presenceId: string, over = {}) => ({
+    clientId,
+    name: presenceId,
+    color: '#2563EB',
+    awarenessData: { presenceId },
+    ...over,
+  });
+
   const states = [
-    { clientId: 1, name: 'Ada', color: '#2563EB' },
-    { clientId: 2, name: 'Grace', color: '#DB2777' },
-    { clientId: 3, name: 'Alan', color: '#15803D' },
+    state(1, 'ada'),
+    state(2, 'grace'),
+    state(3, 'alan'),
   ];
 
   it('should leave the local connection out', () => {
-    expect(getRemoteCollaborators(states, 1)).toEqual([
-      { name: 'Grace', color: '#DB2777' },
-      { name: 'Alan', color: '#15803D' },
-    ]);
+    expect(getRemoteCollaborators(states, 1).map(c => c.id))
+      .toEqual(['grace', 'alan']);
   });
 
   it('should keep everybody when the local client is not in the states',
@@ -110,14 +124,32 @@ describe('getRemoteCollaborators', () => {
     });
 
   it('should collapse the several tabs of the same person', () => {
-    const withSecondTab = [
-      ...states,
-      { clientId: 4, name: 'Grace', color: '#DB2777' },
+    const withSecondTab = [...states, state(4, 'grace')];
+
+    expect(getRemoteCollaborators(withSecondTab, 1).map(c => c.id))
+      .toEqual(['grace', 'alan']);
+  });
+
+  it('should keep two guests who drew the same name apart', () => {
+    const sameName = [
+      state(2, 'guest-a', { name: 'Otter', color: '#DC2626' }),
+      state(3, 'guest-b', { name: 'Otter', color: '#0F766E' }),
     ];
 
-    expect(getRemoteCollaborators(withSecondTab, 1)).toEqual([
-      { name: 'Grace', color: '#DB2777' },
-      { name: 'Alan', color: '#15803D' },
+    expect(getRemoteCollaborators(sameName, 1)).toEqual([
+      { id: 'guest-a', name: 'Otter', color: '#DC2626' },
+      { id: 'guest-b', name: 'Otter', color: '#0F766E' },
+    ]);
+  });
+
+  it('should fall back to the name when there is no presence id', () => {
+    const withoutPresenceId = [
+      { clientId: 2, name: 'Otter', color: '#DC2626' },
+      { clientId: 3, name: 'Otter', color: '#0F766E' },
+    ];
+
+    expect(getRemoteCollaborators(withoutPresenceId, 1)).toEqual([
+      { id: 'Otter', name: 'Otter', color: '#DC2626' },
     ]);
   });
 

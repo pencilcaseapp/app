@@ -4,7 +4,7 @@ import * as Y from 'yjs';
 import type { Provider } from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui/editor/editor';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSocketClient } from '~/contexts/socket-client';
 import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
 import { useFirstLocalEdit } from '~/hooks/use-first-local-edit';
@@ -16,6 +16,7 @@ import { getGuestId } from '~/utils/guest-id';
 import {
   getGuestPresenceIdentity,
   type Collaborator,
+  type PresenceAwarenessData,
 } from '~/utils/presence';
 
 export interface CollaborativeEditorProps {
@@ -47,6 +48,12 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     // so they keep their name and colour when they come back.
     const [identity] = useState(
       () => presence ?? getGuestPresenceIdentity(getGuestId()),
+    );
+    // Lexical re-runs its awareness effects whenever this changes identity,
+    // so it has to stay the same object for as long as the editor is open.
+    const awarenessData = useMemo<PresenceAwarenessData>(
+      () => ({ presenceId: identity.id }),
+      [identity.id],
     );
     const [doc] = useState(() => new Y.Doc());
     useExtractDocumentTitle(doc, onTitleChange);
@@ -112,6 +119,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
             shouldBootstrap={true}
             username={identity.name}
             cursorColor={identity.color}
+            awarenessData={awarenessData}
             cursorsContainerRef={ref}
           />
           {createPortal(<div ref={ref}></div>, document.body)}
