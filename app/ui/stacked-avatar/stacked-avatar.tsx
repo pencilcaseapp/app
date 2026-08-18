@@ -28,7 +28,7 @@ export const StackedAvatars: React.FC<StackedAvatarsProps> = ({
                   {visibleAvatars.map(avatar => (
                     <Avatar
                       as="div"
-                      key={avatar.name}
+                      key={avatar.id ?? avatar.name}
                       className="pointer-events-none focus:outline-none"
                       tabIndex={-1}
                       name={avatar.name}
@@ -48,7 +48,7 @@ export const StackedAvatars: React.FC<StackedAvatarsProps> = ({
               <DropdownMenuPortal>
                 <DropdownMenuContent align="end" className="flex gap-2" hideWhenDetached={false}>
                   {avatars.map(avatar => (
-                    <DropdownMenuItem key={avatar.name} as="div" className="cursor-default pointer-events-none">
+                    <DropdownMenuItem key={avatar.id ?? avatar.name} as="div" className="cursor-default pointer-events-none">
                       <div className="flex justify-start items-center gap-0.5">
                         <Avatar name={avatar.name} color={avatar.color} size="small" />
                         <Typography variant="bodyTiny" className="ml-2">
@@ -65,7 +65,7 @@ export const StackedAvatars: React.FC<StackedAvatarsProps> = ({
             <div className="inline-flex h-8 items-center justify-end -space-x-1 transition-all duration-300 ease-in-out">
               {avatars.map(avatar => (
                 <Avatar
-                  key={avatar.name}
+                  key={avatar.id ?? avatar.name}
                   name={avatar.name}
                   color={avatar.color}
                   size="small"

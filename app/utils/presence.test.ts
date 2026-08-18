@@ -1,0 +1,204 @@
+import { describe, expect, it } from 'vitest';
+import {
+  ANONYMOUS_NAMES,
+  MAX_PRESENCE_NAME_LENGTH,
+  PRESENCE_COLORS,
+} from '~/constants/presence';
+import {
+  getAnonymousName,
+  getGuestPresenceIdentity,
+  getPresenceColor,
+  getRemoteCollaborators,
+  getUserPresenceIdentity,
+} from './presence';
+
+const user = {
+  id: '3f3f0c3e-6c1a-4a1b-9a4c-6a1f4a9d1b2c',
+  name: 'Ada Lovelace',
+  email: 'ada@example.com',
+};
+
+describe('getPresenceColor', () => {
+  it('should pick a colour from the palette', () => {
+    expect(PRESENCE_COLORS).toContain(getPresenceColor(user.id));
+  });
+
+  it('should give the same key the same colour every time', () => {
+    expect(getPresenceColor(user.id)).toBe(getPresenceColor(user.id));
+  });
+
+  it('should spread different keys over the palette', () => {
+    const colors = new Set(
+      Array.from({ length: 200 }, (_, i) => getPresenceColor(`key-${i}`)),
+    );
+
+    expect(colors.size).toBe(PRESENCE_COLORS.length);
+  });
+});
+
+describe('getAnonymousName', () => {
+  it('should pick a name from the list', () => {
+    expect(ANONYMOUS_NAMES).toContain(getAnonymousName('guest-1'));
+  });
+
+  it('should give the same guest the same name every time', () => {
+    expect(getAnonymousName('guest-1')).toBe(getAnonymousName('guest-1'));
+  });
+
+  it('should spread different guests over the list', () => {
+    const names = new Set(
+      Array.from({ length: 500 }, (_, i) => getAnonymousName(`guest-${i}`)),
+    );
+
+    expect(names.size).toBe(ANONYMOUS_NAMES.length);
+  });
+});
+
+describe('getUserPresenceIdentity', () => {
+  it('should identify the collaborator by the user id', () => {
+    expect(getUserPresenceIdentity(user).id).toBe(user.id);
+  });
+
+  it('should use the name of the user', () => {
+    expect(getUserPresenceIdentity(user).name).toBe('Ada Lovelace');
+  });
+
+  it('should fall back to the email when there is no name', () => {
+    expect(getUserPresenceIdentity({ ...user, name: null }).name)
+      .toBe('ada@example.com');
+  });
+
+  it('should fall back to the email when the name is blank', () => {
+    expect(getUserPresenceIdentity({ ...user, name: '   ' }).name)
+      .toBe('ada@example.com');
+  });
+
+  it('should trim the name', () => {
+    expect(getUserPresenceIdentity({ ...user, name: ' Ada ' }).name)
+      .toBe('Ada');
+  });
+
+  it('should keep the colour of a returning user', () => {
+    expect(getUserPresenceIdentity(user).color)
+      .toBe(getUserPresenceIdentity({ ...user, name: 'Ada L.' }).color);
+  });
+});
+
+describe('getGuestPresenceIdentity', () => {
+  it('should identify the collaborator by the guest id', () => {
+    expect(getGuestPresenceIdentity('guest-1').id).toBe('guest-1');
+  });
+
+  it('should keep name and colour of a returning guest', () => {
+    expect(getGuestPresenceIdentity('guest-1'))
+      .toEqual(getGuestPresenceIdentity('guest-1'));
+  });
+
+  it('should give a guest a name and a colour', () => {
+    const identity = getGuestPresenceIdentity('guest-1');
+
+    expect(ANONYMOUS_NAMES).toContain(identity.name);
+    expect(PRESENCE_COLORS).toContain(identity.color);
+  });
+});
+
+describe('getRemoteCollaborators', () => {
+  const state = (clientId: number, presenceId: string, over = {}) => ({
+    clientId,
+    name: presenceId,
+    color: '#2563EB',
+    awarenessData: { presenceId },
+    ...over,
+  });
+
+  const states = [
+    state(1, 'ada'),
+    state(2, 'grace'),
+    state(3, 'alan'),
+  ];
+
+  it('should leave the local connection out', () => {
+    expect(getRemoteCollaborators(states, 1).map(c => c.id))
+      .toEqual(['grace', 'alan']);
+  });
+
+  it('should keep everybody when the local client is not in the states',
+    () => {
+      expect(getRemoteCollaborators(states, 99)).toHaveLength(3);
+    });
+
+  it('should collapse the several tabs of the same person', () => {
+    const withSecondTab = [...states, state(4, 'grace')];
+
+    expect(getRemoteCollaborators(withSecondTab, 1).map(c => c.id))
+      .toEqual(['grace', 'alan']);
+  });
+
+  it('should keep two guests who drew the same name apart', () => {
+    const sameName = [
+      state(2, 'guest-a', { name: 'Otter', color: '#DC2626' }),
+      state(3, 'guest-b', { name: 'Otter', color: '#0F766E' }),
+    ];
+
+    expect(getRemoteCollaborators(sameName, 1)).toEqual([
+      { id: 'guest-a', name: 'Otter', color: '#DC2626' },
+      { id: 'guest-b', name: 'Otter', color: '#0F766E' },
+    ]);
+  });
+
+  it('should fall back to the name when there is no presence id', () => {
+    const withoutPresenceId = [
+      { clientId: 2, name: 'Otter', color: '#DC2626' },
+      { clientId: 3, name: 'Otter', color: '#0F766E' },
+    ];
+
+    expect(getRemoteCollaborators(withoutPresenceId, 1)).toEqual([
+      { id: 'Otter', name: 'Otter', color: '#DC2626' },
+    ]);
+  });
+
+  it('should skip connections that have no identity yet', () => {
+    const connecting = [...states, { clientId: 4 }, { clientId: 5, name: '' }];
+
+    expect(getRemoteCollaborators(connecting, 1)).toHaveLength(2);
+  });
+
+  it('should clamp a name long enough to stripe across the document', () => {
+    const shouting = [state(2, 'guest-a', { name: 'a'.repeat(500) })];
+
+    const [collaborator] = getRemoteCollaborators(shouting, 1);
+
+    expect(collaborator.name).toHaveLength(MAX_PRESENCE_NAME_LENGTH);
+    expect(collaborator.name.endsWith('…')).toBe(true);
+  });
+
+  it('should leave a name of a reasonable length alone', () => {
+    const named = [state(2, 'guest-a', { name: 'Ada Lovelace' })];
+
+    expect(getRemoteCollaborators(named, 1)[0].name).toBe('Ada Lovelace');
+  });
+
+  it('should replace a colour that is not in the palette', () => {
+    const offPalette = [state(2, 'guest-a', { color: 'transparent' })];
+
+    expect(PRESENCE_COLORS)
+      .toContain(getRemoteCollaborators(offPalette, 1)[0].color);
+  });
+
+  it('should replace a missing colour rather than hide the collaborator',
+    () => {
+      const colorless = [{ clientId: 2, name: 'Otter' }];
+
+      const [collaborator] = getRemoteCollaborators(colorless, 1);
+
+      expect(collaborator.name).toBe('Otter');
+      expect(PRESENCE_COLORS).toContain(collaborator.color);
+    });
+
+  it('should keep a colour that is in the palette', () => {
+    const onPalette = [state(2, 'guest-a', { color: PRESENCE_COLORS[7] })];
+
+    expect(getRemoteCollaborators(onPalette, 1)[0].color)
+      .toBe(PRESENCE_COLORS[7]);
+  });
+});

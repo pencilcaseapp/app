@@ -4,16 +4,24 @@ import * as Y from 'yjs';
 import type { Provider } from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui/editor/editor';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSocketClient } from '~/contexts/socket-client';
 import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
 import { useFirstLocalEdit } from '~/hooks/use-first-local-edit';
 import { useAccessRevoked } from '~/hooks/use-access-revoked';
+import { useCollaborators } from '~/hooks/use-collaborators';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 import { createPortal } from 'react-dom';
+import { getGuestId } from '~/utils/guest-id';
+import {
+  getGuestPresenceIdentity,
+  type Collaborator,
+  type PresenceAwarenessData,
+} from '~/utils/presence';
 
 export interface CollaborativeEditorProps {
   id: string;
+  presence: Collaborator | null;
   onTitleChange?: (title: string | null) => void;
   onFirstEdit?: () => void;
   onAccessRevoked?: () => void;
@@ -24,6 +32,7 @@ export interface CollaborativeEditorProps {
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
   = ({
     id,
+    presence,
     onTitleChange,
     onFirstEdit,
     onAccessRevoked,
@@ -34,8 +43,18 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     const [isSynced, setIsSynced] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const [isVirtualKeyboardOpen] = useVirtualKeyboard();
-    const [avatars, setAvatars] = useState<string[]>([]);
     const socketClient = useSocketClient();
+    // A signed out visitor is identified by a guest id kept in their browser,
+    // so they keep their name and colour when they come back.
+    const [identity] = useState(
+      () => presence ?? getGuestPresenceIdentity(getGuestId()),
+    );
+    // Lexical re-runs its awareness effects whenever this changes identity,
+    // so it has to stay the same object for as long as the editor is open.
+    const awarenessData = useMemo<PresenceAwarenessData>(
+      () => ({ presenceId: identity.id }),
+      [identity.id],
+    );
     const [doc] = useState(() => new Y.Doc());
     useExtractDocumentTitle(doc, onTitleChange);
     const [provider] = useState(() => new HocuspocusProvider({
@@ -45,10 +64,9 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
       onSynced: ({ state }) => {
         setIsSynced(state);
       },
-      onAwarenessChange({ states }) {
-        setAvatars(states.map(state => state.name));
-      },
     }));
+
+    const collaborators = useCollaborators(provider);
 
     useFirstLocalEdit(doc, provider, onFirstEdit);
     useAccessRevoked(provider, onAccessRevoked);
@@ -91,7 +109,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     return (
       <LexicalCollaboration>
         <Editor
-          avatars={avatars}
+          avatars={collaborators}
           topbarLeft={topbarLeft}
           topbarRight={topbarRight}
         >
@@ -99,6 +117,9 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
             id={id}
             providerFactory={providerFactory}
             shouldBootstrap={true}
+            username={identity.name}
+            cursorColor={identity.color}
+            awarenessData={awarenessData}
             cursorsContainerRef={ref}
           />
           {createPortal(<div ref={ref}></div>, document.body)}

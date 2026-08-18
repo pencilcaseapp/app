@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StackedAvatars } from './stacked-avatar';
@@ -18,6 +18,27 @@ describe('StackedAvatars', () => {
     const { container } = render(<StackedAvatars avatars={avatars} />);
 
     expect(container).toMatchSnapshot();
+  });
+
+  test('renders two collaborators that share a name', () => {
+    // Two guests can draw the same animal, so the render key has to be the
+    // identity rather than the name. React only warns about a duplicate key,
+    // which is why this asserts on the warning as well as on the avatars.
+    const consoleError = vi.spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    render(
+      <StackedAvatars avatars={[
+        { id: 'guest-a', name: 'Otter', color: '#DC2626' },
+        { id: 'guest-b', name: 'Otter', color: '#0F766E' },
+      ]}
+      />,
+    );
+
+    expect(screen.getAllByLabelText('Otter')).toHaveLength(2);
+    expect(consoleError).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
   });
 
   test('renders all avatars inline when there is no overflow', () => {
