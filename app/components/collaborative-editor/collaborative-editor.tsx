@@ -1,7 +1,11 @@
 import { LexicalCollaboration } from '@lexical/react/LexicalCollaborationContext';
 import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import * as Y from 'yjs';
-import type { Provider } from '@lexical/yjs';
+import {
+  syncCursorPositions,
+  type Provider,
+  type SyncCursorPositionsFn,
+} from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui/editor/editor';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -19,6 +23,17 @@ import {
   type Collaborator,
   type PresenceAwarenessData,
 } from '~/utils/presence';
+
+/**
+ * Draw the remote selections with the browser's own highlights rather than
+ * one absolutely positioned span per line rect, which drops lines it reads as
+ * spanning the whole editor. The plugin's `selectionHighlight` prop only
+ * reaches the awareness path, and a cursor keeps whichever rendering it was
+ * first drawn with, so it is asked for here instead — this runs on both.
+ */
+const syncCursorPositionsFn: SyncCursorPositionsFn = (binding, provider) => {
+  syncCursorPositions(binding, provider, { selectionHighlight: true });
+};
 
 export interface CollaborativeEditorProps {
   id: string;
@@ -123,6 +138,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
             cursorColor={identity.color}
             awarenessData={awarenessData}
             cursorsContainerRef={ref}
+            syncCursorPositionsFn={syncCursorPositionsFn}
           />
           {createPortal(<div ref={ref}></div>, document.body)}
         </Editor>

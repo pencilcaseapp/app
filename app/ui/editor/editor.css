@@ -370,17 +370,23 @@
    Lexical hands each element the colour of the person it belongs to through
    `--lexical-cursor-color`, and positions everything itself, so the rules
    below only carry the look. The name tag can be nudged sideways by
-   `useCursorNameBounds`, which is why it leaves `transform` alone. */
+   `useCursorNameBounds`, which is why it leaves `transform` alone.
+
+   The caret width has to win over an inline `1px` Lexical rewrites on every
+   cursor move, which is the one declaration it does not hand over to the
+   theme. */
 .editor-collab-cursor {
-  width: 2px;
+  width: 2px !important;
   background-color: var(--lexical-cursor-color);
   pointer-events: none;
   z-index: 10;
 }
 
+/* The tag sits on the caret by exactly its own corner radius, so the curve
+   is cut into the caret rather than lifted off it. */
 .editor-collab-cursor-name {
   position: absolute;
-  top: -16px;
+  top: -14px;
   left: 0;
   padding: 0 5px;
   border-radius: 4px;
@@ -395,6 +401,9 @@
   pointer-events: none;
 }
 
+/* Only the browsers without the CSS Custom Highlight API get here: Lexical
+   falls back to painting one span per line rect, and styles the highlight
+   itself everywhere else. */
 .editor-collab-selection-bg {
   background-color: color-mix(
     in srgb,

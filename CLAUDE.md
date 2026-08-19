@@ -147,7 +147,13 @@ identity would fix. The look of the remote cursors is Lexical's own
 `theme.collaboration` (`app/ui/editor/editor-theme.ts` → the
 `editor-collab-*` rules in `editor.css`), which hands each element the
 person's colour as `--lexical-cursor-color` and leaves the positioning to the
-plugin. The one thing the plugin does not do is keep a name tag on screen, so
+plugin. The selections are drawn as CSS Custom Highlights rather than one
+span per line rect — the rect path drops lines it reads as spanning the whole
+editor — which the plugin asks for per cursor the first time it draws it, so
+`syncCursorPositionsFn` turns it on rather than the `selectionHighlight` prop
+(that one only reaches the awareness path, and a Yjs change usually draws a
+cursor first). The one thing the plugin does not do is keep a name tag on
+screen, so
 `useCursorNameBounds` measures the tags it drew and nudges them sideways with
 a `transform` — the only property those rules leave alone.
 
