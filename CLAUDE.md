@@ -86,8 +86,8 @@ process that loaded it, so every instance past the first needs
 `@hocuspocus/extension-redis` to fan updates and awareness out to the others,
 answer a cold load with a peer's in-memory state, and lock the document before
 the `Database` extension writes it. It is a transport, not a store — Postgres
-stays the only persistence. `config.redis` is optional and leaving it out (the
-test environment) runs the live server on its own. `config.instanceId` is what
+stays the only persistence. `config.live.redis` is optional and leaving it out
+(the test environment) runs the live server on its own. `config.instanceId` is what
 the extension tags its messages with to filter its own back out, so it has to
 be unique per process. `stopLiveServer` drains on `SIGTERM`: a deployment would
 otherwise drop everything still sitting behind the store debounce. Read

@@ -14,20 +14,20 @@ const MAX_RECONNECT_DELAY = 2_000;
  * leave this instance silently out of step with the others.
  */
 export function createRedisExtension() {
-  const { redis, instanceId } = getConfig();
+  const { live, instanceId } = getConfig();
 
-  if (!redis) {
+  if (!live.redis) {
     return undefined;
   }
 
   const extension = new Redis({
     identifier: instanceId,
     prefix: 'pencil-case:live',
-    host: redis.host,
-    port: redis.port,
+    host: live.redis.host,
+    port: live.redis.port,
     options: {
-      password: redis.password,
-      tls: redis.tls ? {} : undefined,
+      password: live.redis.password,
+      tls: live.redis.tls ? {} : undefined,
       maxRetriesPerRequest: null,
       retryStrategy: (attempt: number) =>
         Math.min(attempt * 200, MAX_RECONNECT_DELAY),

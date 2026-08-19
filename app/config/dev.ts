@@ -17,10 +17,12 @@ export function getConfigDev(): Config {
       url: 'postgresql://postgres:postgres@localhost:5433/db',
     },
 
-    redis: {
-      host: 'localhost',
-      port: 6379,
-      tls: false,
+    live: {
+      redis: {
+        host: 'localhost',
+        port: 6380,
+        tls: false,
+      },
     },
 
     email: {

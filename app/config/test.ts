@@ -16,6 +16,8 @@ export function getConfigTest(): Config {
       url: 'postgresql://postgres:postgres@localhost:5434/db',
     },
 
+    live: {},
+
     email: {
       from: {
         name: 'pencil case',

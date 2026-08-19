@@ -17,11 +17,13 @@ export function getConfigProd(): Config {
       url: env.get('DATABASE_URL').required().asString(),
     },
 
-    redis: {
-      host: env.get('REDIS_HOST').required().asString(),
-      port: env.get('REDIS_PORT').required().asPortNumber(),
-      password: env.get('REDIS_PASSWORD').asString(),
-      tls: env.get('REDIS_TLS').default('false').asBool(),
+    live: {
+      redis: {
+        host: env.get('REDIS_HOST').required().asString(),
+        port: env.get('REDIS_PORT').required().asPortNumber(),
+        password: env.get('REDIS_PASSWORD').asString(),
+        tls: env.get('REDIS_TLS').default('false').asBool(),
+      },
     },
 
     email: {

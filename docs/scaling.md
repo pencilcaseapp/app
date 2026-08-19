@@ -42,13 +42,19 @@ from the document, so handling the echo of our own message is a no-op.
 `app/config/` owns the settings, as usual:
 
 ```ts
-redis?: {
-  host: string;
-  port: number;
-  password?: string;
-  tls: boolean;
+live: {
+  redis?: {
+    host: string;
+    port: number;
+    password?: string;
+    tls: boolean;
+  };
 };
 ```
+
+It sits under `live` rather than at the top level so that the next thing
+wanting a Redis — a job queue, say — configures its own instead of
+inheriting this one.
 
 It is optional, and leaving it out is what runs the live server on its own —
 that is the test environment, which has no fan-out to test and no Redis
@@ -65,11 +71,11 @@ set per instance; locally the pid stands in.
 
 ## Local development
 
-`npm run docker:up` starts Redis on `6379` next to the two Postgres
-containers. Nothing else is needed — a single dev server behaves the same with
-it or without it. To actually exercise the fan-out, run a second server on
-another port against the same containers and open the same document in two
-browsers.
+`npm run docker:up` starts Redis on `6380` next to the two Postgres
+containers — off the default port, the way the two databases are. Nothing
+else is needed: a single dev server behaves the same with it or without it.
+To actually exercise the fan-out, run a second server on another port against
+the same containers and open the same document in two browsers.
 
 ## Production
 
