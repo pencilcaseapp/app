@@ -27,9 +27,10 @@ import {
 /**
  * Draw the remote selections with the browser's own highlights rather than
  * one absolutely positioned span per line rect, which drops lines it reads as
- * spanning the whole editor. The plugin's `selectionHighlight` prop only
- * reaches the awareness path, and a cursor keeps whichever rendering it was
- * first drawn with, so it is asked for here instead — this runs on both.
+ * spanning the whole editor. The plugin redraws cursors from two places — an
+ * awareness update reads the `selectionHighlight` prop, a Yjs document change
+ * calls this function — and a cursor keeps whichever rendering it was first
+ * drawn with, so the two have to agree.
  */
 const syncCursorPositionsFn: SyncCursorPositionsFn = (binding, provider) => {
   syncCursorPositions(binding, provider, { selectionHighlight: true });
@@ -138,6 +139,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
             cursorColor={identity.color}
             awarenessData={awarenessData}
             cursorsContainerRef={ref}
+            selectionHighlight
             syncCursorPositionsFn={syncCursorPositionsFn}
           />
           {createPortal(<div ref={ref}></div>, document.body)}
