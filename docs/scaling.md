@@ -60,8 +60,8 @@ users lose each other's edits.
 
 `app/config/instance.ts` gives the process an identity. The extension tags every
 message with it to filter its own back out, so two instances sharing one is the
-one way to break the fan-out. Clever Cloud sets `INSTANCE_ID` on every scaler;
-locally the pid stands in.
+one way to break the fan-out. It reads `INSTANCE_ID`, which hosting platforms
+set per instance; locally the pid stands in.
 
 ## Local development
 
@@ -71,30 +71,26 @@ it or without it. To actually exercise the fan-out, run a second server on
 another port against the same containers and open the same document in two
 browsers.
 
-## Clever Cloud
+## Production
 
-Add the **Redis** add-on and link it to the app. It injects `REDIS_HOST`,
-`REDIS_PORT` and `REDIS_PASSWORD`, which is exactly what the production config
-reads, so there is nothing to map by hand:
+Provision a Redis the app can reach and give it `REDIS_HOST`, `REDIS_PORT`,
+`REDIS_PASSWORD` and `REDIS_TLS`. Most managed offerings inject the first three
+under exactly those names, so there is usually nothing to map by hand. Do that
+before deploying: production refuses to boot without the host and the port.
 
-```bash
-clever addon create redis-addon pencil-case-redis --plan s_mono
-clever service link-addon pencil-case-redis -a pencil-case-app-prod
-```
+> **A Redis *API* is not enough.** Several managed key-value stores advertise
+> Redis compatibility while leaving out Pub/Sub, keyspace notifications and
+> `EVAL` — which are the three things this extension is built on, since it
+> publishes on a channel per document and takes its store lock with Redlock.
+> They still answer to `REDIS_HOST` and friends, so the app would connect
+> happily and then silently never sync. Check the command list before picking
+> one; anything without Pub/Sub is a cache, not this.
 
-> **Not Materia KV.** Its Redis compatibility layer is missing Pub/Sub,
-> keyspace notifications and `EVAL`, which are the three things this extension
-> is built on — it publishes on a channel per document and takes its store
-> lock with Redlock. The trap is that Materia KV *also* exposes `REDIS_HOST`,
-> `REDIS_PORT` and `REDIS_PASSWORD` (as aliases of `KV_HOST` and friends), so
-> the app would connect happily and then silently never sync. Use it for caching
-> if we ever want it, not for this.
-
-Once the add-on is linked, scaling out is a console (or `clever scale`) change.
+Once Redis is reachable, scaling out is a matter of running more instances.
 
 ### Sticky sessions: not needed, leave them off
 
-Clever Cloud can pin a user to one scaler, and it is the usual reflex for
+A load balancer can pin a user to one instance, and it is the usual reflex for
 WebSockets, but nothing here wants it:
 
 - A WebSocket is one long-lived connection. There is no second request to route
@@ -108,13 +104,14 @@ WebSockets, but nothing here wants it:
 Stickiness would not even be a *substitute* for Redis: it pins a user, not a
 document, so two people editing the same document would still be split across
 instances. It only makes the fleet load worse — every client pinned to an
-instance reconnects to the same replacement when it goes away — so leave
-`sticky-sessions` disabled.
+instance reconnects to the same replacement when it goes away — so leave it
+disabled.
 
 ## Deployments
 
-Clever Cloud keeps the old scalers running until the new ones are healthy and
-then stops the old ones with `SIGTERM`. Two things carry a session across that:
+A rolling deployment keeps the old instances up until the new ones are healthy
+and then stops the old ones with `SIGTERM`. Two things carry a session across
+that:
 
 - **The server drains on `SIGTERM`** (`stopLiveServer` in `app/live/index.ts`).
   It closes the connections so clients reconnect to a new instance, then calls
@@ -138,7 +135,7 @@ process open until the platform kills it outright.
   that is silently out of step.
 - **Watch connection count.** Each instance opens four connections: the
   extension's publisher and subscriber, plus the two the revocation channel
-  duplicates off the publisher. Multiply by the number of scalers when picking
-  an add-on plan.
+  duplicates off the publisher. Multiply by the number of instances when
+  picking a Redis plan.
 - **Keep the prefix.** Keys are namespaced under `pencil-case:live`, so a Redis
   shared with anything else stays legible.

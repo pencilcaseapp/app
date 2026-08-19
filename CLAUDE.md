@@ -49,7 +49,7 @@ drops and recreates the whole test schema first).
 so they can be started and previewed in a browser without a manual shell.
 
 CI (`.github/workflows/ci.yml`) runs lint, test, typecheck, build, and
-build-storybook. Pushing to `main` deploys to Clever Cloud via
+build-storybook. Pushing to `main` deploys to production via
 `.github/workflows/cd.yml`.
 
 ## Architecture
@@ -91,9 +91,9 @@ test environment) runs the live server on its own. `config.instanceId` is what
 the extension tags its messages with to filter its own back out, so it has to
 be unique per process. `stopLiveServer` drains on `SIGTERM`: a deployment would
 otherwise drop everything still sitting behind the store debounce. Read
-`docs/scaling.md` before touching any of this — it covers the Clever Cloud
-add-on (the **Redis** one; Materia KV has no Pub/Sub) and why sticky sessions
-stay off.
+`docs/scaling.md` before touching any of this — it covers what a managed Redis
+has to support (Pub/Sub and `EVAL`, which several Redis-compatible stores skip)
+and why sticky sessions stay off.
 
 **Live authorisation — `app/live/connections.ts`.** The upgrade request never
 passes through the route middleware, so `onConnect` resolves the session from

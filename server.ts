@@ -72,9 +72,9 @@ async function startServer() {
 }
 
 /**
- * Clever Cloud stops an instance with `SIGTERM` on every deployment and scale
- * down, which is the only chance the live server gets to persist the documents
- * it still holds in memory.
+ * An instance is stopped with `SIGTERM` on every deployment and scale down,
+ * which is the only chance the live server gets to persist the documents it
+ * still holds in memory.
  */
 async function stopServer() {
   server.close();
