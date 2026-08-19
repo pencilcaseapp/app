@@ -10,6 +10,7 @@ import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
 import { useFirstLocalEdit } from '~/hooks/use-first-local-edit';
 import { useAccessRevoked } from '~/hooks/use-access-revoked';
 import { useCollaborators } from '~/hooks/use-collaborators';
+import { useCursorNameBounds } from '~/hooks/use-cursor-name-bounds';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 import { createPortal } from 'react-dom';
 import { getGuestId } from '~/utils/guest-id';
@@ -68,6 +69,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
 
     const collaborators = useCollaborators(provider);
 
+    useCursorNameBounds(ref);
     useFirstLocalEdit(doc, provider, onFirstEdit);
     useAccessRevoked(provider, onAccessRevoked);
 

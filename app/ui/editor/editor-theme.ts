@@ -1,6 +1,18 @@
 import type { EditorThemeClasses } from 'lexical';
 
+/**
+ * The remote cursor label. Lexical anchors it to the cursor it belongs to, so
+ * `useCursorNameBounds` reads it back out of the DOM to keep it on screen.
+ */
+export const CURSOR_NAME_CLASS = 'editor-collab-cursor-name';
+
 const theme: EditorThemeClasses = {
+  collaboration: {
+    cursor: 'editor-collab-cursor',
+    cursorName: CURSOR_NAME_CLASS,
+    selection: 'editor-collab-selection',
+    selectionBg: 'editor-collab-selection-bg',
+  },
   heading: {
     h1: 'editor-heading-h1',
     h2: 'editor-heading-h2',
