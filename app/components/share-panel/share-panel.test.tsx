@@ -38,9 +38,22 @@ function renderSharePanel({
   return render(<Stub initialEntries={[`/doc/${documentId}`]} />);
 }
 
+function stubShare() {
+  const share = vi.fn(async () => {});
+
+  Object.defineProperty(navigator, 'share', {
+    value: share,
+    configurable: true,
+    writable: true,
+  });
+
+  return share;
+}
+
 afterEach(() => {
   vi.clearAllMocks();
   setViewportWidth(1024);
+  Reflect.deleteProperty(navigator, 'share');
 });
 
 describe('SharePanel', () => {
@@ -86,6 +99,32 @@ describe('SharePanel', () => {
     expect(
       screen.getByRole('button', { name: 'Copy link' }),
     ).not.toBeDisabled();
+  });
+
+  test('shares through the native sheet on phones', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const share = stubShare();
+    setViewportWidth(390);
+
+    renderSharePanel({ shared: true });
+
+    expect(
+      screen.queryByRole('button', { name: 'Copy link' }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Share link' }));
+
+    expect(share).toHaveBeenCalledExactlyOnceWith({ url: shareUrl });
+  });
+
+  test('keeps the copy button on phones without the share sheet', () => {
+    setViewportWidth(390);
+
+    renderSharePanel({ shared: true });
+
+    expect(
+      screen.getByRole('button', { name: 'Copy link' }),
+    ).toBeInTheDocument();
   });
 
   test('submits the new sharing state to the document action', async () => {

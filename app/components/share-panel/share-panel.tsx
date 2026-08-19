@@ -1,12 +1,14 @@
 import { href, useFetcher } from 'react-router';
 import { useMedia } from 'react-use';
 import { useAuthenticityToken } from 'remix-utils/csrf/react';
+import { useCanShare } from '~/hooks/use-can-share';
 import { Button } from '~/ui/button/button';
 import { CopyLinkButton } from '~/ui/copy-link-button/copy-link-button';
 import { DropdownMenu } from '~/ui/dropdown-menu/dropdown-menu';
 import { DropdownMenuContent } from '~/ui/dropdown-menu/dropdown-menu-content';
 import { DropdownMenuPortal } from '~/ui/dropdown-menu/dropdown-menu-portal';
 import { DropdownMenuTrigger } from '~/ui/dropdown-menu/dropdown-menu-trigger';
+import { ShareLinkButton } from '~/ui/share-link-button/share-link-button';
 import { Switch } from '~/ui/switch/switch';
 import { Typography } from '~/ui/typography/typography';
 
@@ -26,6 +28,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
   const fetcher = useFetcher();
   const csrfToken = useAuthenticityToken();
   const isMobile = useMedia('(max-width: 640px)', false);
+  const canShare = useCanShare();
 
   const isShared = fetcher.formData
     ? fetcher.formData.get('shared') === 'true'
@@ -83,14 +86,26 @@ export const SharePanel: React.FC<SharePanelProps> = ({
               onCheckedChange={handleToggle}
             />
           </div>
-          <CopyLinkButton
-            className="w-full"
-            colorLight="primary"
-            link={shareUrl}
-            label="Copy link"
-            copiedLabel="Link copied!"
-            disabled={!isShared}
-          />
+          {isMobile && canShare
+            ? (
+                <ShareLinkButton
+                  className="w-full"
+                  colorLight="primary"
+                  link={shareUrl}
+                  label="Share link"
+                  disabled={!isShared}
+                />
+              )
+            : (
+                <CopyLinkButton
+                  className="w-full"
+                  colorLight="primary"
+                  link={shareUrl}
+                  label="Copy link"
+                  copiedLabel="Link copied!"
+                  disabled={!isShared}
+                />
+              )}
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenu>

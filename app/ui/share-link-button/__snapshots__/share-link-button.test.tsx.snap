@@ -1,0 +1,66 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ShareLinkButton > snapshots > default state 1`] = `
+<div>
+  <button
+    class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl px-3 py-2 flex-row-reverse text-pca-white bg-pca-grey-900 hover:bg-pca-grey-800 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-800 dark:text-pca-grey-900 dark:bg-pca-white dark:hover:bg-pca-grey-300 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-300 dark:active:bg-pca-grey-300"
+  >
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+    >
+      Share link
+    </span>
+    <svg
+      aria-hidden="true"
+      class="shrink-0 w-4.5 h-4.5"
+      fill="transparent"
+      focusable="false"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M21 12V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H7.8C6.11984 21 5.27976 21 4.63803 20.673C4.07354 20.3854 3.6146 19.9265 3.32698 19.362C3 18.7202 3 17.8802 3 16.2V12M16 7L12 3M12 3L8 7M12 3V15"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+      />
+    </svg>
+  </button>
+</div>
+`;
+
+exports[`ShareLinkButton > snapshots > disabled state 1`] = `
+<div>
+  <button
+    class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 pointer-events-none rounded-xl px-3 py-2 flex-row-reverse text-pca-white bg-pca-grey-300 focus:outline-hidden dark:text-pca-grey-900 dark:bg-pca-grey-800 dark:text-pca-grey-700! dark:focus:outline-hidden"
+    disabled=""
+  >
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+    >
+      Share link
+    </span>
+    <svg
+      aria-hidden="true"
+      class="shrink-0 w-4.5 h-4.5"
+      fill="transparent"
+      focusable="false"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M21 12V16.2C21 17.8802 21 18.7202 20.673 19.362C20.3854 19.9265 19.9265 20.3854 19.362 20.673C18.7202 21 17.8802 21 16.2 21H7.8C6.11984 21 5.27976 21 4.63803 20.673C4.07354 20.3854 3.6146 19.9265 3.32698 19.362C3 18.7202 3 17.8802 3 16.2V12M16 7L12 3M12 3L8 7M12 3V15"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+      />
+    </svg>
+  </button>
+</div>
+`;
