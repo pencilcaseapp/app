@@ -1,12 +1,11 @@
 import type { Config } from '.';
 import env from 'env-var';
-import { instanceId } from './instance';
 
 export function getConfigDev(): Config {
   return {
     environment: 'development',
 
-    instanceId,
+    instanceId: `local-${process.pid}`,
 
     server: {
       port: 3000,

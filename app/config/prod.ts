@@ -1,12 +1,14 @@
 import type { Config } from '.';
 import env from 'env-var';
-import { instanceId } from './instance';
 
 export function getConfigProd(): Config {
   return {
     environment: 'prod',
 
-    instanceId,
+    instanceId: env
+      .get('INSTANCE_ID')
+      .default(`local-${process.pid}`)
+      .asString(),
 
     server: {
       port: env.get('PORT').required().asIntPositive(),

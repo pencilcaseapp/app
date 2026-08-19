@@ -64,10 +64,10 @@ container to boot in CI. Development points at the `redis_dev` container from
 because an instance that silently comes up without Redis is an instance whose
 users lose each other's edits.
 
-`app/config/instance.ts` gives the process an identity. The extension tags every
-message with it to filter its own back out, so two instances sharing one is the
-one way to break the fan-out. It reads `INSTANCE_ID`, which hosting platforms
-set per instance; locally the pid stands in.
+`instanceId` gives the process an identity. The extension tags every message
+with it to filter its own back out, so two instances sharing one is the one way
+to break the fan-out. Production reads `INSTANCE_ID`, which hosting platforms
+set per instance; everywhere else the pid stands in.
 
 ## Local development
 

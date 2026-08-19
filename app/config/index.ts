@@ -5,7 +5,7 @@ import { getConfigTest } from './test';
 export interface Config {
   environment: 'development' | 'test' | 'prod';
 
-  /** Unique per process, see `app/config/instance.ts`. */
+  /** Unique per process — the live servers tell each other apart by it. */
   instanceId: string;
 
   server: {
