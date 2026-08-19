@@ -38,7 +38,7 @@ export const ShareLinkButton: React.FC<ShareLinkButtonProps> = ({
     <Button
       {...props}
       onClick={handleClick}
-      icon="share"
+      icon="link"
       iconPosition="start"
     >
       {label}
