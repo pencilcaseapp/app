@@ -1,4 +1,5 @@
 import { href, useFetcher } from 'react-router';
+import { useMedia } from 'react-use';
 import { useAuthenticityToken } from 'remix-utils/csrf/react';
 import { Button } from '~/ui/button/button';
 import { CopyLinkButton } from '~/ui/copy-link-button/copy-link-button';
@@ -24,6 +25,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
 }) => {
   const fetcher = useFetcher();
   const csrfToken = useAuthenticityToken();
+  const isMobile = useMedia('(max-width: 640px)', false);
 
   const isShared = fetcher.formData
     ? fetcher.formData.get('shared') === 'true'
@@ -39,9 +41,20 @@ export const SharePanel: React.FC<SharePanelProps> = ({
   return (
     <DropdownMenu defaultOpen={defaultOpen}>
       <DropdownMenuTrigger>
-        <Button type="button" icon="share" colorLight="secondary">
-          Share
-        </Button>
+        {isMobile
+          ? (
+              <Button
+                type="button"
+                icon="share"
+                iconTitle="Share"
+                colorLight="secondary"
+              />
+            )
+          : (
+              <Button type="button" icon="share" colorLight="secondary">
+                Share
+              </Button>
+            )}
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
         <DropdownMenuContent align="end" className="w-75 gap-1 p-3">

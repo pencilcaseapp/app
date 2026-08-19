@@ -7,6 +7,15 @@ import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import { SocketClientProvider } from '~/contexts/socket-client';
 import routes from '~/routes';
 
+type HappyDOMWindow = typeof window & {
+  happyDOM: { setViewport: (viewport: { width: number }) => void };
+};
+
+/** Resizes the happy-dom window so `useMedia` queries resolve. */
+export function setViewportWidth(width: number) {
+  (window as HappyDOMWindow).happyDOM.setViewport({ width });
+}
+
 export async function renderRoute<P extends keyof Register['pages']>(
   path: P,
   options?: Register['pages'][P] & { searchParams?: Record<string, string>; context?: RouterContextProvider },

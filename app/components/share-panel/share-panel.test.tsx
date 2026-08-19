@@ -3,6 +3,7 @@ import { userEvent } from '@testing-library/user-event';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createRoutesStub, type ActionFunctionArgs } from 'react-router';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
+import { setViewportWidth } from '~/utils/testing';
 import { SharePanel } from './share-panel';
 
 const documentId = '11111111-1111-1111-1111-111111111111';
@@ -39,6 +40,7 @@ function renderSharePanel({
 
 afterEach(() => {
   vi.clearAllMocks();
+  setViewportWidth(1024);
 });
 
 describe('SharePanel', () => {
@@ -48,6 +50,17 @@ describe('SharePanel', () => {
     expect(
       screen.getByRole('button', { name: 'Share' }),
     ).toBeInTheDocument();
+  });
+
+  test('renders the trigger without its label on phones', () => {
+    setViewportWidth(390);
+    renderSharePanel({ defaultOpen: false });
+
+    const trigger = screen.getByRole('button', { name: 'Share' });
+
+    // The label lives in the icon, so the button keeps its accessible name.
+    expect(screen.getByTitle('Share')).toBeInTheDocument();
+    expect(trigger.querySelector('span')).toBeNull();
   });
 
   test('opens the panel from the trigger', async () => {
