@@ -1,9 +1,12 @@
 import type { Config } from '.';
 import env from 'env-var';
+import { instanceId } from './instance';
 
 export function getConfigProd(): Config {
   return {
     environment: 'prod',
+
+    instanceId,
 
     server: {
       port: env.get('PORT').required().asIntPositive(),
@@ -12,6 +15,13 @@ export function getConfigProd(): Config {
 
     db: {
       url: env.get('DATABASE_URL').required().asString(),
+    },
+
+    redis: {
+      host: env.get('REDIS_HOST').required().asString(),
+      port: env.get('REDIS_PORT').required().asPortNumber(),
+      password: env.get('REDIS_PASSWORD').asString(),
+      tls: env.get('REDIS_TLS').default('false').asBool(),
     },
 
     email: {

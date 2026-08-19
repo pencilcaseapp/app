@@ -1,8 +1,11 @@
 import type { Config } from '.';
+import { instanceId } from './instance';
 
 export function getConfigTest(): Config {
   return {
     environment: 'test',
+
+    instanceId,
 
     server: {
       port: 3000,

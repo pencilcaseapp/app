@@ -1,9 +1,12 @@
 import type { Config } from '.';
 import env from 'env-var';
+import { instanceId } from './instance';
 
 export function getConfigDev(): Config {
   return {
     environment: 'development',
+
+    instanceId,
 
     server: {
       port: 3000,
@@ -12,6 +15,12 @@ export function getConfigDev(): Config {
 
     db: {
       url: 'postgresql://postgres:postgres@localhost:5433/db',
+    },
+
+    redis: {
+      host: 'localhost',
+      port: 6379,
+      tls: false,
     },
 
     email: {

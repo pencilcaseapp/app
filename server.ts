@@ -2,7 +2,6 @@ import express from 'express';
 import compression from 'compression';
 import { createRequestHandler } from '@react-router/express';
 import { internalIpV4 } from 'internal-ip';
-import { createLiveServer } from '~/live';
 import { getConfig } from '~/config';
 import { migrateDatabase } from '~/db/migrate';
 import { createServer } from 'node:http';
@@ -17,8 +16,14 @@ app.use(compression());
 app.disable('x-powered-by');
 app.enable('trust proxy');
 
+let stopLiveServer = async () => {};
+
 if (config.environment === 'prod') {
-  createLiveServer(server);
+  const live = await import('~/live');
+
+  live.createLiveServer(server);
+  stopLiveServer = live.stopLiveServer;
+
   app.use(
     '/assets',
     express.static('build/client/assets', { immutable: true, maxAge: '1y' }),
@@ -65,5 +70,19 @@ async function startServer() {
     console.log(`🛜 Address on your network http://${host}:${config.server.port}`);
   });
 }
+
+/**
+ * Clever Cloud stops an instance with `SIGTERM` on every deployment and scale
+ * down, which is the only chance the live server gets to persist the documents
+ * it still holds in memory.
+ */
+async function stopServer() {
+  server.close();
+  await stopLiveServer();
+  process.exit(0);
+}
+
+process.on('SIGTERM', stopServer);
+process.on('SIGINT', stopServer);
 
 startServer();
