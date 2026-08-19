@@ -143,7 +143,20 @@ clamped to `MAX_PRESENCE_NAME_LENGTH` (Lexical draws the cursor label
 `nowrap`, so an unbounded one stripes across the document) and anything
 outside the palette falls back to a hashed colour. That bounds the damage to
 misrepresenting yourself; a name is still free text, which only server-side
-identity would fix.
+identity would fix. The look of the remote cursors is Lexical's own
+`theme.collaboration` (`app/ui/editor/editor-theme.ts` → the
+`editor-collab-*` rules in `editor.css`), which hands each element the
+person's colour as `--lexical-cursor-color` and leaves the positioning to the
+plugin. The selections are drawn as CSS Custom Highlights rather than one
+span per line rect — the rect path drops lines it reads as spanning the whole
+editor — which the plugin asks for per cursor the first time it draws it.
+It redraws from two places, so both have to opt in: the `selectionHighlight`
+prop covers awareness updates and `syncCursorPositionsFn` covers Yjs document
+changes; drop either and a cursor first drawn by that path keeps the rect
+rendering for good. The one thing the plugin does not do is keep a name tag on
+screen, so
+`useCursorNameBounds` measures the tags it drew and nudges them sideways with
+a `transform` — the only property those rules leave alone.
 
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader

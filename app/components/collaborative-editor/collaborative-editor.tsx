@@ -1,7 +1,11 @@
 import { LexicalCollaboration } from '@lexical/react/LexicalCollaborationContext';
 import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import * as Y from 'yjs';
-import type { Provider } from '@lexical/yjs';
+import {
+  syncCursorPositions,
+  type Provider,
+  type SyncCursorPositionsFn,
+} from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui/editor/editor';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -10,6 +14,7 @@ import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
 import { useFirstLocalEdit } from '~/hooks/use-first-local-edit';
 import { useAccessRevoked } from '~/hooks/use-access-revoked';
 import { useCollaborators } from '~/hooks/use-collaborators';
+import { useCursorNameBounds } from '~/hooks/use-cursor-name-bounds';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 import { createPortal } from 'react-dom';
 import { getGuestId } from '~/utils/guest-id';
@@ -18,6 +23,18 @@ import {
   type Collaborator,
   type PresenceAwarenessData,
 } from '~/utils/presence';
+
+/**
+ * Draw the remote selections with the browser's own highlights rather than
+ * one absolutely positioned span per line rect, which drops lines it reads as
+ * spanning the whole editor. The plugin redraws cursors from two places — an
+ * awareness update reads the `selectionHighlight` prop, a Yjs document change
+ * calls this function — and a cursor keeps whichever rendering it was first
+ * drawn with, so the two have to agree.
+ */
+const syncCursorPositionsFn: SyncCursorPositionsFn = (binding, provider) => {
+  syncCursorPositions(binding, provider, { selectionHighlight: true });
+};
 
 export interface CollaborativeEditorProps {
   id: string;
@@ -68,6 +85,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
 
     const collaborators = useCollaborators(provider);
 
+    useCursorNameBounds(ref);
     useFirstLocalEdit(doc, provider, onFirstEdit);
     useAccessRevoked(provider, onAccessRevoked);
 
@@ -121,6 +139,8 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
             cursorColor={identity.color}
             awarenessData={awarenessData}
             cursorsContainerRef={ref}
+            selectionHighlight
+            syncCursorPositionsFn={syncCursorPositionsFn}
           />
           {createPortal(<div ref={ref}></div>, document.body)}
         </Editor>
