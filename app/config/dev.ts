@@ -5,6 +5,8 @@ export function getConfigDev(): Config {
   return {
     environment: 'development',
 
+    instanceId: `local-${process.pid}`,
+
     server: {
       port: 3000,
       host: '0.0.0.0',
@@ -12,6 +14,14 @@ export function getConfigDev(): Config {
 
     db: {
       url: 'postgresql://postgres:postgres@localhost:5433/db',
+    },
+
+    live: {
+      redis: {
+        host: 'localhost',
+        port: 6380,
+        tls: false,
+      },
     },
 
     email: {

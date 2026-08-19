@@ -5,6 +5,9 @@ import { getConfigTest } from './test';
 export interface Config {
   environment: 'development' | 'test' | 'prod';
 
+  /** Unique per process — the live servers tell each other apart by it. */
+  instanceId: string;
+
   server: {
     port: number;
     host: string;
@@ -12,6 +15,22 @@ export interface Config {
 
   db: {
     url: string;
+  };
+
+  live: {
+    /**
+     * Left out when the live server runs on its own: without it the process
+     * neither propagates document updates nor sees the other instances, which
+     * is what the test environment and a single instance want. Scoped to the
+     * live server because the next thing wanting a Redis does not have to
+     * share this one.
+     */
+    redis?: {
+      host: string;
+      port: number;
+      password?: string;
+      tls: boolean;
+    };
   };
 
   email: {

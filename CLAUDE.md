@@ -49,7 +49,7 @@ drops and recreates the whole test schema first).
 so they can be started and previewed in a browser without a manual shell.
 
 CI (`.github/workflows/ci.yml`) runs lint, test, typecheck, build, and
-build-storybook. Pushing to `main` deploys to Clever Cloud via
+build-storybook. Pushing to `main` deploys to production via
 `.github/workflows/cd.yml`.
 
 ## Architecture
@@ -81,6 +81,20 @@ edited directly — client side the same extraction runs through
 and `<title>` stay live. `app/utils/headless.ts` uses a headless Lexical editor
 to produce valid Yjs updates on the server.
 
+**Scaling out — `app/live/redis.ts`, `docs/scaling.md`.** A Y.Doc lives in the
+process that loaded it, so every instance past the first needs
+`@hocuspocus/extension-redis` to fan updates and awareness out to the others,
+answer a cold load with a peer's in-memory state, and lock the document before
+the `Database` extension writes it. It is a transport, not a store — Postgres
+stays the only persistence. `config.live.redis` is optional and leaving it out
+(the test environment) runs the live server on its own. `config.instanceId` is what
+the extension tags its messages with to filter its own back out, so it has to
+be unique per process. `stopLiveServer` drains on `SIGTERM`: a deployment would
+otherwise drop everything still sitting behind the store debounce. Read
+`docs/scaling.md` before touching any of this — it covers what a managed Redis
+has to support (Pub/Sub and `EVAL`, which several Redis-compatible stores skip)
+and why sticky sessions stay off.
+
 **Live authorisation — `app/live/connections.ts`.** The upgrade request never
 passes through the route middleware, so `onConnect` resolves the session from
 the cookie itself (`getAuthUserByCookie`) and asks `canOpenDocument`; throwing
@@ -91,8 +105,10 @@ revoked immediately instead of at the next request. The client turns that into
 the permission denied screen via `useAccessRevoked` → `revalidate()`. The two
 sides find each other through `globalThis`: `server.ts` and the routes are
 separate bundles in prod, so importing the instance would give each of them
-their own. `closeConnections` is per process — scaling out needs
-`@hocuspocus/extension-redis`.
+their own. Closing is per process, and the Redis extension does not propagate
+it, so `registerRevocationChannel` publishes the revocation on its own channel
+and every instance closes the connections it holds; the publisher closes its
+own straight away, and the echo of its own message is a no-op.
 
 **Auth.** Passwordless magic code. `app/services/auth.ts` owns the flow
 (argon2-hashed OTP → cookie session with a sha256-hashed token stored in

@@ -4,6 +4,8 @@ export function getConfigTest(): Config {
   return {
     environment: 'test',
 
+    instanceId: `local-${process.pid}`,
+
     server: {
       port: 3000,
       host: 'localhost',
@@ -12,6 +14,8 @@ export function getConfigTest(): Config {
     db: {
       url: 'postgresql://postgres:postgres@localhost:5434/db',
     },
+
+    live: {},
 
     email: {
       from: {

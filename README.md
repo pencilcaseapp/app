@@ -15,9 +15,9 @@ Install the dependencies:
 npm install
 ```
 
-### Database
+### Services
 
-Start a local Postgres database with Docker:
+Start the local Postgres databases and Redis with Docker:
 
 ```bash
 npm run docker:up
@@ -25,6 +25,9 @@ npm run docker:up
 
 The Docker containers run in the background, regardless of the development server. 
 You can stop the containers with `npm run docker:down`
+
+Redis is what lets several live servers share a document, so it only matters
+once the app runs on more than one instance. See [scaling](docs/scaling.md).
 
 ### Server
 
