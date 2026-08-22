@@ -53,8 +53,9 @@ live: {
 ```
 
 It sits under `live` rather than at the top level so that the next thing
-wanting a Redis — a job queue, say — configures its own instead of
-inheriting this one.
+wanting a Redis configures its own instead of inheriting this one — which is
+what the background jobs do: `jobs.redis` (see `docs/jobs.md`) points at the
+same server today and can point somewhere else without touching this.
 
 It is optional, and leaving it out is what runs the live server on its own —
 that is the test environment, which has no fan-out to test and no Redis
@@ -139,9 +140,11 @@ process open until the platform kills it outright.
   commands until it is back (`maxRetriesPerRequest: null`) rather than failing
   them, which is the safer half of a bad trade: a dropped command is an instance
   that is silently out of step.
-- **Watch connection count.** Each instance opens four connections: the
-  extension's publisher and subscriber, plus the two the revocation channel
-  duplicates off the publisher. Multiply by the number of instances when
-  picking a Redis plan.
-- **Keep the prefix.** Keys are namespaced under `pencil-case:live`, so a Redis
-  shared with anything else stays legible.
+- **Watch connection count.** Each instance opens four connections for the
+  live server — the extension's publisher and subscriber, plus the two the
+  revocation channel duplicates off the publisher — and three more for the
+  job queue and its worker. Multiply by the number of instances when picking
+  a Redis plan.
+- **Keep the prefix.** Keys are namespaced under `pencil-case:live` (the job
+  queue uses `pencil-case:jobs`), so a Redis shared with anything else stays
+  legible.

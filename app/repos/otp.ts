@@ -1,4 +1,4 @@
-import { eq, and, gt, type InferSelectModel, isNull } from 'drizzle-orm';
+import { eq, and, gt, lt, inArray, type InferSelectModel, isNull } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { otps } from '~/db/schema';
@@ -88,6 +88,35 @@ export async function markOtpAsUsed(id: string) {
     .returning();
 
   return otp;
+}
+
+const DELETE_BATCH_SIZE = 1000;
+
+/**
+ * Deletes in batches so a large backlog never turns into one long-running
+ * statement holding locks on a table the sign-in flow writes to.
+ */
+export async function deleteOtpsExpiredBefore(before: Date) {
+  let deletedCount = 0;
+
+  while (true) {
+    const batch = db
+      .select({ id: otps.id })
+      .from(otps)
+      .where(lt(otps.expiresAt, before))
+      .limit(DELETE_BATCH_SIZE);
+
+    const deleted = await db
+      .delete(otps)
+      .where(inArray(otps.id, batch))
+      .returning({ id: otps.id });
+
+    deletedCount += deleted.length;
+
+    if (deleted.length < DELETE_BATCH_SIZE) {
+      return deletedCount;
+    }
+  }
 }
 
 export async function canRequestNewOtp(email: string) {

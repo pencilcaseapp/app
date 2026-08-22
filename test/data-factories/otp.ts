@@ -12,12 +12,18 @@ export async function createValidOtp(userId: string, email?: string) {
   return otp;
 }
 
-export async function createExpiredOtp(userId: string, email?: string) {
+export async function createExpiredOtp(input: {
+  userId: string;
+  email?: string;
+  expiresAt?: Date;
+}) {
+  const { userId, email, expiresAt } = input;
+
   const [otp] = await db.insert(otps).values({
     userId,
     email: email ?? faker.internet.email(),
     codeHash: faker.string.alphanumeric(64),
-    expiresAt: new Date(Date.now() - 1000), // Set expiry in the past
+    expiresAt: expiresAt ?? new Date(Date.now() - 1000), // Expiry in the past
   }).returning();
 
   return otp;

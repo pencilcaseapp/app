@@ -33,6 +33,21 @@ export interface Config {
     };
   };
 
+  jobs: {
+    /**
+     * The same Redis server as the live fan-out, configured separately so
+     * the two can be split later. Left out when background jobs are off
+     * entirely, which is what the test environment wants. BullMQ keeps its
+     * keys under its own prefix, so sharing the server is safe.
+     */
+    redis?: {
+      host: string;
+      port: number;
+      password?: string;
+      tls: boolean;
+    };
+  };
+
   email: {
     apiToken?: string;
     from: {

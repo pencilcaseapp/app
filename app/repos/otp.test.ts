@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { expireAllValidOtps, canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed } from './otp';
+import { deleteOtpsExpiredBefore, expireAllValidOtps, canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed } from './otp';
 import { createTestUser } from '~/test/data-factories/user';
 import { createExpiredOtp, createValidOtp, createUsedOtp } from '~/test/data-factories/otp';
 import { faker } from '@faker-js/faker';
@@ -77,7 +77,7 @@ describe('getValidOtp', () => {
 
   it('returns undefined if otp is expired', async () => {
     const userFixture = await createTestUser();
-    const otpFixture = await createExpiredOtp(userFixture.id);
+    const otpFixture = await createExpiredOtp({ userId: userFixture.id });
     const otp = await getValidOtp(otpFixture.id);
 
     expect(otp).toBeUndefined();
@@ -124,10 +124,10 @@ describe('expireAllValidOtps', () => {
       userFixture.email,
     );
 
-    const otpFixture3 = await createExpiredOtp(
-      userFixture.id,
-      userFixture.email,
-    );
+    const otpFixture3 = await createExpiredOtp({
+      userId: userFixture.id,
+      email: userFixture.email,
+    });
 
     await expireAllValidOtps(userFixture.email);
 
@@ -157,6 +157,39 @@ describe('markOtpAsUsed', () => {
     expect(
       usedOtp.usedAt?.getTime(),
     ).toBeLessThanOrEqual(new Date().getTime());
+  });
+});
+
+// The cutoffs sit days in the past so these tests only ever see their own
+// rows — other test files create OTPs expiring around now, in parallel.
+describe('deleteOtpsExpiredBefore', () => {
+  const days = 24 * 60 * 60 * 1000;
+
+  it('deletes otps that expired before the given date', async () => {
+    const userFixture = await createTestUser();
+    const otpFixture = await createExpiredOtp({
+      userId: userFixture.id,
+      expiresAt: new Date(Date.now() - 10 * days),
+    });
+
+    const deletedCount = await deleteOtpsExpiredBefore(
+      new Date(Date.now() - 5 * days),
+    );
+
+    expect(deletedCount).toBeGreaterThanOrEqual(1);
+    expect(await getOtp(otpFixture.id)).toBeUndefined();
+  });
+
+  it('keeps otps that expired after the given date', async () => {
+    const userFixture = await createTestUser();
+    const otpFixture = await createExpiredOtp({
+      userId: userFixture.id,
+      expiresAt: new Date(Date.now() - 6 * days),
+    });
+
+    await deleteOtpsExpiredBefore(new Date(Date.now() - 7 * days));
+
+    expect(await getOtp(otpFixture.id)).toStrictEqual(otpFixture);
   });
 });
 

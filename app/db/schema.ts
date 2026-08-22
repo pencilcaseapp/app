@@ -25,6 +25,7 @@ export const otps = pgTable('otps', {
 }, table => [
   index('otps_user_id_idx').on(table.userId),
   index('otps_email_idx').on(table.email),
+  index('otps_expires_at_idx').on(table.expiresAt),
 ]);
 
 export const sessions = pgTable('sessions', {
