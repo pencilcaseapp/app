@@ -103,7 +103,7 @@ UTC cron `schedule`, `run`) in `app/jobs/definitions/`, registered in
 which upserts the schedulers and starts the worker in-process, and
 `stopJobs()` on `SIGTERM` so a running job finishes before the instance
 goes away. Leaving `jobs.redis` out of the config (test) disables jobs;
-tests call `run` directly. Bull Board is mounted at `/jobs-board` in
+tests call `run` directly. Bull Board is mounted at `/dev/bullmq` in
 development only. Keep `run` idempotent — the queue retries three times
 with backoff.
 

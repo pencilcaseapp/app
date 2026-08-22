@@ -59,6 +59,6 @@ Redis-compatible stores in `docs/scaling.md` apply here too.
 ## Debugging locally
 
 In development the server mounts [Bull Board](https://github.com/felixmosh/bull-board)
-on <http://localhost:3000/jobs-board>: inspect scheduled/completed/failed
+on <http://localhost:3000/dev/bullmq>: inspect scheduled/completed/failed
 runs, retry a failed one, or trigger a scheduled job right away. It is not
 mounted outside development.

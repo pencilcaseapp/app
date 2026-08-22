@@ -4,7 +4,7 @@ import { ExpressAdapter } from '@bull-board/express';
 import { getConfig } from '~/config';
 import { getJobsQueue } from './queue';
 
-export const JOBS_BOARD_PATH = '/jobs-board';
+export const JOBS_BOARD_PATH = '/dev/bullmq';
 
 /**
  * Bull Board, a debugging dashboard for the queue. Development only —

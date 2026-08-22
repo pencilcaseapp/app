@@ -77,7 +77,7 @@ describe('getValidOtp', () => {
 
   it('returns undefined if otp is expired', async () => {
     const userFixture = await createTestUser();
-    const otpFixture = await createExpiredOtp(userFixture.id);
+    const otpFixture = await createExpiredOtp({ userId: userFixture.id });
     const otp = await getValidOtp(otpFixture.id);
 
     expect(otp).toBeUndefined();
@@ -124,10 +124,10 @@ describe('expireAllValidOtps', () => {
       userFixture.email,
     );
 
-    const otpFixture3 = await createExpiredOtp(
-      userFixture.id,
-      userFixture.email,
-    );
+    const otpFixture3 = await createExpiredOtp({
+      userId: userFixture.id,
+      email: userFixture.email,
+    });
 
     await expireAllValidOtps(userFixture.email);
 
@@ -167,11 +167,10 @@ describe('deleteOtpsExpiredBefore', () => {
 
   it('deletes otps that expired before the given date', async () => {
     const userFixture = await createTestUser();
-    const otpFixture = await createExpiredOtp(
-      userFixture.id,
-      undefined,
-      new Date(Date.now() - 10 * days),
-    );
+    const otpFixture = await createExpiredOtp({
+      userId: userFixture.id,
+      expiresAt: new Date(Date.now() - 10 * days),
+    });
 
     const deletedCount = await deleteOtpsExpiredBefore(
       new Date(Date.now() - 5 * days),
@@ -183,11 +182,10 @@ describe('deleteOtpsExpiredBefore', () => {
 
   it('keeps otps that expired after the given date', async () => {
     const userFixture = await createTestUser();
-    const otpFixture = await createExpiredOtp(
-      userFixture.id,
-      undefined,
-      new Date(Date.now() - 6 * days),
-    );
+    const otpFixture = await createExpiredOtp({
+      userId: userFixture.id,
+      expiresAt: new Date(Date.now() - 6 * days),
+    });
 
     await deleteOtpsExpiredBefore(new Date(Date.now() - 7 * days));
 
