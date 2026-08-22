@@ -6,15 +6,15 @@ import { otps } from '~/db/schema';
 export type Otp = InferSelectModel<typeof otps>;
 
 export async function createOtp(input: {
-  userId: string;
   email: string;
+  canonicalEmail: string;
   codeHash: string;
 }) {
-  const { userId, email, codeHash } = input;
+  const { email, canonicalEmail, codeHash } = input;
 
   const [otp] = await db.insert(otps).values({
-    userId,
     email,
+    canonicalEmail,
     codeHash,
   }).returning();
 
@@ -63,7 +63,7 @@ export async function expireOtp(id: string) {
   return otp;
 }
 
-export async function expireAllValidOtps(email: string) {
+export async function expireAllValidOtps(canonicalEmail: string) {
   await db.update(otps)
     .set({
       expiresAt: new Date(),
@@ -71,7 +71,7 @@ export async function expireAllValidOtps(email: string) {
     })
     .where(
       and(
-        eq(otps.email, email),
+        eq(otps.canonicalEmail, canonicalEmail),
         gt(otps.expiresAt, new Date()),
         isNull(otps.usedAt),
       ))
@@ -119,13 +119,13 @@ export async function deleteOtpsExpiredBefore(before: Date) {
   }
 }
 
-export async function canRequestNewOtp(email: string) {
+export async function canRequestNewOtp(canonicalEmail: string) {
   const fifteenMinutesAgo = Date.now() - 15 * 60 * 1000;
 
   const count = await db.$count(
     otps,
     and(
-      eq(otps.email, email),
+      eq(otps.canonicalEmail, canonicalEmail),
       gt(otps.createdAt, new Date(fifteenMinutesAgo)),
     ),
   );

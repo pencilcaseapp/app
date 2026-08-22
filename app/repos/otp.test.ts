@@ -2,22 +2,24 @@ import { describe, it, expect } from 'vitest';
 import { deleteOtpsExpiredBefore, expireAllValidOtps, canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed } from './otp';
 import { createTestUser } from '~/test/data-factories/user';
 import { createExpiredOtp, createValidOtp, createUsedOtp } from '~/test/data-factories/otp';
+import { getCanonicalEmail } from '~/utils/email';
 import { faker } from '@faker-js/faker';
 
 describe('createOtp', () => {
   it('creates an otp', async () => {
-    const userFixture = await createTestUser();
+    const email = faker.internet.email();
 
     const otp = await createOtp({
-      userId: userFixture.id,
-      email: userFixture.email,
+      email,
+      canonicalEmail: getCanonicalEmail(email),
       codeHash: 'hashed-code',
     });
 
     expect(otp).toStrictEqual({
       id: expect.any(String),
-      userId: userFixture.id,
-      email: userFixture.email,
+      userId: null,
+      email,
+      canonicalEmail: getCanonicalEmail(email),
       codeHash: 'hashed-code',
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
@@ -27,11 +29,11 @@ describe('createOtp', () => {
   });
 
   it('creates an otp with correct expiry', async () => {
-    const userFixture = await createTestUser();
+    const email = faker.internet.email();
 
     const otp = await createOtp({
-      userId: userFixture.id,
-      email: userFixture.email,
+      email,
+      canonicalEmail: getCanonicalEmail(email),
       codeHash: 'hashed-code',
     });
 
@@ -129,7 +131,7 @@ describe('expireAllValidOtps', () => {
       email: userFixture.email,
     });
 
-    await expireAllValidOtps(userFixture.email);
+    await expireAllValidOtps(getCanonicalEmail(userFixture.email));
 
     const expiredOtp1 = await getOtp(otpFixture1.id);
     const expiredOtp2 = await getOtp(otpFixture2.id);
@@ -196,30 +198,45 @@ describe('deleteOtpsExpiredBefore', () => {
 describe('canRequestNewOtp', () => {
   it('allows requesting a new OTP if no OTPs have been requested recently', async () => {
     const userFixture = await createTestUser();
-    const canRequest = await canRequestNewOtp(userFixture.email);
+    const canonicalEmail = getCanonicalEmail(userFixture.email);
+    const canRequest = await canRequestNewOtp(canonicalEmail);
 
     expect(canRequest).toBe(true);
   });
 
   it('allows requesting a new OTP if under the limit', async () => {
     const userFixture = await createTestUser();
+    const canonicalEmail = getCanonicalEmail(userFixture.email);
 
     await createValidOtp(userFixture.id, userFixture.email);
     await createValidOtp(userFixture.id, userFixture.email);
 
-    const canRequest = await canRequestNewOtp(userFixture.email);
+    const canRequest = await canRequestNewOtp(canonicalEmail);
 
     expect(canRequest).toBe(true);
   });
 
   it('prevents requesting a new OTP if over the limit', async () => {
     const userFixture = await createTestUser();
+    const canonicalEmail = getCanonicalEmail(userFixture.email);
 
     await createValidOtp(userFixture.id, userFixture.email);
     await createValidOtp(userFixture.id, userFixture.email);
     await createValidOtp(userFixture.id, userFixture.email);
 
-    const canRequest = await canRequestNewOtp(userFixture.email);
+    const canRequest = await canRequestNewOtp(canonicalEmail);
+
+    expect(canRequest).toBe(false);
+  });
+
+  it('counts mailbox variants against the same limit', async () => {
+    const userFixture = await createTestUser();
+
+    await createValidOtp(userFixture.id, 'j.ohn.rate@gmail.com');
+    await createValidOtp(userFixture.id, 'jo.hn.rate@gmail.com');
+    await createValidOtp(userFixture.id, 'john.rate+x@GMAIL.com');
+
+    const canRequest = await canRequestNewOtp('johnrate@gmail.com');
 
     expect(canRequest).toBe(false);
   });
