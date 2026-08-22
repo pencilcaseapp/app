@@ -1,0 +1,1 @@
+CREATE INDEX "otps_expires_at_idx" ON "otps" ("expires_at");

@@ -24,6 +24,14 @@ export function getConfigDev(): Config {
       },
     },
 
+    jobs: {
+      redis: {
+        host: 'localhost',
+        port: 6380,
+        tls: false,
+      },
+    },
+
     email: {
       apiToken: env.get('EMAIL_API_TOKEN').asString(),
       from: {

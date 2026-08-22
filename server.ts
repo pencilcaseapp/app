@@ -4,6 +4,7 @@ import { createRequestHandler } from '@react-router/express';
 import { internalIpV4 } from 'internal-ip';
 import { getConfig } from '~/config';
 import { migrateDatabase } from '~/db/migrate';
+import { startJobs, stopJobs } from '~/jobs';
 import { createServer } from 'node:http';
 
 import 'dotenv/config';
@@ -47,6 +48,13 @@ else {
     ws.handleUpgrade(request, socket, head);
   });
 
+  const { createJobsBoard, JOBS_BOARD_PATH } = await import('~/jobs/board');
+  const jobsBoard = createJobsBoard();
+
+  if (jobsBoard) {
+    app.use(JOBS_BOARD_PATH, jobsBoard);
+  }
+
   app.use(viteDevServer.middlewares);
   app.use(
     createRequestHandler({
@@ -61,6 +69,7 @@ else {
 
 async function startServer() {
   await migrateDatabase();
+  await startJobs();
 
   const localIp = await internalIpV4();
   const host = localIp ?? config.server.host;
@@ -78,7 +87,7 @@ async function startServer() {
  */
 async function stopServer() {
   server.close();
-  await stopLiveServer();
+  await Promise.all([stopLiveServer(), stopJobs()]);
   process.exit(0);
 }
 

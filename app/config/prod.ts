@@ -28,6 +28,15 @@ export function getConfigProd(): Config {
       },
     },
 
+    jobs: {
+      redis: {
+        host: env.get('REDIS_HOST').required().asString(),
+        port: env.get('REDIS_PORT').required().asPortNumber(),
+        password: env.get('REDIS_PASSWORD').asString(),
+        tls: env.get('REDIS_TLS').default('false').asBool(),
+      },
+    },
+
     email: {
       apiToken: env.get('EMAIL_API_TOKEN').required().asString(),
       from: {

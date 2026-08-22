@@ -17,6 +17,8 @@ export function getConfigTest(): Config {
 
     live: {},
 
+    jobs: {},
+
     email: {
       from: {
         name: 'pencil case',

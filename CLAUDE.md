@@ -95,6 +95,18 @@ otherwise drop everything still sitting behind the store debounce. Read
 has to support (Pub/Sub and `EVAL`, which several Redis-compatible stores skip)
 and why sticky sessions stay off.
 
+**Background jobs — `app/jobs/`, `docs/jobs.md`.** BullMQ on the same Redis
+server as the live fan-out, under its own config (`config.jobs.redis`) and
+key prefix (`pencil-case:jobs`). A job is a `JobDefinition` (unique name,
+UTC cron `schedule`, `run`) in `app/jobs/definitions/`, registered in
+`app/jobs/definitions/index.ts`; `server.ts` calls `startJobs()` on boot,
+which upserts the schedulers and starts the worker in-process, and
+`stopJobs()` on `SIGTERM` so a running job finishes before the instance
+goes away. Leaving `jobs.redis` out of the config (test) disables jobs;
+tests call `run` directly. Bull Board is mounted at `/jobs-board` in
+development only. Keep `run` idempotent — the queue retries three times
+with backoff.
+
 **Live authorisation — `app/live/connections.ts`.** The upgrade request never
 passes through the route middleware, so `onConnect` resolves the session from
 the cookie itself (`getAuthUserByCookie`) and asks `canOpenDocument`; throwing
