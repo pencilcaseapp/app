@@ -15,7 +15,9 @@ const config = getConfig();
 
 app.use(compression());
 app.disable('x-powered-by');
-app.enable('trust proxy');
+// Exactly one proxy (the CDN) sits in front; trusting the whole
+// X-Forwarded-For chain would let clients spoof their address.
+app.set('trust proxy', 1);
 
 let stopLiveServer = async () => {};
 

@@ -6,6 +6,7 @@ import { createHash, randomBytes, randomInt } from 'node:crypto';
 import { createCookieSessionStorage, href } from 'react-router';
 import { getConfig } from '~/config';
 import { getNormalizedReturnUrl, withSearchParams } from '~/utils/url';
+import { getCanonicalEmail, normalizeEmail } from '~/utils/email';
 import { SearchParamAuth } from '~/constants/search-params';
 
 const config = getConfig();
@@ -32,25 +33,27 @@ export type InitMagicCodeResult = [InitMagicCodeError] | [null, { otp: Otp }];
 export async function initMagicCode(
   email: string,
 ): Promise<InitMagicCodeResult> {
-  if (!await canRequestNewOtp(email)) {
+  const to = normalizeEmail(email);
+  const canonicalEmail = getCanonicalEmail(to);
+
+  if (!await canRequestNewOtp(canonicalEmail)) {
     return [InitMagicCodeError.TooManyRequests];
   }
 
-  await expireAllValidOtps(email);
+  await expireAllValidOtps(canonicalEmail);
 
-  const user = await getOrCreateUserByEmail(email);
   const code = randomInt(100000, 1000000).toString();
   const codeHash = await argon2.hash(code);
 
   const otp = await createOtp({
-    userId: user.id,
-    email: user.email,
+    email: to,
+    canonicalEmail,
     codeHash,
   });
 
   await sendEmailMagicCode({
     to: {
-      email: user.email,
+      email: to,
     },
     code,
   });
@@ -64,14 +67,14 @@ export enum VerifyMagicCodeError {
 }
 
 export type VerifyMagicCodeResult
-  = [VerifyMagicCodeError] | [null, { otp: Otp }];
+  = [VerifyMagicCodeError] | [null, { otp: Otp; user: User }];
 
 export async function verifyMagicCode(
   id: string, email: string, code: string,
 ): Promise<VerifyMagicCodeResult> {
   const otp = await getValidOtp(id);
 
-  if (!otp || otp.email !== email) {
+  if (!otp || normalizeEmail(otp.email) !== normalizeEmail(email)) {
     return [VerifyMagicCodeError.Expired];
   }
 
@@ -82,7 +85,11 @@ export async function verifyMagicCode(
 
   await markOtpAsUsed(otp.id);
 
-  return [null, { otp }];
+  // The user row only exists once the address is proven, so unverified
+  // sign-in requests leave nothing behind but the OTP row.
+  const user = await getOrCreateUserByEmail(normalizeEmail(otp.email));
+
+  return [null, { otp, user }];
 }
 
 export async function getAuthSession(

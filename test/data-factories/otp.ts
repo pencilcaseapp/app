@@ -1,11 +1,15 @@
 import { faker } from '@faker-js/faker';
 import { db } from '~/db';
 import { otps } from '~/db/schema';
+import { getCanonicalEmail } from '~/utils/email';
 
 export async function createValidOtp(userId: string, email?: string) {
+  const to = email ?? faker.internet.email();
+
   const [otp] = await db.insert(otps).values({
     userId,
-    email: email ?? faker.internet.email(),
+    email: to,
+    canonicalEmail: getCanonicalEmail(to),
     codeHash: faker.string.alphanumeric(64),
   }).returning();
 
@@ -18,10 +22,12 @@ export async function createExpiredOtp(input: {
   expiresAt?: Date;
 }) {
   const { userId, email, expiresAt } = input;
+  const to = email ?? faker.internet.email();
 
   const [otp] = await db.insert(otps).values({
     userId,
-    email: email ?? faker.internet.email(),
+    email: to,
+    canonicalEmail: getCanonicalEmail(to),
     codeHash: faker.string.alphanumeric(64),
     expiresAt: expiresAt ?? new Date(Date.now() - 1000), // Expiry in the past
   }).returning();
@@ -30,9 +36,12 @@ export async function createExpiredOtp(input: {
 }
 
 export async function createUsedOtp(userId: string) {
+  const to = faker.internet.email();
+
   const [otp] = await db.insert(otps).values({
     userId,
-    email: faker.internet.email(),
+    email: to,
+    canonicalEmail: getCanonicalEmail(to),
     codeHash: faker.string.alphanumeric(64),
     usedAt: new Date(),
   }).returning();

@@ -66,7 +66,9 @@ test('matches snapshot', async () => {
 
 test('redirects to onboarding on successful verification', async () => {
   getValidOtpMock.mockResolvedValueOnce(otpFixture);
-  verifyMagicCodeMock.mockResolvedValueOnce([null, { otp: otpFixture }]);
+  verifyMagicCodeMock.mockResolvedValueOnce(
+    [null, { otp: otpFixture, user: userFixture }],
+  );
   createSessionCookieMock.mockResolvedValueOnce(userSessionFixture);
 
   const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {

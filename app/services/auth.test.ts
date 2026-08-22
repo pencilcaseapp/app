@@ -26,8 +26,10 @@ vi.mock('~/repos/otp', async (importOriginal) => {
 
 const getAndRefreshUserSessionMock = vi.fn();
 const updateUserMock = vi.fn();
+const getOrCreateUserByEmailMock = vi.fn(() => userFixture);
 vi.mock('~/repos/user', () => ({
-  getOrCreateUserByEmail: () => userFixture,
+  getOrCreateUserByEmail: (...args: unknown[]) =>
+    getOrCreateUserByEmailMock(...args as []),
   createUserSession: () => ({
     ...userSessionFixture,
     expiresAt: new Date('2026-06-15T13:39:21.509Z'),
@@ -86,10 +88,38 @@ describe('initMagicCode', () => {
       await initMagicCode('test@example.com');
 
       expect(createOtpMock).toHaveBeenCalledWith({
-        userId: userFixture.id,
-        email: userFixture.email,
+        email: 'test@example.com',
+        canonicalEmail: 'test@example.com',
         codeHash: expect.any(String),
       });
+    });
+
+    it('does not create a user yet', async () => {
+      canRequestNewOtpMock.mockResolvedValueOnce(true);
+      await initMagicCode('test@example.com');
+
+      expect(getOrCreateUserByEmailMock).not.toHaveBeenCalled();
+    });
+
+    it('normalizes the address it sends to', async () => {
+      canRequestNewOtpMock.mockResolvedValueOnce(true);
+      await initMagicCode('  John.Smith+promo@GMAIL.com ');
+
+      expect(createOtpMock).toHaveBeenCalledWith({
+        email: 'john.smith+promo@gmail.com',
+        canonicalEmail: 'johnsmith@gmail.com',
+        codeHash: expect.any(String),
+      });
+    });
+
+    it('rate limits by the canonical mailbox', async () => {
+      canRequestNewOtpMock.mockResolvedValueOnce(true);
+      await initMagicCode('J.o.h.n.S.m.i.t.h+x@gmail.com');
+
+      expect(canRequestNewOtpMock)
+        .toHaveBeenCalledWith('johnsmith@gmail.com');
+      expect(expireAllValidOtpsMock)
+        .toHaveBeenCalledWith('johnsmith@gmail.com');
     });
 
     it('creates proper code hash', async () => {
@@ -107,7 +137,7 @@ describe('initMagicCode', () => {
 
       expect(sendEmailMagicCodeMock).toHaveBeenCalledWith({
         to: {
-          email: userFixture.email,
+          email: 'test@example.com',
         },
         code: code.toString(),
       });
@@ -145,7 +175,7 @@ describe('initMagicCode', () => {
       expect(error).toEqual(VerifyMagicCodeError.Invalid);
     });
 
-    it('returns otp if code matches', async () => {
+    it('returns otp and user if code matches', async () => {
       const code = '123456';
       const codeHash = await argon2.hash(code);
 
@@ -166,7 +196,42 @@ describe('initMagicCode', () => {
           ...otpFixture,
           codeHash,
         },
+        user: userFixture,
       });
+    });
+
+    it('matches the email case-insensitively', async () => {
+      const code = '123456';
+      const codeHash = await argon2.hash(code);
+
+      getValidOtpMock.mockResolvedValueOnce({
+        ...otpFixture,
+        codeHash,
+      });
+
+      const [error] = await verifyMagicCode(
+        otpFixture.id,
+        otpFixture.email.toUpperCase(),
+        code,
+      );
+
+      expect(error).toBeNull();
+    });
+
+    it('creates the user with the normalized address', async () => {
+      const code = '123456';
+      const codeHash = await argon2.hash(code);
+
+      getValidOtpMock.mockResolvedValueOnce({
+        ...otpFixture,
+        email: 'John@Example.com',
+        codeHash,
+      });
+
+      await verifyMagicCode(otpFixture.id, 'John@Example.com', code);
+
+      expect(getOrCreateUserByEmailMock)
+        .toHaveBeenCalledWith('john@example.com');
     });
   });
 });
