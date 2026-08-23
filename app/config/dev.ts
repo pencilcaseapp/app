@@ -44,6 +44,10 @@ export function getConfigDev(): Config {
       secret: 's3cr3t',
     },
 
+    e2e: {
+      apiToken: env.get('E2E_API_TOKEN').default('e2e-t0k3n').asString(),
+    },
+
     session: {
       secure: false,
       secret: 's3cr3t',

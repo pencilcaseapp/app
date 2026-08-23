@@ -22,6 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run docker:up      # start dev (:5433) and test (:5434) Postgres containers
 npm run dev            # dev server on http://localhost:3000 (runs migrations on boot)
 npm run test           # vitest (watch mode); requires the test Postgres on :5434
+npm run e2e            # Playwright e2e tests; needs the dev Postgres/Redis (docs/e2e.md)
 npm run typecheck      # react-router typegen && tsc
 npm run lint           # eslint
 npm run storybook      # Storybook on :6006
@@ -272,3 +273,6 @@ passed.
   `app/hooks/use-stable-order.test.ts`); anything depending on layout
   (`offsetTop`, `getBoundingClientRect`) is not — happy-dom reports zeroes, so
   verify that in Storybook instead.
+- End-to-end tests are Playwright specs in `e2e/` against the dev server and
+  its Postgres/Redis; they sign in through `POST /e2e/auth` (enabled by
+  `config.e2e`, absent in prod) instead of the OTP flow. See `docs/e2e.md`.

@@ -16,3 +16,8 @@ server.js
 # Storybook
 *storybook.log
 storybook-static
+
+# Playwright
+/test-results/
+/playwright-report/
+/e2e/.auth/
