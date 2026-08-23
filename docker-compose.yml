@@ -2,9 +2,10 @@ name: pencil-case-app
 
 services:
   postgres_dev:
-    # Pinned: the 18 image moved its data volume to /var/lib/postgresql,
-    # so a fresh pull of :latest refuses our mounts and crash-loops.
-    image: postgres:17
+    # Pinned to a major so CI and local always run the same version. 18
+    # keeps its data in /var/lib/postgresql (not …/data); a volume that
+    # still holds pre-18 data needs a one-time `docker compose down -v`.
+    image: postgres:18
     restart: always
     environment:
       - POSTGRES_USER=postgres
@@ -13,7 +14,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - postgres_dev_data:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d db"]
       interval: 5s
@@ -21,9 +22,7 @@ services:
       retries: 10
 
   postgres_test:
-    # Pinned: the 18 image moved its data volume to /var/lib/postgresql,
-    # so a fresh pull of :latest refuses our mounts and crash-loops.
-    image: postgres:17
+    image: postgres:18
     restart: always
     environment:
       - POSTGRES_USER=postgres
@@ -32,7 +31,7 @@ services:
     ports:
       - "5434:5432"
     volumes:
-      - postgres_test_data:/var/lib/postgresql/data
+      - postgres_test_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d db"]
       interval: 5s
