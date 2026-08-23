@@ -29,7 +29,10 @@ export async function createValidUserSession(userId: string, expiresAt?: Date) {
   return session;
 }
 
-export async function createExpiredUserSession(userId: string) {
+export async function createExpiredUserSession(
+  userId: string,
+  expiresAt?: Date,
+) {
   const token = crypto.randomBytes(32);
   const codeHash = await argon2.hash(token);
 
@@ -37,7 +40,7 @@ export async function createExpiredUserSession(userId: string) {
     userId,
     tokenHash: codeHash,
     userAgent: 'test-agent',
-    expiresAt: new Date(Date.now() - (60 * 1000)),
+    expiresAt: expiresAt ?? new Date(Date.now() - (60 * 1000)),
   }).returning();
 
   return session;

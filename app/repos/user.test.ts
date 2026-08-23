@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createUser, createUserSession, getOrCreateUserByEmail, getUser, getUserByEmail, getAndRefreshUserSession, updateUser } from './user';
+import { createUser, createUserSession, deleteSessionsExpiredBefore, getOrCreateUserByEmail, getUser, getUserByEmail, getAndRefreshUserSession, getUserSession, updateUser } from './user';
 import { createExpiredUserSession, createTestUser, createValidUserSession } from '~/test/data-factories/user';
 import { faker } from '@faker-js/faker';
 
@@ -186,5 +186,39 @@ describe('getAndRefreshUserSession', () => {
     const result = await getAndRefreshUserSession(sessionFixture.tokenHash);
 
     expect(result).toBeNull();
+  });
+});
+
+// The cutoffs sit days in the past so these tests only ever see their own
+// rows — other test files create sessions expiring around now, in parallel.
+describe('deleteSessionsExpiredBefore', () => {
+  const days = 24 * 60 * 60 * 1000;
+
+  it('deletes sessions that expired before the given date', async () => {
+    const userFixture = await createTestUser();
+    const sessionFixture = await createExpiredUserSession(
+      userFixture.id,
+      new Date(Date.now() - 10 * days),
+    );
+
+    const deletedCount = await deleteSessionsExpiredBefore(
+      new Date(Date.now() - 5 * days),
+    );
+
+    expect(deletedCount).toBeGreaterThanOrEqual(1);
+    expect(await getUserSession(sessionFixture.id)).toBeUndefined();
+  });
+
+  it('keeps sessions that expired after the given date', async () => {
+    const userFixture = await createTestUser();
+    const sessionFixture = await createExpiredUserSession(
+      userFixture.id,
+      new Date(Date.now() - 6 * days),
+    );
+
+    await deleteSessionsExpiredBefore(new Date(Date.now() - 7 * days));
+
+    expect(await getUserSession(sessionFixture.id))
+      .toStrictEqual(sessionFixture);
   });
 });

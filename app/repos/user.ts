@@ -1,4 +1,4 @@
-import { and, eq, sql, type InferSelectModel } from 'drizzle-orm';
+import { and, eq, inArray, lt, sql, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { users } from '~/db/schema';
@@ -141,4 +141,45 @@ export async function getAndRefreshUserSession(tokenHash: string) {
     session: refreshedSession ?? session,
     isRefreshed: !!refreshedSession,
   };
+}
+
+export async function getUserSession(id: string) {
+  if (!isUuid(id)) {
+    return undefined;
+  }
+
+  return db.query.sessions.findFirst({
+    where: {
+      id,
+    },
+  });
+}
+
+const DELETE_BATCH_SIZE = 1000;
+
+/**
+ * Deletes in batches so a large backlog never turns into one long-running
+ * statement holding locks on a table every signed in request reads.
+ */
+export async function deleteSessionsExpiredBefore(before: Date) {
+  let deletedCount = 0;
+
+  while (true) {
+    const batch = db
+      .select({ id: sessions.id })
+      .from(sessions)
+      .where(lt(sessions.expiresAt, before))
+      .limit(DELETE_BATCH_SIZE);
+
+    const deleted = await db
+      .delete(sessions)
+      .where(inArray(sessions.id, batch))
+      .returning({ id: sessions.id });
+
+    deletedCount += deleted.length;
+
+    if (deleted.length < DELETE_BATCH_SIZE) {
+      return deletedCount;
+    }
+  }
 }
