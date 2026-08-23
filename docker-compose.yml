@@ -2,9 +2,6 @@ name: pencil-case-app
 
 services:
   postgres_dev:
-    # Pinned to a major so CI and local always run the same version. 18
-    # keeps its data in /var/lib/postgresql (not …/data); a volume that
-    # still holds pre-18 data needs a one-time `docker compose down -v`.
     image: postgres:18
     restart: always
     environment:
