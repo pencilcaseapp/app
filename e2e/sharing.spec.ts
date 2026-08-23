@@ -18,8 +18,10 @@ test('edits from an invited user reach the owner live', async ({
     .toContainText('Written by User B.', { timeout: 10_000 });
 });
 
-test('a shared document appears in the navigation of the user it was shared '
-  + 'with', async ({ userA, userB }) => {
+test('an invited user sees the shared document under All Docs', async ({
+  userA,
+  userB,
+}) => {
   await userA.createDocument();
 
   const heading = `Doc from User A ${Date.now()}`;
