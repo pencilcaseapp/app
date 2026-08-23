@@ -140,6 +140,20 @@ export async function createSessionCookie(input: {
   });
 }
 
+/**
+ * Signs in an e2e test user without the OTP flow. Only reachable through
+ * `/e2e/auth`, which is off in prod (see `Config['e2e']`).
+ */
+export async function signInE2eUser(request: Request, email: string) {
+  const user = await getOrCreateUserByEmail(normalizeEmail(email));
+
+  if (!user.onboarded) {
+    await updateUser(user.id, { onboarded: true });
+  }
+
+  return createSessionCookie({ request, userId: user.id });
+}
+
 export async function onboardUser(
   userId: string,
   input: { name?: string; newsletter?: boolean },

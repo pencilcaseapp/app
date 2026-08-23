@@ -11,4 +11,5 @@ export default [
     route('otp/:otpId', 'routes/otp.tsx'),
     route('onboarding', 'routes/onboarding.tsx'),
   ]),
+  route('e2e/auth', 'routes/e2e-auth.ts'),
 ] satisfies RouteConfig;

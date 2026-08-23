@@ -22,6 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run docker:up      # start dev (:5433) and test (:5434) Postgres containers
 npm run dev            # dev server on http://localhost:3000 (runs migrations on boot)
 npm run test           # vitest (watch mode); requires the test Postgres on :5434
+npm run e2e            # Playwright e2e tests; needs the dev Postgres/Redis (docs/e2e.md)
 npm run typecheck      # react-router typegen && tsc
 npm run lint           # eslint
 npm run storybook      # Storybook on :6006
@@ -48,8 +49,9 @@ drops and recreates the whole test schema first).
 `.claude/launch.json` defines the `dev` (:3000) and `storybook` (:6006) servers,
 so they can be started and previewed in a browser without a manual shell.
 
-CI (`.github/workflows/ci.yml`) runs lint, test, typecheck, build, and
-build-storybook. Pushing to `main` deploys to production via
+CI (`.github/workflows/ci.yml`) runs lint, test, e2e, typecheck, build, and
+build-storybook; the test and e2e jobs start their databases with the same
+`npm run docker:up` as local dev. Pushing to `main` deploys to production via
 `.github/workflows/cd.yml`.
 
 ## Architecture
@@ -272,3 +274,6 @@ passed.
   `app/hooks/use-stable-order.test.ts`); anything depending on layout
   (`offsetTop`, `getBoundingClientRect`) is not — happy-dom reports zeroes, so
   verify that in Storybook instead.
+- End-to-end tests are Playwright specs in `e2e/` against the dev server and
+  its Postgres/Redis; they sign in through `POST /e2e/auth` (enabled by
+  `config.e2e`, absent in prod) instead of the OTP flow. See `docs/e2e.md`.
