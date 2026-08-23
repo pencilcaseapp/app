@@ -12,8 +12,10 @@ npm run e2e:ui   # Playwright's UI mode for writing and debugging tests
 
 Tests live in `e2e/`, configured by `playwright.config.ts`. Locally a dev
 server you already have running is reused; in CI (`ci.yml`, job `e2e`)
-Playwright starts its own against the same Postgres/Redis service
-containers as local dev.
+Playwright starts its own after `npm run docker:up` — the same Docker
+Compose services as local dev. The browser binaries are cached keyed on
+the Playwright version, so Chromium is only downloaded again when
+Playwright (and with it its pinned browser build) is upgraded.
 
 ## Authentication
 

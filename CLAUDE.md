@@ -49,8 +49,9 @@ drops and recreates the whole test schema first).
 `.claude/launch.json` defines the `dev` (:3000) and `storybook` (:6006) servers,
 so they can be started and previewed in a browser without a manual shell.
 
-CI (`.github/workflows/ci.yml`) runs lint, test, typecheck, build, and
-build-storybook. Pushing to `main` deploys to production via
+CI (`.github/workflows/ci.yml`) runs lint, test, e2e, typecheck, build, and
+build-storybook; the test and e2e jobs start their databases with the same
+`npm run docker:up` as local dev. Pushing to `main` deploys to production via
 `.github/workflows/cd.yml`.
 
 ## Architecture

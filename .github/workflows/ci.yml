@@ -24,20 +24,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: db
-        ports:
-          - 5434:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -48,35 +34,14 @@ jobs:
           cache: npm
       - name: Install deps
         run: npm ci
+      - name: Start Postgres and Redis
+        run: npm run docker:up
       - name: Tests
         run: npm run test
 
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: db
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:8-alpine
-        ports:
-          - 6380:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -87,8 +52,20 @@ jobs:
           cache: npm
       - name: Install deps
         run: npm ci
+      - name: Get Playwright version
+        id: playwright
+        run: echo "version=$(node -p 'require("@playwright/test/package.json").version')" >> "$GITHUB_OUTPUT"
+      # Keyed on the Playwright version because each release pins its own
+      # browser builds; on a hit the install step skips the download.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+      - name: Start Postgres and Redis
+        run: npm run docker:up
       - name: E2E tests
         run: npm run e2e
       - name: Upload Playwright report

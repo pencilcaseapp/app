@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "cross-env NODE_ENV=production node ./server.js",
-    "docker:up": "docker compose up -d",
+    "docker:up": "docker compose up -d --wait",
     "docker:down": "docker compose down",
     "dev": "cross-env ENV=development tsx ./server.ts",
     "build": "run-p \"build:*\"",
