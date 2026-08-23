@@ -2,7 +2,9 @@ name: pencil-case-app
 
 services:
   postgres_dev:
-    image: postgres:latest
+    # Pinned: the 18 image moved its data volume to /var/lib/postgresql,
+    # so a fresh pull of :latest refuses our mounts and crash-loops.
+    image: postgres:17
     restart: always
     environment:
       - POSTGRES_USER=postgres
@@ -19,7 +21,9 @@ services:
       retries: 10
 
   postgres_test:
-    image: postgres:latest
+    # Pinned: the 18 image moved its data volume to /var/lib/postgresql,
+    # so a fresh pull of :latest refuses our mounts and crash-loops.
+    image: postgres:17
     restart: always
     environment:
       - POSTGRES_USER=postgres
