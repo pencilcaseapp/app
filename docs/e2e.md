@@ -37,3 +37,25 @@ cookie. Three guards keep it out of production:
 the endpoint and saves the cookie to `e2e/.auth/user.json`
 (gitignored), which every test then loads via `storageState` — tests
 start signed in without repeating the request.
+
+## Fixtures and shared flows
+
+Specs import `test` and `expect` from `e2e/fixtures.ts` instead of
+`@playwright/test`. The base test is extended with signed in users:
+
+- `user` — the storage-state user from the setup project above.
+- `userA` / `userB` — users created fresh for the test through
+  `POST /e2e/auth`, each in a browser context of their own. Multi-user
+  scenarios (sharing, live collaboration, revocation) put both into the
+  same document without them sharing cookies, and a fresh user keeps
+  sidebar assertions independent of documents left behind by earlier
+  runs.
+
+Each of them is an `AppUser` wrapping the flows the specs share:
+creating and opening documents, typing, toggling sharing, finding a
+document in the sidebar. The flows also carry the synchronisation that
+keeps the live-server tests stable — `createDocument`/`openDocument`
+wait for the websocket to deliver the server-seeded heading before
+anyone types, and toggling sharing waits for the share action's round
+trip before the link is handed to the other user (or their access is
+expected to be gone).
