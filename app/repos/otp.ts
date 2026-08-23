@@ -1,4 +1,4 @@
-import { eq, and, gt, lt, inArray, type InferSelectModel, isNull } from 'drizzle-orm';
+import { eq, and, gt, lt, inArray, sql, type InferSelectModel, isNull } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { otps } from '~/db/schema';
@@ -76,6 +76,22 @@ export async function expireAllValidOtps(canonicalEmail: string) {
         isNull(otps.usedAt),
       ))
     .returning();
+}
+
+export async function recordFailedOtpAttempt(id: string) {
+  if (!isUuid(id)) {
+    return undefined;
+  }
+
+  const [otp] = await db.update(otps)
+    .set({
+      attempts: sql`${otps.attempts} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(eq(otps.id, id))
+    .returning();
+
+  return otp;
 }
 
 export async function markOtpAsUsed(id: string) {

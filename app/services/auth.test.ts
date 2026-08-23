@@ -11,6 +11,8 @@ const expireAllValidOtpsMock = vi.fn();
 const createOtpMock = vi.fn();
 const getValidOtpMock = vi.fn();
 const markOtpAsUsedMock = vi.fn();
+const expireOtpMock = vi.fn();
+const recordFailedOtpAttemptMock = vi.fn();
 vi.mock('~/repos/otp', async (importOriginal) => {
   const actual = await importOriginal();
 
@@ -21,6 +23,9 @@ vi.mock('~/repos/otp', async (importOriginal) => {
     createOtp: (...args: unknown[]) => createOtpMock(...args),
     getValidOtp: (...args: unknown[]) => getValidOtpMock(...args),
     markOtpAsUsed: (...args: unknown[]) => markOtpAsUsedMock(...args),
+    expireOtp: (...args: unknown[]) => expireOtpMock(...args),
+    recordFailedOtpAttempt: (...args: unknown[]) =>
+      recordFailedOtpAttemptMock(...args),
   };
 });
 
@@ -169,10 +174,49 @@ describe('initMagicCode', () => {
         ...otpFixture,
         codeHash,
       });
+      recordFailedOtpAttemptMock.mockResolvedValueOnce({
+        ...otpFixture,
+        attempts: 1,
+      });
 
       const [error] = await verifyMagicCode(otpFixture.id, otpFixture.email, '654321');
 
       expect(error).toEqual(VerifyMagicCodeError.Invalid);
+      expect(recordFailedOtpAttemptMock).toHaveBeenCalledWith(otpFixture.id);
+      expect(expireOtpMock).not.toHaveBeenCalled();
+    });
+
+    it('expires the otp after too many wrong codes', async () => {
+      const code = '123456';
+      const codeHash = await argon2.hash(code);
+
+      getValidOtpMock.mockResolvedValueOnce({
+        ...otpFixture,
+        codeHash,
+      });
+      recordFailedOtpAttemptMock.mockResolvedValueOnce({
+        ...otpFixture,
+        attempts: 5,
+      });
+
+      const [error] = await verifyMagicCode(otpFixture.id, otpFixture.email, '654321');
+
+      expect(error).toEqual(VerifyMagicCodeError.Expired);
+      expect(expireOtpMock).toHaveBeenCalledWith(otpFixture.id);
+    });
+
+    it('does not count a matching code as an attempt', async () => {
+      const code = '123456';
+      const codeHash = await argon2.hash(code);
+
+      getValidOtpMock.mockResolvedValueOnce({
+        ...otpFixture,
+        codeHash,
+      });
+
+      await verifyMagicCode(otpFixture.id, otpFixture.email, code);
+
+      expect(recordFailedOtpAttemptMock).not.toHaveBeenCalled();
     });
 
     it('returns otp and user if code matches', async () => {
