@@ -1,30 +1,37 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from './fixtures';
 
-function editor(page: Page) {
-  return page.locator('[contenteditable="true"]');
-}
-
-test('a new document keeps its content across a reload', async ({ page }) => {
-  await page.goto('/new');
-  await page.waitForURL('**/doc/**');
+test('a new document keeps its content across a reload', async ({ user }) => {
+  await user.createDocument();
 
   const heading = `My e2e document ${Date.now()}`;
-  await editor(page).click();
-  await page.keyboard.type(heading);
-  await page.keyboard.press('Enter');
-  await page.keyboard.type('Hello from Playwright.');
+  await user.typeLines(heading, 'Hello from Playwright.');
 
-  await expect(editor(page)).toContainText(heading);
-  await expect(editor(page)).toContainText('Hello from Playwright.');
+  await expect(user.editor).toContainText(heading);
 
   // Typing reaches the live server over the websocket, so the very last
   // keystrokes can still be in flight on the first reload — reload again
   // rather than flake.
   await expect(async () => {
-    await page.reload();
-    await expect(editor(page))
+    await user.page.reload();
+    await expect(user.editor)
       .toContainText('Hello from Playwright.', { timeout: 3000 });
   }).toPass();
 
-  await expect(editor(page)).toContainText(heading);
+  await expect(user.editor).toContainText(heading);
+});
+
+test('a new document appears in the navigation under All Docs', async ({
+  userA,
+}) => {
+  await userA.createDocument();
+
+  const heading = `Navigation doc ${Date.now()}`;
+  await userA.typeLines(heading);
+
+  await expect(userA.documentInAllDocs(heading)).toBeVisible();
+
+  // Still there after a fresh load, now from the document list.
+  await userA.page.reload();
+  await expect(userA.documentInAllDocs(heading))
+    .toBeVisible({ timeout: 10_000 });
 });
