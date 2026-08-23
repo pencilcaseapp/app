@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { pgTable, boolean, timestamp, uuid, text, bytea, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import { pgTable, boolean, integer, timestamp, uuid, text, bytea, uniqueIndex, index } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -18,6 +18,7 @@ export const otps = pgTable('otps', {
   email: text('email').notNull(),
   canonicalEmail: text('canonical_email').notNull(),
   codeHash: text('code_hash').notNull(),
+  attempts: integer('attempts').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   expiresAt: timestamp('expires_at').notNull().default(sql`(CURRENT_TIMESTAMP + INTERVAL '15 minutes')`),

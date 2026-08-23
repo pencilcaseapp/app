@@ -12,6 +12,7 @@ export const otpFixture: Otp = {
   email,
   canonicalEmail: getCanonicalEmail(email),
   codeHash: faker.string.alphanumeric(64),
+  attempts: 0,
   userId: faker.string.uuid(),
   createdAt: faker.date.past(),
   updatedAt: faker.date.past(),

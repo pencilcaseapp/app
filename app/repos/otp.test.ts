@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { deleteOtpsExpiredBefore, expireAllValidOtps, canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed } from './otp';
+import { deleteOtpsExpiredBefore, expireAllValidOtps, canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed, recordFailedOtpAttempt } from './otp';
 import { createTestUser } from '~/test/data-factories/user';
 import { createExpiredOtp, createValidOtp, createUsedOtp } from '~/test/data-factories/otp';
 import { getCanonicalEmail } from '~/utils/email';
@@ -21,6 +21,7 @@ describe('createOtp', () => {
       email,
       canonicalEmail: getCanonicalEmail(email),
       codeHash: 'hashed-code',
+      attempts: 0,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
       expiresAt: expect.any(Date),
@@ -159,6 +160,26 @@ describe('markOtpAsUsed', () => {
     expect(
       usedOtp.usedAt?.getTime(),
     ).toBeLessThanOrEqual(new Date().getTime());
+  });
+});
+
+describe('recordFailedOtpAttempt', () => {
+  it('increments the attempts of an otp', async () => {
+    const userFixture = await createTestUser();
+    const otpFixture = await createValidOtp(userFixture.id);
+
+    expect((await recordFailedOtpAttempt(otpFixture.id))?.attempts).toBe(1);
+    expect((await recordFailedOtpAttempt(otpFixture.id))?.attempts).toBe(2);
+  });
+
+  it('returns undefined for an invalid uuid', async () => {
+    expect(await recordFailedOtpAttempt('not-a-uuid')).toBeUndefined();
+  });
+
+  it('returns undefined for an unknown otp', async () => {
+    expect(
+      await recordFailedOtpAttempt(faker.string.uuid()),
+    ).toBeUndefined();
   });
 });
 

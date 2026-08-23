@@ -1,4 +1,4 @@
-import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, getValidOtp, markOtpAsUsed } from '~/repos/otp';
+import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, expireOtp, getValidOtp, markOtpAsUsed, recordFailedOtpAttempt } from '~/repos/otp';
 import { createUserSession, getOrCreateUserByEmail, getAndRefreshUserSession, updateUser, type User } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
@@ -61,6 +61,12 @@ export async function initMagicCode(
   return [null, { otp }];
 }
 
+/**
+ * A wrong code burns one of these; the last one expires the OTP, so a six
+ * digit code cannot be guessed within the fifteen minutes it lives.
+ */
+const MAX_OTP_ATTEMPTS = 5;
+
 export enum VerifyMagicCodeError {
   Expired,
   Invalid,
@@ -80,6 +86,13 @@ export async function verifyMagicCode(
 
   const isValid = await argon2.verify(otp.codeHash, code);
   if (!isValid) {
+    const failed = await recordFailedOtpAttempt(otp.id);
+
+    if (failed && failed.attempts >= MAX_OTP_ATTEMPTS) {
+      await expireOtp(otp.id);
+      return [VerifyMagicCodeError.Expired];
+    }
+
     return [VerifyMagicCodeError.Invalid];
   }
 
