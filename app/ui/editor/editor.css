@@ -223,10 +223,6 @@
   border-color: var(--color-pca-grey-800);
 }
 
-.editor-listitem-checked {
-  color: var(--color-pca-grey-400);
-}
-
 @media (prefers-color-scheme: dark) {
   .editor-listitem-unchecked::before {
     background-color: color-mix(
@@ -258,10 +254,6 @@
       var(--color-pca-grey-800) 80%,
       transparent
     );
-  }
-
-  .editor-listitem-checked {
-    color: var(--color-pca-grey-600);
   }
 }
 
