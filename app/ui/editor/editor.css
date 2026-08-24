@@ -328,13 +328,14 @@
 /* Horizontal Rules */
 .editor-hr {
   border: none;
-  border-top: 1px solid #d1d5db;
+  height: 1.5px;
+  background-color: var(--color-pca-grey-300);
   margin: 0 0 1.25rem;
 }
 
 @media (prefers-color-scheme: dark) {
   .editor-hr {
-    border-top-color: #374151;
+    background-color: var(--color-pca-grey-800);
   }
 }
 
