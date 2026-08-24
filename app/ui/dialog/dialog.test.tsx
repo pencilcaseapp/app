@@ -147,12 +147,6 @@ describe('DialogContent', () => {
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
   });
 
-  test('applies the medium size by default', () => {
-    renderDialog({ defaultOpen: true });
-
-    expect(screen.getByRole('dialog')).toHaveClass('max-w-lg');
-  });
-
   test('applies the class of the requested size', () => {
     renderDialog({ defaultOpen: true, contentProps: { size: 'large' } });
 
@@ -162,13 +156,13 @@ describe('DialogContent', () => {
   test('applies the full height class when isFullHeight is set', () => {
     renderDialog({ defaultOpen: true, contentProps: { isFullHeight: true } });
 
-    expect(screen.getByRole('dialog')).toHaveClass('h-[32.5rem]');
+    expect(screen.getByRole('dialog')).toHaveClass('h-130');
   });
 
   test('does not apply the full height class by default', () => {
     renderDialog({ defaultOpen: true });
 
-    expect(screen.getByRole('dialog')).not.toHaveClass('h-[32.5rem]');
+    expect(screen.getByRole('dialog')).not.toHaveClass('h-130');
   });
 
   test('does not render a side area by default', () => {

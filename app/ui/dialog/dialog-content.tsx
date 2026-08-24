@@ -8,7 +8,7 @@ import type {
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import classNames from 'classnames';
 
-export type DialogSize = 'small' | 'medium' | 'large';
+export type DialogSize = 'small' | 'large';
 
 export type DialogContentProps = {
   dialogPortalProps?: DialogPortalProps;
@@ -25,7 +25,6 @@ export type DialogContentProps = {
 
 const sizeClasses: { [index in DialogSize]: string } = {
   small: 'max-w-sm',
-  medium: 'max-w-lg',
   large: 'max-w-3xl',
 };
 
@@ -39,7 +38,7 @@ export const DialogContent: FC<DialogContentProps>
     topArea,
     sideArea,
     footerArea,
-    size = 'medium',
+    size = 'small',
     isFullHeight = false,
     className,
   }) => {
@@ -52,7 +51,7 @@ export const DialogContent: FC<DialogContentProps>
             className={classNames(
               'relative flex w-full max-h-full flex-col overflow-hidden rounded-3xl bg-pca-white outline-none shadow-glass transition-[scale,opacity] duration-100 ease-out data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:scale-[0.98] data-ending-style:opacity-0 motion-reduce:transition-none dark:border dark:border-pca-grey-800 dark:bg-pca-grey-900 dark:shadow-glass-dark',
               sizeClasses[size],
-              isFullHeight && 'h-[32.5rem]',
+              isFullHeight && 'h-130',
               className,
             )}
           >
