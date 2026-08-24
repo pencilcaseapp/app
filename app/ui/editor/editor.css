@@ -29,7 +29,7 @@
   font-weight: 700;
   letter-spacing: -0.021em;
   line-height: 1.22;
-  margin: 0 0 0.75rem;
+  margin: 0 0 1rem;
 }
 
 [contenteditable] > *:only-child:has(> br)::before {
@@ -73,6 +73,17 @@
     font-size: 1.125rem;
     line-height: 1.375rem;
   }
+}
+
+/* A heading sits closer to the content it introduces than to what it
+   ends, so the block before it grows its bottom margin — the spacing
+   still only ever flows downwards. */
+[contenteditable] > :has(+ .editor-heading-h2) {
+  margin-bottom: 2rem;
+}
+
+[contenteditable] > :has(+ .editor-heading-h3) {
+  margin-bottom: 1.5rem;
 }
 
 .editor-heading-h4 {
