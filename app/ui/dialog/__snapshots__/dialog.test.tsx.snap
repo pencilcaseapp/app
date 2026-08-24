@@ -1,0 +1,119 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DialogContent > matches the snapshot with every area filled 1`] = `
+<div
+  aria-labelledby="base-ui-_r_2m_"
+  class="relative flex w-full max-h-full flex-col overflow-hidden rounded-3xl bg-pca-white outline-none shadow-glass transition-[scale,opacity] duration-100 ease-out data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:scale-[0.98] data-ending-style:opacity-0 motion-reduce:transition-none dark:border dark:border-pca-grey-800 dark:bg-pca-grey-900 dark:shadow-glass-dark max-w-3xl h-130"
+  data-base-ui-focusable=""
+  data-open=""
+  id="_r_2j_"
+  role="dialog"
+  style="--nested-dialogs: 0;"
+  tabindex="-1"
+>
+  <div
+    class="shrink-0"
+  >
+    <div
+      class="flex items-center gap-2 p-4"
+    >
+      <button
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 w-8! h-8! lg:w-8! lg:h-8! shrink-0"
+        type="button"
+      >
+        <svg
+          aria-hidden="false"
+          aria-labelledby="_r_2l_"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title
+            id="_r_2l_"
+          >
+            Back
+          </title>
+          <path
+            d="M15 6L9 12L15 18"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+      <h2
+        class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white text-center font-semibold min-w-0 flex-1 truncate"
+        id="base-ui-_r_2m_"
+      >
+        Settings
+      </h2>
+      <button
+        class="relative overflow-hidden active:scale-[0.97] flex items-center justify-center gap-2 transition-all duration-300 ease-in-out h-9 rounded-xl w-10 h-10 lg:w-9 lg:h-9 py-0 px-0 flex-row text-pca-grey-900 bg-transparent hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200 dark:text-pca-white dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800 w-8! h-8! lg:w-8! lg:h-8! shrink-0"
+        tabindex="0"
+        type="button"
+      >
+        <svg
+          aria-hidden="false"
+          aria-labelledby="_r_2n_"
+          class="shrink-0 w-6 h-6"
+          fill="transparent"
+          focusable="false"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title
+            id="_r_2n_"
+          >
+            Close
+          </title>
+          <path
+            d="M6 18L18 6M6 6L18 18"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div
+    class="flex min-h-0 flex-1"
+  >
+    <div
+      class="shrink-0 overflow-y-auto overscroll-contain p-4"
+    >
+      <nav>
+        Navigation
+      </nav>
+    </div>
+    <div
+      class="flex min-h-0 min-w-0 flex-1 flex-col"
+    >
+      <div
+        class="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4"
+      >
+        <p>
+          Body content
+        </p>
+      </div>
+      <div
+        class="shrink-0 p-4"
+      >
+        <button
+          type="button"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
