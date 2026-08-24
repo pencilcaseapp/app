@@ -49,7 +49,8 @@ const theme: EditorThemeClasses = {
     underlineStrikethrough: 'editor-text-underline-strikethrough',
     code: 'editor-text-code',
   },
-  horizontalRule: 'editor-hr',
+  hr: 'editor-hr',
+  code: 'editor-code',
   codeHighlight: {
     'atrule': 'editor-code-token-attr',
     'attr': 'editor-code-token-attr',
