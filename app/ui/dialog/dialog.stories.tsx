@@ -7,6 +7,8 @@ import { DialogContent } from './dialog-content';
 import { DialogTopbar } from './dialog-topbar';
 import { Button } from '../button/button';
 import { Typography } from '../typography/typography';
+import { NavigationItem } from '../navigation-item/navigation-item';
+import { TextField } from '../text-field/text-field';
 
 /**
  * `Dialog` is a thin wrapper around Base UI's `Dialog.Root` and is composed
@@ -105,16 +107,28 @@ export const WithTopbarAndFooter: Story = {
   ),
 };
 
+const settingsSections = [
+  { id: 'Account', icon: 'settings' },
+  { id: 'Subscription', icon: 'space' },
+  { id: 'Support', icon: 'info' },
+] as const;
+
 /**
- * The settings composition: a large, full height dialog whose topbar shows a
- * back button once a sub page is open. `onBack` is what makes the back
- * button appear — without it the slot stays empty so the title stays
- * optically centred.
+ * The settings composition: a large, full height dialog with a navigation
+ * column next to the content area. The topbar only shows a back button once
+ * a sub page is open — `onBack` is what makes it appear, so without it the
+ * slot stays empty and the title stays optically centred.
  */
 export const Settings: Story = {
   render: (args) => {
     const [open, setOpen] = useState(false);
-    const [section, setSection] = useState<string | undefined>(undefined);
+    const [section, setSection] = useState<string>('Account');
+    const [isChangingEmail, setIsChangingEmail] = useState(false);
+
+    const openSection = (id: string) => {
+      setSection(id);
+      setIsChangingEmail(false);
+    };
 
     return (
       <div className="flex min-h-dvh items-center justify-center">
@@ -127,8 +141,12 @@ export const Settings: Story = {
             isFullHeight
             topArea={(
               <DialogTopbar
-                title={section ?? 'Settings'}
-                onBack={section ? () => setSection(undefined) : undefined}
+                title={isChangingEmail ? 'Change e-mail' : section}
+                onBack={
+                  isChangingEmail
+                    ? () => setIsChangingEmail(false)
+                    : undefined
+                }
               />
             )}
             footerArea={(
@@ -136,38 +154,76 @@ export const Settings: Story = {
                 <BaseDialog.Close
                   render={<Button colorLight="secondary">Cancel</Button>}
                 />
-                <Button>Save</Button>
+                <Button>{isChangingEmail ? 'Continue' : 'Save'}</Button>
               </div>
             )}
           >
-            {section
-              ? (
-                  <Typography
-                    variant="bodySmall"
-                    textColorLight="grey-600"
-                    textColorDark="grey-400"
-                  >
-                    The
-                    {' '}
-                    {section}
-                    {' '}
-                    settings live here.
-                  </Typography>
-                )
-              : (
-                  <div className="flex flex-col gap-1">
-                    {['Account', 'Subscription', 'Support'].map(item => (
-                      <Button
-                        key={item}
-                        colorLight="secondary"
-                        className="w-full justify-start"
-                        onClick={() => setSection(item)}
-                      >
-                        {item}
-                      </Button>
-                    ))}
-                  </div>
-                )}
+            <div className="flex h-full gap-6">
+              <nav className="flex w-44 shrink-0 flex-col gap-1">
+                {settingsSections.map(({ id, icon }) => (
+                  <NavigationItem
+                    key={id}
+                    as="button"
+                    type="button"
+                    icon={icon}
+                    title={id}
+                    aria-current={id === section ? 'page' : undefined}
+                    onClick={() => openSection(id)}
+                  />
+                ))}
+              </nav>
+
+              <div className="min-w-0 flex-1">
+                {isChangingEmail
+                  ? (
+                      <div className="flex flex-col gap-4">
+                        <Typography variant="heading3" as="h3">
+                          Enter new e-mail
+                        </Typography>
+                        <Typography
+                          variant="bodySmall"
+                          textColorLight="grey-600"
+                          textColorDark="grey-400"
+                        >
+                          We will send a verification code to your new address
+                          so you do not get locked out of your account.
+                        </Typography>
+                        <TextField
+                          id="new-email"
+                          type="email"
+                          label="E-mail"
+                          placeholder="your@email.com"
+                        />
+                      </div>
+                    )
+                  : (
+                      <div className="flex flex-col items-start gap-4">
+                        <Typography variant="heading3" as="h3">
+                          {section}
+                        </Typography>
+                        <Typography
+                          variant="bodySmall"
+                          textColorLight="grey-600"
+                          textColorDark="grey-400"
+                        >
+                          The
+                          {' '}
+                          {section}
+                          {' '}
+                          settings live here.
+                        </Typography>
+                        {section === 'Account' && (
+                          <Button
+                            colorLight="secondary"
+                            onClick={() => setIsChangingEmail(true)}
+                          >
+                            Change e-mail
+                          </Button>
+                        )}
+                      </div>
+                    )}
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
