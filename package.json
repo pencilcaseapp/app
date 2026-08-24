@@ -24,6 +24,7 @@
     "@bull-board/api": "^9.4.0",
     "@bull-board/express": "^9.4.0",
     "@fontsource/inter": "^5.3.0",
+    "@fontsource/source-serif-4": "^5.3.0",
     "@hocuspocus/extension-database": "^4.5.0",
     "@hocuspocus/extension-redis": "^4.6.0",
     "@hocuspocus/provider": "^4.5.0",

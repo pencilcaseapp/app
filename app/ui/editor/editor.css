@@ -338,12 +338,15 @@
   }
 }
 
-/* Blockquotes */
+/* Blockquotes: Source Serif 4 Semibold Italic on the yellow accent
+   line; the text color comes from the editor root. */
 .editor-quote {
-  border-left: 3px solid #d1d5db;
+  border-left: 3px solid var(--color-pca-yellow-500);
   padding-left: 1rem;
   margin: 0 0 1.25rem;
-  color: #4b5563;
+  font-family: var(--font-source-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
   font-style: italic;
 }
 
@@ -353,13 +356,6 @@
 
 .editor-quote p:last-child {
   margin-bottom: 0;
-}
-
-@media (prefers-color-scheme: dark) {
-  .editor-quote {
-    border-left-color: #4b5563;
-    color: #9ca3af;
-  }
 }
 
 /* Text direction */
