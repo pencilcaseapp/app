@@ -69,7 +69,9 @@ const ToastTriggers = () => {
 export const ToastEmitted: Story = {
   render: () => (
     <ToastProvider>
-      <ToastTriggers />
+      <div className="flex min-h-dvh items-center justify-center">
+        <ToastTriggers />
+      </div>
     </ToastProvider>
   ),
 };

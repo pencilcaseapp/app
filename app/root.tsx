@@ -76,14 +76,9 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   });
 }
 
-function SearchParamToasts() {
-  useToast();
-
-  return null;
-}
-
 export default function App({ loaderData }: Route.ComponentProps) {
   useToast();
+
   return (
     <AuthenticityTokenProvider token={loaderData.token}>
       <Outlet />
