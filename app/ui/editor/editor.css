@@ -409,6 +409,27 @@
   }
 }
 
+/* Code blocks */
+.editor-code {
+  display: block;
+  background-color: var(--color-pca-grey-200);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 0 0 1.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-x: auto;
+  tab-size: 2;
+}
+
+@media (prefers-color-scheme: dark) {
+  .editor-code {
+    background-color: var(--color-pca-grey-800);
+  }
+}
+
 /* Prism code token highlights */
 .editor-code-token-attr {
   color: #c2410c;
