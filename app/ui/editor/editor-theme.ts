@@ -23,6 +23,7 @@ const theme: EditorThemeClasses = {
   paragraph: 'editor-paragraph',
   link: 'editor-link',
   list: {
+    checklist: 'editor-checklist',
     ol: 'editor-list-ol',
     ul: 'editor-list-ul',
     listitem: 'editor-listitem',

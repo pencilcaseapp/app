@@ -1,12 +1,16 @@
+@reference "../../app.css";
+
+/* Body text from Figma: Inter 16px on a 24px line. */
 [contenteditable] {
   outline: none;
-  line-height: 1.6;
-  color: #111827;
+  font-family: var(--font-inter);
+  line-height: 1.5;
+  color: var(--color-pca-grey-900);
 }
 
 @media (prefers-color-scheme: dark) {
   [contenteditable] {
-    color: #f3f4f6;
+    color: var(--color-pca-white);
   }
 }
 
@@ -61,7 +65,6 @@
 /* Paragraphs */
 .editor-paragraph {
   font-size: 1rem;
-  line-height: 1.75;
   margin: 0.5rem 0;
 }
 
@@ -131,7 +134,6 @@
 /* List items (shared) */
 .editor-listitem {
   margin: 0.25rem 0;
-  line-height: 1.75;
 }
 
 .editor-listitem p {
@@ -142,11 +144,18 @@
   list-style-type: none;
 }
 
-/* Checklist items (shared base) */
+/* Checklists — the boxes mirror app/ui/checkbox/checkbox.tsx. A top-level
+   checklist drops the list indent so the boxes align with the content;
+   nested ones keep it from .editor-list-ul. */
+[contenteditable] > .editor-checklist {
+  padding-left: 0;
+}
+
 .editor-listitem-checked,
 .editor-listitem-unchecked {
   position: relative;
-  padding-left: 1.5rem;
+  padding-left: 2rem;
+  margin-bottom: 0.5rem;
   list-style-type: none;
   outline: none;
 }
@@ -156,39 +165,120 @@
   content: '';
   position: absolute;
   left: 0;
-  top: 0.375rem;
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid #9ca3af;
-  border-radius: 0.25rem;
+  top: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--color-pca-white);
+  border: 1px solid var(--color-pca-grey-900);
+  border-radius: 0.5rem;
   cursor: pointer;
+  transition:
+    background-color 0.3s ease-in-out,
+    border-color 0.3s ease-in-out;
+}
+
+.editor-listitem-unchecked:hover::before {
+  border-color: var(--color-pca-blue-700);
 }
 
 .editor-listitem-checked::before {
-  background-color: #2563eb;
-  border-color: #2563eb;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3E%3Cpath d='M12.207 4.793a1 1 0 0 1 0 1.414l-5 5a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L6.5 9.086l4.293-4.293a1 1 0 0 1 1.414 0z'/%3E%3C/svg%3E");
-  background-size: 0.75rem;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: var(--color-pca-grey-900);
+  border-color: var(--color-pca-grey-900);
 }
 
-.editor-listitem-checked {
-  color: #9ca3af;
+/* The checkmark lives on its own always-present layer, fully clipped
+   while unchecked, so checking can wipe it in left to right, following
+   the stroke direction. A transition only fires on a value change, so a
+   document that loads with checked items renders them settled — only an
+   actual check draws the mark. */
+.editor-listitem-checked::after,
+.editor-listitem-unchecked::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-image: var(--background-image-checkmark-white);
+  background-size: 13px;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  clip-path: inset(0 100% 0 0);
+}
+
+/* The delay holds the white checkmark back until the box has darkened
+   underneath it — drawn any earlier it is white on white and the wipe
+   is invisible. */
+.editor-listitem-checked::after {
+  clip-path: inset(0 0% 0 0);
+  transition: clip-path 0.25s ease-out 0.15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-listitem-checked::after {
+    transition: none;
+  }
+}
+
+/* Lexical only toggles when the tap lands on the li itself, so its
+   padding strip is the touch target. On mobile the strip grows to
+   44×44 without moving the box or the text: the item margin becomes
+   vertical padding, and the negative margin hangs the extra strip
+   width into the gutter, the pseudos shifting right to keep the box
+   on the content edge and the text at the desktop 8px gap. */
+@media (width < theme(--breakpoint-sm)) {
+  .editor-listitem-checked,
+  .editor-listitem-unchecked {
+    margin: 0 0 0 -0.75rem;
+    padding: 0.5rem 0 0.5rem 2.75rem;
+  }
+
+  .editor-listitem-checked::before,
+  .editor-listitem-unchecked::before,
+  .editor-listitem-checked::after,
+  .editor-listitem-unchecked::after {
+    left: 0.75rem;
+    top: 0.5rem;
+  }
+}
+
+.editor-listitem-checked:hover::before {
+  background-color: var(--color-pca-grey-800);
+  border-color: var(--color-pca-grey-800);
 }
 
 @media (prefers-color-scheme: dark) {
   .editor-listitem-unchecked::before {
-    border-color: #6b7280;
+    background-color: color-mix(
+      in srgb,
+      var(--color-pca-grey-800) 60%,
+      transparent
+    );
+    border-color: transparent;
+  }
+
+  .editor-listitem-unchecked:hover::before {
+    background-color: var(--color-pca-grey-800);
+    border-color: transparent;
   }
 
   .editor-listitem-checked::before {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
+    background-color: var(--color-pca-grey-800);
+    border-color: var(--color-pca-grey-800);
   }
 
-  .editor-listitem-checked {
-    color: #6b7280;
+  .editor-listitem-checked:hover::before {
+    background-color: color-mix(
+      in srgb,
+      var(--color-pca-grey-800) 80%,
+      transparent
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-pca-grey-800) 80%,
+      transparent
+    );
   }
 }
 
@@ -239,8 +329,14 @@
   font-weight: 700;
 }
 
+/* Figma's Body Italic is Inter Medium Italic; bold text keeps its own
+   weight when both styles apply. */
 .editor-text-italic {
   font-style: italic;
+}
+
+.editor-text-italic:not(.editor-text-bold) {
+  font-weight: 500;
 }
 
 .editor-text-underline {
