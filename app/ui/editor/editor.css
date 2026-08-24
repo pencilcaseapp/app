@@ -14,11 +14,13 @@
   }
 }
 
-/* Headings */
+/* Headings from Figma: Inter Bold, 28/20/16px on mobile and 36/24/18px
+   from the sm breakpoint up. H1 and H2 sit on an auto line, H3 carries
+   an explicit one (24px mobile, 22px desktop). */
 .editor-heading-h1 {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: normal;
   margin: 1.5rem 0 0.75rem;
 }
 
@@ -35,17 +37,32 @@
 }
 
 .editor-heading-h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  line-height: 1.3;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: normal;
   margin: 1.25rem 0 0.625rem;
 }
 
 .editor-heading-h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.4;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5rem;
   margin: 1rem 0 0.5rem;
+}
+
+@media (width >= theme(--breakpoint-sm)) {
+  .editor-heading-h1 {
+    font-size: 2.25rem;
+  }
+
+  .editor-heading-h2 {
+    font-size: 1.5rem;
+  }
+
+  .editor-heading-h3 {
+    font-size: 1.125rem;
+    line-height: 1.375rem;
+  }
 }
 
 .editor-heading-h4 {
