@@ -115,9 +115,10 @@ const settingsSections = [
 
 /**
  * The settings composition: a large, full height dialog with a navigation
- * column next to the content area. The topbar only shows a back button once
- * a sub page is open — `onBack` is what makes it appear, so without it the
- * slot stays empty and the title stays optically centred.
+ * column next to the content area, roomier than the dialogs above through
+ * `padding`. The topbar only shows a back button once a sub page is open —
+ * `onBack` is what makes it appear, so without it the slot stays empty and
+ * the title stays optically centred.
  */
 export const Settings: Story = {
   render: (args) => {
@@ -138,6 +139,7 @@ export const Settings: Story = {
         <Dialog {...args} open={open} onOpenChange={setOpen}>
           <DialogContent
             size="large"
+            padding="large"
             isFullHeight
             topArea={(
               <DialogTopbar

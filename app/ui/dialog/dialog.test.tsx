@@ -171,6 +171,49 @@ describe('DialogContent', () => {
     expect(screen.getByRole('dialog')).not.toHaveClass('h-[32.5rem]');
   });
 
+  test('applies the medium padding by default', () => {
+    renderDialog({ defaultOpen: true });
+
+    expect(screen.getByRole('dialog'))
+      .toHaveClass('[--dialog-padding:1.5rem]');
+  });
+
+  test('applies the variables of the requested padding', () => {
+    renderDialog({ defaultOpen: true, contentProps: { padding: 'large' } });
+
+    expect(screen.getByRole('dialog'))
+      .toHaveClass('[--dialog-padding:2rem]', '[--dialog-gap:0.75rem]');
+  });
+
+  test('drops the padding of every area when padding is none', () => {
+    renderDialog({
+      defaultOpen: true,
+      contentProps: {
+        padding: 'none',
+        topArea: <span>Top area content</span>,
+        footerArea: <button type="button">Save</button>,
+      },
+    });
+
+    expect(screen.getByRole('dialog'))
+      .toHaveClass('[--dialog-padding:0rem]', '[--dialog-gap:0rem]');
+  });
+
+  test('pads the content and the footer from the same variable', () => {
+    renderDialog({
+      defaultOpen: true,
+      contentProps: {
+        children: <p>Body content</p>,
+        footerArea: <button type="button">Save</button>,
+      },
+    });
+
+    expect(screen.getByText('Body content').parentElement)
+      .toHaveClass('px-(--dialog-padding)', 'pb-(--dialog-gap)');
+    expect(screen.getByRole('button', { name: 'Save' }).parentElement)
+      .toHaveClass('px-(--dialog-padding)', 'pb-(--dialog-padding)');
+  });
+
   test('transitions the scale of the popup, not its transform', () => {
     renderDialog({ defaultOpen: true });
 
