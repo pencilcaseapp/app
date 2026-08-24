@@ -1,3 +1,5 @@
+@reference "../../app.css";
+
 /* Body text from Figma: Inter 16px on a 24px line. */
 [contenteditable] {
   outline: none;
@@ -227,11 +229,11 @@
    vertical padding, and the negative margin hangs the extra strip
    width into the gutter, the pseudos shifting right to keep the box
    on the content edge and the text at the desktop 8px gap. */
-@media (max-width: 40rem) {
+@media (width < theme(--breakpoint-sm)) {
   .editor-listitem-checked,
   .editor-listitem-unchecked {
     margin: 0 0 0 -0.75rem;
-    padding: 0.625rem 0 0.625rem 2.75rem;
+    padding: 0.5rem 0 0.5rem 2.75rem;
   }
 
   .editor-listitem-checked::before,
@@ -239,7 +241,7 @@
   .editor-listitem-checked::after,
   .editor-listitem-unchecked::after {
     left: 0.75rem;
-    top: 0.625rem;
+    top: 0.5rem;
   }
 }
 
