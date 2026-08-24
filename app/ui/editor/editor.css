@@ -17,8 +17,9 @@
 }
 
 /* Headings from Figma: Inter Bold, 28/20/16px on mobile and 36/24/18px
-   from the sm breakpoint up. H1 and H2 sit on an auto line, H3 carries
-   an explicit one (24px mobile, 22px desktop).
+   from the sm breakpoint up. H3 keeps the explicit Figma line heights
+   (24px mobile, 22px desktop); the negative tracking tightens the large
+   sizes optically.
 
    Block spacing flows downwards only — 12px under a heading, 20px under
    a body block, per the Figma modules — so adjacent blocks never stack
@@ -26,7 +27,8 @@
 .editor-heading-h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  line-height: normal;
+  letter-spacing: -0.021em;
+  line-height: 1.22;
   margin: 0 0 0.75rem;
 }
 
@@ -45,13 +47,15 @@
 .editor-heading-h2 {
   font-size: 1.25rem;
   font-weight: 700;
-  line-height: normal;
+  letter-spacing: -0.008em;
+  line-height: 1.4;
   margin: 0 0 0.75rem;
 }
 
 .editor-heading-h3 {
   font-size: 1rem;
   font-weight: 700;
+  letter-spacing: -0.004em;
   line-height: 1.5rem;
   margin: 0 0 0.75rem;
 }
