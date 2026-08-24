@@ -142,11 +142,17 @@
   list-style-type: none;
 }
 
-/* Checklist items (shared base) */
+/* Checklists — the boxes mirror app/ui/checkbox/checkbox.tsx. A top-level
+   checklist drops the list indent so the boxes align with the content;
+   nested ones keep it from .editor-list-ul. */
+[contenteditable] > .editor-checklist {
+  padding-left: 0;
+}
+
 .editor-listitem-checked,
 .editor-listitem-unchecked {
   position: relative;
-  padding-left: 1.5rem;
+  padding-left: 2rem;
   list-style-type: none;
   outline: none;
 }
@@ -156,39 +162,106 @@
   content: '';
   position: absolute;
   left: 0;
-  top: 0.375rem;
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid #9ca3af;
-  border-radius: 0.25rem;
+  top: 0.125rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--color-pca-white);
+  border: 1px solid var(--color-pca-grey-900);
+  border-radius: 0.5rem;
   cursor: pointer;
+  transition:
+    background-color 0.3s ease-in-out,
+    border-color 0.3s ease-in-out;
+}
+
+.editor-listitem-unchecked:hover::before {
+  border-color: var(--color-pca-blue-700);
 }
 
 .editor-listitem-checked::before {
-  background-color: #2563eb;
-  border-color: #2563eb;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3E%3Cpath d='M12.207 4.793a1 1 0 0 1 0 1.414l-5 5a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L6.5 9.086l4.293-4.293a1 1 0 0 1 1.414 0z'/%3E%3C/svg%3E");
-  background-size: 0.75rem;
+  background-color: var(--color-pca-grey-900);
+  border-color: var(--color-pca-grey-900);
+}
+
+/* The checkmark lives on its own always-present layer, fully clipped
+   while unchecked, so checking can wipe it in left to right, following
+   the stroke direction. A transition only fires on a value change, so a
+   document that loads with checked items renders them settled — only an
+   actual check draws the mark. */
+.editor-listitem-checked::after,
+.editor-listitem-unchecked::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.125rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-image: var(--background-image-checkmark-white);
+  background-size: 13px;
   background-position: center;
   background-repeat: no-repeat;
+  cursor: pointer;
+  clip-path: inset(0 100% 0 0);
+}
+
+/* The delay holds the white checkmark back until the box has darkened
+   underneath it — drawn any earlier it is white on white and the wipe
+   is invisible. */
+.editor-listitem-checked::after {
+  clip-path: inset(0 0% 0 0);
+  transition: clip-path 0.25s ease-out 0.15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-listitem-checked::after {
+    transition: none;
+  }
+}
+
+.editor-listitem-checked:hover::before {
+  background-color: var(--color-pca-grey-800);
+  border-color: var(--color-pca-grey-800);
 }
 
 .editor-listitem-checked {
-  color: #9ca3af;
+  color: var(--color-pca-grey-400);
 }
 
 @media (prefers-color-scheme: dark) {
   .editor-listitem-unchecked::before {
-    border-color: #6b7280;
+    background-color: color-mix(
+      in srgb,
+      var(--color-pca-grey-800) 60%,
+      transparent
+    );
+    border-color: transparent;
+  }
+
+  .editor-listitem-unchecked:hover::before {
+    background-color: var(--color-pca-grey-800);
+    border-color: transparent;
   }
 
   .editor-listitem-checked::before {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
+    background-color: var(--color-pca-grey-800);
+    border-color: var(--color-pca-grey-800);
+  }
+
+  .editor-listitem-checked:hover::before {
+    background-color: color-mix(
+      in srgb,
+      var(--color-pca-grey-800) 80%,
+      transparent
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-pca-grey-800) 80%,
+      transparent
+    );
   }
 
   .editor-listitem-checked {
-    color: #6b7280;
+    color: var(--color-pca-grey-600);
   }
 }
 
