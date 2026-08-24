@@ -218,6 +218,25 @@
   }
 }
 
+/* Lexical only toggles when the tap lands on the li itself, inside its
+   padding strip — so the padding IS the touch target. On mobile the
+   strip widens to 44px and the item margin becomes vertical padding,
+   growing the target from ~32×28 to ~44×44. */
+@media (max-width: 40rem) {
+  .editor-listitem-checked,
+  .editor-listitem-unchecked {
+    margin: 0;
+    padding: 0.5rem 0 0.5rem 2.75rem;
+  }
+
+  .editor-listitem-checked::before,
+  .editor-listitem-unchecked::before,
+  .editor-listitem-checked::after,
+  .editor-listitem-unchecked::after {
+    top: 0.625rem;
+  }
+}
+
 .editor-listitem-checked:hover::before {
   background-color: var(--color-pca-grey-800);
   border-color: var(--color-pca-grey-800);
