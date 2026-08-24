@@ -400,7 +400,7 @@
   font-size: 0.875em;
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
-  background-color: var(--color-pca-grey-200);
+  background-color: var(--color-pca-grey-100);
 }
 
 @media (prefers-color-scheme: dark) {
