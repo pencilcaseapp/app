@@ -1,12 +1,14 @@
+/* Body text from Figma: Inter 16px on a 24px line. */
 [contenteditable] {
   outline: none;
-  line-height: 1.6;
-  color: #111827;
+  font-family: var(--font-inter);
+  line-height: 1.5;
+  color: var(--color-pca-grey-900);
 }
 
 @media (prefers-color-scheme: dark) {
   [contenteditable] {
-    color: #f3f4f6;
+    color: var(--color-pca-white);
   }
 }
 
@@ -61,7 +63,6 @@
 /* Paragraphs */
 .editor-paragraph {
   font-size: 1rem;
-  line-height: 1.75;
   margin: 0.5rem 0;
 }
 
@@ -131,7 +132,6 @@
 /* List items (shared) */
 .editor-listitem {
   margin: 0.25rem 0;
-  line-height: 1.75;
 }
 
 .editor-listitem p {
@@ -162,7 +162,7 @@
   content: '';
   position: absolute;
   left: 0;
-  top: 0.125rem;
+  top: 0;
   width: 1.5rem;
   height: 1.5rem;
   background-color: var(--color-pca-white);
@@ -193,7 +193,7 @@
   content: '';
   position: absolute;
   left: 0;
-  top: 0.125rem;
+  top: 0;
   width: 1.5rem;
   height: 1.5rem;
   background-image: var(--background-image-checkmark-white);
@@ -228,7 +228,7 @@
   .editor-listitem-checked,
   .editor-listitem-unchecked {
     margin: 0 0 0 -0.75rem;
-    padding: 0.5rem 0 0.5rem 2.75rem;
+    padding: 0.625rem 0 0.625rem 2.75rem;
   }
 
   .editor-listitem-checked::before,
@@ -326,8 +326,14 @@
   font-weight: 700;
 }
 
+/* Figma's Body Italic is Inter Medium Italic; bold text keeps its own
+   weight when both styles apply. */
 .editor-text-italic {
   font-style: italic;
+}
+
+.editor-text-italic:not(.editor-text-bold) {
+  font-weight: 500;
 }
 
 .editor-text-underline {
