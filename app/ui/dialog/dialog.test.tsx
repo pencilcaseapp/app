@@ -171,16 +171,49 @@ describe('DialogContent', () => {
     expect(screen.getByRole('dialog')).not.toHaveClass('h-[32.5rem]');
   });
 
-  test('pads the content and the footer the same', () => {
+  test('does not render a side area by default', () => {
+    renderDialog({ defaultOpen: true });
+
+    expect(screen.queryByText('Side content')).not.toBeInTheDocument();
+  });
+
+  test('renders the side area', () => {
+    renderDialog({
+      defaultOpen: true,
+      contentProps: { sideArea: <span>Side content</span> },
+    });
+
+    expect(screen.getByText('Side content')).toBeInTheDocument();
+  });
+
+  test('keeps the footer beside the side area, not underneath it', () => {
+    renderDialog({
+      defaultOpen: true,
+      contentProps: {
+        sideArea: <span>Side content</span>,
+        footerArea: <button type="button">Save</button>,
+      },
+    });
+
+    const side = screen.getByText('Side content').parentElement;
+    const footer = screen.getByRole('button', { name: 'Save' }).parentElement;
+
+    expect(side).not.toContainElement(footer);
+    expect(side?.parentElement).toContainElement(footer);
+  });
+
+  test('pads the content, the side area and the footer the same', () => {
     renderDialog({
       defaultOpen: true,
       contentProps: {
         children: <p>Body content</p>,
+        sideArea: <span>Side content</span>,
         footerArea: <button type="button">Save</button>,
       },
     });
 
     expect(screen.getByText('Body content').parentElement).toHaveClass('p-4');
+    expect(screen.getByText('Side content').parentElement).toHaveClass('p-4');
     expect(screen.getByRole('button', { name: 'Save' }).parentElement)
       .toHaveClass('p-4');
   });

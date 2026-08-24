@@ -16,9 +16,11 @@ import { TextField } from '../text-field/text-field';
  * optional `DialogTopbar`. Trigger, close, title and description parts come
  * straight from `@base-ui/react/dialog`.
  *
- * The content area is always rendered, the top and footer areas are opt-in,
- * so the same component covers a small confirmation dialog and a full
- * settings area.
+ * The content area is always rendered, the top, side and footer areas are
+ * opt-in, so the same component covers a small confirmation dialog and a
+ * full settings area. A `sideArea` splits everything below the topbar into
+ * two columns, which keeps the footer inside the content column instead of
+ * running under the navigation.
  */
 const meta: Meta<typeof Dialog> = {
   title: 'Overlay/Dialog',
@@ -114,10 +116,11 @@ const settingsSections = [
 ] as const;
 
 /**
- * The settings composition: a large, full height dialog with a navigation
- * column next to the content area. The topbar only shows a back button once
- * a sub page is open — `onBack` is what makes it appear, so without it the
- * slot stays empty and the title stays optically centred.
+ * The settings composition: a large, full height dialog whose navigation
+ * lives in the `sideArea`, so it owns a full height column and the footer
+ * only spans the content next to it. The topbar only shows a back button
+ * once a sub page is open — `onBack` is what makes it appear, so without it
+ * the slot stays empty and the title stays optically centred.
  */
 export const Settings: Story = {
   render: (args) => {
@@ -149,6 +152,29 @@ export const Settings: Story = {
                 }
               />
             )}
+            sideArea={(
+              <nav className="flex h-full w-44 flex-col justify-between gap-1">
+                <div className="flex flex-col gap-1">
+                  {settingsSections.map(({ id, icon }) => (
+                    <NavigationItem
+                      key={id}
+                      as="button"
+                      type="button"
+                      icon={icon}
+                      title={id}
+                      aria-current={id === section ? 'page' : undefined}
+                      onClick={() => openSection(id)}
+                    />
+                  ))}
+                </div>
+                <Button
+                  colorLight="secondary"
+                  className="w-full justify-start text-pca-red-500! dark:text-pca-red-500!"
+                >
+                  Logout
+                </Button>
+              </nav>
+            )}
             footerArea={(
               <div className="flex items-center justify-end gap-2">
                 <BaseDialog.Close
@@ -158,72 +184,54 @@ export const Settings: Story = {
               </div>
             )}
           >
-            <div className="flex h-full gap-6">
-              <nav className="flex w-44 shrink-0 flex-col gap-1">
-                {settingsSections.map(({ id, icon }) => (
-                  <NavigationItem
-                    key={id}
-                    as="button"
-                    type="button"
-                    icon={icon}
-                    title={id}
-                    aria-current={id === section ? 'page' : undefined}
-                    onClick={() => openSection(id)}
-                  />
-                ))}
-              </nav>
-
-              <div className="min-w-0 flex-1">
-                {isChangingEmail
-                  ? (
-                      <div className="flex flex-col gap-4">
-                        <Typography variant="heading3" as="h3">
-                          Enter new e-mail
-                        </Typography>
-                        <Typography
-                          variant="bodySmall"
-                          textColorLight="grey-600"
-                          textColorDark="grey-400"
-                        >
-                          We will send a verification code to your new address
-                          so you do not get locked out of your account.
-                        </Typography>
-                        <TextField
-                          id="new-email"
-                          type="email"
-                          label="E-mail"
-                          placeholder="your@email.com"
-                        />
-                      </div>
-                    )
-                  : (
-                      <div className="flex flex-col items-start gap-4">
-                        <Typography variant="heading3" as="h3">
-                          {section}
-                        </Typography>
-                        <Typography
-                          variant="bodySmall"
-                          textColorLight="grey-600"
-                          textColorDark="grey-400"
-                        >
-                          The
-                          {' '}
-                          {section}
-                          {' '}
-                          settings live here.
-                        </Typography>
-                        {section === 'Account' && (
-                          <Button
-                            colorLight="secondary"
-                            onClick={() => setIsChangingEmail(true)}
-                          >
-                            Change e-mail
-                          </Button>
-                        )}
-                      </div>
+            {isChangingEmail
+              ? (
+                  <div className="flex flex-col gap-4">
+                    <Typography variant="heading3" as="h3">
+                      Enter new e-mail
+                    </Typography>
+                    <Typography
+                      variant="bodySmall"
+                      textColorLight="grey-600"
+                      textColorDark="grey-400"
+                    >
+                      We will send a verification code to your new address so
+                      you do not get locked out of your account.
+                    </Typography>
+                    <TextField
+                      id="new-email"
+                      type="email"
+                      label="E-mail"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                )
+              : (
+                  <div className="flex flex-col items-start gap-4">
+                    <Typography variant="heading3" as="h3">
+                      {section}
+                    </Typography>
+                    <Typography
+                      variant="bodySmall"
+                      textColorLight="grey-600"
+                      textColorDark="grey-400"
+                    >
+                      The
+                      {' '}
+                      {section}
+                      {' '}
+                      settings live here.
+                    </Typography>
+                    {section === 'Account' && (
+                      <Button
+                        colorLight="secondary"
+                        onClick={() => setIsChangingEmail(true)}
+                      >
+                        Change e-mail
+                      </Button>
                     )}
-              </div>
-            </div>
+                  </div>
+                )}
           </DialogContent>
         </Dialog>
       </div>

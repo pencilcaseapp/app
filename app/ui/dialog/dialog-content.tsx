@@ -16,6 +16,7 @@ export type DialogContentProps = {
   dialogViewportProps?: DialogViewportProps;
   dialogPopupProps?: DialogPopupProps;
   topArea?: ReactNode;
+  sideArea?: ReactNode;
   footerArea?: ReactNode;
   size?: DialogSize;
   isFullHeight?: boolean;
@@ -36,6 +37,7 @@ export const DialogContent: FC<DialogContentProps>
     dialogViewportProps,
     dialogPopupProps,
     topArea,
+    sideArea,
     footerArea,
     size = 'medium',
     isFullHeight = false,
@@ -59,14 +61,23 @@ export const DialogContent: FC<DialogContentProps>
                 {topArea}
               </div>
             )}
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
-              {children}
-            </div>
-            {footerArea && (
-              <div className="shrink-0 p-4">
-                {footerArea}
+            <div className="flex min-h-0 flex-1">
+              {sideArea && (
+                <div className="shrink-0 overflow-y-auto overscroll-contain p-4">
+                  {sideArea}
+                </div>
+              )}
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+                  {children}
+                </div>
+                {footerArea && (
+                  <div className="shrink-0 p-4">
+                    {footerArea}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </BaseDialog.Popup>
         </BaseDialog.Viewport>
       </BaseDialog.Portal>
