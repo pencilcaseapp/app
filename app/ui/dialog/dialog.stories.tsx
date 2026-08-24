@@ -77,7 +77,7 @@ export const Default: Story = {
  * A confirmation dialog with a topbar and a footer. The topbar owns the
  * title and the close trigger, the footer is laid out by the consumer.
  */
-export const WithTopbarAndFooter: Story = {
+export const WithFooter: Story = {
   render: args => (
     <div className="flex min-h-dvh items-center justify-center">
       <Dialog {...args}>
@@ -86,7 +86,6 @@ export const WithTopbarAndFooter: Story = {
         />
         <DialogContent
           size="small"
-          topArea={<DialogTopbar title="Delete document" />}
           footerArea={(
             <div className="flex items-center justify-end gap-2">
               <BaseDialog.Close
@@ -96,6 +95,9 @@ export const WithTopbarAndFooter: Story = {
             </div>
           )}
         >
+          <BaseDialog.Title className="mb-2" render={<Typography variant="heading3" as="h2" />}>
+            Delete document
+          </BaseDialog.Title>
           <Typography
             variant="bodySmall"
             textColorLight="grey-600"
@@ -122,7 +124,7 @@ const settingsSections = [
  * once a sub page is open — `onBack` is what makes it appear, so without it
  * the slot stays empty and the title stays optically centred.
  */
-export const Settings: Story = {
+export const WithSideArea: Story = {
   render: (args) => {
     const [open, setOpen] = useState(false);
     const [section, setSection] = useState<string>('Account');
