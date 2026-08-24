@@ -226,6 +226,24 @@ describe('DialogContent', () => {
 
     expect(screen.getByRole('dialog')).toHaveClass('w-96');
   });
+
+  test('matches the snapshot with every area filled', () => {
+    render(
+      <Dialog defaultOpen>
+        <DialogContent
+          size="large"
+          isFullHeight
+          topArea={<DialogTopbar title="Settings" onBack={vi.fn()} />}
+          sideArea={<nav>Navigation</nav>}
+          footerArea={<button type="button">Save</button>}
+        >
+          <p>Body content</p>
+        </DialogContent>
+      </Dialog>,
+    );
+
+    expect(screen.getByRole('dialog')).toMatchSnapshot();
+  });
 });
 
 describe('DialogTopbar', () => {
