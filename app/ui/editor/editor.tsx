@@ -9,6 +9,7 @@ import { CodeHighlightNode, CodeNode } from '@lexical/code-core';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { HorizontalRuleNode } from '@lexical/extension';
 import { useMemo, type ComponentProps } from 'react';
+import { useMedia } from 'react-use';
 import { EditorPluginMarkdown } from './plugins/editor-plugin-markdown';
 import { EditorPluginAutoLink } from './plugins/editor-plugin-auto-link';
 import { EditorPluginCodePrism } from './plugins/editor-plugin-code-prism';
@@ -36,6 +37,12 @@ export const Editor: React.FC<EditorProps> = ({
   topbarRight,
   children,
 }) => {
+  /* Ticking a box is not editing: the check list plugin focuses the list item
+     it toggled, and a focused item inside the contenteditable is what opens
+     the virtual keyboard. Keep the focus where it was on touch devices, where
+     that keyboard covers half the document nobody asked to edit. */
+  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
+
   const config = useMemo<EditorConfig>(() => ({
     editorState: initialEditorState ?? null,
     namespace: 'pencilCase',
@@ -64,7 +71,7 @@ export const Editor: React.FC<EditorProps> = ({
         />
         <EditorPluginRichText />
         <EditorPluginAutoFocus />
-        <CheckListPlugin />
+        <CheckListPlugin disableTakeFocusOnClick={isTouchDevice} />
         <ListPlugin />
         <ClickableLinkPlugin newTab />
         <TabIndentationPlugin maxIndent={3} />
