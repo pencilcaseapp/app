@@ -188,10 +188,15 @@
 }
 
 /* Checklists — the boxes mirror app/ui/checkbox/checkbox.tsx. A top-level
-   checklist drops the list indent so the boxes align with the content;
-   nested ones keep it from .editor-list-ul. */
+   checklist drops the list indent so the boxes align with the content; a
+   nested one indents by the width of the box strip above it instead, so
+   its boxes start where the parent item's label does. */
 [contenteditable] > .editor-checklist {
   padding-left: 0;
+}
+
+.editor-checklist .editor-checklist {
+  padding-left: 2rem;
 }
 
 .editor-listitem-checked,
@@ -201,6 +206,23 @@
   margin-bottom: 0.5rem;
   list-style-type: none;
   outline: none;
+}
+
+/* Lexical marks the item that only holds a nested list as a check item
+   too, so it would draw a second, permanently empty box on the row its
+   first nested item renders in. It has no content of its own, so drop
+   the box and the strip it reserved for it. */
+.editor-nested-listitem.editor-listitem-checked,
+.editor-nested-listitem.editor-listitem-unchecked {
+  margin: 0;
+  padding: 0;
+}
+
+.editor-nested-listitem.editor-listitem-checked::before,
+.editor-nested-listitem.editor-listitem-unchecked::before,
+.editor-nested-listitem.editor-listitem-checked::after,
+.editor-nested-listitem.editor-listitem-unchecked::after {
+  content: none;
 }
 
 .editor-listitem-checked::before,
