@@ -25,8 +25,8 @@ export const MenuOrSignInButton: React.FC<MenuOrSignInButtonProps>
 
     return (
       <Button
-        colorLight="secondary"
-        colorDark="secondary"
+        colorLight="glass"
+        colorDark="glass"
         icon="sidebar"
         iconTitle={isSidebarOpen ? 'Close navigation' : 'Open navigation'}
         ref={triggerRef}

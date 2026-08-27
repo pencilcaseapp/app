@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { HorizontalOverflow } from '../horizontal-overflow/horizontal-overflow';
 import classNames from 'classnames';
-import { useWindowScroll } from 'react-use';
 
 export type TopbarProps = {
   left?: React.ReactNode;
   center?: React.ReactNode;
   right?: React.ReactNode;
-  hasBorder?: boolean;
+  hasSolidBackground?: boolean;
   ref?: React.Ref<HTMLElement>;
 };
 
 export const Topbar: React.FC<TopbarProps>
-  = ({ left, center, right, hasBorder, ref }) => {
+  = ({ left, center, right, hasSolidBackground, ref }) => {
     const leftRef = useRef<HTMLDivElement>(null);
     const rightRef = useRef<HTMLDivElement>(null);
     const [leftWidth, setLeftWidth] = useState(0);
@@ -43,17 +42,20 @@ export const Topbar: React.FC<TopbarProps>
       return () => observer.disconnect();
     }, []);
 
-    const { y } = useWindowScroll();
-    const isScrolling = y > 30;
-    const showBorder = hasBorder || isScrolling;
-
     return (
       <header
         ref={ref}
-        className={classNames('fixed z-50 w-full top-0 left-0 h-14 px-2 grid grid-cols-1 grid-rows-1 items-center bg-pca-white dark:bg-pca-grey-900 lg:bg-transparent dark:lg:bg-transparent',
-          showBorder && 'border-b border-pca-grey-200 dark:border-pca-grey-800 lg:border-none',
+        className={classNames(
+          'fixed z-50 w-full top-0 left-0 h-14 px-2 grid grid-cols-1 grid-rows-1 items-center',
+          hasSolidBackground && 'bg-pca-white dark:bg-pca-grey-900 border-b border-pca-grey-200 dark:border-pca-grey-800 lg:bg-transparent dark:lg:bg-transparent lg:border-none',
         )}
       >
+        {!hasSolidBackground && (
+          <div
+            aria-hidden
+            className="absolute top-0 left-0 w-full h-20 pointer-events-none lg:hidden bg-linear-to-b from-pca-white to-pca-white/0 dark:from-pca-grey-900 dark:to-pca-grey-900/0"
+          />
+        )}
         <div ref={leftRef} className="col-start-1 row-start-1 justify-self-start z-10 flex min-w-max">
           {left}
         </div>

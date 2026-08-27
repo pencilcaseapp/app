@@ -5,7 +5,8 @@ import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import { Icon } from '../icon/icon';
 import type { PolymorphicComponentPropWithRef } from '../polymorphic-types/polymorphic-types';
 
-export type ButtonColor = 'primary' | 'secondary' | 'upgrade' | 'danger';
+export type ButtonColor
+  = 'primary' | 'secondary' | 'glass' | 'upgrade' | 'danger';
 
 export type ButtonProps<C extends React.ElementType>
   = PolymorphicComponentPropWithRef<
@@ -75,6 +76,20 @@ export function Button<C extends React.ElementType = 'button'>(
     && 'dark:bg-transparent dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800',
   ]);
 
+  const glassLightFilledClasses = classNames([
+    'text-pca-grey-900 backdrop-blur-lg backdrop-saturate-150',
+    disabled && 'text-pca-grey-300! focus:outline-hidden',
+    !disabled
+    && 'bg-pca-white/75 hover:bg-pca-grey-200 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 active:bg-pca-grey-200',
+  ]);
+
+  const glassDarkFilledClasses = classNames([
+    'dark:text-pca-white',
+    disabled && 'dark:text-pca-grey-700! dark:focus:outline-hidden',
+    !disabled
+    && 'dark:bg-pca-grey-900/55 dark:hover:bg-pca-grey-800 dark:focus:outline-hidden dark:focus:ring-2 dark:focus:ring-pca-grey-700 dark:active:bg-pca-grey-800',
+  ]);
+
   const upgradeLightFilledClasses = classNames([
     'text-pca-grey-900',
     disabled && 'bg-pca-yellow-300/50 text-pca-grey-300! focus:outline-hidden',
@@ -111,6 +126,10 @@ export function Button<C extends React.ElementType = 'button'>(
     colorLight === 'secondary' && secondaryLightFilledClasses,
     !colorDark && colorLight === 'secondary' && secondaryDarkFilledClasses,
     colorDark === 'secondary' && secondaryDarkFilledClasses,
+
+    colorLight === 'glass' && glassLightFilledClasses,
+    !colorDark && colorLight === 'glass' && glassDarkFilledClasses,
+    colorDark === 'glass' && glassDarkFilledClasses,
 
     colorLight === 'upgrade' && upgradeLightFilledClasses,
     !colorDark && colorLight === 'upgrade' && upgradeDarkFilledClasses,

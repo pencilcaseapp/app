@@ -50,11 +50,11 @@ export const SharePanel: React.FC<SharePanelProps> = ({
                 type="button"
                 icon="share"
                 iconTitle="Share"
-                colorLight="secondary"
+                colorLight="glass"
               />
             )
           : (
-              <Button type="button" icon="share" colorLight="secondary">
+              <Button type="button" icon="share" colorLight="glass">
                 Share
               </Button>
             )}
