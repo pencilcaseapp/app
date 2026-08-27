@@ -80,7 +80,6 @@ export const SwapAreasExample: Story = {
     return (
       <>
         <Topbar
-          hasBorder={!isSwapped}
           left={
             !isSwapped ? (<Button colorLight="secondary" className="text-pca-grey-400! dark:text-pca-grey-600!" icon="close" />) : (<Button colorLight="secondary" icon="sidebar" />)
 

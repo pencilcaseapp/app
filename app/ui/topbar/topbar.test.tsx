@@ -22,14 +22,16 @@ describe('Topbar', () => {
     expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
   });
 
-  test('applies border class when hasBorder is true', () => {
-    const { container } = render(<Topbar hasBorder />);
-    expect(container.querySelector('header')?.className).toMatch(/border-b/);
+  test('renders the scroll fade below the bar', () => {
+    const { container } = render(<Topbar />);
+    const fade = container.querySelector('[aria-hidden]');
+    expect(fade?.className).toMatch(/bg-linear-to-b/);
   });
 
-  test('does not apply border class when hasBorder is false', () => {
-    const { container } = render(<Topbar hasBorder={false} />);
-    expect(container.querySelector('header')?.className).not.toMatch(/border-b/);
+  test('renders a solid bar instead of the fade when hasSolidBackground is set', () => {
+    const { container } = render(<Topbar hasSolidBackground />);
+    expect(container.querySelector('[aria-hidden]')).toBeNull();
+    expect(container.querySelector('header')?.className).toMatch(/border-b/);
   });
 
   test('matches snapshot', () => {
@@ -38,7 +40,6 @@ describe('Topbar', () => {
         left={<button>Menu</button>}
         center={<span>Toolbar</span>}
         right={<button>Share</button>}
-        hasBorder
       />,
     );
 

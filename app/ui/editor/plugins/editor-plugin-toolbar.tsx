@@ -18,7 +18,6 @@ import {
   INSERT_ORDERED_LIST_COMMAND,
   INSERT_UNORDERED_LIST_COMMAND,
 } from '@lexical/list';
-import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
 import { StackedAvatars } from '~/ui/stacked-avatar/stacked-avatar';
 import { MAX_VISIBLE_COLLABORATORS } from '~/constants/presence';
@@ -46,7 +45,6 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
     const { y: windowY } = useWindowScroll();
     const topbarRef = useRef<HTMLElement>(null);
     const [isVirtualKeyboardOpen] = useVirtualKeyboard();
-    const { isSidebarOpen } = useSidebarContext();
     const isScrolling = (isVirtualKeyboardOpen ? contentY : windowY) > 65;
 
     const $updateToolbar = useCallback(() => {
@@ -146,7 +144,7 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
     return (
       <Topbar
         ref={topbarRef}
-        hasBorder={isVirtualKeyboardOpen || isSidebarOpen}
+        hasSolidBackground={isVirtualKeyboardOpen}
         left={!isVirtualKeyboardOpen ? topbarLeft : <Button colorLight="secondary" icon="close" className="text-pca-grey-400!" iconTitle="close" />}
         right={!isVirtualKeyboardOpen && (
           <>
