@@ -49,6 +49,19 @@ drops and recreates the whole test schema first).
 `.claude/launch.json` defines the `dev` (:3000) and `storybook` (:6006) servers,
 so they can be started and previewed in a browser without a manual shell.
 
+**Claude Code on the web.** The cloud container ships the Docker binaries but
+starts no daemon, so `npm run docker:up` — and with it every test and e2e run —
+fails there until something starts one. `.claude/hooks/session-start.sh` is a
+`SessionStart` hook (registered in `.claude/settings.json`) that starts
+`dockerd`, runs `npm install` and brings the compose stack up. It exits
+immediately unless `CLAUDE_CODE_REMOTE` is `true`, so local dev is untouched.
+Docker Hub rate limits anonymous pulls per IP and the cloud environment shares
+its egress address, so the hook points the daemon at Google's pull-through
+mirror in `/etc/docker/daemon.json`; without it `postgres:18` and
+`redis:8-alpine` come back as `429 Too Many Requests`. If Docker looks broken
+mid-session, re-run the hook rather than starting `dockerd` by hand —
+`/var/log/dockerd.log` has the daemon output.
+
 CI (`.github/workflows/ci.yml`) runs lint, test, e2e, typecheck, build, and
 build-storybook; the test and e2e jobs start their databases with the same
 `npm run docker:up` as local dev. Pushing to `main` deploys to production via
