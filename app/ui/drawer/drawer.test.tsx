@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Drawer } from '@base-ui/react/drawer';
-import { Sheet } from './drawer';
+import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
+import { Drawer } from './drawer';
 import { DrawerContent } from './drawer-content';
 import type { DrawerContentProps } from './drawer-content';
 
@@ -12,18 +12,20 @@ function renderDrawer(
   { contentProps?: DrawerContentProps; defaultOpen?: boolean } = {},
 ) {
   return render(
-    <Sheet defaultOpen={defaultOpen}>
-      <Drawer.Trigger>Open drawer</Drawer.Trigger>
+    <Drawer defaultOpen={defaultOpen}>
+      <BaseDrawer.Trigger>Open drawer</BaseDrawer.Trigger>
       <DrawerContent {...contentProps}>
-        <Drawer.Title>Delete document</Drawer.Title>
-        <Drawer.Description>This action cannot be undone.</Drawer.Description>
+        <BaseDrawer.Title>Delete document</BaseDrawer.Title>
+        <BaseDrawer.Description>
+          This action cannot be undone.
+        </BaseDrawer.Description>
         {contentProps?.children}
       </DrawerContent>
-    </Sheet>,
+    </Drawer>,
   );
 }
 
-describe('Sheet', () => {
+describe('Drawer', () => {
   test('renders the trigger', () => {
     renderDrawer();
 
@@ -77,19 +79,19 @@ describe('Sheet', () => {
       const [open, setOpen] = useState(false);
 
       return (
-        <Sheet
+        <Drawer
           open={open}
           onOpenChange={(nextOpen) => {
             onOpenChange(nextOpen);
             setOpen(nextOpen);
           }}
         >
-          <Drawer.Trigger>Open drawer</Drawer.Trigger>
+          <BaseDrawer.Trigger>Open drawer</BaseDrawer.Trigger>
           <DrawerContent>
-            <Drawer.Title>Settings</Drawer.Title>
-            <Drawer.Close>Close</Drawer.Close>
+            <BaseDrawer.Title>Settings</BaseDrawer.Title>
+            <BaseDrawer.Close>Close</BaseDrawer.Close>
           </DrawerContent>
-        </Sheet>
+        </Drawer>
       );
     }
 

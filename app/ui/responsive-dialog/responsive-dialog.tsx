@@ -1,5 +1,5 @@
 import { Dialog as BaseDialog } from '@base-ui/react/dialog';
-import { Drawer } from '@base-ui/react/drawer';
+import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import type {
   DialogCloseProps,
   DialogDescriptionProps,
@@ -10,7 +10,7 @@ import { createContext, use } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 import { Dialog } from '~/ui/dialog/dialog';
-import { Sheet } from '~/ui/drawer/drawer';
+import { Drawer } from '~/ui/drawer/drawer';
 
 export type ResponsiveDialogProps = {
   open?: boolean;
@@ -33,7 +33,7 @@ export const ResponsiveDialog: FC<ResponsiveDialogProps> = (
   { children, ...rest },
 ) => {
   const isMobile = useIsMobile();
-  const Root = isMobile ? Sheet : Dialog;
+  const Root = isMobile ? Drawer : Dialog;
 
   return (
     <IsDrawerContext value={isMobile}>
@@ -49,7 +49,7 @@ export const ResponsiveDialogTrigger: FC<ResponsiveDialogTriggerProps> = (
   props,
 ) => {
   return useIsDrawer()
-    ? <Drawer.Trigger {...props} />
+    ? <BaseDrawer.Trigger {...props} />
     : <BaseDialog.Trigger {...props} />;
 };
 
@@ -59,7 +59,7 @@ export const ResponsiveDialogClose: FC<ResponsiveDialogCloseProps> = (
   props,
 ) => {
   return useIsDrawer()
-    ? <Drawer.Close {...props} />
+    ? <BaseDrawer.Close {...props} />
     : <BaseDialog.Close {...props} />;
 };
 
@@ -69,7 +69,7 @@ export const ResponsiveDialogTitle: FC<ResponsiveDialogTitleProps> = (
   props,
 ) => {
   return useIsDrawer()
-    ? <Drawer.Title {...props} />
+    ? <BaseDrawer.Title {...props} />
     : <BaseDialog.Title {...props} />;
 };
 
@@ -79,6 +79,6 @@ export const ResponsiveDialogDescription: FC<
   ResponsiveDialogDescriptionProps
 > = (props) => {
   return useIsDrawer()
-    ? <Drawer.Description {...props} />
+    ? <BaseDrawer.Description {...props} />
     : <BaseDialog.Description {...props} />;
 };

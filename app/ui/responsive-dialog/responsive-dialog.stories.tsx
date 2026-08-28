@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Drawer } from '@base-ui/react/drawer';
+import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import {
   ResponsiveDialog,
   ResponsiveDialogClose,
@@ -8,7 +8,7 @@ import {
   ResponsiveDialogTrigger,
 } from './responsive-dialog';
 import { ResponsiveDialogContent } from './responsive-dialog-content';
-import { Sheet } from '../drawer/drawer';
+import { Drawer } from '../drawer/drawer';
 import { DrawerContent } from '../drawer/drawer-content';
 import { Button } from '../button/button';
 import { Typography } from '../typography/typography';
@@ -123,15 +123,15 @@ export const WithFooter: Story = {
 export const NestedInsideDrawer: Story = {
   render: args => (
     <div className="flex min-h-dvh items-center justify-center">
-      <Sheet>
-        <Drawer.Trigger
+      <Drawer>
+        <BaseDrawer.Trigger
           render={<Button colorLight="primary">Open sidebar</Button>}
         />
         <DrawerContent>
           <div className="flex flex-col items-start gap-4">
-            <Drawer.Title render={<Typography variant="heading3" as="h2" />}>
+            <BaseDrawer.Title render={<Typography variant="heading3" as="h2" />}>
               Documents
-            </Drawer.Title>
+            </BaseDrawer.Title>
             <ResponsiveDialog {...args}>
               <ResponsiveDialogTrigger
                 render={(
@@ -167,7 +167,7 @@ export const NestedInsideDrawer: Story = {
             </ResponsiveDialog>
           </div>
         </DrawerContent>
-      </Sheet>
+      </Drawer>
     </div>
   ),
 };
