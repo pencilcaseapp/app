@@ -69,14 +69,16 @@ export async function updateUser(id: string, input: {
   name?: string;
   newsletter?: boolean;
   onboarded?: boolean;
+  hasSubscription?: boolean;
 }) {
-  const { email, name, newsletter, onboarded } = input;
+  const { email, name, newsletter, onboarded, hasSubscription } = input;
   const response = await db.update(users)
     .set({
       email,
       name,
       newsletter,
       onboarded,
+      hasSubscription,
       updatedAt: new Date(),
     })
     .where(eq(users.id, id))

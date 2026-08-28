@@ -60,6 +60,15 @@ export interface Config {
     secret: string;
   };
 
+  invite: {
+    /**
+     * Redeeming `/invite/:code` with this code hands a signed in user the pro
+     * features. One shared code, handed out to friends by hand until the
+     * paid subscription exists.
+     */
+    code: string;
+  };
+
   /**
    * Enables the `/e2e/auth` endpoint the Playwright tests use to sign in
    * without the OTP flow. Left out in prod; staging sets it once it exists.

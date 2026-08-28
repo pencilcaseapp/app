@@ -9,6 +9,7 @@ export const userFixture: User = {
   name: faker.person.fullName(),
   newsletter: faker.datatype.boolean(),
   onboarded: faker.datatype.boolean(),
+  hasSubscription: false,
   createdAt: faker.date.past(),
   updatedAt: faker.date.past(),
 };

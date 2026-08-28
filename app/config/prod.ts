@@ -49,6 +49,10 @@ export function getConfigProd(): Config {
       secret: env.get('CSRF_SECRET').required().asString(),
     },
 
+    invite: {
+      code: env.get('INVITE_CODE').required().asString(),
+    },
+
     session: {
       secure: true,
       secret: env.get('SESSION_SECRET').required().asString(),
