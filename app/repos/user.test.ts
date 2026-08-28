@@ -20,6 +20,7 @@ describe('createUser', () => {
       name: user.name,
       newsletter: user.newsletter,
       onboarded: user.onboarded,
+      hasSubscription: false,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
@@ -80,6 +81,7 @@ describe('getOrCreateUserByEmail', () => {
       name: null,
       newsletter: false,
       onboarded: false,
+      hasSubscription: false,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });

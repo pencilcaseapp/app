@@ -30,6 +30,10 @@ export function getConfigTest(): Config {
       secret: 's3cr3t',
     },
 
+    invite: {
+      code: 'super-secret',
+    },
+
     e2e: {
       apiToken: 'e2e-t0k3n',
     },
