@@ -1,14 +1,14 @@
 /* eslint-disable @eslint-react/rules-of-hooks */
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Drawer } from '@base-ui/react/drawer';
-import { Sheet } from './drawer';
+import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
+import { Drawer } from './drawer';
 import { DrawerContent } from './drawer-content';
 import { Button } from '../button/button';
 import { Typography } from '../typography/typography';
 
 /**
- * The `Sheet` is a thin wrapper around Base UI's `Drawer.Root` and is
+ * The `Drawer` is a thin wrapper around Base UI's `Drawer.Root` and is
  * composed together with `DrawerContent` (which renders the portal,
  * backdrop, viewport and popup). The trigger, close, title and
  * description parts are used directly from `@base-ui/react/drawer`.
@@ -17,9 +17,9 @@ import { Typography } from '../typography/typography';
  * can be dismissed by swiping, clicking the backdrop or pressing
  * `Escape`.
  */
-const meta: Meta<typeof Sheet> = {
+const meta: Meta<typeof Drawer> = {
   title: 'Overlay/Drawer',
-  component: Sheet,
+  component: Drawer,
   parameters: {
     layout: 'fullscreen',
   },
@@ -32,7 +32,7 @@ const meta: Meta<typeof Sheet> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof Sheet>;
+type Story = StoryObj<typeof Drawer>;
 
 /**
  * A basic bottom sheet with a trigger, a title, a description and a
@@ -41,17 +41,17 @@ type Story = StoryObj<typeof Sheet>;
 export const Default: Story = {
   render: args => (
     <div className="flex min-h-dvh items-center justify-center">
-      <Sheet {...args}>
-        <Drawer.Trigger
+      <Drawer {...args}>
+        <BaseDrawer.Trigger
           render={<Button colorLight="primary">Open drawer</Button>}
         />
         <DrawerContent>
-          <Drawer.Title
+          <BaseDrawer.Title
             render={<Typography variant="heading2" as="h2" />}
           >
             Delete document
-          </Drawer.Title>
-          <Drawer.Description
+          </BaseDrawer.Title>
+          <BaseDrawer.Description
             render={(
               <Typography
                 variant="bodySmall"
@@ -61,9 +61,9 @@ export const Default: Story = {
             )}
           >
             This action cannot be undone.
-          </Drawer.Description>
+          </BaseDrawer.Description>
         </DrawerContent>
-      </Sheet>
+      </Drawer>
     </div>
   ),
 };
@@ -82,14 +82,14 @@ export const Controlled: Story = {
         <Button colorLight="primary" onClick={() => setOpen(true)}>
           Open drawer
         </Button>
-        <Sheet {...args} open={open} onOpenChange={setOpen}>
+        <Drawer {...args} open={open} onOpenChange={setOpen}>
           <DrawerContent>
-            <Drawer.Title
+            <BaseDrawer.Title
               render={<Typography variant="heading2" as="h2" />}
             >
               Settings
-            </Drawer.Title>
-            <Drawer.Description
+            </BaseDrawer.Title>
+            <BaseDrawer.Description
               render={(
                 <Typography
                   variant="bodySmall"
@@ -102,10 +102,10 @@ export const Controlled: Story = {
               Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
               sed diam nonumy eirmod tempor invidunt ut labore et dolore
               magna aliquyam erat, sed diam voluptua. At vero eos et accusam
-            </Drawer.Description>
-            <Drawer.Close render={<Button colorLight="primary">Close</Button>} />
+            </BaseDrawer.Description>
+            <BaseDrawer.Close render={<Button colorLight="primary">Close</Button>} />
           </DrawerContent>
-        </Sheet>
+        </Drawer>
       </div>
     );
   },
@@ -120,7 +120,7 @@ export const WithTopAndFooterAreas: Story = {
         <Button colorLight="primary" onClick={() => setOpen(true)}>
           Open drawer
         </Button>
-        <Sheet {...args} open={open} onOpenChange={setOpen}>
+        <Drawer {...args} open={open} onOpenChange={setOpen}>
           <DrawerContent
             topArea={(
               <div className="flex justify-center items-center h-12">
@@ -131,7 +131,7 @@ export const WithTopAndFooterAreas: Story = {
             )}
             footerArea={(
               <div className="flex justify-between items-center">
-                <Drawer.Close render={<Button colorLight="secondary" className="mr-2">Cancel</Button>} />
+                <BaseDrawer.Close render={<Button colorLight="secondary" className="mr-2">Cancel</Button>} />
                 <Button>Save</Button>
               </div>
             )}
@@ -140,7 +140,7 @@ export const WithTopAndFooterAreas: Story = {
               Content area
             </div>
           </DrawerContent>
-        </Sheet>
+        </Drawer>
       </div>
     );
   },
@@ -149,17 +149,17 @@ export const WithTopAndFooterAreas: Story = {
 export const FullHeight: Story = {
   render: args => (
     <div className="flex min-h-dvh items-center justify-center">
-      <Sheet {...args}>
-        <Drawer.Trigger
+      <Drawer {...args}>
+        <BaseDrawer.Trigger
           render={<Button colorLight="primary">Open drawer</Button>}
         />
         <DrawerContent isFullHeight>
-          <Drawer.Title
+          <BaseDrawer.Title
             render={<Typography variant="heading2" as="h2" />}
           >
             Delete document
-          </Drawer.Title>
-          <Drawer.Description
+          </BaseDrawer.Title>
+          <BaseDrawer.Description
             render={(
               <Typography
                 variant="bodySmall"
@@ -169,9 +169,9 @@ export const FullHeight: Story = {
             )}
           >
             This action cannot be undone.
-          </Drawer.Description>
+          </BaseDrawer.Description>
         </DrawerContent>
-      </Sheet>
+      </Drawer>
     </div>
   ),
 };
