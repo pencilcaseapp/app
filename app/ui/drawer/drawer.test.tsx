@@ -164,8 +164,9 @@ describe('DrawerContent', () => {
       },
     });
 
-    expect(screen.getByRole('dialog')).toHaveClass(
-      '[--footer-reserved-height:calc(96px+var(--bleed))]',
-    );
+    expect(
+      screen.getByRole('dialog').style
+        .getPropertyValue('--footer-reserved-height'),
+    ).toBe('calc(96px + var(--bleed))');
   });
 });
