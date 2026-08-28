@@ -17,6 +17,8 @@ import { sessionCookieHeaderContext } from './contexts/user-session';
 import { sessionMiddleware } from './middleware/auth';
 import { Typography } from './ui/typography/typography';
 import { PageTitle } from './components/page-title/page-title';
+import { ToastProvider } from './ui/toast/toast-provider';
+import { useToast } from './hooks/use-toast';
 
 import './app.css';
 
@@ -44,7 +46,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className={classNames(...routeBodyClassNames)}>
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -73,6 +77,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
+  useToast();
+
   return (
     <AuthenticityTokenProvider token={loaderData.token}>
       <Outlet />

@@ -3,3 +3,9 @@ export enum SearchParamAuth {
   IsExpired = 'isExpired',
   ReturnUrl = 'returnUrl',
 }
+
+export enum SearchParamToast {
+  ToastSuccess = 'toastSuccess',
+  ToastInfo = 'toastInfo',
+  ToastDanger = 'toastDanger',
+}
