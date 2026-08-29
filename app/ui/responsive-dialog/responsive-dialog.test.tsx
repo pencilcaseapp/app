@@ -192,7 +192,9 @@ describe('ResponsiveDialog', () => {
       expect(
         screen.getByRole('dialog').style
           .getPropertyValue('--footer-reserved-height'),
-      ).toBe('calc(96px + var(--bleed))');
+      ).toBe(
+        'calc(96px + env(safe-area-inset-bottom, 0px) + var(--bleed))',
+      );
     });
   });
 });

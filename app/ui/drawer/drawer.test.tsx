@@ -145,7 +145,7 @@ describe('DrawerContent', () => {
     renderDrawer({ defaultOpen: true, contentProps: { isFullHeight: true } });
 
     expect(screen.getByRole('dialog')).toHaveClass(
-      'min-h-[calc(95dvh+var(--bleed))]',
+      'min-h-[calc(var(--drawer-max-height)+var(--bleed))]',
     );
   });
 
@@ -153,8 +153,29 @@ describe('DrawerContent', () => {
     renderDrawer({ defaultOpen: true });
 
     expect(screen.getByRole('dialog')).not.toHaveClass(
-      'min-h-[calc(95dvh+var(--bleed))]',
+      'min-h-[calc(var(--drawer-max-height)+var(--bleed))]',
     );
+  });
+
+  test('defaults the max height to 95dvh', () => {
+    renderDrawer({ defaultOpen: true });
+
+    expect(
+      screen.getByRole('dialog').style
+        .getPropertyValue('--drawer-max-height'),
+    ).toBe('95dvh');
+  });
+
+  test('applies a custom max height', () => {
+    renderDrawer({
+      defaultOpen: true,
+      contentProps: { maxHeight: 'calc(100dvh - 4.5rem)' },
+    });
+
+    expect(
+      screen.getByRole('dialog').style
+        .getPropertyValue('--drawer-max-height'),
+    ).toBe('calc(100dvh - 4.5rem)');
   });
 
   test('reserves footer height based on reservedFooterHeight', () => {
@@ -169,6 +190,6 @@ describe('DrawerContent', () => {
     expect(
       screen.getByRole('dialog').style
         .getPropertyValue('--footer-reserved-height'),
-    ).toBe('calc(96px + var(--bleed))');
+    ).toBe('calc(96px + env(safe-area-inset-bottom, 0px) + var(--bleed))');
   });
 });
