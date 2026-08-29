@@ -7,6 +7,14 @@ export const relations = defineRelations(schema, r => ({
     documents: r.many.documents(),
     sessions: r.many.sessions(),
     documentCollaborators: r.many.documentCollaborators(),
+    subscriptions: r.many.subscriptions(),
+  },
+  subscriptions: {
+    user: r.one.users({
+      from: r.subscriptions.userId,
+      to: r.users.id,
+      optional: false,
+    }),
   },
   otps: {
     user: r.one.users({

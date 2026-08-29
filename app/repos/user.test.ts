@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createUser, createUserSession, deleteSessionsExpiredBefore, getOrCreateUserByEmail, getUser, getUserByEmail, getAndRefreshUserSession, getUserSession, updateUser } from './user';
+import { createUser, createUserSession, deleteSessionsExpiredBefore, getOrCreateUserByEmail, getUser, getUserByCreemCustomerId, getUserByEmail, getAndRefreshUserSession, getUserSession, updateUser } from './user';
 import { createExpiredUserSession, createTestUser, createValidUserSession } from '~/test/data-factories/user';
 import { faker } from '@faker-js/faker';
 
@@ -21,6 +21,7 @@ describe('createUser', () => {
       newsletter: user.newsletter,
       onboarded: user.onboarded,
       hasSubscription: false,
+      creemCustomerId: null,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
@@ -82,6 +83,7 @@ describe('getOrCreateUserByEmail', () => {
       newsletter: false,
       onboarded: false,
       hasSubscription: false,
+      creemCustomerId: null,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
@@ -103,6 +105,24 @@ describe('updateUser', () => {
       email: user.email,
       updatedAt: expect.any(Date),
     });
+  });
+});
+
+describe('getUserByCreemCustomerId', () => {
+  it('returns the user holding the customer id', async () => {
+    const userFixture = await createTestUser();
+    const creemCustomerId = `cust_${faker.string.alphanumeric(21)}`;
+    await updateUser(userFixture.id, { creemCustomerId });
+
+    const user = await getUserByCreemCustomerId(creemCustomerId);
+
+    expect(user?.id).toBe(userFixture.id);
+  });
+
+  it('returns undefined if no user holds the customer id', async () => {
+    const user = await getUserByCreemCustomerId('cust_unknown');
+
+    expect(user).toBeUndefined();
   });
 });
 

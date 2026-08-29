@@ -11,6 +11,11 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    launchOptions: {
+      // Claude Code on the web ships its own Chromium build; everywhere
+      // else this stays unset and the default download is used.
+      executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
+    },
   },
   projects: [
     {
@@ -32,5 +37,12 @@ export default defineConfig({
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      // Points the app at the fake Creem served by the dev server itself,
+      // so the subscription specs run the whole flow on localhost (see
+      // app/routes/e2e-creem.ts). A dev server started by hand needs the
+      // same variable for these specs to pass.
+      CREEM_API_URL: 'http://localhost:3000/e2e/creem',
+    },
   },
 });

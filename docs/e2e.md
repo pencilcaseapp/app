@@ -59,3 +59,23 @@ wait for the websocket to deliver the server-seeded heading before
 anyone types, and toggling sharing waits for the share action's round
 trip before the link is handed to the other user (or their access is
 expected to be gone).
+
+## The fake Creem
+
+`e2e/subscription.spec.ts` covers the paid-subscription flow end to
+end without leaving localhost: `playwright.config.ts` starts the dev
+server with `CREEM_API_URL` pointing at `app/routes/e2e-creem.ts`, a
+fake of the few Creem endpoints the app calls plus stand-in checkout
+and portal pages. The fake signs its checkout redirects and webhook
+deliveries with the same functions (and config values) the app
+verifies with, so the signature checks run for real; `AppUser` gains
+`upgradeToPro()` and `deliverCreemWebhook(...)` for driving it. Like
+`/e2e/auth` it 404s unless `config.e2e` is set.
+
+Subscription state sticks to the user, so these specs use the fresh
+`userA` fixture, never the shared storage-state `user`. And because a
+locally reused dev server keeps its own environment: start it with
+`CREEM_API_URL=http://localhost:3000/e2e/creem npm run dev` (or let
+Playwright start one) before running these specs, otherwise the
+upgrade button walks into the real test-mode checkout.
+See `docs/subscriptions.md` for the integration itself.
