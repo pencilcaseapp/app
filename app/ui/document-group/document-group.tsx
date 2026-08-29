@@ -22,7 +22,7 @@ export const DocumentGroup: FC<DocumentGroupProps>
       <AccordionItem value={value}>
         <AccordionHeader asChild>
           <div className={classNames([
-            'sticky -top-4 left-0 group flex items-center gap-2 z-10 bg-pca-white dark:bg-pca-grey-900',
+            'sticky top-0 md:-top-4 left-0 group flex items-center gap-2 z-10 bg-pca-white dark:bg-pca-grey-900',
           ])}
           >
             <AccordionTrigger className={classNames([

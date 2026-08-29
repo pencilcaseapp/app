@@ -1,8 +1,8 @@
-export const toggleNavigation = (isMobile: boolean) => ({
+export const toggleNavigation = {
   open: {
     x: 0,
     transition: {
-      delay: isMobile ? 0 : 0.3,
+      delay: 0.3,
       type: 'tween' as const,
       duration: 0.3,
       ease: 'easeInOut' as const,
@@ -17,7 +17,7 @@ export const toggleNavigation = (isMobile: boolean) => ({
       ease: 'easeInOut' as const,
     },
   },
-});
+};
 
 export const slimNavigation = {
   open: {
