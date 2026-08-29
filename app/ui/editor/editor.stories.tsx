@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Editor } from './editor';
-import { initialEditorStateFixture } from '~/test/fixtures/editor';
+import {
+  emptyEditorStateFixture,
+  initialEditorStateFixture,
+} from '~/test/fixtures/editor';
 import { SidebarProvider } from '../sidebar-context/sidebar-provider';
 import { PRESENCE_COLORS } from '~/constants/presence';
 
@@ -26,6 +29,15 @@ export const Primary: Story = {
   args: {
     avatars: [],
     initialEditorState: JSON.stringify(initialEditorStateFixture),
+  },
+};
+
+/* What a freshly created document looks like: one empty heading showing the
+   placeholder. */
+export const Empty: Story = {
+  args: {
+    avatars: [],
+    initialEditorState: JSON.stringify(emptyEditorStateFixture),
   },
 };
 

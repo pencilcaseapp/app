@@ -32,14 +32,19 @@
   margin: 0 0 1rem;
 }
 
-[contenteditable] > *:only-child:has(> br)::before {
+/* The placeholder belongs to a document with a single, empty block, which
+   Lexical renders as the one `<br>` it manages for an empty element. A
+   Shift+Enter leaves a second `<br>` behind — and text of its own in a
+   `<span>` — so the `<br>` being the only child is what tells the empty
+   block from a block that merely ends in a line break. */
+[contenteditable] > *:only-child:has(> br:only-child)::before {
   position: absolute;
   content: var(--editor-placeholder, 'Type something …');
   color: var(--color-pca-grey-300);
 }
 
 @media (prefers-color-scheme: dark) {
-  [contenteditable] > *:only-child:has(> br)::before {
+  [contenteditable] > *:only-child:has(> br:only-child)::before {
     color: var(--color-pca-grey-700);
   }
 }
