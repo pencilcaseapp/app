@@ -10,7 +10,6 @@ import {
 } from './framer-animation';
 import { StickyBottomArea } from './sticky-bottom-area';
 import type { SidebarBaseProps } from './types';
-import { useMedia } from 'react-use';
 
 export type SidebarMenuProps = {
   initialState?: 'open' | 'close';
@@ -23,12 +22,11 @@ export const SidebarMenu: FC<SidebarMenuProps> = ({
   showSlimSidebar = false,
 }) => {
   const { isSidebarOpen } = useSidebarContext();
-  const isMobile = useMedia('(max-width: 640px)', false);
 
   return (
     <>
       <motion.div
-        variants={toggleNavigation(isMobile)}
+        variants={toggleNavigation}
         animate={isSidebarOpen ? 'open' : 'close'}
         exit="close"
         initial={initialState ?? (isSidebarOpen ? 'open' : 'close')}

@@ -25,7 +25,8 @@ import {
   EditedDocumentProvider,
   useEditedDocument,
 } from '~/contexts/edited-document';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
 
 export const handle = {
   bodyClassName: 'w-full bg-pca-white dark:bg-pca-grey-900',
@@ -89,6 +90,11 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
     navigation,
     getNavigationKey,
   );
+  // The document stays set while the dialog animates out, so its
+  // title does not vanish from the copy mid-close.
+  const [documentToDelete, setDocumentToDelete]
+    = useState<NavigationItemData>();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!editedDocumentId) {
@@ -123,7 +129,15 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
                             <DropdownMenuTrigger iconTitle="Item options" />
                             <DropdownMenuPortal>
                               <DropdownMenuContent align="start">
-                                <DropdownMenuItem as="button" onClick={() => console.log('clicked')} color="danger" icon="trash">
+                                <DropdownMenuItem
+                                  as="button"
+                                  onClick={() => {
+                                    setDocumentToDelete({ ...item, label });
+                                    setIsDeleteDialogOpen(true);
+                                  }}
+                                  color="danger"
+                                  icon="trash"
+                                >
                                   Delete
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -137,6 +151,15 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
                   })}
                 </DocumentGroup>
               </DocumentGroupRoot>
+              <DeleteDocumentDialog
+                documentTitle={documentToDelete?.label}
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+                onConfirm={() => {
+                  console.log('delete', documentToDelete?.to);
+                  setIsDeleteDialogOpen(false);
+                }}
+              />
             </>
           ),
         },

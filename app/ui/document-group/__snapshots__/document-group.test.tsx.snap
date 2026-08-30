@@ -10,7 +10,7 @@ exports[`DocumentGroup > actionArea > should match snapshot 1`] = `
       data-state="closed"
     >
       <div
-        class="sticky -top-4 left-0 group flex items-center gap-2 z-10 bg-pca-white dark:bg-pca-grey-900"
+        class="sticky top-0 md:-top-4 left-0 group flex items-center gap-2 z-10 bg-pca-white dark:bg-pca-grey-900"
         data-orientation="vertical"
         data-state="closed"
       >
