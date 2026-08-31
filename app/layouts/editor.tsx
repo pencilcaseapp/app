@@ -28,6 +28,8 @@ import {
 } from '~/contexts/edited-document';
 import { useEffect, useState } from 'react';
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
+import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
+import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 
 export const handle = {
   bodyClassName: 'w-full bg-pca-white dark:bg-pca-grey-900',
@@ -64,7 +66,10 @@ export default function LayoutEditor({
         <SocketClientProvider>
           <SidebarProvider>
             {user && (
-              <EditorSidebar navigation={navigation} />
+              <EditorSidebar
+                navigation={navigation}
+                showUpgrade={!user.hasSubscription}
+              />
             )}
             <Outlet />
           </SidebarProvider>
@@ -78,11 +83,12 @@ type NavigationItemData = { label: string; to: string };
 
 export interface EditorSidebarProps {
   navigation: NavigationItemData[];
+  showUpgrade?: boolean;
 }
 
 const getNavigationKey = (item: NavigationItemData) => item.to;
 
-function EditorSidebar({ navigation }: EditorSidebarProps) {
+function EditorSidebar({ navigation, showUpgrade }: EditorSidebarProps) {
   const location = useLocation();
   const [activeDocumentTitle] = useDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
@@ -179,8 +185,17 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
           ),
         },
       ]}
+      // The upgrade area adds the meter block, the button, and the
+      // column gap on top of the footer's base height.
+      reservedFooterHeight={showUpgrade ? 223 : 123}
       bottomArea={(
         <>
+          {showUpgrade && (
+            <SidebarUpgrade
+              documentCount={navigation.length}
+              documentLimit={FREE_DOCUMENT_LIMIT}
+            />
+          )}
           {bottomNavigation?.map(item => (
             <NavigationItem
               onClick={closeOnNavigate}

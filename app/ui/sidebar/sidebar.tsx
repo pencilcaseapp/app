@@ -8,11 +8,17 @@ import type { SidebarMenuItem, SidebarBaseProps } from './types';
 import { SidebarMenu } from './sidebar-menu';
 
 export type { SidebarMenuItem };
-export type SidebarProps = SidebarBaseProps;
+export type SidebarProps = SidebarBaseProps & {
+  /** Height the mobile drawer reserves for the `bottomArea` footer. */
+  reservedFooterHeight?: number;
+};
 
 export const Sidebar: FC<SidebarProps> = ({
   bottomArea,
   items,
+  // The footer's rendered height: two navigation items
+  // plus the gap and the footer's own top padding.
+  reservedFooterHeight = 123,
 }) => {
   const { isSidebarOpen, setIsSidebarOpen } = useSidebarContext();
   const isMobile = useMedia('(max-width: 640px)', false);
@@ -23,9 +29,7 @@ export const Sidebar: FC<SidebarProps> = ({
         <DrawerContent
           isFullHeight
           maxHeight="calc(100dvh - 56px)"
-          // The footer's rendered height: two navigation items
-          // plus the gap and the footer's own top padding.
-          reservedFooterHeight={123}
+          reservedFooterHeight={reservedFooterHeight}
           contentClassName="px-3 pb-6"
           footerArea={bottomArea && (
             <div className="flex flex-col gap-1.5">
