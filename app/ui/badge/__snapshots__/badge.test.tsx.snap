@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Badge > variant 'danger' — matches snapshot 1`] = `
+<div>
+  <span
+    class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-red-300"
+  >
+    <span
+      class="antialiased font-inter text-xs text-pca-red-700 dark:text-pca-red-700 font-semibold leading-[18px] tracking-[0.02em]"
+    >
+      Title
+    </span>
+  </span>
+</div>
+`;
+
+exports[`Badge > variant 'info' — matches snapshot 1`] = `
+<div>
+  <span
+    class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-blue-300"
+  >
+    <span
+      class="antialiased font-inter text-xs text-pca-blue-900 dark:text-pca-blue-900 font-semibold leading-[18px] tracking-[0.02em]"
+    >
+      Title
+    </span>
+  </span>
+</div>
+`;
+
+exports[`Badge > variant 'success' — matches snapshot 1`] = `
+<div>
+  <span
+    class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-green-300"
+  >
+    <span
+      class="antialiased font-inter text-xs text-pca-green-900 dark:text-pca-green-900 font-semibold leading-[18px] tracking-[0.02em]"
+    >
+      Title
+    </span>
+  </span>
+</div>
+`;
+
+exports[`Badge > variant 'warning' — matches snapshot 1`] = `
+<div>
+  <span
+    class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-orange-300"
+  >
+    <span
+      class="antialiased font-inter text-xs text-pca-orange-900 dark:text-pca-orange-900 font-semibold leading-[18px] tracking-[0.02em]"
+    >
+      Title
+    </span>
+  </span>
+</div>
+`;
