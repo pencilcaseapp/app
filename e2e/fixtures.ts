@@ -18,7 +18,7 @@ const apiToken = process.env.E2E_API_TOKEN ?? 'e2e-t0k3n';
  * specs share so a test reads as the scenario it covers.
  */
 export class AppUser {
-  constructor(readonly page: Page) {}
+  constructor(readonly page: Page, readonly email?: string) {}
 
   get editor(): Locator {
     return this.page.locator('[contenteditable="true"]');
@@ -161,17 +161,18 @@ async function provideFreshUser(
   provide: (user: AppUser) => Promise<void>,
 ): Promise<void> {
   const context = await browser.newContext({ baseURL });
+  const email = `e2e-${name}-${randomUUID()}@pencilcase.app`;
   const response = await context.request.post('/e2e/auth', {
     headers: {
       Authorization: `Bearer ${apiToken}`,
     },
     data: {
-      email: `e2e-${name}-${randomUUID()}@pencilcase.app`,
+      email,
     },
   });
 
   expect(response.ok()).toBeTruthy();
 
-  await provide(new AppUser(await context.newPage()));
+  await provide(new AppUser(await context.newPage(), email));
   await context.close();
 }

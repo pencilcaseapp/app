@@ -23,6 +23,11 @@ export async function sendEmail({ to, subject, email }: SendEmailInput) {
     return;
   }
 
+  if (isTestEmailAddress(to.email)) {
+    console.warn(`Skipping email to the test address ${to.email} …`);
+    return;
+  }
+
   const [html, text] = await Promise.all([
     render(email),
     render(email, { plainText: true }),
@@ -39,6 +44,32 @@ export async function sendEmail({ to, subject, email }: SendEmailInput) {
     .html(html)
     .text(text)
     .send();
+}
+
+const testEmailDomains = ['example.com', 'example.net', 'example.org'];
+
+const testEmailTlds = ['.test', '.invalid', '.example', '.localhost'];
+
+/**
+ * The e2e tests sign their throwaway users up as `e2e-…@pencilcase.app`
+ * (see e2e/fixtures.ts), and the reserved example/test domains never
+ * route anywhere — none of these must reach Lettermint when a real
+ * token is configured.
+ */
+export function isTestEmailAddress(email: string) {
+  const address = email.trim().toLowerCase();
+  const atIndex = address.lastIndexOf('@');
+
+  if (atIndex === -1) {
+    return false;
+  }
+
+  const localPart = address.slice(0, atIndex);
+  const domain = address.slice(atIndex + 1);
+
+  return localPart.startsWith('e2e-')
+    || testEmailDomains.includes(domain)
+    || testEmailTlds.some(tld => domain.endsWith(tld));
 }
 
 function formatEmailData(data: EmailData) {

@@ -10,6 +10,7 @@ export const userFixture: User = {
   newsletter: faker.datatype.boolean(),
   onboarded: faker.datatype.boolean(),
   hasSubscription: false,
+  creemCustomerId: null,
   createdAt: faker.date.past(),
   updatedAt: faker.date.past(),
 };

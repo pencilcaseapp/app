@@ -6,6 +6,8 @@ export function getConfigTest(): Config {
 
     instanceId: `local-${process.pid}`,
 
+    appUrl: 'http://localhost:3000',
+
     server: {
       port: 3000,
       host: 'localhost',
@@ -32,6 +34,13 @@ export function getConfigTest(): Config {
 
     invite: {
       code: 'super-secret',
+    },
+
+    creem: {
+      apiUrl: 'https://creem.invalid',
+      apiKey: 'creem_test_apikey',
+      productId: 'prod_test',
+      webhookSecret: 'whsec-test',
     },
 
     e2e: {

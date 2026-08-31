@@ -60,7 +60,16 @@ its egress address, so the hook points the daemon at Google's pull-through
 mirror in `/etc/docker/daemon.json`; without it `postgres:18` and
 `redis:8-alpine` come back as `429 Too Many Requests`. If Docker looks broken
 mid-session, re-run the hook rather than starting `dockerd` by hand —
-`/var/log/dockerd.log` has the daemon output.
+`/var/log/dockerd.log` has the daemon output. The cloud container also
+ships its own Chromium instead of the Playwright-pinned build, so run
+the e2e tests there with
+`PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium npm run e2e`
+(the config picks the path up; everywhere else it stays unset). For the
+specs that leave localhost (the Creem checkout), additionally set
+`PLAYWRIGHT_CHROMIUM_PROXY=$HTTPS_PROXY` — the browser has to go
+through the container's egress proxy, and the config's proxy arguments
+also cap TLS at 1.2 because the relay cannot digest Chromium's TLS 1.3
+client hello.
 
 CI (`.github/workflows/ci.yml`) runs lint, test, e2e, typecheck, build, and
 build-storybook; the test and e2e jobs start their databases with the same
@@ -136,6 +145,20 @@ their own. Closing is per process, and the Redis extension does not propagate
 it, so `registerRevocationChannel` publishes the revocation on its own channel
 and every instance closes the connections it holds; the publisher closes its
 own straight away, and the echo of its own message is a no-op.
+
+**Subscriptions — `app/services/subscription.ts`, `docs/subscriptions.md`.**
+The pro subscription is sold through Creem (merchant of record):
+`/upgrade` starts their hosted checkout, `/upgrade/callback` verifies the
+signed redirect, `/webhooks/creem` keeps the `subscriptions` table in
+sync (events recorded in `creem_webhook_events` for idempotency), and
+`/billing-portal` opens Creem's self-service portal. Access control is
+only ever `users.has_subscription`, recomputed from the stored statuses
+on every sync. `app/services/creem.ts` wraps the official `creem` SDK;
+`config.creem` switches between test and live mode. The e2e tests
+drive Creem's real test-mode checkout and skip without
+`CREEM_API_KEY`. Read
+`docs/subscriptions.md` before touching webhook handling or the emails
+around it — it also spells out which emails Creem sends for us.
 
 **Auth.** Passwordless magic code. `app/services/auth.ts` owns the flow
 (argon2-hashed OTP → cookie session with a sha256-hashed token stored in

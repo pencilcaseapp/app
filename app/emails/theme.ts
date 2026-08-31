@@ -65,6 +65,9 @@ export const theme = `@theme {
 
   --spacing-gutter: 18px;
   --spacing-content-end: 86px;
+
+  /* Tailwind's default is 0.75rem; emails need pixels. */
+  --radius-xl: 12px;
 }`;
 
 export const contentWidth = 'max-w-[296px]';

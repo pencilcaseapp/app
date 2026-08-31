@@ -59,3 +59,26 @@ wait for the websocket to deliver the server-seeded heading before
 anyone types, and toggling sharing waits for the share action's round
 trip before the link is handed to the other user (or their access is
 expected to be gone).
+
+## The Creem checkout
+
+`e2e/subscription.spec.ts` drives Creem's real test-mode checkout:
+upgrade, pay with the always-succeeding test card on their hosted
+page, follow the signed redirect back, see pro switched on and the
+customer portal open. That buys real end-to-end confidence at the
+price of depending on Creem being up and their checkout page keeping
+its shape — the card-form locators in the spec are the one place to
+adjust when it changes.
+
+The paid spec needs `CREEM_API_KEY` (the playwright config loads
+`.env`, so the same entry serves the dev server and the tests). A
+local run without the key skips it; CI gets it as a repository secret
+and fails loudly when the secret is missing, so the paid flow can
+never fall out of CI unnoticed. Every run leaves a throwaway customer and subscription
+behind in the test store. Webhook lifecycle behaviour (cancellations,
+failed renewals, redeliveries) is deliberately not covered here —
+Creem cannot deliver webhooks to localhost or a CI runner — and lives
+in the service tests instead; see `docs/subscriptions.md`.
+
+Subscription state sticks to the user, so the spec uses the fresh
+`userA` fixture, never the shared storage-state `user`.

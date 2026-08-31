@@ -10,6 +10,11 @@ export function getConfigProd(): Config {
       .default(`local-${process.pid}`)
       .asString(),
 
+    appUrl: env
+      .get('APP_URL')
+      .default('https://docs.pencilcase.app')
+      .asString(),
+
     server: {
       port: env.get('PORT').required().asIntPositive(),
       host: env.get('HOST').required().asString(),
@@ -51,6 +56,16 @@ export function getConfigProd(): Config {
 
     invite: {
       code: env.get('INVITE_CODE').required().asString(),
+    },
+
+    creem: {
+      apiUrl: env
+        .get('CREEM_API_URL')
+        .default('https://api.creem.io')
+        .asString(),
+      apiKey: env.get('CREEM_API_KEY').required().asString(),
+      productId: env.get('CREEM_PRODUCT_ID').required().asString(),
+      webhookSecret: env.get('CREEM_WEBHOOK_SECRET').required().asString(),
     },
 
     session: {

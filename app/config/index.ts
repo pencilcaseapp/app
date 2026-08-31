@@ -8,6 +8,13 @@ export interface Config {
   /** Unique per process — the live servers tell each other apart by it. */
   instanceId: string;
 
+  /**
+   * Where the app is reachable from the outside, without a trailing slash.
+   * Only for links that leave the request/response cycle (emails); routes
+   * build absolute URLs from the incoming request instead.
+   */
+  appUrl: string;
+
   server: {
     port: number;
     host: string;
@@ -67,6 +74,21 @@ export interface Config {
      * paid subscription exists.
      */
     code: string;
+  };
+
+  /**
+   * The merchant of record selling the pro subscription. Test mode and live
+   * mode are separate Creem environments with their own API hosts, keys and
+   * webhook secrets, so all four values switch together. See
+   * docs/subscriptions.md.
+   */
+  creem: {
+    apiUrl: string;
+    apiKey: string;
+    /** The pro subscription product, created in the Creem dashboard. */
+    productId: string;
+    /** Signs incoming webhooks; from the dashboard's Developers page. */
+    webhookSecret: string;
   };
 
   /**

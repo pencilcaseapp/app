@@ -70,8 +70,16 @@ export async function updateUser(id: string, input: {
   newsletter?: boolean;
   onboarded?: boolean;
   hasSubscription?: boolean;
+  creemCustomerId?: string;
 }) {
-  const { email, name, newsletter, onboarded, hasSubscription } = input;
+  const {
+    email,
+    name,
+    newsletter,
+    onboarded,
+    hasSubscription,
+    creemCustomerId,
+  } = input;
   const response = await db.update(users)
     .set({
       email,
@@ -79,12 +87,21 @@ export async function updateUser(id: string, input: {
       newsletter,
       onboarded,
       hasSubscription,
+      creemCustomerId,
       updatedAt: new Date(),
     })
     .where(eq(users.id, id))
     .returning();
 
   return response[0];
+}
+
+export async function getUserByCreemCustomerId(creemCustomerId: string) {
+  return db.query.users.findFirst({
+    where: {
+      creemCustomerId,
+    },
+  });
 }
 
 export async function createUserSession(input: {

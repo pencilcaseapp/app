@@ -4,6 +4,11 @@ We build transactional emails as React components with
 [React Email](https://react.email/), render them to HTML on the server, and send
 them through Lettermint.
 
+`sendEmail` skips Lettermint when no API token is configured, and for test
+addresses — `e2e-…` users the e2e tests sign up and the reserved
+example/test domains (`isTestEmailAddress` in `app/services/email.ts`) —
+so test runs against a configured token never spam the provider.
+
 Everything — the components, `render()`, and the preview CLI — comes from the
 single `react-email` package. It is a runtime dependency, not a dev one, because
 the server renders templates with it. Do not reach for `@react-email/components`
