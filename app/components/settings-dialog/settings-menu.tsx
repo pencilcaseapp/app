@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Link } from 'react-router';
+import { href, Link } from 'react-router';
 import { Icon } from '~/ui/icon/icon';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
 import { settingsSections } from './settings-dialog';
@@ -35,8 +35,8 @@ export const SettingsMenu: FC<SettingsMenuProps> = ({ user }) => {
           />
         ))}
         <NavigationItem
-          as="button"
-          type="button"
+          as="a"
+          href={href('/signout')}
           icon="logout"
           title="Logout"
           className="text-pca-red-500"

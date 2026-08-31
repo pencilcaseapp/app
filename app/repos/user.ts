@@ -162,6 +162,18 @@ export async function getAndRefreshUserSession(tokenHash: string) {
   };
 }
 
+export async function expireUserSession(tokenHash: string) {
+  const [session] = await db
+    .update(sessions)
+    .set({
+      expiresAt: new Date(),
+    })
+    .where(eq(sessions.tokenHash, tokenHash))
+    .returning();
+
+  return session;
+}
+
 export async function getUserSession(id: string) {
   if (!isUuid(id)) {
     return undefined;

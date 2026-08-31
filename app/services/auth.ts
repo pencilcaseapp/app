@@ -1,5 +1,5 @@
 import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, expireOtp, getValidOtp, markOtpAsUsed, recordFailedOtpAttempt } from '~/repos/otp';
-import { createUserSession, getOrCreateUserByEmail, getAndRefreshUserSession, updateUser, type User } from '~/repos/user';
+import { createUserSession, expireUserSession, getOrCreateUserByEmail, getAndRefreshUserSession, updateUser, type User } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
 import { createHash, randomBytes, randomInt } from 'node:crypto';
@@ -11,7 +11,7 @@ import { SearchParamAuth } from '~/constants/search-params';
 
 const config = getConfig();
 
-const { getSession, commitSession }
+const { getSession, commitSession, destroySession }
   = createCookieSessionStorage<{ token: string }>({
     cookie: {
       name: 'session',
@@ -151,6 +151,21 @@ export async function createSessionCookie(input: {
   return commitSession(cookieSession, {
     expires: session.expiresAt,
   });
+}
+
+/**
+ * Expires the session behind the cookie so the token is dead even if the
+ * cookie survives, and returns the header that clears the cookie itself.
+ */
+export async function signOut(request: Request) {
+  const cookieSession = await getSession(request.headers.get('Cookie'));
+  const token = cookieSession.get('token');
+
+  if (token) {
+    await expireUserSession(hashUserSessionToken(token));
+  }
+
+  return destroySession(cookieSession);
 }
 
 /**
