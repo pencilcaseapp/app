@@ -6,8 +6,9 @@ test.describe('the account settings', () => {
       const { page } = userA;
       await userA.createDocument();
 
+      // The sidebar skips the menu page on a desktop viewport.
       await page.getByRole('link', { name: 'Settings' }).click();
-      await page.getByRole('link', { name: 'Account' }).click();
+      await expect(page).toHaveURL(/\/settings\/account$/);
 
       await page.getByLabel('Name').fill('Ada Lovelace');
       await page.getByLabel('Subscribe to Newsletter').check();

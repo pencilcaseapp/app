@@ -1,17 +1,6 @@
 import { useEffect, useState } from 'react';
-import {
-  matchPath,
-  Outlet,
-  useLocation,
-  useNavigate,
-  type MiddlewareFunction,
-} from 'react-router';
-import { useMedia } from 'react-use';
-import { SETTINGS_SIDE_NAVIGATION_QUERY } from '~/components/settings-dialog/settings-dialog';
-import type {
-  SettingsOutletContext,
-  SettingsSection,
-} from '~/components/settings-dialog/settings-dialog';
+import { Outlet, useNavigate, type MiddlewareFunction } from 'react-router';
+import type { SettingsOutletContext } from '~/components/settings-dialog/settings-dialog';
 import { ResponsiveDialog } from '~/ui/responsive-dialog/responsive-dialog';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
@@ -39,15 +28,6 @@ export default function Settings({
   loaderData: { user },
 }: Route.ComponentProps) {
   const navigate = useNavigate();
-  const location = useLocation();
-  const hasSideNavigation = useMedia(SETTINGS_SIDE_NAVIGATION_QUERY, false);
-
-  // The child routes are the only ways this component renders, so the
-  // last segment is always a section id or `settings` itself.
-  const section = (matchPath(
-    '/doc/:id/settings/:section',
-    location.pathname,
-  )?.params.section ?? null) as SettingsSection | null;
 
   const [open, setOpen] = useState(false);
 
@@ -67,14 +47,6 @@ export default function Settings({
       cancelAnimationFrame(secondFrame);
     };
   }, []);
-
-  // The side navigation has no menu page; its index is the account
-  // section.
-  useEffect(() => {
-    if (hasSideNavigation && section === null) {
-      void navigate('account', { replace: true });
-    }
-  }, [hasSideNavigation, section, navigate]);
 
   return (
     <ResponsiveDialog

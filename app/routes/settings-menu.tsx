@@ -1,23 +1,15 @@
 import { useOutletContext } from 'react-router';
-import { useMedia } from 'react-use';
-import {
-  SETTINGS_SIDE_NAVIGATION_QUERY,
-  SettingsDialogContent,
-} from '~/components/settings-dialog/settings-dialog';
+import { SettingsDialogContent } from '~/components/settings-dialog/settings-dialog';
 import type { SettingsOutletContext } from '~/components/settings-dialog/settings-dialog';
 import { SettingsMenu } from '~/components/settings-dialog/settings-menu';
 
 /*
- * The stacked layouts open on this menu; with the side navigation the
- * settings route immediately replaces it with the account section.
+ * The root page of the stacked layouts, which the sidebar links to on
+ * mobile; off mobile it links straight to the account section, so this
+ * page is only reached there by opening the settings URL itself.
  */
 export default function SettingsMenuRoute() {
   const { user } = useOutletContext<SettingsOutletContext>();
-  const hasSideNavigation = useMedia(SETTINGS_SIDE_NAVIGATION_QUERY, false);
-
-  if (hasSideNavigation) {
-    return null;
-  }
 
   return (
     <SettingsDialogContent section={null}>

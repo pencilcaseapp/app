@@ -179,9 +179,11 @@ describe('the settings routes', () => {
   });
 
   describe('with the side navigation', () => {
-    test('the index replaces itself with the account section',
+    // The sidebar links straight into the account section off mobile,
+    // which is the same URL a section deep link opens.
+    test('open the account section without the back button',
       async () => {
-        await renderSettings('/doc/:id/settings', 'desktop');
+        await renderSettings('/doc/:id/settings/account', 'desktop');
 
         expect(await screen.findByLabelText('Name'))
           .toHaveValue(userFixture.name);
@@ -191,6 +193,18 @@ describe('the settings routes', () => {
         expect(
           screen.queryByRole('button', { name: 'Back' }),
         ).not.toBeInTheDocument();
+      });
+
+    test('still render the menu page for the settings URL itself',
+      async () => {
+        await renderSettings('/doc/:id/settings', 'desktop');
+
+        expect(
+          await screen.findByRole('dialog', { name: 'Settings' }),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole('link', { name: 'Account' }),
+        ).toBeInTheDocument();
       });
 
     test('switch sections through the side navigation', async () => {
