@@ -1,5 +1,6 @@
 import { createFormHook, type FormAsyncValidateOrFn, type FormOptions, type FormValidateOrFn } from '@tanstack/react-form';
 import { mergeForm, useTransform } from '@tanstack/react-form-remix';
+import { useId } from 'react';
 import { useActionData, useSubmit } from 'react-router';
 import { ControlledCheckbox } from '~/components/controlled-checkbox/controlled-checkbox';
 import { ControlledHiddenInput } from '~/components/controlled-hidden-input/controlled-hidden-input';
@@ -7,11 +8,7 @@ import { ControlledOneTimePasswordField } from '~/components/controlled-one-time
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
 import { ControlledSwitch } from '~/components/controlled-switch/controlled-switch';
 import { ControlledTextField } from '~/components/controlled-text-field/controlled-text-field';
-import { fieldContext, formContext } from '~/contexts/form';
-
-export interface FormMeta {
-  formId: string;
-}
+import { fieldContext, formContext, type FormMeta } from '~/contexts/form';
 
 export const formHook = createFormHook({
   fieldContext,
@@ -58,6 +55,7 @@ export function useAppForm<
 ) {
   const actionData = useActionData();
   const submit = useSubmit();
+  const formId = useId();
 
   return formHook.useAppForm({
     ...props,
@@ -66,7 +64,7 @@ export function useAppForm<
       [actionData],
     ),
     onSubmitMeta: {
-      formId: '',
+      formId,
     },
     onSubmitInvalid() {
       const InvalidInput = document.querySelector(

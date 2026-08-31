@@ -1,6 +1,9 @@
 import { useOutletContext } from 'react-router';
 import { useMedia } from 'react-use';
-import { SETTINGS_SIDE_NAVIGATION_QUERY } from '~/components/settings-dialog/settings-dialog';
+import {
+  SETTINGS_SIDE_NAVIGATION_QUERY,
+  SettingsDialogContent,
+} from '~/components/settings-dialog/settings-dialog';
 import type { SettingsOutletContext } from '~/components/settings-dialog/settings-dialog';
 import { SettingsMenu } from '~/components/settings-dialog/settings-menu';
 
@@ -16,5 +19,9 @@ export default function SettingsMenuRoute() {
     return null;
   }
 
-  return <SettingsMenu user={user} />;
+  return (
+    <SettingsDialogContent section={null}>
+      <SettingsMenu user={user} />
+    </SettingsDialogContent>
+  );
 }

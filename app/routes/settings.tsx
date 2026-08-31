@@ -7,14 +7,12 @@ import {
   type MiddlewareFunction,
 } from 'react-router';
 import { useMedia } from 'react-use';
-import {
-  SETTINGS_SIDE_NAVIGATION_QUERY,
-  SettingsDialog,
-} from '~/components/settings-dialog/settings-dialog';
+import { SETTINGS_SIDE_NAVIGATION_QUERY } from '~/components/settings-dialog/settings-dialog';
 import type {
   SettingsOutletContext,
   SettingsSection,
 } from '~/components/settings-dialog/settings-dialog';
+import { ResponsiveDialog } from '~/ui/responsive-dialog/responsive-dialog';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
 import type { Route } from './+types/settings';
@@ -31,8 +29,9 @@ export function loader({ context }: Route.LoaderArgs) {
 
 /*
  * The settings dialog over the document it was opened from: this route
- * renders the shell, the outlet renders the menu (index) or the section
- * routes below it. The dialog mounts closed and opens a frame later so
+ * only keeps the responsive dialog open across the section routes; the
+ * outlet renders the menu (index) or a section, each bringing its own
+ * dialog content. The dialog mounts closed and opens a frame later so
  * the enter animation plays, and closing waits for the exit animation
  * before navigating back up to the document.
  */
@@ -78,8 +77,7 @@ export default function Settings({
   }, [hasSideNavigation, section, navigate]);
 
   return (
-    <SettingsDialog
-      section={section}
+    <ResponsiveDialog
       open={open}
       onOpenChange={setOpen}
       onOpenChangeComplete={(nextOpen) => {
@@ -89,6 +87,6 @@ export default function Settings({
       }}
     >
       <Outlet context={{ user } satisfies SettingsOutletContext} />
-    </SettingsDialog>
+    </ResponsiveDialog>
   );
 }

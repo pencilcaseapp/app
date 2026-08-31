@@ -1,33 +1,30 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import {
-  createRoutesStub,
-  href,
-  Outlet,
-  RouterContextProvider,
-  type LoaderFunction,
-} from 'react-router';
+import { href, RouterContextProvider } from 'react-router';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import {
   optionalUserSessionContext,
   userSessionContext,
 } from '~/contexts/user-session';
-import LayoutEditor, { loader as layoutLoader } from '~/layouts/editor';
 import { userFixture } from '~/test/fixtures/user';
-import Settings, { loader as settingsLoader } from './settings';
-import SettingsAccountRoute from './settings-account';
-import SettingsMenuRoute from './settings-menu';
-import SettingsSubscriptionRoute from './settings-subscription';
-import SettingsSupportRoute from './settings-support';
+import { renderRoute } from '~/utils/testing';
 
-vi.mock('~/repos/document', () => ({
-  getDocumentList: vi.fn().mockResolvedValue([]),
-}));
+const openDocumentMock = vi.fn().mockResolvedValue([null, {
+  title: 'The Document',
+  shared: false,
+  isOwner: true,
+  hasJoined: false,
+}]);
+
+vi.mock('~/services/document', async (importOriginal) => {
+  return {
+    ...await importOriginal<typeof import('~/services/document')>(),
+    openDocument: (...args: unknown[]) => openDocumentMock(...args),
+  };
+});
 
 const MOBILE_QUERY = '(width < 40rem)';
 const SIDE_NAVIGATION_QUERY = '(width >= 64rem)';
-const SIDEBAR_MOBILE_QUERY = '(max-width: 640px)';
-const SIDEBAR_DESKTOP_QUERY = '(min-width: 1280px)';
 
 const useMediaMock = vi.fn();
 
@@ -43,11 +40,10 @@ type Viewport = 'mobile' | 'tablet' | 'desktop';
 const mockViewport = (viewport: Viewport) => {
   useMediaMock.mockImplementation((query: string) => {
     if (viewport === 'mobile') {
-      return query === MOBILE_QUERY || query === SIDEBAR_MOBILE_QUERY;
+      return query === MOBILE_QUERY;
     }
     if (viewport === 'desktop') {
-      return query === SIDE_NAVIGATION_QUERY
-        || query === SIDEBAR_DESKTOP_QUERY;
+      return query === SIDE_NAVIGATION_QUERY;
     }
     return false;
   });
@@ -55,48 +51,27 @@ const mockViewport = (viewport: Viewport) => {
 
 const DOC_ID = '11111111-2222-4333-8444-555555555555';
 
-function renderSettings(path: string, viewport: Viewport) {
+type SettingsPath
+  = '/doc/:id'
+    | '/doc/:id/settings'
+    | '/doc/:id/settings/account'
+    | '/doc/:id/settings/subscription'
+    | '/doc/:id/settings/support';
+
+async function renderSettings(path: SettingsPath, viewport: Viewport) {
   mockViewport(viewport);
 
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, userFixture);
   context.set(userSessionContext, userFixture);
 
-  const Stub = createRoutesStub([
-    {
-      Component: LayoutEditor as React.ComponentType,
-      loader: layoutLoader,
-      children: [
-        {
-          path: 'doc/:id',
-          Component: () => (
-            <>
-              <div>Document</div>
-              <Outlet />
-            </>
-          ),
-          children: [
-            {
-              path: 'settings',
-              Component: Settings as React.ComponentType,
-              loader: settingsLoader as unknown as LoaderFunction,
-              children: [
-                { index: true, Component: SettingsMenuRoute },
-                { path: 'account', Component: SettingsAccountRoute },
-                {
-                  path: 'subscription',
-                  Component: SettingsSubscriptionRoute,
-                },
-                { path: 'support', Component: SettingsSupportRoute },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ], context);
+  await renderRoute(path, {
+    params: { id: DOC_ID },
+    context,
+    ...(path === '/doc/:id' ? {} : { parentRoute: '/doc/:id' }),
+  });
 
-  return render(<Stub initialEntries={[path]} />);
+  return userEvent.setup();
 }
 
 afterEach(() => {
@@ -105,15 +80,17 @@ afterEach(() => {
 
 describe('the settings routes', () => {
   test('keep the dialog closed on the document route', async () => {
-    renderSettings(`/doc/${DOC_ID}`, 'tablet');
+    await renderSettings('/doc/:id', 'tablet');
 
-    expect(await screen.findByText('Document')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: 'Share' }),
+    ).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   describe('stacked below the side navigation breakpoint', () => {
     test('open on the menu page', async () => {
-      renderSettings(`/doc/${DOC_ID}/settings`, 'tablet');
+      await renderSettings('/doc/:id/settings', 'tablet');
 
       expect(
         await screen.findByRole('dialog', { name: 'Settings' }),
@@ -134,8 +111,7 @@ describe('the settings routes', () => {
 
     test('navigate into a section and back through the topbar',
       async () => {
-        const person = userEvent.setup();
-        renderSettings(`/doc/${DOC_ID}/settings`, 'tablet');
+        const person = await renderSettings('/doc/:id/settings', 'tablet');
 
         await person.click(
           await screen.findByRole('link', { name: 'Account' }),
@@ -161,7 +137,7 @@ describe('the settings routes', () => {
       });
 
     test('link to support through a mailto', async () => {
-      renderSettings(`/doc/${DOC_ID}/settings/support`, 'tablet');
+      await renderSettings('/doc/:id/settings/support', 'tablet');
 
       expect(
         await screen.findByRole('link', { name: 'inbox@pencilcase.app' }),
@@ -169,7 +145,7 @@ describe('the settings routes', () => {
     });
 
     test('deep link into a section', async () => {
-      renderSettings(`/doc/${DOC_ID}/settings/subscription`, 'tablet');
+      await renderSettings('/doc/:id/settings/subscription', 'tablet');
 
       expect(
         await screen.findByRole('dialog', { name: 'Subscription' }),
@@ -184,8 +160,8 @@ describe('the settings routes', () => {
 
     test('close through the cancel button and return to the document',
       async () => {
-        const person = userEvent.setup();
-        renderSettings(`/doc/${DOC_ID}/settings/account`, 'tablet');
+        const person
+          = await renderSettings('/doc/:id/settings/account', 'tablet');
 
         await person.click(
           await screen.findByRole('button', { name: 'Cancel' }),
@@ -196,14 +172,16 @@ describe('the settings routes', () => {
             screen.queryByRole('dialog'),
           ).not.toBeInTheDocument();
         });
-        expect(screen.getByText('Document')).toBeInTheDocument();
+        expect(
+          screen.getByRole('button', { name: 'Share' }),
+        ).toBeInTheDocument();
       });
   });
 
   describe('with the side navigation', () => {
     test('the index replaces itself with the account section',
       async () => {
-        renderSettings(`/doc/${DOC_ID}/settings`, 'desktop');
+        await renderSettings('/doc/:id/settings', 'desktop');
 
         expect(await screen.findByLabelText('Name'))
           .toHaveValue(userFixture.name);
@@ -216,8 +194,8 @@ describe('the settings routes', () => {
       });
 
     test('switch sections through the side navigation', async () => {
-      const person = userEvent.setup();
-      renderSettings(`/doc/${DOC_ID}/settings/account`, 'desktop');
+      const person
+        = await renderSettings('/doc/:id/settings/account', 'desktop');
 
       await person.click(
         await screen.findByRole('link', { name: 'Support' }),
@@ -237,7 +215,7 @@ describe('the settings routes', () => {
 
   describe('on mobile', () => {
     test('render the stacked pages in the drawer variant', async () => {
-      renderSettings(`/doc/${DOC_ID}/settings`, 'mobile');
+      await renderSettings('/doc/:id/settings', 'mobile');
 
       expect(
         await screen.findByRole('dialog', { name: 'Settings' }),
