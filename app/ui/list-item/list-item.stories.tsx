@@ -1,19 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { FeatureListItem } from './feature-list-item';
+import { ListItem } from './list-item';
 
 /**
- * One entry of a feature list, e.g. on the pricing table: an icon
+ * One entry of a list, e.g. a feature on the pricing table: an icon
  * next to a short line of text.
  *
- * The icon defaults to the grey `check` and can be swapped
- * (`icon`) and recolored (`iconColor`: `success` and `danger`).
- * The text colors follow the theme by default and can be pinned via
- * `textColorLight`/`textColorDark` for fixed surfaces like the
- * yellow pricing card.
+ * The icon defaults to `check` and can be swapped (`icon`). Icon and
+ * text colors follow the theme by default (grey-900 light, white
+ * dark) and can be set per theme via `iconColorLight`/`iconColorDark`
+ * and `textColorLight`/`textColorDark`, e.g. green for success, red
+ * for danger, or pinned colors for fixed surfaces like the yellow
+ * pricing card.
  */
-const meta: Meta<typeof FeatureListItem> = {
-  title: 'Data Display/FeatureListItem',
-  component: FeatureListItem,
+const meta: Meta<typeof ListItem> = {
+  title: 'Data Display/ListItem',
+  component: ListItem,
   decorators: [
     Story => (
       <ul className="flex flex-col gap-3">
@@ -24,7 +25,7 @@ const meta: Meta<typeof FeatureListItem> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof FeatureListItem>;
+type Story = StoryObj<typeof ListItem>;
 
 export const Default: Story = {
   args: {
@@ -35,7 +36,8 @@ export const Default: Story = {
 export const Success: Story = {
   args: {
     children: 'Hosted in the EU',
-    iconColor: 'success',
+    iconColorLight: 'green-700',
+    iconColorDark: 'green-700',
   },
 };
 
@@ -43,17 +45,19 @@ export const Danger: Story = {
   args: {
     children: 'No access control',
     icon: 'close',
-    iconColor: 'danger',
+    iconColorLight: 'red-500',
+    iconColorDark: 'red-500',
   },
 };
 
 /**
- * On the yellow pricing card the text is pinned to grey-900 in both
- * themes.
+ * On the yellow pricing card icon and text are pinned to grey-900
+ * in both themes.
  */
 export const OnYellow: Story = {
   args: {
     children: 'Support small tech',
+    iconColorDark: 'grey-900',
     textColorDark: 'grey-900',
   },
   decorators: [

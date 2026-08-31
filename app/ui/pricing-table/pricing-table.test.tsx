@@ -32,6 +32,16 @@ describe('PricingTable', () => {
     expect(container).toMatchSnapshot();
   });
 
+  it('renders on a white background', () => {
+    const { container } = render(
+      <PricingTable {...props} background="white" />,
+    );
+
+    expect(container.firstChild).toHaveClass('bg-pca-white');
+    expect(container.firstChild).not.toHaveClass('bg-pca-yellow-500');
+    expect(container).toMatchSnapshot();
+  });
+
   it('renders without action area and fine print', () => {
     render(<PricingTable {...props} />);
 

@@ -53,3 +53,21 @@ export const WithoutAction: Story = {
     ],
   },
 };
+
+/**
+ * On a white background the card follows the theme and lies flat,
+ * e.g. to compare the free plan against pro.
+ */
+export const OnWhite: Story = {
+  args: {
+    plan: 'pencil case free',
+    amount: '0 €',
+    period: '/ year',
+    background: 'white',
+    features: [
+      '3 docs',
+      'Hosted in the EU',
+      'Support small tech',
+    ],
+  },
+};

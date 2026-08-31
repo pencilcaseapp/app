@@ -4,35 +4,35 @@ import type { IconName } from '../icon/icons';
 import type { TypographyProps } from '../typography/typography';
 import { Typography } from '../typography/typography';
 
-export type FeatureListItemIconColor = 'default' | 'success' | 'danger';
-
-export interface FeatureListItemProps {
+export interface ListItemProps {
   children: React.ReactNode;
   icon?: IconName;
-  iconColor?: FeatureListItemIconColor;
+  iconColorLight?: TypographyProps['textColorLight'];
+  iconColorDark?: TypographyProps['textColorDark'];
   textColorLight?: TypographyProps['textColorLight'];
   textColorDark?: TypographyProps['textColorDark'];
   className?: string;
 }
 
-export const FeatureListItem: React.FC<FeatureListItemProps> = ({
+export const ListItem: React.FC<ListItemProps> = ({
   children,
   icon = 'check',
-  iconColor = 'default',
+  iconColorLight = 'grey-900',
+  iconColorDark = 'white',
   textColorLight = 'grey-900',
   textColorDark = 'white',
   className,
 }) => {
-  const iconClasses = classNames([
-    'h-4.5 w-4.5 shrink-0',
-    iconColor === 'default' && 'text-pca-grey-900',
-    iconColor === 'success' && 'text-pca-green-700',
-    iconColor === 'danger' && 'text-pca-red-500',
-  ]);
-
   return (
     <li className={classNames('flex items-center gap-2.5', className)}>
-      <Icon icon={icon} className={iconClasses} />
+      <Typography
+        as="span"
+        textColorLight={iconColorLight}
+        textColorDark={iconColorDark}
+        className="flex shrink-0"
+      >
+        <Icon icon={icon} className="h-4.5 w-4.5" />
+      </Typography>
       <Typography
         as="span"
         variant="bodySmall"
