@@ -1,4 +1,11 @@
-import { href, matchPath, NavLink, Outlet, useLocation } from 'react-router';
+import {
+  href,
+  Link,
+  matchPath,
+  NavLink,
+  Outlet,
+  useLocation,
+} from 'react-router';
 import {
   DocumentTitleProvider,
   useDocumentTitle,
@@ -237,7 +244,9 @@ function EditorSidebar({
                 title="Settings"
                 to={settingsUrl}
                 icon="settings"
-                as={NavLink}
+                // A plain link, so opening the dialog does not mark the
+                // entry as the active page.
+                as={Link}
               />
             )}
           </>
