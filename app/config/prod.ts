@@ -12,7 +12,7 @@ export function getConfigProd(): Config {
 
     appUrl: env
       .get('APP_URL')
-      .default('https://pencilcase.app')
+      .default('https://docs.pencilcase.app')
       .asString(),
 
     server: {
