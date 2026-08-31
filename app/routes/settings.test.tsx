@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import {
   createRoutesStub,
+  href,
   Outlet,
   RouterContextProvider,
   type LoaderFunction,
@@ -124,8 +125,8 @@ describe('the settings routes', () => {
         ).toBeInTheDocument();
       }
       expect(
-        screen.getByRole('button', { name: 'Logout' }),
-      ).toBeInTheDocument();
+        screen.getByRole('link', { name: 'Logout' }),
+      ).toHaveAttribute('href', href('/signout'));
       expect(
         screen.queryByRole('button', { name: 'Save' }),
       ).not.toBeInTheDocument();

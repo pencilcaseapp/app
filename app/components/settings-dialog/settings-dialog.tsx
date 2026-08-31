@@ -1,6 +1,6 @@
 import type { FC, PropsWithChildren } from 'react';
 import classNames from 'classnames';
-import { NavLink, useNavigate } from 'react-router';
+import { href, NavLink, useNavigate } from 'react-router';
 import { useMedia } from 'react-use';
 import { Button } from '~/ui/button/button';
 import type { IconName } from '~/ui/icon/icons';
@@ -117,8 +117,8 @@ export const SettingsDialog: FC<SettingsDialogProps> = ({
                   ))}
                 </div>
                 <NavigationItem
-                  as="button"
-                  type="button"
+                  as="a"
+                  href={href('/signout')}
                   icon="logout"
                   title="Logout"
                   className="text-pca-red-500"

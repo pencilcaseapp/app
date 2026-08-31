@@ -20,6 +20,7 @@ export default [
     route('upgrade', 'routes/upgrade.tsx'),
     route('upgrade/callback', 'routes/upgrade-callback.tsx'),
   ]),
+  route('signout', 'routes/signout.ts'),
   route('invite/:code', 'routes/invite.ts'),
   route('billing-portal', 'routes/billing-portal.ts'),
   route('webhooks/creem', 'routes/creem-webhook.ts'),

@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { createSessionCookie, getAuthSession, getSignInUrl, initMagicCode, InitMagicCodeError, onboardUser, verifyMagicCode, VerifyMagicCodeError } from './auth';
+import { createSessionCookie, getAuthSession, getSignInUrl, initMagicCode, InitMagicCodeError, onboardUser, signOut, verifyMagicCode, VerifyMagicCodeError } from './auth';
 import { userFixture, userSessionFixture } from '~/test/fixtures/user';
 import argon2 from 'argon2';
 import { otpFixture } from '~/test/fixtures/otp';
@@ -30,6 +30,7 @@ vi.mock('~/repos/otp', async (importOriginal) => {
 });
 
 const getAndRefreshUserSessionMock = vi.fn();
+const expireUserSessionMock = vi.fn();
 const updateUserMock = vi.fn();
 const getOrCreateUserByEmailMock = vi.fn(() => userFixture);
 vi.mock('~/repos/user', () => ({
@@ -41,6 +42,7 @@ vi.mock('~/repos/user', () => ({
   }),
   getAndRefreshUserSession: (...args: unknown[]) =>
     getAndRefreshUserSessionMock(...args),
+  expireUserSession: (...args: unknown[]) => expireUserSessionMock(...args),
   updateUser: (...args: unknown[]) => updateUserMock(...args),
 }));
 
@@ -336,6 +338,29 @@ describe('getAuthSession', () => {
       user: userFixture,
       cookieHeader: 'session=eyJ0b2tlbiI6InlwaW5LeFd3bkF1YWVFS1lrUnRRWVRGREtKSm5JdmU1a3I2NXZzUDU2LXcifQ%3D%3D.7FWkYgIL8Aj2ImIH%2F4VgSCgJf1XI4OWWzTi1GbutCBo; Path=/; Expires=Mon, 15 Jun 2026 13:39:21 GMT; HttpOnly; SameSite=Lax',
     });
+  });
+});
+
+describe('signOut', () => {
+  it('expires the session and clears the cookie', async () => {
+    const request = new Request('http://localhost', {
+      headers: {
+        Cookie: validSessionCookie,
+      },
+    });
+
+    const cookieHeader = await signOut(request);
+
+    expect(expireUserSessionMock).toHaveBeenCalledWith('hashed-token');
+    expect(cookieHeader).toContain('session=;');
+    expect(cookieHeader).toContain('Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+  });
+
+  it('clears the cookie without a session to expire', async () => {
+    const cookieHeader = await signOut(new Request('http://localhost'));
+
+    expect(expireUserSessionMock).not.toHaveBeenCalled();
+    expect(cookieHeader).toContain('session=;');
   });
 });
 

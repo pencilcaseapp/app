@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createUser, createUserSession, deleteSessionsExpiredBefore, getOrCreateUserByEmail, getUser, getUserByCreemCustomerId, getUserByEmail, getAndRefreshUserSession, getUserSession, updateUser } from './user';
+import { createUser, createUserSession, deleteSessionsExpiredBefore, expireUserSession, getOrCreateUserByEmail, getUser, getUserByCreemCustomerId, getUserByEmail, getAndRefreshUserSession, getUserSession, updateUser } from './user';
 import { createExpiredUserSession, createTestUser, createValidUserSession } from '~/test/data-factories/user';
 import { faker } from '@faker-js/faker';
 
@@ -208,6 +208,26 @@ describe('getAndRefreshUserSession', () => {
     const result = await getAndRefreshUserSession(sessionFixture.tokenHash);
 
     expect(result).toBeNull();
+  });
+});
+
+describe('expireUserSession', () => {
+  it('expires the session behind the token hash', async () => {
+    const userFixture = await createTestUser();
+    const sessionFixture = await createValidUserSession(userFixture.id);
+
+    const session = await expireUserSession(sessionFixture.tokenHash);
+
+    expect(session?.expiresAt.getTime())
+      .toBeLessThanOrEqual(Date.now());
+    expect(await getAndRefreshUserSession(sessionFixture.tokenHash))
+      .toBeNull();
+  });
+
+  it('returns undefined if no session matches', async () => {
+    const session = await expireUserSession('non-existent-token-hash');
+
+    expect(session).toBeUndefined();
   });
 });
 
