@@ -7,6 +7,7 @@ import {
   RouterContextProvider,
   type LoaderFunction,
 } from 'react-router';
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import {
   optionalUserSessionContext,
@@ -14,6 +15,7 @@ import {
 } from '~/contexts/user-session';
 import LayoutEditor, { loader as layoutLoader } from '~/layouts/editor';
 import { userFixture } from '~/test/fixtures/user';
+import { ToastProvider } from '~/ui/toast/toast-provider';
 import Settings, { loader as settingsLoader } from './settings';
 import SettingsAccountRoute from './settings-account';
 import SettingsMenuRoute from './settings-menu';
@@ -96,7 +98,13 @@ function renderSettings(path: string, viewport: Viewport) {
     },
   ], context);
 
-  return render(<Stub initialEntries={[path]} />);
+  return render(
+    <ToastProvider>
+      <AuthenticityTokenProvider token="test-token">
+        <Stub initialEntries={[path]} />
+      </AuthenticityTokenProvider>
+    </ToastProvider>,
+  );
 }
 
 afterEach(() => {

@@ -1,17 +1,14 @@
-import type { FC, PropsWithChildren } from 'react';
+import { useState, type FC, type PropsWithChildren } from 'react';
 import classNames from 'classnames';
 import { href, NavLink, useNavigate } from 'react-router';
 import { useMedia } from 'react-use';
-import { Button } from '~/ui/button/button';
 import type { IconName } from '~/ui/icon/icons';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
-import {
-  ResponsiveDialog,
-  ResponsiveDialogClose,
-} from '~/ui/responsive-dialog/responsive-dialog';
+import { ResponsiveDialog } from '~/ui/responsive-dialog/responsive-dialog';
 import { ResponsiveDialogContent } from '~/ui/responsive-dialog/responsive-dialog-content';
 import { ResponsiveDialogTopbar } from '~/ui/responsive-dialog/responsive-dialog-topbar';
 import { SIDEBAR_DRAWER_MAX_HEIGHT } from '~/ui/sidebar/sidebar';
+import { SettingsFooterContext } from './settings-footer';
 
 export interface SettingsDialogUser {
   name: string | null;
@@ -74,11 +71,15 @@ export const SettingsDialog: FC<SettingsDialogProps> = ({
 }) => {
   const navigate = useNavigate();
   const hasSideNavigation = useMedia(SETTINGS_SIDE_NAVIGATION_QUERY, false);
+  const [footer, setFooter] = useState<HTMLDivElement | null>(null);
 
   const isMenu = !hasSideNavigation && section === null;
   const activeSection = section ?? 'account';
   const sectionTitle = settingsSections
     .find(({ id }) => id === activeSection)?.title;
+  // Only the account section fills the footer; reserving it for the
+  // others would leave an empty bar below their content.
+  const hasFooter = !isMenu && activeSection === 'account';
 
   return (
     <ResponsiveDialog
@@ -128,18 +129,18 @@ export const SettingsDialog: FC<SettingsDialogProps> = ({
               </nav>
             )
           : undefined}
-        footerArea={!isMenu && activeSection === 'account'
+        footerArea={hasFooter
           ? (
-              <div className="flex items-center justify-end gap-2">
-                <ResponsiveDialogClose
-                  render={<Button colorLight="secondary">Cancel</Button>}
-                />
-                <Button type="button">Save</Button>
-              </div>
+              <div
+                ref={setFooter}
+                className="flex items-center justify-end gap-2"
+              />
             )
           : undefined}
       >
-        {children}
+        <SettingsFooterContext value={footer}>
+          {children}
+        </SettingsFooterContext>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );

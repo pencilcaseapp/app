@@ -6,12 +6,15 @@ import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 export type ControlledFormProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: AnyFormApi & { AppForm: any };
+  /** Own id, for a submit button rendered outside the form element. */
+  id?: string;
   children: ReactNode;
 };
 
 export const ControlledForm: React.FC<ControlledFormProps>
-  = ({ form, children }) => {
-    const formId = useId();
+  = ({ form, id, children }) => {
+    const generatedId = useId();
+    const formId = id ?? generatedId;
     const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
       event.preventDefault();
       event.stopPropagation();

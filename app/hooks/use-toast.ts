@@ -29,3 +29,13 @@ export const useToast = () => {
     }
   }, [add, successMessage, infoMessage, dangerMessage]);
 };
+
+/**
+ * Emits a toast from a component, for feedback that stays on the page
+ * instead of travelling through a redirect.
+ */
+export const useEmitToast = () => {
+  const { add } = Toast.useToastManager();
+
+  return add;
+};
