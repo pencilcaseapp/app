@@ -52,11 +52,21 @@ export default function Settings({
 
   const [open, setOpen] = useState(false);
 
-  // Opened a tick after mounting so Base UI treats it as an open
-  // transition and plays the enter animation.
+  // Opened two frames after mounting: the popup then mounts after the
+  // navigation's own render has painted, so its starting style gets a
+  // painted frame and the enter animation plays. One frame (or a
+  // timeout) still shares the navigation's busy frame and the drawer
+  // snaps into place instead of sliding up.
   useEffect(() => {
-    const timeout = setTimeout(() => setOpen(true), 0);
-    return () => clearTimeout(timeout);
+    let secondFrame: number;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => setOpen(true));
+    });
+
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      cancelAnimationFrame(secondFrame);
+    };
   }, []);
 
   // The side navigation has no menu page; its index is the account
