@@ -16,15 +16,31 @@ export function setViewportWidth(width: number) {
   (window as HappyDOMWindow).happyDOM.setViewport({ width });
 }
 
+type RouteEntry = (typeof routes)[number];
+
+/** Flattens the route tree, joining each route's path with its parents'. */
+function flattenRoutes(
+  entries: RouteEntry[],
+  parentPath = '',
+): { route: RouteEntry; fullPath: string }[] {
+  return entries.flatMap((route) => {
+    const fullPath = [parentPath, route.path].filter(Boolean).join('/');
+
+    return [
+      { route, fullPath },
+      ...flattenRoutes(route.children ?? [], fullPath),
+    ];
+  });
+}
+
 export async function renderRoute<P extends keyof Register['pages']>(
   path: P,
   options?: Register['pages'][P] & { searchParams?: Record<string, string>; context?: RouterContextProvider },
 ) {
-  const flatRoutes = routes.map(r => [r, ...(r.children ?? [])]).flat();
-  const route = flatRoutes.find(r =>
-    path === '/' ? r.index === true : `/${r.path}` === path,
+  const match = flattenRoutes(routes).find(({ route, fullPath }) =>
+    path === '/' ? route.index === true : `/${fullPath}` === path,
   );
-  const file = await import(`~/${route?.file}`);
+  const file = await import(`~/${match?.route.file}`);
   const Component = file.default ?? (() => null);
 
   let replacedPath: string = path;

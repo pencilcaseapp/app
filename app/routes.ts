@@ -4,7 +4,9 @@ export default [
   index('routes/startpage.tsx'),
   layout('layouts/editor.tsx', [
     route('new', 'routes/new.tsx'),
-    route('doc/:id', 'routes/doc.tsx'),
+    route('doc/:id', 'routes/doc.tsx', [
+      route('settings', 'routes/doc-settings.tsx'),
+    ]),
   ]),
   layout('layouts/auth.tsx', [
     route('signin', 'routes/signin.tsx'),

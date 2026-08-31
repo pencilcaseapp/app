@@ -10,6 +10,12 @@ import { SidebarMenu } from './sidebar-menu';
 export type { SidebarMenuItem };
 export type SidebarProps = SidebarBaseProps;
 
+/**
+ * The height of the sidebar's mobile drawer, shared with overlays that
+ * stack a nested drawer on top of it so both line up.
+ */
+export const SIDEBAR_DRAWER_MAX_HEIGHT = 'calc(100dvh - 56px)';
+
 export const Sidebar: FC<SidebarProps> = ({
   bottomArea,
   items,
@@ -22,7 +28,7 @@ export const Sidebar: FC<SidebarProps> = ({
       <Drawer open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <DrawerContent
           isFullHeight
-          maxHeight="calc(100dvh - 56px)"
+          maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
           // The footer's rendered height: two navigation items
           // plus the gap and the footer's own top padding.
           reservedFooterHeight={123}
