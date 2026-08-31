@@ -8,7 +8,7 @@ export const FormFieldStyle = <C extends React.ElementType = 'input'>
 
   const classes = classNames([
     // Base styles
-    'bg-white dark:bg-pca-grey-800/60 border border-pca-grey-900 dark:border-transparent transition-all duration-300 ease-in-out rounded-xl outline-0 p-3 text-sm font-inter text-pca-grey-900 dark:text-white',
+    'bg-white dark:bg-pca-grey-800/60 border border-pca-grey-900 dark:border-transparent transition-[color,background-color,border-color,box-shadow] duration-300 ease-in-out rounded-xl outline-0 p-3 text-sm font-inter text-pca-grey-900 dark:text-white',
     // Focus and hover styles
     'hover:border-pca-blue-700 dark:hover:border-transparent dark:hover:bg-pca-grey-800 focus:border-pca-blue-700 dark:focus:border-pca-grey-700 dark:active:border-pca-grey-700 focus:ring-2 dark:focus:ring-0 active:ring-2 dark:active:ring-0 ring-pca-blue-300 dark:focus:bg-pca-grey-800 dark:active:bg-pca-grey-800',
     // Placeholder styles
