@@ -64,7 +64,12 @@ mid-session, re-run the hook rather than starting `dockerd` by hand —
 ships its own Chromium instead of the Playwright-pinned build, so run
 the e2e tests there with
 `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium npm run e2e`
-(the config picks the path up; everywhere else it stays unset).
+(the config picks the path up; everywhere else it stays unset). For the
+specs that leave localhost (the Creem checkout), additionally set
+`PLAYWRIGHT_CHROMIUM_PROXY=$HTTPS_PROXY` — the browser has to go
+through the container's egress proxy, and the config's proxy arguments
+also cap TLS at 1.2 because the relay cannot digest Chromium's TLS 1.3
+client hello.
 
 CI (`.github/workflows/ci.yml`) runs lint, test, e2e, typecheck, build, and
 build-storybook; the test and e2e jobs start their databases with the same
