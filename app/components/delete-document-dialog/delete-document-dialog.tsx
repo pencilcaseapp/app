@@ -7,6 +7,7 @@ import {
   ResponsiveDialogTitle,
 } from '~/ui/responsive-dialog/responsive-dialog';
 import { ResponsiveDialogContent } from '~/ui/responsive-dialog/responsive-dialog-content';
+import { ResponsiveDialogContentInner } from '~/ui/responsive-dialog/responsive-dialog-content-inner';
 import { Typography } from '~/ui/typography/typography';
 
 export interface DeleteDocumentDialogProps {
@@ -32,37 +33,38 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent
-        minHeight="40dvh"
-        footerArea={(
-          <div className="flex items-center justify-end gap-2">
-            <ResponsiveDialogClose
-              render={<Button colorLight="secondary">Cancel</Button>}
-            />
-            <Button colorLight="danger" onClick={onConfirm}>
-              Delete
-            </Button>
-          </div>
-        )}
-      >
-        <ResponsiveDialogTitle
-          className="mb-2"
-          render={<Typography variant="heading3" as="h2" />}
-        >
-          Delete document
-        </ResponsiveDialogTitle>
-        <ResponsiveDialogDescription
-          render={(
-            <Typography
-              variant="bodySmall"
-              as="p"
-              textColorLight="grey-600"
-              textColorDark="grey-400"
-            />
+      <ResponsiveDialogContent minHeight="40dvh">
+        <ResponsiveDialogContentInner
+          footerArea={(
+            <div className="flex items-center justify-end gap-2">
+              <ResponsiveDialogClose
+                render={<Button colorLight="secondary">Cancel</Button>}
+              />
+              <Button colorLight="danger" onClick={onConfirm}>
+                Delete
+              </Button>
+            </div>
           )}
         >
-          {description}
-        </ResponsiveDialogDescription>
+          <ResponsiveDialogTitle
+            className="mb-2"
+            render={<Typography variant="heading3" as="h2" />}
+          >
+            Delete document
+          </ResponsiveDialogTitle>
+          <ResponsiveDialogDescription
+            render={(
+              <Typography
+                variant="bodySmall"
+                as="p"
+                textColorLight="grey-600"
+                textColorDark="grey-400"
+              />
+            )}
+          >
+            {description}
+          </ResponsiveDialogDescription>
+        </ResponsiveDialogContentInner>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );

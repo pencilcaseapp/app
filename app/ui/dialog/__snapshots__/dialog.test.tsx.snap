@@ -2,11 +2,11 @@
 
 exports[`DialogContent > matches the snapshot with every area filled 1`] = `
 <div
-  aria-labelledby="base-ui-_r_2m_"
+  aria-labelledby="base-ui-_r_1j_"
   class="relative flex w-full max-h-full flex-col overflow-hidden rounded-3xl bg-pca-white outline-none shadow-glass transition-[scale,opacity] duration-100 ease-out data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:scale-[0.98] data-ending-style:opacity-0 motion-reduce:transition-none dark:border dark:border-pca-grey-800 dark:bg-pca-grey-900 dark:shadow-glass-dark max-w-3xl h-130"
   data-base-ui-focusable=""
   data-open=""
-  id="_r_2j_"
+  id="_r_1g_"
   role="dialog"
   style="--nested-dialogs: 0;"
   tabindex="-1"
@@ -23,7 +23,7 @@ exports[`DialogContent > matches the snapshot with every area filled 1`] = `
       >
         <svg
           aria-hidden="false"
-          aria-labelledby="_r_2l_"
+          aria-labelledby="_r_1i_"
           class="shrink-0 w-6 h-6"
           fill="transparent"
           focusable="false"
@@ -33,7 +33,7 @@ exports[`DialogContent > matches the snapshot with every area filled 1`] = `
           xmlns="http://www.w3.org/2000/svg"
         >
           <title
-            id="_r_2l_"
+            id="_r_1i_"
           >
             Back
           </title>
@@ -48,7 +48,7 @@ exports[`DialogContent > matches the snapshot with every area filled 1`] = `
       </button>
       <h2
         class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white text-center font-semibold min-w-0 flex-1 truncate"
-        id="base-ui-_r_2m_"
+        id="base-ui-_r_1j_"
       >
         Settings
       </h2>
@@ -59,7 +59,7 @@ exports[`DialogContent > matches the snapshot with every area filled 1`] = `
       >
         <svg
           aria-hidden="false"
-          aria-labelledby="_r_2n_"
+          aria-labelledby="_r_1k_"
           class="shrink-0 w-6 h-6"
           fill="transparent"
           focusable="false"
@@ -69,7 +69,7 @@ exports[`DialogContent > matches the snapshot with every area filled 1`] = `
           xmlns="http://www.w3.org/2000/svg"
         >
           <title
-            id="_r_2n_"
+            id="_r_1k_"
           >
             Close
           </title>

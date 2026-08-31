@@ -3,6 +3,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ResponsiveDialog } from './responsive-dialog';
 import { ResponsiveDialogContent } from './responsive-dialog-content';
+import {
+  ResponsiveDialogContentInner,
+} from './responsive-dialog-content-inner';
 import { ResponsiveDialogTopbar } from './responsive-dialog-topbar';
 import type {
   ResponsiveDialogTopbarProps,
@@ -14,10 +17,14 @@ vi.mock('~/hooks/use-is-mobile');
 function renderTopbar(topbarProps?: Partial<ResponsiveDialogTopbarProps>) {
   return render(
     <ResponsiveDialog defaultOpen>
-      <ResponsiveDialogContent
-        topArea={<ResponsiveDialogTopbar title="Settings" {...topbarProps} />}
-      >
-        Content
+      <ResponsiveDialogContent>
+        <ResponsiveDialogContentInner
+          topArea={(
+            <ResponsiveDialogTopbar title="Settings" {...topbarProps} />
+          )}
+        >
+          Content
+        </ResponsiveDialogContentInner>
       </ResponsiveDialogContent>
     </ResponsiveDialog>,
   );

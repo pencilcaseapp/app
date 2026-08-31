@@ -6,22 +6,30 @@ import { Dialog as BaseDialog } from '@base-ui/react/dialog';
 import { Dialog } from './dialog';
 import { DialogContent } from './dialog-content';
 import type { DialogContentProps } from './dialog-content';
+import { DialogContentInner } from './dialog-content-inner';
+import type { DialogContentInnerProps } from './dialog-content-inner';
 import { DialogTopbar } from './dialog-topbar';
 import type { DialogTopbarProps } from './dialog-topbar';
 
 function renderDialog(
-  { contentProps, defaultOpen }:
-  { contentProps?: DialogContentProps; defaultOpen?: boolean } = {},
+  { contentProps, innerProps, defaultOpen }:
+  {
+    contentProps?: DialogContentProps;
+    innerProps?: DialogContentInnerProps;
+    defaultOpen?: boolean;
+  } = {},
 ) {
   return render(
     <Dialog defaultOpen={defaultOpen}>
       <BaseDialog.Trigger>Open dialog</BaseDialog.Trigger>
       <DialogContent {...contentProps}>
-        <BaseDialog.Title>Delete document</BaseDialog.Title>
-        <BaseDialog.Description>
-          This action cannot be undone.
-        </BaseDialog.Description>
-        {contentProps?.children}
+        <DialogContentInner {...innerProps}>
+          <BaseDialog.Title>Delete document</BaseDialog.Title>
+          <BaseDialog.Description>
+            This action cannot be undone.
+          </BaseDialog.Description>
+          {innerProps?.children}
+        </DialogContentInner>
       </DialogContent>
     </Dialog>,
   );
@@ -30,8 +38,10 @@ function renderDialog(
 function renderTopbar(topbarProps: DialogTopbarProps) {
   return render(
     <Dialog defaultOpen>
-      <DialogContent topArea={<DialogTopbar {...topbarProps} />}>
-        Body content
+      <DialogContent>
+        <DialogContentInner topArea={<DialogTopbar {...topbarProps} />}>
+          Body content
+        </DialogContentInner>
       </DialogContent>
     </Dialog>,
   );
@@ -120,33 +130,6 @@ describe('Dialog', () => {
 });
 
 describe('DialogContent', () => {
-  test('renders its children inside the dialog', () => {
-    renderDialog({
-      defaultOpen: true,
-      contentProps: { children: <p>Body content</p> },
-    });
-
-    expect(screen.getByText('Body content')).toBeInTheDocument();
-  });
-
-  test('renders the top area', () => {
-    renderDialog({
-      defaultOpen: true,
-      contentProps: { topArea: <span>Top area content</span> },
-    });
-
-    expect(screen.getByText('Top area content')).toBeInTheDocument();
-  });
-
-  test('renders the footer area', () => {
-    renderDialog({
-      defaultOpen: true,
-      contentProps: { footerArea: <button type="button">Save</button> },
-    });
-
-    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
-  });
-
   test('applies the class of the requested size', () => {
     renderDialog({ defaultOpen: true, contentProps: { size: 'large' } });
 
@@ -163,53 +146,6 @@ describe('DialogContent', () => {
     renderDialog({ defaultOpen: true });
 
     expect(screen.getByRole('dialog')).not.toHaveClass('h-130');
-  });
-
-  test('does not render a side area by default', () => {
-    renderDialog({ defaultOpen: true });
-
-    expect(screen.queryByText('Side content')).not.toBeInTheDocument();
-  });
-
-  test('renders the side area', () => {
-    renderDialog({
-      defaultOpen: true,
-      contentProps: { sideArea: <span>Side content</span> },
-    });
-
-    expect(screen.getByText('Side content')).toBeInTheDocument();
-  });
-
-  test('keeps the footer beside the side area, not underneath it', () => {
-    renderDialog({
-      defaultOpen: true,
-      contentProps: {
-        sideArea: <span>Side content</span>,
-        footerArea: <button type="button">Save</button>,
-      },
-    });
-
-    const side = screen.getByText('Side content').parentElement;
-    const footer = screen.getByRole('button', { name: 'Save' }).parentElement;
-
-    expect(side).not.toContainElement(footer);
-    expect(side?.parentElement).toContainElement(footer);
-  });
-
-  test('pads the content, the side area and the footer the same', () => {
-    renderDialog({
-      defaultOpen: true,
-      contentProps: {
-        children: <p>Body content</p>,
-        sideArea: <span>Side content</span>,
-        footerArea: <button type="button">Save</button>,
-      },
-    });
-
-    expect(screen.getByText('Body content').parentElement).toHaveClass('p-4');
-    expect(screen.getByText('Side content').parentElement).toHaveClass('p-4');
-    expect(screen.getByRole('button', { name: 'Save' }).parentElement)
-      .toHaveClass('p-4');
   });
 
   test('transitions the scale of the popup, not its transform', () => {
@@ -230,19 +166,95 @@ describe('DialogContent', () => {
   test('matches the snapshot with every area filled', () => {
     render(
       <Dialog defaultOpen>
-        <DialogContent
-          size="large"
-          isFullHeight
-          topArea={<DialogTopbar title="Settings" onBack={vi.fn()} />}
-          sideArea={<nav>Navigation</nav>}
-          footerArea={<button type="button">Save</button>}
-        >
-          <p>Body content</p>
+        <DialogContent size="large" isFullHeight>
+          <DialogContentInner
+            topArea={<DialogTopbar title="Settings" onBack={vi.fn()} />}
+            sideArea={<nav>Navigation</nav>}
+            footerArea={<button type="button">Save</button>}
+          >
+            <p>Body content</p>
+          </DialogContentInner>
         </DialogContent>
       </Dialog>,
     );
 
     expect(screen.getByRole('dialog')).toMatchSnapshot();
+  });
+});
+
+describe('DialogContentInner', () => {
+  test('renders its children inside the dialog', () => {
+    renderDialog({
+      defaultOpen: true,
+      innerProps: { children: <p>Body content</p> },
+    });
+
+    expect(screen.getByText('Body content')).toBeInTheDocument();
+  });
+
+  test('renders the top area', () => {
+    renderDialog({
+      defaultOpen: true,
+      innerProps: { topArea: <span>Top area content</span> },
+    });
+
+    expect(screen.getByText('Top area content')).toBeInTheDocument();
+  });
+
+  test('renders the footer area', () => {
+    renderDialog({
+      defaultOpen: true,
+      innerProps: { footerArea: <button type="button">Save</button> },
+    });
+
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
+  });
+
+  test('does not render a side area by default', () => {
+    renderDialog({ defaultOpen: true });
+
+    expect(screen.queryByText('Side content')).not.toBeInTheDocument();
+  });
+
+  test('renders the side area', () => {
+    renderDialog({
+      defaultOpen: true,
+      innerProps: { sideArea: <span>Side content</span> },
+    });
+
+    expect(screen.getByText('Side content')).toBeInTheDocument();
+  });
+
+  test('keeps the footer beside the side area, not underneath it', () => {
+    renderDialog({
+      defaultOpen: true,
+      innerProps: {
+        sideArea: <span>Side content</span>,
+        footerArea: <button type="button">Save</button>,
+      },
+    });
+
+    const side = screen.getByText('Side content').parentElement;
+    const footer = screen.getByRole('button', { name: 'Save' }).parentElement;
+
+    expect(side).not.toContainElement(footer);
+    expect(side?.parentElement).toContainElement(footer);
+  });
+
+  test('pads the content, the side area and the footer the same', () => {
+    renderDialog({
+      defaultOpen: true,
+      innerProps: {
+        children: <p>Body content</p>,
+        sideArea: <span>Side content</span>,
+        footerArea: <button type="button">Save</button>,
+      },
+    });
+
+    expect(screen.getByText('Body content').parentElement).toHaveClass('p-4');
+    expect(screen.getByText('Side content').parentElement).toHaveClass('p-4');
+    expect(screen.getByRole('button', { name: 'Save' }).parentElement)
+      .toHaveClass('p-4');
   });
 });
 

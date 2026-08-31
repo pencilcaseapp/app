@@ -13,23 +13,35 @@ import { ResponsiveDialogContent } from './responsive-dialog-content';
 import type {
   ResponsiveDialogContentProps,
 } from './responsive-dialog-content';
+import {
+  ResponsiveDialogContentInner,
+} from './responsive-dialog-content-inner';
+import type {
+  ResponsiveDialogContentInnerProps,
+} from './responsive-dialog-content-inner';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 
 vi.mock('~/hooks/use-is-mobile');
 
 function renderResponsiveDialog(
-  { contentProps, defaultOpen }:
-  { contentProps?: ResponsiveDialogContentProps; defaultOpen?: boolean } = {},
+  { contentProps, innerProps, defaultOpen }:
+  {
+    contentProps?: ResponsiveDialogContentProps;
+    innerProps?: ResponsiveDialogContentInnerProps;
+    defaultOpen?: boolean;
+  } = {},
 ) {
   return render(
     <ResponsiveDialog defaultOpen={defaultOpen}>
       <ResponsiveDialogTrigger>Open</ResponsiveDialogTrigger>
       <ResponsiveDialogContent {...contentProps}>
-        <ResponsiveDialogTitle>Delete document</ResponsiveDialogTitle>
-        <ResponsiveDialogDescription>
-          This action cannot be undone.
-        </ResponsiveDialogDescription>
-        {contentProps?.children}
+        <ResponsiveDialogContentInner {...innerProps}>
+          <ResponsiveDialogTitle>Delete document</ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>
+            This action cannot be undone.
+          </ResponsiveDialogDescription>
+          {innerProps?.children}
+        </ResponsiveDialogContentInner>
       </ResponsiveDialogContent>
     </ResponsiveDialog>,
   );
@@ -130,7 +142,7 @@ describe('ResponsiveDialog', () => {
     test('renders the top and footer areas', () => {
       renderResponsiveDialog({
         defaultOpen: true,
-        contentProps: {
+        innerProps: {
           topArea: <span>Top area content</span>,
           footerArea: <button type="button">Save</button>,
         },
@@ -162,7 +174,7 @@ describe('ResponsiveDialog', () => {
     test('renders the side area', () => {
       renderResponsiveDialog({
         defaultOpen: true,
-        contentProps: { sideArea: <span>Side content</span> },
+        innerProps: { sideArea: <span>Side content</span> },
       });
 
       expect(screen.getByText('Side content')).toBeInTheDocument();
@@ -183,15 +195,17 @@ describe('ResponsiveDialog', () => {
     test('reserves footer height based on reservedFooterHeight', () => {
       renderResponsiveDialog({
         defaultOpen: true,
-        contentProps: {
+        innerProps: {
           reservedFooterHeight: 96,
           footerArea: <button type="button">Save</button>,
         },
       });
 
+      const footer = screen.getByRole('button', { name: 'Save' })
+        .parentElement?.parentElement;
+
       expect(
-        screen.getByRole('dialog').style
-          .getPropertyValue('--footer-reserved-height'),
+        footer?.style.getPropertyValue('--footer-reserved-height'),
       ).toBe(
         'calc(96px + env(safe-area-inset-bottom, 0px) + var(--bleed))',
       );

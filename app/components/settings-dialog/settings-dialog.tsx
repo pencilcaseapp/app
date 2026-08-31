@@ -5,6 +5,7 @@ import { useMedia } from 'react-use';
 import type { IconName } from '~/ui/icon/icons';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
 import { ResponsiveDialogContent } from '~/ui/responsive-dialog/responsive-dialog-content';
+import { ResponsiveDialogContentInner } from '~/ui/responsive-dialog/responsive-dialog-content-inner';
 import { ResponsiveDialogTopbar } from '~/ui/responsive-dialog/responsive-dialog-topbar';
 import { SIDEBAR_DRAWER_MAX_HEIGHT } from '~/ui/sidebar/sidebar';
 
@@ -29,7 +30,29 @@ export const settingsSections: {
   { id: 'support', title: 'Support', icon: 'help' },
 ];
 
-export interface SettingsDialogContentProps extends PropsWithChildren {
+/*
+ * The popup of the settings overlay, rendered by the settings route
+ * around its outlet so it stays mounted while the section routes swap
+ * the structure within. Below `sm` it is a full height drawer, from
+ * `sm` a centered dialog that narrows once the section navigation is
+ * not taking up the side area.
+ */
+export const SettingsDialogContent: FC<PropsWithChildren> = ({ children }) => {
+  const hasSideNavigation = useMedia(SETTINGS_SIDE_NAVIGATION_QUERY, false);
+
+  return (
+    <ResponsiveDialogContent
+      size="large"
+      isFullHeight
+      maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
+      className={hasSideNavigation ? undefined : 'max-w-2xl!'}
+    >
+      {children}
+    </ResponsiveDialogContent>
+  );
+};
+
+export interface SettingsDialogContentInnerProps extends PropsWithChildren {
   /** The section being rendered, or null for the menu index. */
   section: SettingsSection | null;
   /** The section's actions, pinned below the content. */
@@ -47,16 +70,17 @@ const sideNavigationItemClasses = classNames(
 );
 
 /*
- * The shared chrome of the settings overlay, rendered by each settings
- * route inside the `ResponsiveDialog` the settings route keeps open
- * across them. Below `sm` it is a full height drawer, from `sm` a
- * centered dialog; below `lg` the sections stack behind the menu page
- * the topbar's back button returns to, from `lg` the section navigation
+ * The shared chrome of a settings page, rendered by each settings route
+ * inside the `SettingsDialogContent` the settings route keeps open
+ * across them. Below `lg` the sections stack behind the menu page the
+ * topbar's back button returns to, from `lg` the section navigation
  * sits in the dialog's side area. The side area and the back button
  * only render for a section, so their navigation can rely on `..`
  * being the settings route.
  */
-export const SettingsDialogContent: FC<SettingsDialogContentProps> = ({
+export const SettingsDialogContentInner: FC<
+  SettingsDialogContentInnerProps
+> = ({
   section,
   footerArea,
   children,
@@ -69,11 +93,7 @@ export const SettingsDialogContent: FC<SettingsDialogContentProps> = ({
     : settingsSections.find(({ id }) => id === section)?.title;
 
   return (
-    <ResponsiveDialogContent
-      size="large"
-      isFullHeight
-      maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
-      className={hasSideNavigation ? undefined : 'max-w-2xl!'}
+    <ResponsiveDialogContentInner
       topArea={(
         <ResponsiveDialogTopbar
           title={title}
@@ -115,6 +135,6 @@ export const SettingsDialogContent: FC<SettingsDialogContentProps> = ({
       footerArea={footerArea}
     >
       {children}
-    </ResponsiveDialogContent>
+    </ResponsiveDialogContentInner>
   );
 };
