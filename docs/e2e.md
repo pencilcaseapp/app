@@ -71,9 +71,10 @@ its shape — the card-form locators in the spec are the one place to
 adjust when it changes.
 
 The paid spec needs `CREEM_API_KEY` (the playwright config loads
-`.env`, so the same entry serves the dev server and the tests) and
-skips itself without one — CI provides it as a repository secret to
-the e2e job. Every run leaves a throwaway customer and subscription
+`.env`, so the same entry serves the dev server and the tests). A
+local run without the key skips it; CI gets it as a repository secret
+and fails loudly when the secret is missing, so the paid flow can
+never fall out of CI unnoticed. Every run leaves a throwaway customer and subscription
 behind in the test store. Webhook lifecycle behaviour (cancellations,
 failed renewals, redeliveries) is deliberately not covered here —
 Creem cannot deliver webhooks to localhost or a CI runner — and lives

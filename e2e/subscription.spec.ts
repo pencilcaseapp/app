@@ -3,14 +3,18 @@ import { expect, test } from './fixtures';
 
 /**
  * The paid flow runs against Creem's real test-mode checkout, so it
- * needs CREEM_API_KEY (see docs/e2e.md) and is skipped without it. Each
- * run pays with Creem's always-succeeding test card and leaves a test
- * customer and subscription behind in the test store.
+ * needs CREEM_API_KEY (see docs/e2e.md): CI fails without the secret,
+ * a local run without the key skips. Each run pays with Creem's
+ * always-succeeding test card and leaves a test customer and
+ * subscription behind in the test store.
  */
 
 const creemApiKey = process.env.CREEM_API_KEY;
 
 test('upgrading to pro through the Creem checkout', async ({ userA }) => {
+  if (!creemApiKey && process.env.CI) {
+    throw new Error('The CREEM_API_KEY repository secret is not set');
+  }
   test.skip(
     !creemApiKey,
     'Set CREEM_API_KEY to run the paid checkout flow (docs/e2e.md)',
