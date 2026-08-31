@@ -17,6 +17,8 @@ export type ResponsiveDialogContentProps = {
   /** Drawer only. */
   reservedFooterHeight?: number;
   /** Drawer only. */
+  maxHeight?: string;
+  /** Drawer only. */
   minHeight?: string;
 } & PropsWithChildren;
 
@@ -29,6 +31,7 @@ export const ResponsiveDialogContent: FC<ResponsiveDialogContentProps> = ({
   sideArea,
   className,
   reservedFooterHeight,
+  maxHeight,
   minHeight,
 }) => {
   const isDrawer = useIsDrawer();
@@ -40,6 +43,7 @@ export const ResponsiveDialogContent: FC<ResponsiveDialogContentProps> = ({
         footerArea={footerArea}
         isFullHeight={isFullHeight}
         reservedFooterHeight={reservedFooterHeight}
+        maxHeight={maxHeight}
         minHeight={minHeight}
       >
         {children}
