@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import classNames from 'classnames';
 import { useMedia } from 'react-use';
@@ -24,14 +23,17 @@ export interface SettingsDialogUser {
   newsletter: boolean | null;
 }
 
+export type SettingsSection = 'account' | 'subscription' | 'support';
+export type SettingsPage = 'menu' | SettingsSection;
+
 export interface SettingsDialogProps {
   user: SettingsDialogUser;
   open: boolean;
+  /** The page shown: the menu (stacked layouts only) or a section. */
+  page: SettingsPage;
   onOpenChange: (open: boolean) => void;
+  onPageChange: (page: SettingsPage) => void;
 }
-
-type SettingsSection = 'account' | 'subscription' | 'support';
-type SettingsPage = 'menu' | SettingsSection;
 
 const sections: {
   id: SettingsSection;
@@ -42,6 +44,12 @@ const sections: {
   { id: 'subscription', title: 'Subscription', icon: 'euro' },
   { id: 'support', title: 'Support', icon: 'help' },
 ];
+
+export function isSettingsSection(
+  value: string,
+): value is SettingsSection {
+  return sections.some(({ id }) => id === value);
+}
 
 const chevron = (
   <Icon icon="chevronRight" className="m-1 text-pca-grey-400" />
@@ -67,10 +75,11 @@ const sideNavigationItemClasses = classNames(
 export const SettingsDialog: FC<SettingsDialogProps> = ({
   user,
   open,
+  page,
   onOpenChange,
+  onPageChange,
 }) => {
   const hasSideNavigation = useMedia('(width >= 64rem)', false);
-  const [page, setPage] = useState<SettingsPage>('menu');
 
   const isMenu = !hasSideNavigation && page === 'menu';
   const section: SettingsSection = page === 'menu' ? 'account' : page;
@@ -117,7 +126,7 @@ export const SettingsDialog: FC<SettingsDialogProps> = ({
               type="button"
               icon={icon}
               title={title}
-              onClick={() => setPage(id)}
+              onClick={() => onPageChange(id)}
               actionArea={chevron}
               isActionAreaVisible
             />
@@ -207,7 +216,7 @@ export const SettingsDialog: FC<SettingsDialogProps> = ({
             title={isMenu ? 'Settings' : sectionTitle}
             onBack={
               !hasSideNavigation && page !== 'menu'
-                ? () => setPage('menu')
+                ? () => onPageChange('menu')
                 : undefined
             }
           />
@@ -225,7 +234,7 @@ export const SettingsDialog: FC<SettingsDialogProps> = ({
                       title={title}
                       className={sideNavigationItemClasses}
                       aria-current={id === section ? 'page' : undefined}
-                      onClick={() => setPage(id)}
+                      onClick={() => onPageChange(id)}
                     />
                   ))}
                 </div>

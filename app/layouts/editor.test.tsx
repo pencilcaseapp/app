@@ -25,7 +25,7 @@ function renderEditorLayout(initialPath: string) {
           path: 'doc/:id',
           Component: () => <div>Document</div>,
           children: [
-            { path: 'settings', Component: () => null },
+            { path: 'settings/:section?', Component: () => null },
           ],
         },
       ],
@@ -52,6 +52,28 @@ describe('LayoutEditor', () => {
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText(userFixture.name!)).toBeInTheDocument();
+  });
+
+  test('deep links to a settings section', async () => {
+    renderEditorLayout(`/doc/${DOC_ID}/settings/subscription`);
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    expect(
+      screen.getByText('The Subscription settings live here.'),
+    ).toBeInTheDocument();
+  });
+
+  test('changing the section navigates to its url', async () => {
+    const user = userEvent.setup();
+    renderEditorLayout(`/doc/${DOC_ID}/settings`);
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Support' }),
+    );
+
+    expect(
+      screen.getByText('The Support settings live here.'),
+    ).toBeInTheDocument();
   });
 
   test('closing the dialog navigates back to the document', async () => {

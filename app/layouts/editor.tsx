@@ -35,8 +35,14 @@ import {
 } from '~/contexts/edited-document';
 import { useEffect, useState } from 'react';
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
-import { SettingsDialog } from '~/components/settings-dialog/settings-dialog';
-import type { SettingsDialogUser } from '~/components/settings-dialog/settings-dialog';
+import {
+  isSettingsSection,
+  SettingsDialog,
+} from '~/components/settings-dialog/settings-dialog';
+import type {
+  SettingsDialogUser,
+  SettingsPage,
+} from '~/components/settings-dialog/settings-dialog';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 
 export const handle = {
@@ -115,12 +121,21 @@ function EditorSidebar({ navigation, user }: EditorSidebarProps) {
     location.pathname,
   );
   const settingsUrl = documentMatch?.params.id
-    ? href('/doc/:id/settings', { id: documentMatch.params.id })
+    ? href('/doc/:id/settings/:section?', { id: documentMatch.params.id })
     : null;
   // The URL drives the dialog, but the dialog stays mounted here so its
-  // open and close animations can play across navigations.
-  const isSettingsOpen
-    = matchPath('/doc/:id/settings', location.pathname) !== null;
+  // open and close animations can play across navigations. `settings`
+  // shows the menu, `settings/:section` deep-links into a section.
+  const settingsMatch = matchPath(
+    '/doc/:id/settings/:section?',
+    location.pathname,
+  );
+  const isSettingsOpen = settingsMatch !== null;
+  const settingsSection = settingsMatch?.params.section;
+  const settingsPage: SettingsPage
+    = settingsSection && isSettingsSection(settingsSection)
+      ? settingsSection
+      : 'menu';
 
   // A nested drawer needs its parent open beneath it, so a deep link to
   // the settings URL on mobile brings the sidebar up as well.
@@ -134,9 +149,18 @@ function EditorSidebar({ navigation, user }: EditorSidebarProps) {
     <SettingsDialog
       user={user}
       open={isSettingsOpen}
+      page={settingsPage}
       onOpenChange={(open) => {
         if (!open && documentMatch?.params.id) {
           void navigate(href('/doc/:id', { id: documentMatch.params.id }));
+        }
+      }}
+      onPageChange={(page) => {
+        if (documentMatch?.params.id) {
+          void navigate(href('/doc/:id/settings/:section?', {
+            id: documentMatch.params.id,
+            section: page === 'menu' ? undefined : page,
+          }));
         }
       }}
     />

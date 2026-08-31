@@ -5,7 +5,7 @@ export default [
   layout('layouts/editor.tsx', [
     route('new', 'routes/new.tsx'),
     route('doc/:id', 'routes/doc.tsx', [
-      route('settings', 'routes/doc-settings.tsx'),
+      route('settings/:section?', 'routes/doc-settings.tsx'),
     ]),
   ]),
   layout('layouts/auth.tsx', [

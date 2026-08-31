@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { SettingsDialog } from './settings-dialog';
+import type { SettingsPage } from './settings-dialog';
 
 const MOBILE_QUERY = '(width < 40rem)';
 const SIDE_NAVIGATION_QUERY = '(width >= 64rem)';
@@ -30,11 +32,32 @@ const user = {
 };
 
 const onOpenChange = vi.fn();
+const onPageChange = vi.fn();
 
-function renderDialog({ open = true }: { open?: boolean } = {}) {
-  return render(
-    <SettingsDialog user={user} open={open} onOpenChange={onOpenChange} />,
-  );
+function renderDialog(
+  { open = true, page = 'menu' }:
+  { open?: boolean; page?: SettingsPage } = {},
+) {
+  // The page is controlled (the layout derives it from the URL), so the
+  // harness feeds page changes back in the way the router would.
+  function Harness() {
+    const [currentPage, setCurrentPage] = useState<SettingsPage>(page);
+
+    return (
+      <SettingsDialog
+        user={user}
+        open={open}
+        page={currentPage}
+        onOpenChange={onOpenChange}
+        onPageChange={(nextPage) => {
+          onPageChange(nextPage);
+          setCurrentPage(nextPage);
+        }}
+      />
+    );
+  }
+
+  return render(<Harness />);
 }
 
 afterEach(() => {
@@ -76,6 +99,7 @@ describe('SettingsDialog', () => {
 
       await person.click(screen.getByRole('button', { name: 'Account' }));
 
+      expect(onPageChange).toHaveBeenCalledWith('account');
       expect(
         screen.getByRole('dialog', { name: 'Account' }),
       ).toBeInTheDocument();
