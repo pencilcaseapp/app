@@ -32,7 +32,7 @@ export async function createExpiredOtp(input: {
     email: to,
     canonicalEmail: getCanonicalEmail(to),
     codeHash: faker.string.alphanumeric(64),
-    expiresAt: expiresAt ?? new Date(Date.now() - 1000), // Expiry in the past
+    expiresAt: expiresAt ?? new Date(Date.now() - 1000),
   }).returning();
 
   return otp;

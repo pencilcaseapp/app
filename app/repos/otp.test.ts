@@ -38,7 +38,6 @@ describe('createOtp', () => {
       codeHash: 'hashed-code',
     });
 
-    // OTP should expire 15 minutes after creation
     const expectedExpiresAt = otp.createdAt.getTime() + 15 * 60 * 1000;
 
     expect(
@@ -107,7 +106,6 @@ describe('expireOtp', () => {
     const otpFixture = await createValidOtp(userFixture.id);
     const expiredOtp = await expireOtp(otpFixture.id);
 
-    // OTP should be expired immediately
     expect(
       expiredOtp.expiresAt.getTime(),
     ).toBeLessThanOrEqual(new Date().getTime());
@@ -156,7 +154,6 @@ describe('markOtpAsUsed', () => {
     const otpFixture = await createValidOtp(userFixture.id);
     const usedOtp = await markOtpAsUsed(otpFixture.id);
 
-    // OTP should be marked as used immediately
     expect(
       usedOtp.usedAt?.getTime(),
     ).toBeLessThanOrEqual(new Date().getTime());

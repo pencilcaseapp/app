@@ -191,7 +191,6 @@ describe('Typography', () => {
       );
       const el = screen.getByText('Regular');
       expect(el.className).toContain('font-normal');
-      // Should not have the default font-bold from the title variant
       expect(el.className).not.toContain('font-bold');
     });
 

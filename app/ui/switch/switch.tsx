@@ -34,25 +34,18 @@ export const Switch: React.FC<SwitchProps>
     className,
   }) => {
     const trackClasses = classNames([
-      // Base styles
       'relative inline-flex h-6 w-11 shrink-0 rounded-full p-0.5 outline-0 transition-colors duration-200 ease-in-out',
-      // Disabled state
       disabled
       && 'cursor-not-allowed bg-pca-grey-100 dark:bg-pca-grey-800 data-checked:bg-pca-green-100',
-      // Unchecked state
       !disabled
       && 'cursor-pointer bg-pca-grey-400 dark:bg-pca-grey-600 hover:bg-pca-grey-600 dark:hover:bg-pca-grey-800 focus:bg-pca-grey-300 dark:focus:bg-pca-grey-700 focus:ring-2 focus:ring-pca-grey-200 dark:focus:ring-pca-grey-500',
-      // Checked state
       !disabled
       && 'data-checked:bg-pca-green-700 data-checked:hover:bg-pca-green-900 data-checked:focus:bg-pca-green-700 data-checked:focus:ring-pca-green-300',
     ]);
 
     const thumbClasses = classNames([
-      // Base styles
       'block size-5 rounded-full shadow-primary transition-transform duration-200 ease-in-out',
-      // Checked state
       'data-checked:translate-x-5',
-      // Disabled state
       disabled
       && 'bg-pca-grey-100 dark:bg-pca-grey-700 data-checked:bg-pca-white',
       !disabled && 'bg-pca-white',

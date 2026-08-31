@@ -11,10 +11,6 @@ type AsProp<C extends ElementType> = {
 
 export type PropsToOmit<C extends ElementType, P> = keyof (AsProp<C> & P);
 
-/*
-* A polymorphic component prop that can
-* be used to override the default element type.
-*/
 export type PolymorphicComponentProp<
   C extends ElementType,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -22,7 +18,6 @@ export type PolymorphicComponentProp<
 > = PropsWithChildren<Props & AsProp<C>>
   & Omit<ComponentPropsWithoutRef<C>, PropsToOmit<C, Props>>;
 
-// Same as above, but with a "ref" prop
 export type PolymorphicComponentPropWithRef<
   C extends ElementType,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type

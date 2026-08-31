@@ -102,7 +102,6 @@ describe('DocumentGroup', () => {
         </DocumentGroup>,
       );
 
-      // Only the AccordionTrigger button should exist.
       expect(screen.getAllByRole('button')).toHaveLength(1);
     });
 

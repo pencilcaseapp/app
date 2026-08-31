@@ -97,7 +97,6 @@ describe('SidebarProvider', () => {
         expect(result.current?.isSidebarOpen).toBe(true);
       });
 
-      // setDesktopSidebarOpen should not be called on mobile
       expect(setDesktopSidebarOpen).not.toHaveBeenCalled();
     });
   });

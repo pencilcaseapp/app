@@ -51,7 +51,6 @@ export const Sidebar: FC<SidebarProps> = ({
             </div>
           )}
         >
-          {/* <Drawer.Title className="sr-only">Navigation</Drawer.Title> */}
           <nav>
             <ul className="flex flex-col gap-2">
               {items.map(({ key, content }) => {

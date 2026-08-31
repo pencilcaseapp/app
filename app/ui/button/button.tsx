@@ -39,9 +39,6 @@ export function Button<C extends React.ElementType = 'button'>(
     ...props
   }: ButtonProps<C>,
 ) {
-  /*
-   * Filled Variants
-   */
   const filledClasses = classNames([
     'transition-all duration-300 ease-in-out h-9',
     (disabled || isLoading)

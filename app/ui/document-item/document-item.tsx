@@ -72,20 +72,15 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
     // Only colors transition — `transition-all` would fight the layout
     // animation for control over `transform`.
     'transition-colors group h-12 lg:h-10 flex items-center justify-between gap-2 pr-1 lg:pr-0.5 rounded-xl cursor-pointer',
-    // Hover / open state — covers the whole row including actionArea.
     // Scoped to non-active rows so the yellow active surface isn't overridden.
     'not-has-aria-[current=page]:hover:bg-pca-grey-100 dark:not-has-aria-[current=page]:hover:bg-pca-grey-800',
     'not-has-aria-[current=page]:has-data-[state=open]:bg-pca-grey-100 dark:not-has-aria-[current=page]:has-data-[state=open]:bg-pca-grey-800',
-    // Keyboard focus / press on the inner link (non-active rows)
     'not-has-aria-[current=page]:has-[:focus-visible]:bg-pca-grey-200 dark:not-has-aria-[current=page]:has-[:focus-visible]:bg-pca-grey-800',
     'not-has-aria-[current=page]:has-[:active]:bg-pca-grey-200 dark:not-has-aria-[current=page]:has-[:active]:bg-pca-grey-800',
-    // Active (current page) styles — driven by aria-current on the inner link
     'has-aria-[current=page]:bg-pca-yellow-500 dark:has-aria-[current=page]:bg-pca-yellow-500',
     'dark:has-aria-[current=page]:text-pca-grey-900',
-    // Focus / press while active — stay on the yellow surface
     'has-[[aria-current=page]:focus-visible]:bg-pca-yellow-700 dark:has-[[aria-current=page]:focus-visible]:bg-pca-yellow-700',
     'has-[[aria-current=page]:active]:bg-pca-yellow-700 dark:has-[[aria-current=page]:active]:bg-pca-yellow-700',
-    // Disabled
     'has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50',
     // Reordering — see the layout effect above.
     'data-[reorder=shift]:animate-row-shift',

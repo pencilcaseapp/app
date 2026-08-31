@@ -16,6 +16,5 @@ export const ClientOnly: React.FC<ClientOnlyProps> = ({
     return <>{children}</>;
   }
 
-  // Render children if on client side, otherwise return fallback
   return isClient ? <>{children}</> : <>{fallback}</>;
 };

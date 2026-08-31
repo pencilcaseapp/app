@@ -10,8 +10,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Thin loaders and actions.** Loaders and actions control the route and
   nothing more. Push business logic into `app/services/` and data access into
   `app/repos/` (see **Layering** below).
-- **Few comments.** Let the code explain itself; only comment genuinely
-  complex business logic.
+- **Comments are a last resort.** Only add a comment when the code cannot be
+  made to explain itself: a non-obvious *why* (a workaround, a browser or
+  library quirk, an ordering constraint, a business rule that is not visible
+  from the code). Never write a comment that restates what the line below it
+  already says — section labels over class strings (`// Base styles`,
+  `// Disabled state`), narrations of the next statement (`// Get all tables`),
+  or restatements of a test's name. Prefer a better name or a small named
+  constant over a comment, and delete commented-out code rather than leaving
+  it behind. Doc comments that are genuinely consumed elsewhere stay: `/** */`
+  on exported props and helpers, and the Storybook descriptions rendered on
+  the docs page.
 - **Pull requests and commits.** Follow the `pull-request` skill
   (`.claude/skills/pull-request/`) — Angular commit format and short,
   human-readable PR descriptions.

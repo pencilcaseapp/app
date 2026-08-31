@@ -273,8 +273,6 @@ describe('extractTitleFromYDoc', () => {
   });
 
   it('uses the full editor fixture with h1', () => {
-    // This uses the same fixture as the app, ensuring consistency
-    // with a real-world Lexical document structure
     const doc = createYDocFromEditorState(
       initialEditorStateFixture as SerializedEditorState,
     );

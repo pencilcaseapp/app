@@ -23,13 +23,9 @@ export const Checkbox: React.FC<CheckboxProps>
     ...props
   }) => {
     const classes = classNames(
-      // Base styles
       'peer grid h-6 w-6 !p-0 !rounded-lg shrink-0 appearance-none cursor-pointer place-content-center after:hidden after:content-[\'\']',
-      // Checked state
       'checked:after:bg-checkmark-white checked:border-pca-grey-900 checked:bg-pca-grey-900 dark:checked:bg-pca-grey-800 dark:checked:border-pca-grey-800 checked:after:block checked:after:h-[13px] checked:after:w-[13px]',
-      // Hover styles
       'checked:hover:border-pca-grey-800 checked:hover:bg-pca-grey-800 dark:checked:hover:border-pca-grey-800/80 dark:checked:hover:bg-pca-grey-800/80',
-      // Disabled state
       'disabled:checked:after:opacity-30 disabled:checked:after:bg-checkmark-black dark:disabled:checked:after:bg-checkmark-white',
     );
 
