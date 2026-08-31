@@ -49,3 +49,22 @@ export const ActionArea: Story = {
     ),
   },
 };
+
+/**
+ * With a custom illustration, like the lost pencil
+ * on the not found view.
+ */
+export const CustomIllustration: Story = {
+  args: {
+    title: 'Not Found',
+    description:
+        'It may have been deleted, moved, or the link you followed is taking you nowhere.',
+    imageSrcLight: '/lost-pencil-light.svg',
+    imageSrcDark: '/lost-pencil-dark.svg',
+    actionArea: (
+      <Button>
+        Go home
+      </Button>
+    ),
+  },
+};

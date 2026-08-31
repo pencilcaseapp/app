@@ -8,10 +8,19 @@ export interface DocEmptyStateProps {
   description: string;
   actionArea?: React.ReactNode;
   signInUrl?: string | null;
+  imageSrcLight?: string;
+  imageSrcDark?: string;
 }
 
 export const DocEmptyState: React.FC<DocEmptyStateProps>
-  = ({ title, description, actionArea, signInUrl }) => {
+  = ({
+    title,
+    description,
+    actionArea,
+    signInUrl,
+    imageSrcLight,
+    imageSrcDark,
+  }) => {
     return (
       <div className="h-dvh">
         <PageTitle>{title}</PageTitle>
@@ -22,6 +31,8 @@ export const DocEmptyState: React.FC<DocEmptyStateProps>
           title={title}
           description={description}
           actionArea={actionArea}
+          imageSrcLight={imageSrcLight}
+          imageSrcDark={imageSrcDark}
         />
       </div>
     );
