@@ -268,7 +268,10 @@ Never leave `transition-all` on an element whose `transform` is animated by
 Motion or by a keyframe — the CSS transition and the animation fight over the
 property and the result reads as a bounce. Gate JS-driven motion on
 `useReducedMotion()`. Sidebar stacking: the sidebar itself is `z-20`, the sticky
-group header and the sticky bottom area are `z-10`.
+group header and the sticky bottom area are `z-10`. Above them the overlays
+stack in a fixed order: topbar, dropdowns and the dialog and drawer layers at
+`z-50`, tooltips at `z-60`, and the toast viewport at `z-70` so a toast stays
+readable over a dialog's backdrop.
 
 ## Conventions
 
