@@ -52,7 +52,7 @@ export const SettingsDialogContent: FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-export interface SettingsDialogPageProps extends PropsWithChildren {
+export interface SettingsDialogContentInnerProps extends PropsWithChildren {
   /** The section being rendered, or null for the menu index. */
   section: SettingsSection | null;
   /** The section's actions, pinned below the content. */
@@ -78,7 +78,9 @@ const sideNavigationItemClasses = classNames(
  * only render for a section, so their navigation can rely on `..`
  * being the settings route.
  */
-export const SettingsDialogPage: FC<SettingsDialogPageProps> = ({
+export const SettingsDialogContentInner: FC<
+  SettingsDialogContentInnerProps
+> = ({
   section,
   footerArea,
   children,

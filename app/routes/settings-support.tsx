@@ -1,5 +1,5 @@
 import type { MiddlewareFunction } from 'react-router';
-import { SettingsDialogPage } from '~/components/settings-dialog/settings-dialog';
+import { SettingsDialogContentInner } from '~/components/settings-dialog/settings-dialog';
 import { commonCopies } from '~/constants/common-copies';
 import { authMiddleware } from '~/middleware/auth';
 import { Icon } from '~/ui/icon/icon';
@@ -16,7 +16,7 @@ const externalLink = (
 
 export default function SettingsSupportRoute() {
   return (
-    <SettingsDialogPage section="support">
+    <SettingsDialogContentInner section="support">
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-3">
           <Typography variant="heading3" as="h2">
@@ -36,6 +36,6 @@ export default function SettingsSupportRoute() {
           isActionAreaVisible
         />
       </div>
-    </SettingsDialogPage>
+    </SettingsDialogContentInner>
   );
 }

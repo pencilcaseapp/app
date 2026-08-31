@@ -1,5 +1,5 @@
 import type { MiddlewareFunction } from 'react-router';
-import { SettingsDialogPage } from '~/components/settings-dialog/settings-dialog';
+import { SettingsDialogContentInner } from '~/components/settings-dialog/settings-dialog';
 import { authMiddleware } from '~/middleware/auth';
 import { Typography } from '~/ui/typography/typography';
 
@@ -9,7 +9,7 @@ export const middleware: MiddlewareFunction[] = [
 
 export default function SettingsSubscriptionRoute() {
   return (
-    <SettingsDialogPage section="subscription">
+    <SettingsDialogContentInner section="subscription">
       <Typography
         variant="bodySmall"
         textColorLight="grey-600"
@@ -17,6 +17,6 @@ export default function SettingsSubscriptionRoute() {
       >
         The Subscription settings live here.
       </Typography>
-    </SettingsDialogPage>
+    </SettingsDialogContentInner>
   );
 }

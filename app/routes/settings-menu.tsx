@@ -1,5 +1,5 @@
 import type { MiddlewareFunction } from 'react-router';
-import { SettingsDialogPage } from '~/components/settings-dialog/settings-dialog';
+import { SettingsDialogContentInner } from '~/components/settings-dialog/settings-dialog';
 import { SettingsMenu } from '~/components/settings-dialog/settings-menu';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
@@ -24,8 +24,8 @@ export default function SettingsMenuRoute({
   loaderData: { user },
 }: Route.ComponentProps) {
   return (
-    <SettingsDialogPage section={null}>
+    <SettingsDialogContentInner section={null}>
       <SettingsMenu user={user} />
-    </SettingsDialogPage>
+    </SettingsDialogContentInner>
   );
 }
