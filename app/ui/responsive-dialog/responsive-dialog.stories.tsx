@@ -1,3 +1,5 @@
+/* eslint-disable @eslint-react/rules-of-hooks */
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import {
@@ -8,9 +10,11 @@ import {
   ResponsiveDialogTrigger,
 } from './responsive-dialog';
 import { ResponsiveDialogContent } from './responsive-dialog-content';
+import { ResponsiveDialogTopbar } from './responsive-dialog-topbar';
 import { Drawer } from '../drawer/drawer';
 import { DrawerContent } from '../drawer/drawer-content';
 import { Button } from '../button/button';
+import { NavigationItem } from '../navigation-item/navigation-item';
 import { Typography } from '../typography/typography';
 
 /**
@@ -110,6 +114,59 @@ export const WithFooter: Story = {
       </ResponsiveDialog>
     </div>
   ),
+};
+
+/**
+ * A multi-page composition held together by `ResponsiveDialogTopbar`: the
+ * topbar owns the title and the close trigger in both variants, and shows
+ * a back button once `onBack` is passed — here while the sub page is open.
+ */
+export const WithTopbar: Story = {
+  render: (args) => {
+    const [isOnSubPage, setIsOnSubPage] = useState(false);
+
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <ResponsiveDialog {...args}>
+          <ResponsiveDialogTrigger
+            render={<Button colorLight="primary">Open settings</Button>}
+          />
+          <ResponsiveDialogContent
+            size="large"
+            isFullHeight
+            topArea={(
+              <ResponsiveDialogTopbar
+                title={isOnSubPage ? 'Account' : 'Settings'}
+                onBack={isOnSubPage
+                  ? () => setIsOnSubPage(false)
+                  : undefined}
+              />
+            )}
+          >
+            {isOnSubPage
+              ? (
+                  <Typography
+                    variant="bodySmall"
+                    textColorLight="grey-600"
+                    textColorDark="grey-400"
+                  >
+                    The Account settings live here.
+                  </Typography>
+                )
+              : (
+                  <NavigationItem
+                    as="button"
+                    type="button"
+                    icon="account"
+                    title="Account"
+                    onClick={() => setIsOnSubPage(true)}
+                  />
+                )}
+          </ResponsiveDialogContent>
+        </ResponsiveDialog>
+      </div>
+    );
+  },
 };
 
 /**

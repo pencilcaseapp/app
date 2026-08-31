@@ -4,7 +4,14 @@ export default [
   index('routes/startpage.tsx'),
   layout('layouts/editor.tsx', [
     route('new', 'routes/new.tsx'),
-    route('doc/:id', 'routes/doc.tsx'),
+    route('doc/:id', 'routes/doc.tsx', [
+      route('settings', 'routes/settings.tsx', [
+        index('routes/settings-menu.tsx'),
+        route('account', 'routes/settings-account.tsx'),
+        route('subscription', 'routes/settings-subscription.tsx'),
+        route('support', 'routes/settings-support.tsx'),
+      ]),
+    ]),
   ]),
   layout('layouts/auth.tsx', [
     route('signin', 'routes/signin.tsx'),
@@ -13,6 +20,7 @@ export default [
     route('upgrade', 'routes/upgrade.tsx'),
     route('upgrade/callback', 'routes/upgrade-callback.tsx'),
   ]),
+  route('signout', 'routes/signout.ts'),
   route('invite/:code', 'routes/invite.ts'),
   route('billing-portal', 'routes/billing-portal.ts'),
   route('webhooks/creem', 'routes/creem-webhook.ts'),

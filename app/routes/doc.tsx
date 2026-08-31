@@ -1,5 +1,5 @@
 import type { Route } from './+types/doc';
-import { Link, redirect, data, useRevalidator } from 'react-router';
+import { Link, Outlet, redirect, data, useRevalidator } from 'react-router';
 import { z } from 'zod';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
 import {
@@ -172,6 +172,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
             : null}
         />
       </ClientOnly>
+      <Outlet />
     </>
   );
 }

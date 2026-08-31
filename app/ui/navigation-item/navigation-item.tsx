@@ -7,15 +7,21 @@ import { Tooltip } from '../tooltip/tooltip';
 import { useIconOnly } from './icon-only-context';
 import { useMedia } from 'react-use';
 
+type TypographyColorProps
+  = Pick<React.ComponentProps<typeof Typography>,
+    'textColorLight' | 'textColorDark'>;
+
 export type DocumentItemProps<C extends React.ElementType>
   = PolymorphicComponentPropWithRef<
     C,
     {
       title?: string;
       actionArea?: React.ReactNode;
+      /** Keeps the action area visible instead of revealing it on hover. */
+      isActionAreaVisible?: boolean;
       icon: IconName;
       iconOnly?: boolean;
-    }
+    } & TypographyColorProps
   >;
 
 export function NavigationItem<C extends React.ElementType = 'a'>(
@@ -23,8 +29,11 @@ export function NavigationItem<C extends React.ElementType = 'a'>(
     title,
     icon,
     actionArea,
+    isActionAreaVisible,
     className,
     iconOnly,
+    textColorLight,
+    textColorDark,
     ref,
     ...rest }: DocumentItemProps<C>,
 ) {
@@ -72,6 +81,8 @@ export function NavigationItem<C extends React.ElementType = 'a'>(
                   variant="bodySmall"
                   as="span"
                   textAlign="left"
+                  textColorLight={textColorLight}
+                  textColorDark={textColorDark}
                   className="block truncate min-w-0 flex-1"
                   title={title}
                 >
@@ -81,7 +92,7 @@ export function NavigationItem<C extends React.ElementType = 'a'>(
               {actionArea && (
                 <div className={classNames([
                   'shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity',
-                  isTouchDevice && 'opacity-100',
+                  (isTouchDevice || isActionAreaVisible) && 'opacity-100',
                 ])}
                 >
                   {actionArea}
