@@ -50,8 +50,8 @@ export const DrawerContent: FC<DrawerContentProps>
     return (
       <Drawer.VirtualKeyboardProvider>
         <Drawer.Portal {...drawerPortalProps}>
-          <Drawer.Backdrop {...drawerBackdropProps} className="[--backdrop-opacity:0.2] [--bleed:3rem] fixed inset-0 min-h-dvh bg-pca-grey-700 opacity-[calc(var(--backdrop-opacity)*(1-var(--drawer-swipe-progress)))] transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] dark:[--backdrop-opacity:0.7] data-starting-style:opacity-0 data-ending-style:opacity-0 data-swiping:duration-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)]" />
-          <Drawer.Viewport {...dialogViewportProps} className="fixed inset-0 flex items-end justify-center touch-none [--bleed:3rem] after:pointer-events-none after:fixed after:inset-x-0 after:bottom-0 after:h-(--bleed) after:bg-white after:content-[''] data-closed:after:opacity-0 has-data-swiping:after:opacity-0 dark:after:bg-pca-grey-900">
+          <Drawer.Backdrop {...drawerBackdropProps} className="[--backdrop-opacity:0.2] [--bleed:3rem] fixed inset-0 z-50 min-h-dvh bg-pca-grey-700 opacity-[calc(var(--backdrop-opacity)*(1-var(--drawer-swipe-progress)))] transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] dark:[--backdrop-opacity:0.7] data-starting-style:opacity-0 data-ending-style:opacity-0 data-swiping:duration-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)]" />
+          <Drawer.Viewport {...dialogViewportProps} className="fixed inset-0 z-50 flex items-end justify-center touch-none [--bleed:3rem] after:pointer-events-none after:fixed after:inset-x-0 after:bottom-0 after:h-(--bleed) after:bg-white after:content-[''] data-closed:after:opacity-0 has-data-swiping:after:opacity-0 dark:after:bg-pca-grey-900">
             <Drawer.Popup
               {...drawerPopupProps}
               // A class built from the prop would never be seen by

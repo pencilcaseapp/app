@@ -44,8 +44,8 @@ export const DialogContent: FC<DialogContentProps>
   }) => {
     return (
       <BaseDialog.Portal {...dialogPortalProps}>
-        <BaseDialog.Backdrop {...dialogBackdropProps} className="[--backdrop-opacity:0.2] fixed inset-0 min-h-dvh bg-pca-grey-700 opacity-(--backdrop-opacity) transition-opacity duration-150 dark:[--backdrop-opacity:0.7] data-starting-style:opacity-0 data-ending-style:opacity-0 motion-reduce:transition-none" />
-        <BaseDialog.Viewport {...dialogViewportProps} className="fixed inset-0 flex items-center justify-center p-4">
+        <BaseDialog.Backdrop {...dialogBackdropProps} className="[--backdrop-opacity:0.2] fixed inset-0 z-50 min-h-dvh bg-pca-grey-700 opacity-(--backdrop-opacity) transition-opacity duration-150 dark:[--backdrop-opacity:0.7] data-starting-style:opacity-0 data-ending-style:opacity-0 motion-reduce:transition-none" />
+        <BaseDialog.Viewport {...dialogViewportProps} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <BaseDialog.Popup
             {...dialogPopupProps}
             className={classNames(
