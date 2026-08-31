@@ -6,17 +6,15 @@ const KEYBOARD_HEIGHT_THRESHOLD = 50;
 /*
  * A shrinking viewport is not proof of our own keyboard: iOS resizes the page
  * behind the native share sheet when the app it hands the link to opens a
- * keyboard of its own, and the page never sees it close again. Only an
- * editable element focused in this document can have opened the keyboard the
- * editor has to lay itself out around.
+ * keyboard of its own, and the page never sees it close again. Only the
+ * editor's own content can have opened the keyboard it has to lay itself out
+ * around — a form field in a dialog or drawer above it opens a keyboard the
+ * editor must stay out of the way of, not one it should reflow for.
  */
 const hasEditableFocus = () => {
   const element = document.activeElement;
 
-  return element instanceof HTMLElement
-    && (element.isContentEditable
-      || element instanceof HTMLInputElement
-      || element instanceof HTMLTextAreaElement);
+  return element instanceof HTMLElement && element.isContentEditable;
 };
 
 export const useVirtualKeyboard = () => {

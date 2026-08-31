@@ -47,6 +47,13 @@ const createButton = () => {
   return element;
 };
 
+const createTextInput = () => {
+  const element = document.createElement('input');
+  document.body.append(element);
+
+  return element;
+};
+
 describe('useVirtualKeyboard', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
@@ -94,6 +101,25 @@ describe('useVirtualKeyboard', () => {
     const { result } = renderHook(() => useVirtualKeyboard());
 
     setViewportHeight(400);
+
+    expect(result.current[0]).toBe(false);
+  });
+
+  it('should ignore a keyboard opened by a field outside the editor', () => {
+    focus(createTextInput());
+    const { result } = renderHook(() => useVirtualKeyboard());
+
+    setViewportHeight(400);
+
+    expect(result.current[0]).toBe(false);
+  });
+
+  it('should report the keyboard closed when focus moves to a field outside the editor', () => {
+    focus(createEditable());
+    const { result } = renderHook(() => useVirtualKeyboard());
+    setViewportHeight(400);
+
+    focus(createTextInput());
 
     expect(result.current[0]).toBe(false);
   });
