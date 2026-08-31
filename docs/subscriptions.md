@@ -140,15 +140,16 @@ funds — any future expiry and CVC.
 
 ## Testing
 
-Everything on our side runs offline: services and repos are unit
-tested, and the e2e specs (`e2e/subscription.spec.ts`) drive the whole
-flow against the fake Creem in `app/routes/e2e-creem.ts` — see
-`docs/e2e.md`. What the fake cannot vouch for is Creem's side, so
-after changes to the integration, click through test mode once by
-hand: upgrade with the success card, see the confirmation and the
-portal, pay with the decline card, cancel in the portal and watch the
-webhook land (the dashboard's Developers page lists every delivery
-and lets you re-send).
+The services and repos are unit tested offline — webhook handling,
+signatures, idempotency and the access policy all live there. The e2e
+specs (`e2e/subscription.spec.ts`) drive Creem's real test-mode
+checkout end to end when `CREEM_API_KEY` is set and skip without it —
+see `docs/e2e.md`. Webhooks are the one thing e2e cannot cover (Creem
+cannot reach localhost or CI), so after changes to the webhook
+handling, test it by hand: tunnel with ngrok, cancel in the portal,
+pay with the decline card, and watch the deliveries land — the
+dashboard's Developers page lists every delivery and lets you
+re-send.
 
 ## Going live
 

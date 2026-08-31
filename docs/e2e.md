@@ -60,22 +60,24 @@ anyone types, and toggling sharing waits for the share action's round
 trip before the link is handed to the other user (or their access is
 expected to be gone).
 
-## The fake Creem
+## The Creem checkout
 
-`e2e/subscription.spec.ts` covers the paid-subscription flow end to
-end without leaving localhost: `playwright.config.ts` starts the dev
-server with `CREEM_API_URL` pointing at `app/routes/e2e-creem.ts`, a
-fake of the few Creem endpoints the app calls plus stand-in checkout
-and portal pages. The fake signs its checkout redirects and webhook
-deliveries with the same functions (and config values) the app
-verifies with, so the signature checks run for real; `AppUser` gains
-`upgradeToPro()` and `deliverCreemWebhook(...)` for driving it. Like
-`/e2e/auth` it 404s unless `config.e2e` is set.
+`e2e/subscription.spec.ts` drives Creem's real test-mode checkout:
+upgrade, pay with the always-succeeding test card on their hosted
+page, follow the signed redirect back, see pro switched on and the
+customer portal open. That buys real end-to-end confidence at the
+price of depending on Creem being up and their checkout page keeping
+its shape — the card-form locators in the spec are the one place to
+adjust when it changes.
+
+The paid spec needs `CREEM_API_KEY` (the playwright config loads
+`.env`, so the same entry serves the dev server and the tests) and
+skips itself without one — CI provides it as a repository secret to
+the e2e job. Every run leaves a throwaway customer and subscription
+behind in the test store. Webhook lifecycle behaviour (cancellations,
+failed renewals, redeliveries) is deliberately not covered here —
+Creem cannot deliver webhooks to localhost or a CI runner — and lives
+in the service tests instead; see `docs/subscriptions.md`.
 
 Subscription state sticks to the user, so these specs use the fresh
-`userA` fixture, never the shared storage-state `user`. And because a
-locally reused dev server keeps its own environment: start it with
-`CREEM_API_URL=http://localhost:3000/e2e/creem npm run dev` (or let
-Playwright start one) before running these specs, otherwise the
-upgrade button walks into the real test-mode checkout.
-See `docs/subscriptions.md` for the integration itself.
+`userA` fixture, never the shared storage-state `user`.

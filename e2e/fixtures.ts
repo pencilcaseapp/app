@@ -86,46 +86,6 @@ export class AppUser {
     await expect(this.editor).toContainText(lines[lines.length - 1]);
   }
 
-  /**
-   * Buys the pro subscription through the fake Creem checkout and
-   * returns the Creem subscription id, so a test can drive webhook
-   * deliveries for it afterwards.
-   */
-  async upgradeToPro(): Promise<string> {
-    await this.page.goto('/upgrade');
-    await this.page.getByRole('button', { name: 'Upgrade' }).click();
-    await this.page.waitForURL('**/e2e/creem/checkout/**');
-    await this.page.getByRole('button', { name: 'Pay now' }).click();
-    await this.page.waitForURL('**/upgrade/callback**');
-
-    const subscriptionId = new URL(this.page.url())
-      .searchParams.get('subscription_id');
-    expect(subscriptionId).toBeTruthy();
-
-    return subscriptionId ?? '';
-  }
-
-  /**
-   * Has the fake Creem deliver a signed webhook to the app, the way the
-   * real one does after a change on their side.
-   */
-  async deliverCreemWebhook(
-    eventType: string,
-    subscriptionId: string,
-    options?: { eventId?: string },
-  ): Promise<void> {
-    const response = await this.page.request.post(
-      '/e2e/creem/deliver-webhook',
-      {
-        headers: { Authorization: `Bearer ${apiToken}` },
-        data: { eventType, subscriptionId, ...options },
-      },
-    );
-
-    expect(response.ok()).toBeTruthy();
-    expect((await response.json()).status).toBe(200);
-  }
-
   /** Turns sharing on and returns the link to hand to another user. */
   async shareDocument(): Promise<string> {
     await this.setSharing(true);

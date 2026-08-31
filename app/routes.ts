@@ -17,5 +17,4 @@ export default [
   route('billing-portal', 'routes/billing-portal.ts'),
   route('webhooks/creem', 'routes/creem-webhook.ts'),
   route('e2e/auth', 'routes/e2e-auth.ts'),
-  route('e2e/creem/*', 'routes/e2e-creem.ts'),
 ] satisfies RouteConfig;

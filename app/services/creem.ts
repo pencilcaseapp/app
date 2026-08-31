@@ -99,21 +99,18 @@ export function verifyRedirectSignature(searchParams: URLSearchParams) {
     return false;
   }
 
-  const pairs = [...searchParams].filter(([key, value]) =>
-    key !== 'signature' && value !== '' && value !== 'null',
-  );
-
-  return timingSafeEqualHex(signature, createRedirectSignature(pairs));
-}
-
-/** The signing half is shared with the fake Creem the e2e tests run. */
-export function createRedirectSignature(pairs: [string, string][]) {
-  const data = pairs
+  const data = [...searchParams]
+    .filter(([key, value]) =>
+      key !== 'signature' && value !== '' && value !== 'null',
+    )
     .map(([key, value]) => `${key}=${value}`)
     .concat(`salt=${config.creem.apiKey}`)
     .join('|');
 
-  return crypto.createHash('sha256').update(data).digest('hex');
+  const expected
+    = crypto.createHash('sha256').update(data).digest('hex');
+
+  return timingSafeEqualHex(signature, expected);
 }
 
 /**
@@ -140,14 +137,6 @@ export async function verifyWebhookSignature(
   catch {
     return false;
   }
-}
-
-/** The signing half is shared with the fake Creem the e2e tests run. */
-export function createWebhookSignature(rawBody: string) {
-  return crypto
-    .createHmac('sha256', config.creem.webhookSecret)
-    .update(rawBody)
-    .digest('hex');
 }
 
 /**
