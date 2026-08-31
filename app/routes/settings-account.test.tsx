@@ -114,7 +114,7 @@ describe('the settings account route', () => {
     await person.click(await screen.findByRole('button', { name: 'Save' }));
 
     expect(
-      await screen.findByText('Your account has been updated.'),
+      await screen.findByText('Your account has been updated'),
     ).toBeInTheDocument();
   });
 });

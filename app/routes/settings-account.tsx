@@ -66,7 +66,7 @@ export default function SettingsAccountRoute() {
 
   useEffect(() => {
     if (actionData?.saved) {
-      emitToast({ type: 'success', title: 'Your account has been updated.' });
+      emitToast({ type: 'success', title: 'Your account has been updated' });
     }
   }, [actionData, emitToast]);
 
@@ -74,9 +74,6 @@ export default function SettingsAccountRoute() {
     <SettingsDialogContent
       section="account"
       footerArea={(
-        // The footer renders outside the form element, so the submit
-        // button reaches the form through `form.AppForm` and submits it
-        // by id.
         <form.AppForm>
           <div className="flex items-center justify-end gap-2">
             <ResponsiveDialogClose

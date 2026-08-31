@@ -13,7 +13,7 @@ test.describe('the account settings', () => {
       await page.getByLabel('Subscribe to Newsletter').check();
       await page.getByRole('button', { name: 'Save' }).click();
 
-      await expect(page.getByText('Your account has been updated.'))
+      await expect(page.getByText('Your account has been updated'))
         .toBeVisible();
 
       await page.reload();
