@@ -1,28 +1,30 @@
 import type { AnyFormApi } from '@tanstack/react-form';
-import { useId, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Form } from 'react-router';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
+import { getFormId } from '~/contexts/form';
 
 export type ControlledFormProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: AnyFormApi & { AppForm: any };
-  /** Own id, for a submit button rendered outside the form element. */
-  id?: string;
   children: ReactNode;
 };
 
 export const ControlledForm: React.FC<ControlledFormProps>
-  = ({ form, id, children }) => {
-    const generatedId = useId();
-    const formId = id ?? generatedId;
+  = ({ form, children }) => {
     const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
       event.preventDefault();
       event.stopPropagation();
-      form.handleSubmit({ formId });
+      form.handleSubmit();
     };
 
     return (
-      <Form id={formId} method="post" onSubmit={handleSubmit} className="block">
+      <Form
+        id={getFormId(form)}
+        method="post"
+        onSubmit={handleSubmit}
+        className="block"
+      >
         <form.AppForm>
           <AuthenticityTokenInput />
           {children}

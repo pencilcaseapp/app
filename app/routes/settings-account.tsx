@@ -18,10 +18,6 @@ import { Typography } from '~/ui/typography/typography';
 import { validateForm } from '~/utils/form';
 import type { Route } from './+types/settings-account';
 
-// The save button sits in the dialog footer, outside the form element,
-// and is wired to the form by this id.
-const FORM_ID = 'settings-account-form';
-
 const formSchema = z.object({
   name: z.string().optional(),
   newsletter: z.boolean(),
@@ -78,21 +74,20 @@ export default function SettingsAccountRoute() {
     <SettingsDialogContent
       section="account"
       footerArea={(
-        // The footer renders outside the form element and its provider:
-        // `form.AppForm` restores the context, the id the association.
+        // The footer renders outside the form element, so the submit
+        // button reaches the form through `form.AppForm` and submits it
+        // by id.
         <form.AppForm>
           <div className="flex items-center justify-end gap-2">
             <ResponsiveDialogClose
               render={<Button colorLight="secondary">Cancel</Button>}
             />
-            <ControlledSubmitButton form={FORM_ID}>
-              Save
-            </ControlledSubmitButton>
+            <ControlledSubmitButton>Save</ControlledSubmitButton>
           </div>
         </form.AppForm>
       )}
     >
-      <ControlledForm form={form} id={FORM_ID}>
+      <ControlledForm form={form}>
         <div className="flex flex-col gap-6">
           <SettingsProfile user={user} />
           <form.AppField name="name">
