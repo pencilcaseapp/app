@@ -16,7 +16,7 @@ export const SettingsSupport: FC = () => {
           How can we help?
         </Typography>
         <Typography variant="bodySmall">
-          Write us an e-mail. A real human will answer and help you with
+          Write us an e-mail. We’ll get back to you and help you with
           your case. We take your feedback seriously.
         </Typography>
       </div>
