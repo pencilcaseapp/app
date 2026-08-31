@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useActionData, useOutletContext } from 'react-router';
 import { z } from 'zod';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
+import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
 import { SettingsDialogContent } from '~/components/settings-dialog/settings-dialog';
 import type { SettingsOutletContext } from '~/components/settings-dialog/settings-dialog';
 import { SettingsProfile } from '~/components/settings-dialog/settings-profile';
@@ -84,7 +85,9 @@ export default function SettingsAccountRoute() {
             <ResponsiveDialogClose
               render={<Button colorLight="secondary">Cancel</Button>}
             />
-            <form.SubmitButton form={FORM_ID}>Save</form.SubmitButton>
+            <ControlledSubmitButton form={FORM_ID}>
+              Save
+            </ControlledSubmitButton>
           </div>
         </form.AppForm>
       )}
