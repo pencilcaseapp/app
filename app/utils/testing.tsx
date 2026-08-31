@@ -36,17 +36,30 @@ function flattenRoutes(
   });
 }
 
-/** Imports a route module and shapes it into a route stub entry. */
-async function loadRoute(file: string, path: string) {
-  const module = await import(`~/${file}`);
+/**
+ * Imports a route's module — and its children's, so index routes render
+ * and sibling routes can be navigated to — into a route stub entry.
+ * `rootPath` mounts the entry at an absolute path instead of its own.
+ */
+async function loadRouteTree(
+  route: RouteEntry,
+  rootPath?: string,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  const module = await import(`~/${route.file}`);
 
   return {
     ...module,
-    path,
+    ...(route.index === true && !rootPath
+      ? { index: true }
+      : { path: rootPath ?? route.path }),
     Component: module.default ?? (() => null),
     middleware: [],
     HydrateFallback: () => null,
     ErrorBoundary: () => null,
+    children: route.children
+      ? await Promise.all(route.children.map(child => loadRouteTree(child)))
+      : undefined,
   };
 }
 
@@ -56,9 +69,10 @@ export async function renderRoute<P extends keyof Register['pages']>(
     searchParams?: Record<string, string>;
     context?: RouterContextProvider;
     /**
-     * Also mounts the ancestor routes from this path down, so the route
-     * renders below their outlets and their loaders run. Everything
-     * above stays unmounted; it only contributes URL segments.
+     * Mounts this ancestor route and everything below it instead of
+     * the route alone, so the route renders below the ancestors'
+     * outlets and their loaders run. Everything above stays
+     * unmounted; it only contributes URL segments.
      */
     parentRoute?: keyof Register['pages'];
   },
@@ -77,30 +91,21 @@ export async function renderRoute<P extends keyof Register['pages']>(
     }
   }
 
-  // The mounted chain: the target route alone, or nested below its
-  // ancestors starting at `parentRoute`.
-  const parents = options?.parentRoute
-    ? match.parents.slice(match.parents.findIndex(
+  // The mounted tree: the target route, or the ancestor named by
+  // `parentRoute`, with all routes below it.
+  const mountRoot = options?.parentRoute
+    ? match.parents.find(
         ({ fullPath }) => `/${fullPath}` === options.parentRoute,
-      ))
-    : [];
-  if (options?.parentRoute && parents.length === 0) {
-    throw new Error(`${String(options.parentRoute)} is not above ${path}`);
+      )
+    : match;
+  if (!mountRoot) {
+    throw new Error(`${String(options?.parentRoute)} is not above ${path}`);
   }
 
-  const chain = [...parents, match];
-  const [root, ...descendants] = await Promise.all(chain.map(
-    (entry, index) => loadRoute(
-      entry.route.file,
-      index === 0 ? `/${entry.fullPath}` : entry.route.path ?? '',
-    ),
-  ));
-  let stubRoute = root;
-  for (const descendant of descendants) {
-    stubRoute.children = [descendant];
-    stubRoute = descendant;
-  }
-
+  const root = await loadRouteTree(
+    mountRoot.route,
+    `/${mountRoot.fullPath}`,
+  );
   const Stub = createRoutesStub([root], options?.context);
 
   if (options?.searchParams) {
