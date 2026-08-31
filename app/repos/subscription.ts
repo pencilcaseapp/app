@@ -5,6 +5,23 @@ import { subscriptions } from '~/db/schema';
 
 export type Subscription = InferSelectModel<typeof subscriptions>;
 
+/**
+ * The statuses Creem moves a subscription through. The `status` column
+ * stays plain text so a status Creem introduces later is stored rather
+ * than rejected — this enum types everything on our side that reasons
+ * about them.
+ */
+export enum SubscriptionStatus {
+  Active = 'active',
+  Trialing = 'trialing',
+  PastDue = 'past_due',
+  ScheduledCancel = 'scheduled_cancel',
+  Canceled = 'canceled',
+  Unpaid = 'unpaid',
+  Paused = 'paused',
+  Incomplete = 'incomplete',
+}
+
 export type UpsertSubscriptionInput = {
   userId: string;
   creemSubscriptionId: string;
@@ -71,7 +88,7 @@ export async function getSubscriptionByCreemId(creemSubscriptionId: string) {
 
 export async function hasSubscriptionWithStatus(
   userId: string,
-  statuses: string[],
+  statuses: SubscriptionStatus[],
 ) {
   if (!isUuid(userId)) {
     return false;

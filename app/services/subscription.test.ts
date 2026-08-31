@@ -27,13 +27,19 @@ vi.mock('~/repos/user', () => ({
 const upsertSubscriptionMock = vi.fn();
 const getSubscriptionByCreemIdMock = vi.fn();
 const hasSubscriptionWithStatusMock = vi.fn();
-vi.mock('~/repos/subscription', () => ({
-  upsertSubscription: (...args: unknown[]) => upsertSubscriptionMock(...args),
-  getSubscriptionByCreemId:
-    (...args: unknown[]) => getSubscriptionByCreemIdMock(...args),
-  hasSubscriptionWithStatus:
-    (...args: unknown[]) => hasSubscriptionWithStatusMock(...args),
-}));
+vi.mock('~/repos/subscription', async (importOriginal) => {
+  const actual
+    = await importOriginal<typeof import('~/repos/subscription')>();
+  return {
+    ...actual,
+    upsertSubscription:
+      (...args: unknown[]) => upsertSubscriptionMock(...args),
+    getSubscriptionByCreemId:
+      (...args: unknown[]) => getSubscriptionByCreemIdMock(...args),
+    hasSubscriptionWithStatus:
+      (...args: unknown[]) => hasSubscriptionWithStatusMock(...args),
+  };
+});
 
 const recordWebhookEventMock = vi.fn();
 const getWebhookEventMock = vi.fn();
@@ -148,8 +154,7 @@ describe('redeemInviteCode', () => {
 describe('startProCheckout', () => {
   it('prefills the email of a first time subscriber', async () => {
     createCheckoutSessionMock.mockResolvedValue({
-      id: 'ch_123',
-      checkout_url: 'https://creem.invalid/checkout/ch_123',
+      checkoutUrl: 'https://creem.invalid/checkout/ch_123',
     });
 
     const [error, result] = await startProCheckout(
@@ -169,8 +174,7 @@ describe('startProCheckout', () => {
 
   it('hands over the Creem customer id of a returning one', async () => {
     createCheckoutSessionMock.mockResolvedValue({
-      id: 'ch_123',
-      checkout_url: 'https://creem.invalid/checkout/ch_123',
+      checkoutUrl: 'https://creem.invalid/checkout/ch_123',
     });
 
     await startProCheckout(
@@ -541,7 +545,7 @@ describe('getBillingPortalUrl', () => {
 
   it('returns the portal url', async () => {
     createBillingPortalSessionMock.mockResolvedValue({
-      customer_portal_link: 'https://creem.invalid/my-orders/login/abc',
+      customerPortalLink: 'https://creem.invalid/my-orders/login/abc',
     });
 
     const [error, result] = await getBillingPortalUrl(

@@ -114,8 +114,11 @@ There is no trial email because the product has no trial; add one on
 
 `config.creem` (see `app/config/`): `apiUrl`, `apiKey`, `productId`,
 `webhookSecret`. The dev defaults point at our shared test-mode store,
-so `npm run dev` talks to real Creem test mode out of the box;
-override with:
+except for the API key, which is never checked in — put it in `.env`
+(loaded by the dev server) to talk to real Creem test mode; without it
+only the fake Creem of the e2e tests works. The API client wraps the
+official `creem` SDK; only the redirect-signature check is hand-rolled
+because the SDK has no helper for it.
 
 | Variable | From |
 | --- | --- |

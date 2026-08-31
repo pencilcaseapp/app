@@ -1,9 +1,22 @@
 import crypto from 'node:crypto';
+import { Creem } from 'creem';
+import type { SubscriptionEntity } from 'creem/models/components';
+import {
+  verifyWebhookSignature as sdkVerifyWebhookSignature,
+} from 'creem/webhooks';
 import { z } from 'zod';
 import { getConfig } from '~/config';
 
 const config = getConfig();
 
+const creem = new Creem({
+  apiKey: config.creem.apiKey,
+  serverURL: config.creem.apiUrl,
+});
+
+// The webhook payloads arrive as raw JSON, not through the SDK, so the
+// fields the app consumes are parsed with these schemas — tolerant of
+// anything Creem adds around them.
 export const creemCustomerSchema = z.object({
   id: z.string(),
   email: z.string(),
@@ -44,15 +57,6 @@ export const creemWebhookEventSchema = z.object({
 
 export type CreemWebhookEvent = z.infer<typeof creemWebhookEventSchema>;
 
-const checkoutSessionSchema = z.object({
-  id: z.string(),
-  checkout_url: z.string(),
-});
-
-const billingPortalSessionSchema = z.object({
-  customer_portal_link: z.string(),
-});
-
 export async function createCheckoutSession(input: {
   successUrl: string;
   customer: { id: string } | { email: string };
@@ -60,39 +64,33 @@ export async function createCheckoutSession(input: {
 }) {
   const { successUrl, customer, metadata } = input;
 
-  const response = await creemFetch('/v1/checkouts', {
-    method: 'POST',
-    body: JSON.stringify({
-      product_id: config.creem.productId,
-      success_url: successUrl,
-      customer,
-      metadata,
-    }),
+  const checkout = await creem.checkouts.create({
+    productId: config.creem.productId,
+    successUrl,
+    customer,
+    metadata,
   });
 
-  return checkoutSessionSchema.parse(response);
+  if (!checkout.checkoutUrl) {
+    throw new Error(`Checkout ${checkout.id} came back without a url`);
+  }
+
+  return { checkoutUrl: checkout.checkoutUrl };
 }
 
 export async function getSubscription(subscriptionId: string) {
-  const search = new URLSearchParams({ subscription_id: subscriptionId });
-  const response = await creemFetch(`/v1/subscriptions?${search}`);
-
-  return creemSubscriptionSchema.parse(response);
+  return toCreemSubscription(await creem.subscriptions.get(subscriptionId));
 }
 
 export async function createBillingPortalSession(customerId: string) {
-  const response = await creemFetch('/v1/customers/billing', {
-    method: 'POST',
-    body: JSON.stringify({ customer_id: customerId }),
-  });
-
-  return billingPortalSessionSchema.parse(response);
+  return creem.customers.generateBillingLinks({ customerId });
 }
 
 /**
  * Creem signs the redirect back from the checkout with a SHA-256 over the
  * query parameters joined as `key=value|…|salt={apiKey}` — in the order
  * they appear in the URL, skipping the signature itself and empty values.
+ * The SDK offers no helper for this one, so it stays hand-rolled.
  */
 export function verifyRedirectSignature(searchParams: URLSearchParams) {
   const signature = searchParams.get('signature');
@@ -119,10 +117,11 @@ export function createRedirectSignature(pairs: [string, string][]) {
 }
 
 /**
- * Webhooks are signed with an HMAC-SHA256 of the raw body in the
- * `creem-signature` header, keyed with the webhook secret.
+ * Webhooks carry an HMAC-SHA256 of the raw body in the `creem-signature`
+ * header; the verification is the SDK's, which also understands the
+ * newer standard-webhooks headers.
  */
-export function verifyWebhookSignature(
+export async function verifyWebhookSignature(
   rawBody: string,
   signature: string | null,
 ) {
@@ -130,7 +129,17 @@ export function verifyWebhookSignature(
     return false;
   }
 
-  return timingSafeEqualHex(signature, createWebhookSignature(rawBody));
+  try {
+    await sdkVerifyWebhookSignature(
+      rawBody,
+      { 'creem-signature': signature },
+      { secret: config.creem.webhookSecret },
+    );
+    return true;
+  }
+  catch {
+    return false;
+  }
 }
 
 /** The signing half is shared with the fake Creem the e2e tests run. */
@@ -141,29 +150,41 @@ export function createWebhookSignature(rawBody: string) {
     .digest('hex');
 }
 
+/**
+ * The SDK models are camelCase with parsed dates; the webhook payloads
+ * are the raw wire format. Everything downstream speaks the wire format,
+ * so what the SDK loads is folded back into it.
+ */
+function toCreemSubscription(entity: SubscriptionEntity): CreemSubscription {
+  const { customer, product } = entity;
+
+  return {
+    id: entity.id,
+    status: entity.status,
+    customer: typeof customer === 'string'
+      ? customer
+      : { id: customer.id, email: customer.email, name: customer.name },
+    product: typeof product === 'string'
+      ? product
+      : {
+          id: product.id,
+          price: product.price,
+          currency: product.currency,
+          billing_period: product.billingPeriod,
+        },
+    current_period_start_date:
+      entity.currentPeriodStartDate?.toISOString(),
+    current_period_end_date: entity.currentPeriodEndDate?.toISOString(),
+    canceled_at: entity.canceledAt?.toISOString() ?? null,
+    metadata: entity.metadata,
+    updated_at: entity.updatedAt.toISOString(),
+  };
+}
+
 function timingSafeEqualHex(actual: string, expected: string) {
   const actualBuffer = Buffer.from(actual);
   const expectedBuffer = Buffer.from(expected);
 
   return actualBuffer.length === expectedBuffer.length
     && crypto.timingSafeEqual(actualBuffer, expectedBuffer);
-}
-
-async function creemFetch(path: string, init?: RequestInit) {
-  const response = await fetch(`${config.creem.apiUrl}${path}`, {
-    ...init,
-    headers: {
-      'x-api-key': config.creem.apiKey,
-      'content-type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    const method = init?.method ?? 'GET';
-    throw new Error(
-      `Creem request failed: ${method} ${path} → ${response.status}`,
-    );
-  }
-
-  return response.json();
 }

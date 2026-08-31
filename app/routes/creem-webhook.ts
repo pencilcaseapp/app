@@ -5,10 +5,6 @@ import {
 } from '~/services/subscription';
 import type { Route } from './+types/creem-webhook';
 
-export function loader() {
-  throw data('Not Found', { status: 404 });
-}
-
 export async function action({ request }: Route.ActionArgs) {
   if (request.method !== 'POST') {
     throw data('Method Not Allowed', { status: 405 });

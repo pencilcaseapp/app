@@ -3,6 +3,7 @@ import { faker } from '@faker-js/faker';
 import {
   getSubscriptionByCreemId,
   hasSubscriptionWithStatus,
+  SubscriptionStatus,
   upsertSubscription,
   type UpsertSubscriptionInput,
 } from './subscription';
@@ -139,20 +140,26 @@ describe('hasSubscriptionWithStatus', () => {
     const user = await createTestUser();
     await createTestSubscription(user.id, { status: 'past_due' });
 
-    expect(await hasSubscriptionWithStatus(user.id, ['active', 'past_due']))
-      .toBe(true);
+    expect(await hasSubscriptionWithStatus(
+      user.id,
+      [SubscriptionStatus.Active, SubscriptionStatus.PastDue],
+    )).toBe(true);
   });
 
   it('ignores subscriptions in other statuses', async () => {
     const user = await createTestUser();
     await createTestSubscription(user.id, { status: 'canceled' });
 
-    expect(await hasSubscriptionWithStatus(user.id, ['active']))
-      .toBe(false);
+    expect(await hasSubscriptionWithStatus(
+      user.id,
+      [SubscriptionStatus.Active],
+    )).toBe(false);
   });
 
   it('returns false for an invalid user id', async () => {
-    expect(await hasSubscriptionWithStatus('invalid-id', ['active']))
-      .toBe(false);
+    expect(await hasSubscriptionWithStatus(
+      'invalid-id',
+      [SubscriptionStatus.Active],
+    )).toBe(false);
   });
 });

@@ -148,7 +148,7 @@ signed redirect, `/webhooks/creem` keeps the `subscriptions` table in
 sync (events recorded in `creem_webhook_events` for idempotency), and
 `/billing-portal` opens Creem's self-service portal. Access control is
 only ever `users.has_subscription`, recomputed from the stored statuses
-on every sync. The thin API client lives in `app/services/creem.ts`;
+on every sync. `app/services/creem.ts` wraps the official `creem` SDK;
 `config.creem` switches between test and live mode. The e2e tests run
 against the fake Creem in `app/routes/e2e-creem.ts`. Read
 `docs/subscriptions.md` before touching webhook handling or the emails

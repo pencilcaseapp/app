@@ -9,6 +9,7 @@ import {
 import {
   getSubscriptionByCreemId,
   hasSubscriptionWithStatus,
+  SubscriptionStatus,
   upsertSubscription,
 } from '~/repos/subscription';
 import {
@@ -44,10 +45,10 @@ const config = getConfig();
  * canceled, expired, unpaid, paused — switches the features off.
  */
 const ACCESS_GRANTING_STATUSES = [
-  'active',
-  'trialing',
-  'past_due',
-  'scheduled_cancel',
+  SubscriptionStatus.Active,
+  SubscriptionStatus.Trialing,
+  SubscriptionStatus.PastDue,
+  SubscriptionStatus.ScheduledCancel,
 ];
 
 /**
@@ -90,7 +91,7 @@ export async function startProCheckout(
       metadata: { userId: user.id },
     });
 
-    return [null, { checkoutUrl: checkout.checkout_url }];
+    return [null, { checkoutUrl: checkout.checkoutUrl }];
   }
   catch (error) {
     console.error('Creating a Creem checkout session failed', error);
@@ -160,7 +161,7 @@ export async function getBillingPortalUrl(
 
   try {
     const session = await createBillingPortalSession(user.creemCustomerId);
-    return [null, { portalUrl: session.customer_portal_link }];
+    return [null, { portalUrl: session.customerPortalLink }];
   }
   catch (error) {
     console.error('Creating a Creem portal session failed', error);
@@ -187,7 +188,7 @@ export async function handleCreemWebhook(
   rawBody: string,
   signature: string | null,
 ): Promise<HandleCreemWebhookResult> {
-  if (!verifyWebhookSignature(rawBody, signature)) {
+  if (!await verifyWebhookSignature(rawBody, signature)) {
     return [HandleCreemWebhookError.InvalidSignature];
   }
 
@@ -327,7 +328,8 @@ async function syncCreemSubscription(creemSubscription: CreemSubscription) {
 
   if (
     inserted
-    && ACCESS_GRANTING_STATUSES.includes(creemSubscription.status)
+    && ACCESS_GRANTING_STATUSES
+      .includes(creemSubscription.status as SubscriptionStatus)
   ) {
     await sendEmailSubscriptionStarted({ to: emailData(user) });
   }

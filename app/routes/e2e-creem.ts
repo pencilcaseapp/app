@@ -27,16 +27,38 @@ type FakeCheckout = {
   metadata: Record<string, string>;
 };
 
+// Shaped like the real API responses — the SDK validates what it loads,
+// so the entities have to be complete, not just the fields the app uses.
 type FakeSubscription = {
   id: string;
   object: 'subscription';
   status: string;
-  customer: { id: string; email: string; name: string | null };
+  collection_method: 'charge_automatically';
+  customer: {
+    id: string;
+    object: 'customer';
+    email: string;
+    name: string | null;
+    country: 'DE';
+    created_at: string;
+    updated_at: string;
+    mode: 'test';
+  };
   product: {
     id: string;
+    object: 'product';
+    name: string;
+    description: string;
     price: number;
     currency: string;
+    billing_type: 'recurring';
     billing_period: string;
+    status: 'active';
+    tax_mode: 'inclusive';
+    tax_category: 'saas';
+    created_at: string;
+    updated_at: string;
+    mode: 'test';
   };
   current_period_start_date: string;
   current_period_end_date: string;
@@ -148,6 +170,10 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     return data({
       id: checkout.id,
+      object: 'checkout',
+      status: 'pending',
+      mode: 'test',
+      product: checkout.productId,
       checkout_url:
         new URL(`/e2e/creem/checkout/${checkout.id}`, request.url).href,
     });
@@ -208,12 +234,32 @@ function completeCheckout(checkout: FakeCheckout, request: Request) {
     id: `sub_e2e_${crypto.randomUUID()}`,
     object: 'subscription',
     status: 'active',
-    customer: { id: customerId, email, name: null },
+    collection_method: 'charge_automatically',
+    customer: {
+      id: customerId,
+      object: 'customer',
+      email,
+      name: null,
+      country: 'DE',
+      created_at: now.toISOString(),
+      updated_at: now.toISOString(),
+      mode: 'test',
+    },
     product: {
       id: checkout.productId,
+      object: 'product',
+      name: 'pencil case PRO',
+      description: 'The pro product of the fake Creem.',
       price: 2500,
       currency: 'EUR',
+      billing_type: 'recurring',
       billing_period: 'every-year',
+      status: 'active',
+      tax_mode: 'inclusive',
+      tax_category: 'saas',
+      created_at: now.toISOString(),
+      updated_at: now.toISOString(),
+      mode: 'test',
     },
     current_period_start_date: now.toISOString(),
     current_period_end_date: periodEnd.toISOString(),
