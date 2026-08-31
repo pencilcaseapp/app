@@ -71,5 +71,9 @@ export const OnWhite: Story = {
       'Hosted in the EU',
       'Support small tech',
     ],
+    missingFeatures: [
+      'Unlimited docs',
+      'Access control for collaboration',
+    ],
   },
 };

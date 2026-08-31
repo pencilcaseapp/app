@@ -9,6 +9,8 @@ export interface PricingTableProps {
   amount: string;
   period: string;
   features: string[];
+  /** Features the plan lacks, listed after `features` with a red X. */
+  missingFeatures?: string[];
   /** The card surface. `yellow` is the upgrade card, which keeps
    * its colors in both themes; `white` follows the page theme,
    * e.g. to compare plans side by side. */
@@ -23,6 +25,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
   amount,
   period,
   features,
+  missingFeatures = [],
   background = 'yellow',
   actionArea,
   finePrint,
@@ -67,6 +70,18 @@ export const PricingTable: React.FC<PricingTableProps> = ({
             key={feature}
             iconColorDark={onYellow ? 'grey-900' : 'white'}
             textColorDark={onYellow ? 'grey-900' : 'white'}
+          >
+            {feature}
+          </ListItem>
+        ))}
+        {missingFeatures.map(feature => (
+          <ListItem
+            key={feature}
+            icon="close"
+            iconColorLight="red-500"
+            iconColorDark="red-500"
+            textColorLight={onYellow ? 'grey-900' : 'grey-600'}
+            textColorDark={onYellow ? 'grey-900' : 'grey-400'}
           >
             {feature}
           </ListItem>
