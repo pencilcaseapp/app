@@ -16,6 +16,8 @@ export type ResponsiveDialogProps = {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Called after the open or close animation has finished. */
+  onOpenChangeComplete?: (open: boolean) => void;
   modal?: boolean;
 } & PropsWithChildren;
 

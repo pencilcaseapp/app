@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import { type FC, type PropsWithChildren } from 'react';
 import { useMedia } from 'react-use';
 import { SidebarPortal } from '../sidebar-portal/sidebar-portal';
 import { Drawer } from '../drawer/drawer';
@@ -8,11 +8,25 @@ import type { SidebarMenuItem, SidebarBaseProps } from './types';
 import { SidebarMenu } from './sidebar-menu';
 
 export type { SidebarMenuItem };
-export type SidebarProps = SidebarBaseProps;
+
+/**
+ * `children` is the page the sidebar sits next to. On mobile it renders
+ * inside the sidebar's `Drawer` root (not its popup), so a drawer opened
+ * from anywhere in the page registers as a nested drawer and stacks on
+ * the sidebar instead of just covering it.
+ */
+export type SidebarProps = SidebarBaseProps & PropsWithChildren;
+
+/**
+ * The height of the sidebar's mobile drawer, shared with overlays that
+ * stack a nested drawer on top of it so both line up.
+ */
+export const SIDEBAR_DRAWER_MAX_HEIGHT = 'calc(100dvh - 56px)';
 
 export const Sidebar: FC<SidebarProps> = ({
   bottomArea,
   items,
+  children,
 }) => {
   const { isSidebarOpen, setIsSidebarOpen } = useSidebarContext();
   const isMobile = useMedia('(max-width: 640px)', false);
@@ -22,7 +36,7 @@ export const Sidebar: FC<SidebarProps> = ({
       <Drawer open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <DrawerContent
           isFullHeight
-          maxHeight="calc(100dvh - 56px)"
+          maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
           // The footer's rendered height: two navigation items
           // plus the gap and the footer's own top padding.
           reservedFooterHeight={123}
@@ -42,26 +56,30 @@ export const Sidebar: FC<SidebarProps> = ({
             </ul>
           </nav>
         </DrawerContent>
+        {children}
       </Drawer>
     );
   }
 
   return (
-    <SidebarPortal
-      tabletChildren={(
-        <SidebarMenu
-          initialState="close"
-          bottomArea={bottomArea}
-          items={items}
-        />
-      )}
-      desktopChildren={(
-        <SidebarMenu
-          showSlimSidebar
-          bottomArea={bottomArea}
-          items={items}
-        />
-      )}
-    />
+    <>
+      <SidebarPortal
+        tabletChildren={(
+          <SidebarMenu
+            initialState="close"
+            bottomArea={bottomArea}
+            items={items}
+          />
+        )}
+        desktopChildren={(
+          <SidebarMenu
+            showSlimSidebar
+            bottomArea={bottomArea}
+            items={items}
+          />
+        )}
+      />
+      {children}
+    </>
   );
 };

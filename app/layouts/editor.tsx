@@ -1,4 +1,4 @@
-import { href, NavLink, Outlet, useLocation } from 'react-router';
+import { href, matchPath, NavLink, Outlet, useLocation } from 'react-router';
 import {
   DocumentTitleProvider,
   useDocumentTitle,
@@ -26,8 +26,9 @@ import {
   EditedDocumentProvider,
   useEditedDocument,
 } from '~/contexts/edited-document';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type PropsWithChildren } from 'react';
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
+import { useIsMobile } from '~/hooks/use-is-mobile';
 
 export const handle = {
   bodyClassName: 'w-full bg-pca-white dark:bg-pca-grey-900',
@@ -35,7 +36,6 @@ export const handle = {
 
 const bottomNavigation = [
   { label: 'Create Doc', to: href('/new'), icon: 'create-doc' },
-  { label: 'Settings', to: '/settings', icon: 'settings' },
 ];
 
 export async function loader({ context }: Route.LoaderArgs) {
@@ -63,10 +63,13 @@ export default function LayoutEditor({
       <EditedDocumentProvider>
         <SocketClientProvider>
           <SidebarProvider>
-            {user && (
-              <EditorSidebar navigation={navigation} />
-            )}
-            <Outlet />
+            {user
+              ? (
+                  <EditorSidebar navigation={navigation}>
+                    <Outlet />
+                  </EditorSidebar>
+                )
+              : <Outlet />}
           </SidebarProvider>
         </SocketClientProvider>
       </EditedDocumentProvider>
@@ -76,14 +79,15 @@ export default function LayoutEditor({
 
 type NavigationItemData = { label: string; to: string };
 
-export interface EditorSidebarProps {
+export interface EditorSidebarProps extends PropsWithChildren {
   navigation: NavigationItemData[];
 }
 
 const getNavigationKey = (item: NavigationItemData) => item.to;
 
-function EditorSidebar({ navigation }: EditorSidebarProps) {
+function EditorSidebar({ navigation, children }: EditorSidebarProps) {
   const location = useLocation();
+  const isMobile = useIsMobile();
   const [activeDocumentTitle] = useDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
   const { editedDocumentId } = useEditedDocument();
@@ -96,6 +100,15 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
   const [documentToDelete, setDocumentToDelete]
     = useState<NavigationItemData>();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  // Settings lives under the open document, so the entry only exists
+  // while one is open (the only editor page — `/new` always redirects).
+  const documentMatch = matchPath(
+    { path: '/doc/:id', end: false },
+    location.pathname,
+  );
+  const settingsUrl = documentMatch?.params.id
+    ? href('/doc/:id/settings', { id: documentMatch.params.id })
+    : null;
 
   useEffect(() => {
     if (!editedDocumentId) {
@@ -106,93 +119,108 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
   }, [editedDocumentId, moveToTop]);
 
   return (
-    <Sidebar
-      items={[
-        {
-          key: 'all-docs',
-          content: (
-            <>
-              <DocumentGroupRoot defaultValue={['all-docs']}>
-                <DocumentGroup icon="space" title="All Docs" value="all-docs">
-                  {stableNavigation.map((item) => {
-                    const isActive = item.to === location.pathname;
-                    const label = isActive ? activeDocumentTitle : item.label;
+    <>
+      <Sidebar
+        items={[
+          {
+            key: 'all-docs',
+            content: (
+              <>
+                <DocumentGroupRoot defaultValue={['all-docs']}>
+                  <DocumentGroup icon="space" title="All Docs" value="all-docs">
+                    {stableNavigation.map((item) => {
+                      const isActive = item.to === location.pathname;
+                      const label = isActive ? activeDocumentTitle : item.label;
 
-                    return (
-                      <DocumentItem
-                        title={label}
-                        as={NavLink}
-                        to={item.to}
-                        key={item.to}
-                        onClick={closeOnNavigate}
-                        actionArea={(
-                          <DropdownMenu>
-                            <DropdownMenuTrigger iconTitle="Item options" />
-                            <DropdownMenuPortal>
-                              <DropdownMenuContent align="start">
-                                <DropdownMenuItem
-                                  as="button"
-                                  onClick={() => {
-                                    setDocumentToDelete({ ...item, label });
-                                    setIsDeleteDialogOpen(true);
-                                  }}
-                                  color="danger"
-                                  icon="trash"
-                                >
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenuPortal>
-                          </DropdownMenu>
-                        )}
-                      >
-                        {label}
-                      </DocumentItem>
-                    );
-                  })}
+                      return (
+                        <DocumentItem
+                          title={label}
+                          as={NavLink}
+                          to={item.to}
+                          key={item.to}
+                          onClick={closeOnNavigate}
+                          actionArea={(
+                            <DropdownMenu>
+                              <DropdownMenuTrigger iconTitle="Item options" />
+                              <DropdownMenuPortal>
+                                <DropdownMenuContent align="start">
+                                  <DropdownMenuItem
+                                    as="button"
+                                    onClick={() => {
+                                      setDocumentToDelete({ ...item, label });
+                                      setIsDeleteDialogOpen(true);
+                                    }}
+                                    color="danger"
+                                    icon="trash"
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenuPortal>
+                            </DropdownMenu>
+                          )}
+                        >
+                          {label}
+                        </DocumentItem>
+                      );
+                    })}
+                  </DocumentGroup>
+                </DocumentGroupRoot>
+                <DeleteDocumentDialog
+                  documentTitle={documentToDelete?.label}
+                  open={isDeleteDialogOpen}
+                  onOpenChange={setIsDeleteDialogOpen}
+                  onConfirm={() => {
+                    console.log('delete', documentToDelete?.to);
+                    setIsDeleteDialogOpen(false);
+                  }}
+                />
+              </>
+            ),
+          },
+          {
+            key: 'Deleted',
+            content: (
+              <DocumentGroupRoot>
+                <DocumentGroup icon="trash" title="Deleted" value="deleted">
+                  <DocumentGroupEmpty
+                    icon="no-docs"
+                  >
+                    No deleted documents
+                  </DocumentGroupEmpty>
                 </DocumentGroup>
               </DocumentGroupRoot>
-              <DeleteDocumentDialog
-                documentTitle={documentToDelete?.label}
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
-                onConfirm={() => {
-                  console.log('delete', documentToDelete?.to);
-                  setIsDeleteDialogOpen(false);
-                }}
+            ),
+          },
+        ]}
+        bottomArea={(
+          <>
+            {bottomNavigation?.map(item => (
+              <NavigationItem
+                onClick={closeOnNavigate}
+                key={`${item.label}-${item.to}`}
+                title={item.label}
+                to={item.to}
+                icon={item.icon as IconName}
+                as={NavLink}
               />
-            </>
-          ),
-        },
-        {
-          key: 'Deleted',
-          content: (
-            <DocumentGroupRoot>
-              <DocumentGroup icon="trash" title="Deleted" value="deleted">
-                <DocumentGroupEmpty
-                  icon="no-docs"
-                >
-                  No deleted documents
-                </DocumentGroupEmpty>
-              </DocumentGroup>
-            </DocumentGroupRoot>
-          ),
-        },
-      ]}
-      bottomArea={(
-        <>
-          {bottomNavigation?.map(item => (
-            <NavigationItem
-              onClick={closeOnNavigate}
-              key={`${item.label}-${item.to}`}
-              title={item.label}
-              to={item.to}
-              icon={item.icon as IconName}
-              as={NavLink}
-            />
-          ))}
-        </>
-      )}
-    />
+            ))}
+            {settingsUrl && (
+              <NavigationItem
+                // On mobile the sidebar stays open: the settings drawer
+                // stacks on top of it instead of replacing it.
+                onClick={isMobile ? undefined : closeOnNavigate}
+                title="Settings"
+                to={settingsUrl}
+                icon="settings"
+                as={NavLink}
+              />
+            )}
+          </>
+        )}
+      >
+        {children}
+      </Sidebar>
+    </>
   );
 }
