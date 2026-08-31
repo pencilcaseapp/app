@@ -79,5 +79,5 @@ failed renewals, redeliveries) is deliberately not covered here —
 Creem cannot deliver webhooks to localhost or a CI runner — and lives
 in the service tests instead; see `docs/subscriptions.md`.
 
-Subscription state sticks to the user, so these specs use the fresh
+Subscription state sticks to the user, so the spec uses the fresh
 `userA` fixture, never the shared storage-state `user`.

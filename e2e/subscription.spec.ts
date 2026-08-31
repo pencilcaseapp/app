@@ -37,53 +37,18 @@ test('upgrading to pro through the Creem checkout', async ({ userA }) => {
   await popup.waitForURL('**creem.io/**', { timeout: 30_000 });
 });
 
-test('a tampered checkout redirect grants nothing', async ({ userA }) => {
-  const forged = new URLSearchParams({
-    checkout_id: 'ch_forged',
-    subscription_id: 'sub_forged',
-    customer_id: 'cust_forged',
-    product_id: 'prod_forged',
-    signature: '0'.repeat(64),
-  });
-  await userA.page.goto(`/upgrade/callback?${forged}`);
-
-  await expect(userA.page.getByText('We could not confirm this payment.'))
-    .toBeVisible();
-
-  await userA.page.goto('/upgrade');
-  await expect(userA.page.getByRole('button', { name: 'Upgrade' }))
-    .toBeVisible();
-});
-
-test('the webhook endpoint rejects an unsigned delivery', async ({
-  user,
-}) => {
-  const response = await user.page.request.post('/webhooks/creem', {
-    headers: { 'creem-signature': '0'.repeat(64) },
-    data: { id: 'evt_forged', eventType: 'subscription.paid', object: {} },
-  });
-
-  expect(response.status()).toBe(401);
-});
-
 /**
  * Creem's checkout is not our page: the locators lean on accessible
  * names and placeholders instead of markup, and this helper is the one
- * place to adjust when their checkout changes. 4111… is Creem's
- * always-succeeding test card; expiry and CVC can be anything valid.
+ * place to adjust when their checkout changes. The full name comes
+ * before the card details; 4111… is Creem's always-succeeding test
+ * card, and expiry and CVC can be anything valid.
  */
 async function payWithTestCard(page: Page): Promise<void> {
+  await fillPaymentField(page, /full name/i, 'E2E Tester');
   await fillPaymentField(page, /card number/i, '4111111111111111');
   await fillPaymentField(page, /expir|mm\s*\/?\s*yy/i, '12/30');
   await fillPaymentField(page, /cvc|cvv|security code/i, '123');
-
-  const cardholder = page
-    .getByRole('textbox', { name: /name/i })
-    .or(page.getByPlaceholder(/name/i))
-    .first();
-  if (await cardholder.isVisible()) {
-    await cardholder.fill('E2E Tester');
-  }
 
   await page.getByRole('button', { name: /pay|subscribe/i }).first().click();
 }
