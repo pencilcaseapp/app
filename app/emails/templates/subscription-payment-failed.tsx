@@ -1,5 +1,5 @@
-import { Link } from 'react-email';
 import { Layout } from '../ui/layout/layout';
+import { LinkButton } from '../ui/link-button/link-button';
 import { Typography } from '../ui/typography/typography';
 
 const preview = 'Update your payment method to keep pencil case PRO.';
@@ -43,19 +43,9 @@ export function SubscriptionPaymentFailedEmail({
       <Typography variant="bodySmall" textAlign="center" className="mb-3">
         {action}
       </Typography>
-      <Typography
-        variant="bodySmall"
-        fontWeight="semibold"
-        textAlign="center"
-        className="mb-6"
-      >
-        <Link
-          href={portalUrl}
-          className="text-pca-blue-700 underline"
-        >
-          Update payment method
-        </Link>
-      </Typography>
+      <LinkButton href={portalUrl} className="mb-6">
+        Update payment method
+      </LinkButton>
       <Typography variant="bodySmall" textAlign="center">
         {closing}
       </Typography>

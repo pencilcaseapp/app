@@ -1,5 +1,5 @@
-import { Link } from 'react-email';
 import { Layout } from '../ui/layout/layout';
+import { LinkButton } from '../ui/link-button/link-button';
 import { Typography } from '../ui/typography/typography';
 
 const preview = 'Your PRO subscription has ended.';
@@ -39,18 +39,9 @@ export function SubscriptionCanceledEmail({
       <Typography variant="bodySmall" textAlign="center" className="mb-3">
         {closing}
       </Typography>
-      <Typography
-        variant="bodySmall"
-        fontWeight="semibold"
-        textAlign="center"
-      >
-        <Link
-          href={upgradeUrl}
-          className="text-pca-blue-700 underline"
-        >
-          Get pencil case PRO
-        </Link>
-      </Typography>
+      <LinkButton href={upgradeUrl}>
+        Get pencil case PRO
+      </LinkButton>
     </Layout>
   );
 }
