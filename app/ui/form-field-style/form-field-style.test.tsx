@@ -18,4 +18,20 @@ describe('FormFieldStyle', () => {
 
     expect(container).toMatchSnapshot();
   });
+
+  // The drawer's virtual keyboard handling parks the focused field off screen
+  // for one `focus()` call and restores it in the same task. A transition on
+  // `transform` or `opacity` animates that restore, which is what made the
+  // field fly into place when the keyboard opened.
+  test('does not transition transform or opacity', () => {
+    const { container } = render(
+      <FormFieldStyle as="input" type="email" />,
+    );
+    const classes = container.firstElementChild?.className ?? '';
+
+    expect(classes).not.toMatch(/(^|\s)transition-all(\s|$)/);
+    expect(classes).toContain(
+      'transition-[color,background-color,border-color,box-shadow]',
+    );
+  });
 });
