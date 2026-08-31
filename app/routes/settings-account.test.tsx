@@ -1,29 +1,18 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import {
-  createRoutesStub,
-  RouterContextProvider,
-  type LoaderFunction,
-} from 'react-router';
-import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
+import { RouterContextProvider } from 'react-router';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import {
   optionalUserSessionContext,
   userSessionContext,
 } from '~/contexts/user-session';
 import { userFixture } from '~/test/fixtures/user';
-import { ToastProvider } from '~/ui/toast/toast-provider';
-import Settings, { loader as settingsLoader } from './settings';
-import SettingsAccountRoute, {
-  action as settingsAccountAction,
-} from './settings-account';
+import { renderRoute } from '~/utils/testing';
 
-const updateAccountMock = vi.fn();
+const updateUserMock = vi.fn();
 
-vi.mock('~/services/auth', () => ({
-  updateAccount: (...args: unknown[]) => updateAccountMock(...args),
-  getAuthSession: vi.fn(),
-  getSignInUrl: vi.fn(),
+vi.mock('~/repos/user', () => ({
+  updateUser: (...args: unknown[]) => updateUserMock(...args),
 }));
 
 const MOBILE_QUERY = '(width < 40rem)';
@@ -45,7 +34,7 @@ const user = {
   newsletter: false,
 };
 
-function renderAccount({ isMobile = false } = {}) {
+async function renderAccount({ isMobile = false } = {}) {
   useMediaMock.mockImplementation(
     (query: string) => isMobile && query === MOBILE_QUERY,
   );
@@ -54,28 +43,11 @@ function renderAccount({ isMobile = false } = {}) {
   context.set(optionalUserSessionContext, user);
   context.set(userSessionContext, user);
 
-  const Stub = createRoutesStub([
-    {
-      path: '/doc/:id/settings',
-      Component: Settings as React.ComponentType,
-      loader: settingsLoader as unknown as LoaderFunction,
-      children: [
-        {
-          path: 'account',
-          Component: SettingsAccountRoute,
-          action: settingsAccountAction as unknown as LoaderFunction,
-        },
-      ],
-    },
-  ], context);
-
-  render(
-    <ToastProvider>
-      <AuthenticityTokenProvider token="test-token">
-        <Stub initialEntries={[`/doc/${DOC_ID}/settings/account`]} />
-      </AuthenticityTokenProvider>
-    </ToastProvider>,
-  );
+  await renderRoute('/doc/:id/settings/account', {
+    params: { id: DOC_ID },
+    context,
+    parentRoute: '/doc/:id/settings',
+  });
 
   return userEvent.setup();
 }
@@ -86,7 +58,7 @@ afterEach(() => {
 
 describe('the settings account route', () => {
   test('prefill the form with the account of the session', async () => {
-    renderAccount();
+    await renderAccount();
 
     expect(await screen.findByLabelText('Name')).toHaveValue('Ada Lovelace');
     expect(screen.getByLabelText('Subscribe to Newsletter'))
@@ -97,7 +69,7 @@ describe('the settings account route', () => {
   });
 
   test('save the name and the newsletter preference', async () => {
-    const person = renderAccount();
+    const person = await renderAccount();
 
     const name = await screen.findByLabelText('Name');
     await person.clear(name);
@@ -106,7 +78,7 @@ describe('the settings account route', () => {
     await person.click(screen.getByRole('button', { name: 'Save' }));
 
     await vi.waitFor(() => {
-      expect(updateAccountMock).toHaveBeenCalledWith(user.id, {
+      expect(updateUserMock).toHaveBeenCalledWith(user.id, {
         name: 'Grace Hopper',
         newsletter: true,
       });
@@ -114,12 +86,12 @@ describe('the settings account route', () => {
   });
 
   test('keep the untouched values on save', async () => {
-    const person = renderAccount();
+    const person = await renderAccount();
 
     await person.click(await screen.findByRole('button', { name: 'Save' }));
 
     await vi.waitFor(() => {
-      expect(updateAccountMock).toHaveBeenCalledWith(user.id, {
+      expect(updateUserMock).toHaveBeenCalledWith(user.id, {
         name: 'Ada Lovelace',
         newsletter: false,
       });
@@ -127,17 +99,17 @@ describe('the settings account route', () => {
   });
 
   test('save from the footer of the drawer variant', async () => {
-    const person = renderAccount({ isMobile: true });
+    const person = await renderAccount({ isMobile: true });
 
     await person.click(await screen.findByRole('button', { name: 'Save' }));
 
     await vi.waitFor(() => {
-      expect(updateAccountMock).toHaveBeenCalledTimes(1);
+      expect(updateUserMock).toHaveBeenCalledTimes(1);
     });
   });
 
   test('emit a toast once the account was updated', async () => {
-    const person = renderAccount();
+    const person = await renderAccount();
 
     await person.click(await screen.findByRole('button', { name: 'Save' }));
 

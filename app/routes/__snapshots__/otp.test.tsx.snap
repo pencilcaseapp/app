@@ -6,7 +6,7 @@ exports[`matches snapshot 1`] = `
     action="/otp/5fb9220d-9b0f-4d32-a248-6492457c3890?email=Toy_Boyle44%40gmail.com&returnUrl=%2F"
     class="block"
     data-discover="true"
-    id="_r_2_"
+    id="_r_3_"
     method="post"
   >
     <input
@@ -129,7 +129,7 @@ exports[`matches snapshot 1`] = `
     action="/otp/5fb9220d-9b0f-4d32-a248-6492457c3890?email=Toy_Boyle44%40gmail.com&returnUrl=%2F"
     class="block"
     data-discover="true"
-    id="_r_3_"
+    id="_r_4_"
     method="post"
   >
     <input

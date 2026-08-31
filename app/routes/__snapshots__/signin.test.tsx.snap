@@ -6,7 +6,7 @@ exports[`matches snapshot 1`] = `
     action="/signin"
     class="block"
     data-discover="true"
-    id="_r_1_"
+    id="_r_2_"
     method="post"
   >
     <input

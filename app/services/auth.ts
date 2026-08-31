@@ -194,14 +194,6 @@ export async function onboardUser(
   });
 }
 
-export async function updateAccount(
-  userId: string,
-  input: { name?: string; newsletter?: boolean },
-) {
-  const { name, newsletter } = input;
-  await updateUser(userId, { name, newsletter });
-}
-
 export function getSignInUrl(returnUrl: string = href('/')) {
   return withSearchParams(href('/signin'),
     {

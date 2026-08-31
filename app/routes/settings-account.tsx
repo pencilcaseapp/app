@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { useActionData, useOutletContext } from 'react-router';
 import { z } from 'zod';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
+import { SettingsDialogContent } from '~/components/settings-dialog/settings-dialog';
 import type { SettingsOutletContext } from '~/components/settings-dialog/settings-dialog';
-import { SettingsFooter } from '~/components/settings-dialog/settings-footer';
 import { SettingsProfile } from '~/components/settings-dialog/settings-profile';
 import { userSessionContext } from '~/contexts/user-session';
 import { useAppForm } from '~/hooks/use-app-form';
 import { useEmitToast } from '~/hooks/use-toast';
-import { updateAccount } from '~/services/auth';
+import { updateUser } from '~/repos/user';
 import { Button } from '~/ui/button/button';
 import { Icon } from '~/ui/icon/icon';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
@@ -36,7 +36,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     return form.formState;
   }
 
-  await updateAccount(user.id, {
+  await updateUser(user.id, {
     name: form.data.name,
     newsletter: form.data.newsletter,
   });
@@ -74,59 +74,69 @@ export default function SettingsAccountRoute() {
   }, [actionData, emitToast]);
 
   return (
-    <ControlledForm form={form} id={FORM_ID}>
-      <div className="flex flex-col gap-6">
-        <SettingsProfile user={user} />
-        <form.AppField name="name">
-          {field => (
-            <field.TextField
-              label="Name"
-              autoComplete="name"
-              placeholder="e.g. John Doe"
+    <SettingsDialogContent
+      section="account"
+      footerArea={(
+        // The footer renders outside the form element and its provider:
+        // `form.AppForm` restores the context, the id the association.
+        <form.AppForm>
+          <div className="flex items-center justify-end gap-2">
+            <ResponsiveDialogClose
+              render={<Button colorLight="secondary">Cancel</Button>}
             />
-          )}
-        </form.AppField>
-        <div className="flex flex-col gap-1">
-          <Typography variant="bodySmall" fontWeight="semibold" as="h3">
-            Change e-mail
-          </Typography>
-          <NavigationItem
-            as="button"
-            type="button"
-            icon="mail"
-            title={user.email}
-            actionArea={chevron}
-            isActionAreaVisible
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <Typography variant="bodySmall" fontWeight="semibold" as="h3">
-            Newsletter
-          </Typography>
-          <Typography
-            variant="bodyTiny"
-            textColorLight="grey-600"
-            textColorDark="grey-400"
-          >
-            We’ll send you important feature updates and special offers.
-            No spam, no scam, we hate it too. Unsubscribe at any time.
-          </Typography>
-          <form.AppField name="newsletter">
+            <form.SubmitButton form={FORM_ID}>Save</form.SubmitButton>
+          </div>
+        </form.AppForm>
+      )}
+    >
+      <ControlledForm form={form} id={FORM_ID}>
+        <div className="flex flex-col gap-6">
+          <SettingsProfile user={user} />
+          <form.AppField name="name">
             {field => (
-              <field.Checkbox
-                label="Subscribe to Newsletter"
-                className="mt-3"
+              <field.TextField
+                label="Name"
+                autoComplete="name"
+                placeholder="e.g. John Doe"
               />
             )}
           </form.AppField>
+          <div className="flex flex-col gap-1">
+            <Typography variant="bodySmall" fontWeight="semibold" as="h3">
+              Change e-mail
+            </Typography>
+            <NavigationItem
+              as="button"
+              type="button"
+              icon="mail"
+              title={user.email}
+              actionArea={chevron}
+              isActionAreaVisible
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Typography variant="bodySmall" fontWeight="semibold" as="h3">
+              Newsletter
+            </Typography>
+            <Typography
+              variant="bodyTiny"
+              textColorLight="grey-600"
+              textColorDark="grey-400"
+            >
+              We’ll send you important feature updates and special offers.
+              No spam, no scam, we hate it too. Unsubscribe at any time.
+            </Typography>
+            <form.AppField name="newsletter">
+              {field => (
+                <field.Checkbox
+                  label="Subscribe to Newsletter"
+                  className="mt-3"
+                />
+              )}
+            </form.AppField>
+          </div>
         </div>
-      </div>
-      <SettingsFooter>
-        <ResponsiveDialogClose
-          render={<Button colorLight="secondary">Cancel</Button>}
-        />
-        <form.SubmitButton form={FORM_ID}>Save</form.SubmitButton>
-      </SettingsFooter>
-    </ControlledForm>
+      </ControlledForm>
+    </SettingsDialogContent>
   );
 }
