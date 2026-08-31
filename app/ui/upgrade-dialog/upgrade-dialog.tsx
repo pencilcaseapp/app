@@ -13,6 +13,9 @@ import {
   ResponsiveDialogContent,
 } from '../responsive-dialog/responsive-dialog-content';
 import {
+  ResponsiveDialogContentInner,
+} from '../responsive-dialog/responsive-dialog-content-inner';
+import {
   ResponsiveDialogTopbar,
 } from '../responsive-dialog/responsive-dialog-topbar';
 import { Typography } from '../typography/typography';
@@ -29,6 +32,8 @@ export type UpgradeDialogProps = {
   /** Dialog only. */
   size?: DialogSize;
   closeLabel?: string;
+  imageSrcLight?: string;
+  imageSrcDark?: string;
 } & Omit<ResponsiveDialogProps, 'children'>;
 
 /*
@@ -46,39 +51,53 @@ export const UpgradeDialog: FC<UpgradeDialogProps> = ({
   trigger,
   size = 'large',
   closeLabel = 'Close',
+  imageSrcLight = '/flying-docs-light.svg',
+  imageSrcDark = '/flying-docs-dark.svg',
   ...rest
 }) => {
   return (
     <ResponsiveDialog {...rest}>
       {trigger && <ResponsiveDialogTrigger render={trigger} />}
-      <ResponsiveDialogContent
-        size={size}
-        topArea={(
-          <ResponsiveDialogTopbar title={title} closeLabel={closeLabel} />
-        )}
-      >
-        <div className="p-2 sm:p-6">
-          <Typography variant="heading2" as="h2" textAlign="center">
-            {headline}
-          </Typography>
-          {description && (
-            <ResponsiveDialogDescription
-              render={(
-                <Typography
-                  variant="bodySmall"
-                  as="p"
-                  textAlign="center"
-                  textColorLight="grey-600"
-                  textColorDark="grey-400"
-                  className="mt-2"
-                />
-              )}
-            >
-              {description}
-            </ResponsiveDialogDescription>
+      <ResponsiveDialogContent size={size}>
+        <ResponsiveDialogContentInner
+          topArea={(
+            <ResponsiveDialogTopbar title={title} closeLabel={closeLabel} />
           )}
-          <div className="mt-8">{pricingArea}</div>
-        </div>
+        >
+          <div className="p-2 sm:p-6">
+            <picture>
+              <source
+                srcSet={imageSrcDark}
+                media="(prefers-color-scheme: dark)"
+              />
+              <img
+                src={imageSrcLight}
+                className="mx-auto mb-4 block h-45 w-45"
+                alt=""
+              />
+            </picture>
+            <Typography variant="heading2" as="h2" textAlign="center">
+              {headline}
+            </Typography>
+            {description && (
+              <ResponsiveDialogDescription
+                render={(
+                  <Typography
+                    variant="bodySmall"
+                    as="p"
+                    textAlign="center"
+                    textColorLight="grey-600"
+                    textColorDark="grey-400"
+                    className="mt-2"
+                  />
+                )}
+              >
+                {description}
+              </ResponsiveDialogDescription>
+            )}
+            <div className="mt-8">{pricingArea}</div>
+          </div>
+        </ResponsiveDialogContentInner>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );
