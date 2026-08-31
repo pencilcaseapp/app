@@ -64,7 +64,7 @@ export const UpgradeDialog: FC<UpgradeDialogProps> = ({
             <ResponsiveDialogTopbar title={title} closeLabel={closeLabel} />
           )}
         >
-          <div className="p-2 sm:p-6">
+          <div className="p-2 sm:px-6 sm:pb-6 sm:pt-2">
             <picture>
               <source
                 srcSet={imageSrcDark}
@@ -72,7 +72,7 @@ export const UpgradeDialog: FC<UpgradeDialogProps> = ({
               />
               <img
                 src={imageSrcLight}
-                className="mx-auto mb-4 block h-45 w-45"
+                className="mx-auto mb-2 block h-33 w-45"
                 alt=""
               />
             </picture>
@@ -95,7 +95,7 @@ export const UpgradeDialog: FC<UpgradeDialogProps> = ({
                 {description}
               </ResponsiveDialogDescription>
             )}
-            <div className="mt-8">{pricingArea}</div>
+            <div className="mt-6">{pricingArea}</div>
           </div>
         </ResponsiveDialogContentInner>
       </ResponsiveDialogContent>
