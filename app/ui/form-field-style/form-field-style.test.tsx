@@ -18,4 +18,16 @@ describe('FormFieldStyle', () => {
 
     expect(container).toMatchSnapshot();
   });
+
+  test('does not transition transform or opacity', () => {
+    const { container } = render(
+      <FormFieldStyle as="input" type="email" />,
+    );
+    const classes = container.firstElementChild?.className ?? '';
+
+    expect(classes).not.toMatch(/(^|\s)transition-all(\s|$)/);
+    expect(classes).toContain(
+      'transition-[color,background-color,border-color,box-shadow]',
+    );
+  });
 });

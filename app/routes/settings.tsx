@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router';
+import { useIsMobile } from '~/hooks/use-is-mobile';
 import { ResponsiveDialog } from '~/ui/responsive-dialog/responsive-dialog';
+import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 
 /*
  * The settings dialog over the document it was opened from: this route
@@ -13,8 +15,20 @@ import { ResponsiveDialog } from '~/ui/responsive-dialog/responsive-dialog';
  */
 export default function Settings() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const { setIsSidebarOpen } = useSidebarContext();
 
   const [open, setOpen] = useState(false);
+
+  // On mobile the settings drawer stacks on the open sidebar, but a
+  // direct load starts with the sidebar closed and the drawer would sit
+  // over the bare document. Opening it restores the stack, so closing
+  // settings reveals the sidebar it is normally opened from.
+  useEffect(() => {
+    if (isMobile) {
+      setIsSidebarOpen(true);
+    }
+  }, [isMobile, setIsSidebarOpen]);
 
   // Opened two frames after mounting: the popup then mounts after the
   // navigation's own render has painted, so its starting style gets a
