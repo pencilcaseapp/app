@@ -160,6 +160,14 @@ describe('the settings routes', () => {
         ).not.toBeInTheDocument();
       });
 
+    test('link to support through a mailto', async () => {
+      renderSettings(`/doc/${DOC_ID}/settings/support`, 'tablet');
+
+      expect(
+        await screen.findByRole('link', { name: 'inbox@pencilcase.app' }),
+      ).toHaveAttribute('href', 'mailto:inbox@pencilcase.app');
+    });
+
     test('deep link into a section', async () => {
       renderSettings(`/doc/${DOC_ID}/settings/subscription`, 'tablet');
 
@@ -216,7 +224,7 @@ describe('the settings routes', () => {
       );
 
       expect(
-        await screen.findByText('The Support settings live here.'),
+        await screen.findByRole('heading', { name: 'How can we help?' }),
       ).toBeInTheDocument();
       expect(
         screen.getByRole('link', { name: 'Support' }),
