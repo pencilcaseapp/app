@@ -53,7 +53,7 @@ export default function Settings() {
       onOpenChange={setOpen}
       onOpenChangeComplete={(nextOpen) => {
         if (!nextOpen) {
-          void navigate('..');
+          void navigate('..', { preventScrollReset: true });
         }
       }}
     >
