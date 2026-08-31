@@ -6,20 +6,28 @@ import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import { Drawer } from './drawer';
 import { DrawerContent } from './drawer-content';
 import type { DrawerContentProps } from './drawer-content';
+import { DrawerContentInner } from './drawer-content-inner';
+import type { DrawerContentInnerProps } from './drawer-content-inner';
 
 function renderDrawer(
-  { contentProps, defaultOpen }:
-  { contentProps?: DrawerContentProps; defaultOpen?: boolean } = {},
+  { contentProps, innerProps, defaultOpen }:
+  {
+    contentProps?: DrawerContentProps;
+    innerProps?: DrawerContentInnerProps;
+    defaultOpen?: boolean;
+  } = {},
 ) {
   return render(
     <Drawer defaultOpen={defaultOpen}>
       <BaseDrawer.Trigger>Open drawer</BaseDrawer.Trigger>
       <DrawerContent {...contentProps}>
-        <BaseDrawer.Title>Delete document</BaseDrawer.Title>
-        <BaseDrawer.Description>
-          This action cannot be undone.
-        </BaseDrawer.Description>
-        {contentProps?.children}
+        <DrawerContentInner {...innerProps}>
+          <BaseDrawer.Title>Delete document</BaseDrawer.Title>
+          <BaseDrawer.Description>
+            This action cannot be undone.
+          </BaseDrawer.Description>
+          {innerProps?.children}
+        </DrawerContentInner>
       </DrawerContent>
     </Drawer>,
   );
@@ -108,39 +116,6 @@ describe('Drawer', () => {
 });
 
 describe('DrawerContent', () => {
-  test('renders its children inside the drawer', () => {
-    renderDrawer({
-      defaultOpen: true,
-      contentProps: {
-        children: <p>Body content</p>,
-      },
-    });
-
-    expect(screen.getByText('Body content')).toBeInTheDocument();
-  });
-
-  test('renders the top area', () => {
-    renderDrawer({
-      defaultOpen: true,
-      contentProps: {
-        topArea: <span>Top area content</span>,
-      },
-    });
-
-    expect(screen.getByText('Top area content')).toBeInTheDocument();
-  });
-
-  test('renders the footer area', () => {
-    renderDrawer({
-      defaultOpen: true,
-      contentProps: {
-        footerArea: <button type="button">Save</button>,
-      },
-    });
-
-    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
-  });
-
   test('applies the full height class when isFullHeight is set', () => {
     renderDrawer({ defaultOpen: true, contentProps: { isFullHeight: true } });
 
@@ -177,19 +152,66 @@ describe('DrawerContent', () => {
         .getPropertyValue('--drawer-max-height'),
     ).toBe('calc(100dvh - 4.5rem)');
   });
+});
+
+describe('DrawerContentInner', () => {
+  test('renders its children inside the drawer', () => {
+    renderDrawer({
+      defaultOpen: true,
+      innerProps: {
+        children: <p>Body content</p>,
+      },
+    });
+
+    expect(screen.getByText('Body content')).toBeInTheDocument();
+  });
+
+  test('renders the top area', () => {
+    renderDrawer({
+      defaultOpen: true,
+      innerProps: {
+        topArea: <span>Top area content</span>,
+      },
+    });
+
+    expect(screen.getByText('Top area content')).toBeInTheDocument();
+  });
+
+  test('renders the footer area', () => {
+    renderDrawer({
+      defaultOpen: true,
+      innerProps: {
+        footerArea: <button type="button">Save</button>,
+      },
+    });
+
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
+  });
 
   test('reserves footer height based on reservedFooterHeight', () => {
     renderDrawer({
       defaultOpen: true,
-      contentProps: {
+      innerProps: {
         reservedFooterHeight: 96,
         footerArea: <button type="button">Save</button>,
       },
     });
 
+    const footer = screen.getByRole('button', { name: 'Save' })
+      .parentElement?.parentElement;
+
     expect(
-      screen.getByRole('dialog').style
-        .getPropertyValue('--footer-reserved-height'),
+      footer?.style.getPropertyValue('--footer-reserved-height'),
     ).toBe('calc(96px + env(safe-area-inset-bottom, 0px) + var(--bleed))');
+  });
+
+  test('pads the bottom itself when there is no footer', () => {
+    renderDrawer({
+      defaultOpen: true,
+      innerProps: { children: <p>Body content</p> },
+    });
+
+    expect(screen.getByText('Body content').parentElement?.parentElement)
+      .toHaveClass('pb-[calc(env(safe-area-inset-bottom,0px)+var(--bleed))]');
   });
 });

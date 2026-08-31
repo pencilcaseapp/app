@@ -5,7 +5,7 @@ import type {
   DialogViewportProps,
   DialogPopupProps,
 } from '@base-ui/react';
-import type { FC, PropsWithChildren, ReactNode } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import classNames from 'classnames';
 
 export type DialogSize = 'small' | 'large';
@@ -15,9 +15,6 @@ export type DialogContentProps = {
   dialogBackdropProps?: DialogBackdropProps;
   dialogViewportProps?: DialogViewportProps;
   dialogPopupProps?: DialogPopupProps;
-  topArea?: ReactNode;
-  sideArea?: ReactNode;
-  footerArea?: ReactNode;
   size?: DialogSize;
   isFullHeight?: boolean;
   className?: string;
@@ -28,6 +25,12 @@ const sizeClasses: { [index in DialogSize]: string } = {
   large: 'max-w-3xl',
 };
 
+/*
+ * The portal, backdrop, viewport and popup of a dialog. It only provides
+ * the popup surface; the content structure inside comes from
+ * `DialogContentInner`, so a dialog driven by nested routes can keep the
+ * popup mounted while the routes swap the structure within.
+ */
 export const DialogContent: FC<DialogContentProps>
   = ({
     children,
@@ -35,9 +38,6 @@ export const DialogContent: FC<DialogContentProps>
     dialogBackdropProps,
     dialogViewportProps,
     dialogPopupProps,
-    topArea,
-    sideArea,
-    footerArea,
     size = 'small',
     isFullHeight = false,
     className,
@@ -55,28 +55,7 @@ export const DialogContent: FC<DialogContentProps>
               className,
             )}
           >
-            {topArea && (
-              <div className="shrink-0">
-                {topArea}
-              </div>
-            )}
-            <div className="flex min-h-0 flex-1">
-              {sideArea && (
-                <div className="shrink-0 overflow-y-auto overscroll-contain p-4">
-                  {sideArea}
-                </div>
-              )}
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
-                  {children}
-                </div>
-                {footerArea && (
-                  <div className="shrink-0 p-4">
-                    {footerArea}
-                  </div>
-                )}
-              </div>
-            </div>
+            {children}
           </BaseDialog.Popup>
         </BaseDialog.Viewport>
       </BaseDialog.Portal>

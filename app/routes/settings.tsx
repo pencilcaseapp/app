@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router';
+import { SettingsDialogContent } from '~/components/settings-dialog/settings-dialog';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 import { ResponsiveDialog } from '~/ui/responsive-dialog/responsive-dialog';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 
 /*
  * The settings dialog over the document it was opened from: this route
- * only keeps the responsive dialog open across the section routes; the
- * outlet renders the menu (index) or a section, each bringing its own
- * authentication, data and dialog content, so nothing is handed down
- * from here. The dialog mounts closed and opens a frame later so the
- * enter animation plays, and closing waits for the exit animation
- * before navigating back up to the document.
+ * keeps the responsive dialog and its popup open across the section
+ * routes; the outlet renders the menu (index) or a section, each
+ * bringing its own authentication, data and page structure, so nothing
+ * is handed down from here. The dialog mounts closed and opens a frame
+ * later so the enter animation plays, and closing waits for the exit
+ * animation before navigating back up to the document.
  */
 export default function Settings() {
   const navigate = useNavigate();
@@ -57,7 +58,9 @@ export default function Settings() {
         }
       }}
     >
-      <Outlet />
+      <SettingsDialogContent>
+        <Outlet />
+      </SettingsDialogContent>
     </ResponsiveDialog>
   );
 }

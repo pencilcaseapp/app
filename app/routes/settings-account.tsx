@@ -3,7 +3,7 @@ import { useActionData, type MiddlewareFunction } from 'react-router';
 import { z } from 'zod';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
-import { SettingsDialogContent } from '~/components/settings-dialog/settings-dialog';
+import { SettingsDialogPage } from '~/components/settings-dialog/settings-dialog';
 import { SettingsProfile } from '~/components/settings-dialog/settings-profile';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
@@ -82,7 +82,7 @@ export default function SettingsAccountRoute({
   }, [actionData, emitToast]);
 
   return (
-    <SettingsDialogContent
+    <SettingsDialogPage
       section="account"
       footerArea={(
         <form.AppForm>
@@ -143,6 +143,6 @@ export default function SettingsAccountRoute({
           </div>
         </div>
       </ControlledForm>
-    </SettingsDialogContent>
+    </SettingsDialogPage>
   );
 }

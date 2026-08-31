@@ -4,13 +4,15 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import { Drawer } from './drawer';
 import { DrawerContent } from './drawer-content';
+import { DrawerContentInner } from './drawer-content-inner';
 import { Button } from '../button/button';
 import { Typography } from '../typography/typography';
 
 /**
  * The `Drawer` is a thin wrapper around Base UI's `Drawer.Root` and is
  * composed together with `DrawerContent` (which renders the portal,
- * backdrop, viewport and popup). The trigger, close, title and
+ * backdrop, viewport and popup) and `DrawerContentInner` (the content
+ * structure inside the popup). The trigger, close, title and
  * description parts are used directly from `@base-ui/react/drawer`.
  *
  * By default the drawer slides up from the bottom of the viewport and
@@ -46,22 +48,24 @@ export const Default: Story = {
           render={<Button colorLight="primary">Open drawer</Button>}
         />
         <DrawerContent>
-          <BaseDrawer.Title
-            render={<Typography variant="heading2" as="h2" />}
-          >
-            Delete document
-          </BaseDrawer.Title>
-          <BaseDrawer.Description
-            render={(
-              <Typography
-                variant="bodySmall"
-                as="p"
-                className="text-pca-grey-600 dark:text-pca-grey-400"
-              />
-            )}
-          >
-            This action cannot be undone.
-          </BaseDrawer.Description>
+          <DrawerContentInner>
+            <BaseDrawer.Title
+              render={<Typography variant="heading2" as="h2" />}
+            >
+              Delete document
+            </BaseDrawer.Title>
+            <BaseDrawer.Description
+              render={(
+                <Typography
+                  variant="bodySmall"
+                  as="p"
+                  className="text-pca-grey-600 dark:text-pca-grey-400"
+                />
+              )}
+            >
+              This action cannot be undone.
+            </BaseDrawer.Description>
+          </DrawerContentInner>
         </DrawerContent>
       </Drawer>
     </div>
@@ -84,26 +88,29 @@ export const Controlled: Story = {
         </Button>
         <Drawer {...args} open={open} onOpenChange={setOpen}>
           <DrawerContent>
-            <BaseDrawer.Title
-              render={<Typography variant="heading2" as="h2" />}
-            >
-              Settings
-            </BaseDrawer.Title>
-            <BaseDrawer.Description
-              render={(
-                <Typography
-                  variant="bodySmall"
-                  as="p"
-                  className="text-pca-grey-600 dark:text-pca-grey-400"
-                />
-              )}
-            >
-              This drawer is fully controlled by the parent component.
-              Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
-              sed diam nonumy eirmod tempor invidunt ut labore et dolore
-              magna aliquyam erat, sed diam voluptua. At vero eos et accusam
-            </BaseDrawer.Description>
-            <BaseDrawer.Close render={<Button colorLight="primary">Close</Button>} />
+            <DrawerContentInner>
+              <BaseDrawer.Title
+                render={<Typography variant="heading2" as="h2" />}
+              >
+                Settings
+              </BaseDrawer.Title>
+              <BaseDrawer.Description
+                render={(
+                  <Typography
+                    variant="bodySmall"
+                    as="p"
+                    className="text-pca-grey-600 dark:text-pca-grey-400"
+                  />
+                )}
+              >
+                This drawer is fully controlled by the parent component.
+                Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+                sed diam nonumy eirmod tempor invidunt ut labore et dolore
+                magna aliquyam erat, sed diam voluptua. At vero eos et
+                accusam
+              </BaseDrawer.Description>
+              <BaseDrawer.Close render={<Button colorLight="primary">Close</Button>} />
+            </DrawerContentInner>
           </DrawerContent>
         </Drawer>
       </div>
@@ -121,24 +128,26 @@ export const WithTopAndFooterAreas: Story = {
           Open drawer
         </Button>
         <Drawer {...args} open={open} onOpenChange={setOpen}>
-          <DrawerContent
-            topArea={(
-              <div className="flex justify-center items-center h-12">
-                <Typography variant="bodySmall" fontWeight="semibold" as="h2" className="">
-                  Top area content
-                </Typography>
+          <DrawerContent>
+            <DrawerContentInner
+              topArea={(
+                <div className="flex justify-center items-center h-12">
+                  <Typography variant="bodySmall" fontWeight="semibold" as="h2" className="">
+                    Top area content
+                  </Typography>
+                </div>
+              )}
+              footerArea={(
+                <div className="flex justify-between items-center">
+                  <BaseDrawer.Close render={<Button colorLight="secondary" className="mr-2">Cancel</Button>} />
+                  <Button>Save</Button>
+                </div>
+              )}
+            >
+              <div className="h-200 bg-ws-grey-100">
+                Content area
               </div>
-            )}
-            footerArea={(
-              <div className="flex justify-between items-center">
-                <BaseDrawer.Close render={<Button colorLight="secondary" className="mr-2">Cancel</Button>} />
-                <Button>Save</Button>
-              </div>
-            )}
-          >
-            <div className="h-200 bg-ws-grey-100">
-              Content area
-            </div>
+            </DrawerContentInner>
           </DrawerContent>
         </Drawer>
       </div>
@@ -154,22 +163,24 @@ export const FullHeight: Story = {
           render={<Button colorLight="primary">Open drawer</Button>}
         />
         <DrawerContent isFullHeight>
-          <BaseDrawer.Title
-            render={<Typography variant="heading2" as="h2" />}
-          >
-            Delete document
-          </BaseDrawer.Title>
-          <BaseDrawer.Description
-            render={(
-              <Typography
-                variant="bodySmall"
-                as="p"
-                className="text-pca-grey-600 dark:text-pca-grey-400"
-              />
-            )}
-          >
-            This action cannot be undone.
-          </BaseDrawer.Description>
+          <DrawerContentInner>
+            <BaseDrawer.Title
+              render={<Typography variant="heading2" as="h2" />}
+            >
+              Delete document
+            </BaseDrawer.Title>
+            <BaseDrawer.Description
+              render={(
+                <Typography
+                  variant="bodySmall"
+                  as="p"
+                  className="text-pca-grey-600 dark:text-pca-grey-400"
+                />
+              )}
+            >
+              This action cannot be undone.
+            </BaseDrawer.Description>
+          </DrawerContentInner>
         </DrawerContent>
       </Drawer>
     </div>

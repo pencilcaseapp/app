@@ -236,6 +236,22 @@ describe('the settings routes', () => {
         screen.queryByRole('button', { name: 'Save' }),
       ).not.toBeInTheDocument();
     });
+
+    // The popup lives in the settings route above the sections, so
+    // switching sections swaps the content inside the open dialog
+    // instead of remounting it.
+    test('keep the same popup mounted across sections', async () => {
+      const person
+        = await renderSettings('/doc/:id/settings/account', 'desktop');
+
+      const popup = await screen.findByRole('dialog', { name: 'Account' });
+
+      await person.click(screen.getByRole('link', { name: 'Support' }));
+
+      expect(
+        await screen.findByRole('dialog', { name: 'Support' }),
+      ).toBe(popup);
+    });
   });
 
   describe('on mobile', () => {

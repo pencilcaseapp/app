@@ -3,6 +3,7 @@ import { useMedia } from 'react-use';
 import { SidebarPortal } from '../sidebar-portal/sidebar-portal';
 import { Drawer } from '../drawer/drawer';
 import { DrawerContent } from '../drawer/drawer-content';
+import { DrawerContentInner } from '../drawer/drawer-content-inner';
 import { useSidebarContext } from '../sidebar-context/use-sidebar-context';
 import type { SidebarMenuItem, SidebarBaseProps } from './types';
 import { SidebarMenu } from './sidebar-menu';
@@ -40,25 +41,25 @@ export const Sidebar: FC<SidebarProps> = ({
   if (isMobile) {
     return (
       <Drawer open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <DrawerContent
-          isFullHeight
-          maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
-          reservedFooterHeight={reservedFooterHeight}
-          contentClassName="px-3 pb-6"
-          footerArea={bottomArea && (
-            <div className="flex flex-col gap-1.5">
-              {bottomArea}
-            </div>
-          )}
-        >
-          {/* <Drawer.Title className="sr-only">Navigation</Drawer.Title> */}
-          <nav>
-            <ul className="flex flex-col gap-2">
-              {items.map(({ key, content }) => {
-                return <li key={key}>{content}</li>;
-              })}
-            </ul>
-          </nav>
+        <DrawerContent isFullHeight maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}>
+          <DrawerContentInner
+            reservedFooterHeight={reservedFooterHeight}
+            contentClassName="px-3 pb-6"
+            footerArea={bottomArea && (
+              <div className="flex flex-col gap-1.5">
+                {bottomArea}
+              </div>
+            )}
+          >
+            {/* <Drawer.Title className="sr-only">Navigation</Drawer.Title> */}
+            <nav>
+              <ul className="flex flex-col gap-2">
+                {items.map(({ key, content }) => {
+                  return <li key={key}>{content}</li>;
+                })}
+              </ul>
+            </nav>
+          </DrawerContentInner>
         </DrawerContent>
         {children}
       </Drawer>

@@ -4,33 +4,33 @@ import type {
   DrawerBackdropProps,
   DialogViewportProps,
   DrawerPopupProps,
-  DrawerContentProps as BaseDrawerContentProps,
 } from '@base-ui/react';
 import type { CSSProperties, FC, PropsWithChildren } from 'react';
 import classNames from 'classnames';
 
 // While a nested drawer stacks on top, the areas of the drawer behind
 // fade out (and back in while the nested drawer is swiped).
-const nestedFadeClassName = 'group-data-nested-drawer-open/popup:opacity-0 group-data-nested-drawer-swiping/popup:opacity-100';
+export const nestedFadeClassName = 'group-data-nested-drawer-open/popup:opacity-0 group-data-nested-drawer-swiping/popup:opacity-100';
 
 export type DrawerContentProps = {
   drawerPortalProps?: DrawerPortalProps;
   drawerBackdropProps?: DrawerBackdropProps;
   dialogViewportProps?: DialogViewportProps;
   drawerPopupProps?: DrawerPopupProps;
-  drawerContentProps?: BaseDrawerContentProps;
-  topArea?: React.ReactNode;
-  footerArea?: React.ReactNode;
-  reservedFooterHeight?: number;
   isFullHeight?: boolean;
   /** CSS length the drawer may grow to, e.g. `calc(100dvh - 4.5rem)`. */
   maxHeight?: string;
   /** CSS length the drawer keeps even when its content is shorter. */
   minHeight?: string;
-  /** Replaces the default padding of the scrollable content area. */
-  contentClassName?: string;
 } & PropsWithChildren;
 
+/*
+ * The portal, backdrop, viewport, popup and handle of a bottom sheet
+ * drawer. It only provides the popup surface; the content structure
+ * inside comes from `DrawerContentInner`, so a drawer driven by nested
+ * routes can keep the popup mounted while the routes swap the structure
+ * within.
+ */
 export const DrawerContent: FC<DrawerContentProps>
   = ({
     children,
@@ -38,14 +38,9 @@ export const DrawerContent: FC<DrawerContentProps>
     drawerBackdropProps,
     dialogViewportProps,
     drawerPopupProps,
-    drawerContentProps,
-    topArea,
-    footerArea,
     isFullHeight = false,
-    reservedFooterHeight = 56,
     maxHeight = '95dvh',
     minHeight = '0px',
-    contentClassName = 'px-4 pt-4 pb-6',
   }) => {
     return (
       <Drawer.VirtualKeyboardProvider>
@@ -54,12 +49,7 @@ export const DrawerContent: FC<DrawerContentProps>
           <Drawer.Viewport {...dialogViewportProps} className="fixed inset-0 z-50 flex items-end justify-center touch-none [--bleed:3rem] after:pointer-events-none after:fixed after:inset-x-0 after:bottom-0 after:h-(--bleed) after:bg-white after:content-[''] data-closed:after:opacity-0 has-data-swiping:after:opacity-0 dark:after:bg-pca-grey-900">
             <Drawer.Popup
               {...drawerPopupProps}
-              // A class built from the prop would never be seen by
-              // Tailwind's scanner, so the variable is set inline.
               style={{
-                '--footer-reserved-height':
-                  `calc(${reservedFooterHeight}px`
-                  + ' + env(safe-area-inset-bottom, 0px) + var(--bleed))',
                 '--drawer-max-height': maxHeight,
                 '--drawer-min-height': minHeight,
               } as CSSProperties}
@@ -78,7 +68,6 @@ export const DrawerContent: FC<DrawerContentProps>
                   ? 'min-h-[calc(var(--drawer-max-height)+var(--bleed))]'
                   : 'min-h-[calc(var(--drawer-min-height)+var(--bleed))]',
                 'data-nested-drawer-open:min-h-0',
-                footerArea === undefined && 'pb-[calc(env(safe-area-inset-bottom,0px)+var(--bleed))]',
               )}
             >
               {/* While a nested drawer pins the popup to the stack
@@ -87,21 +76,7 @@ export const DrawerContent: FC<DrawerContentProps>
                   the popup clips it instead. */}
               <div className="flex min-h-0 grow flex-col group-data-nested-drawer-open/popup:h-(--drawer-height) group-data-nested-drawer-open/popup:grow-0 group-data-nested-drawer-open/popup:shrink-0">
                 <div className={classNames('w-12 h-1.5 bg-pca-grey-200 shrink-0 rounded-full dark:bg-pca-grey-800 mx-auto mb-4 mt-4 transition-opacity duration-300', nestedFadeClassName)} />
-                {topArea && (
-                  <div className={classNames('px-4 border-b border-pca-grey-200 dark:border-pca-grey-800 transition-opacity duration-300', nestedFadeClassName)}>
-                    {topArea}
-                  </div>
-                )}
-                <Drawer.Content {...drawerContentProps} className={classNames('min-h-0 flex-1 overflow-y-auto overscroll-contain touch-auto transition-opacity duration-300', contentClassName, nestedFadeClassName)}>
-                  {children}
-                </Drawer.Content>
-                {footerArea && (
-                  <div className={classNames('relative min-h-(--footer-reserved-height) shrink-0 transition-[min-height,opacity] duration-260 ease-[cubic-bezier(0.32,0.72,0,1)] focus-within:min-h-[calc(var(--footer-reserved-height)+var(--drawer-keyboard-inset,0px))] motion-reduce:transition-none', nestedFadeClassName)}>
-                    <div className="absolute right-0 bottom-0 left-0 z-1 border-t border-pca-grey-200 dark:border-pca-grey-800 bg-white px-4 pt-2.5 pb-[calc(10px+env(safe-area-inset-bottom,0px)+var(--bleed))] transition-[bottom,padding-bottom] duration-260 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[bottom,padding-bottom] focus-within:fixed focus-within:z-3 focus-within:bottom-0 focus-within:pb-[calc(0.625rem+env(safe-area-inset-bottom,0px)+var(--bleed)+var(--drawer-keyboard-inset,0px))] focus-within:transform-[translate3d(0,0,0)] motion-reduce:transition-none  dark:bg-pca-grey-900">
-                      {footerArea}
-                    </div>
-                  </div>
-                )}
+                {children}
               </div>
             </Drawer.Popup>
           </Drawer.Viewport>

@@ -10,9 +10,11 @@ import {
   ResponsiveDialogTrigger,
 } from './responsive-dialog';
 import { ResponsiveDialogContent } from './responsive-dialog-content';
+import { ResponsiveDialogContentInner } from './responsive-dialog-content-inner';
 import { ResponsiveDialogTopbar } from './responsive-dialog-topbar';
 import { Drawer } from '../drawer/drawer';
 import { DrawerContent } from '../drawer/drawer-content';
+import { DrawerContentInner } from '../drawer/drawer-content-inner';
 import { Button } from '../button/button';
 import { NavigationItem } from '../navigation-item/navigation-item';
 import { Typography } from '../typography/typography';
@@ -21,8 +23,9 @@ import { Typography } from '../typography/typography';
  * `ResponsiveDialog` renders the bottom sheet drawer below Tailwind's `sm`
  * breakpoint and the centered dialog on every larger viewport — resize the
  * preview across 640px to switch between the two. Compose it with
- * `ResponsiveDialogContent` and the `ResponsiveDialogTrigger`, `Close`,
- * `Title` and `Description` parts, which all follow the active variant.
+ * `ResponsiveDialogContent`, `ResponsiveDialogContentInner` and the
+ * `ResponsiveDialogTrigger`, `Close`, `Title` and `Description` parts,
+ * which all follow the active variant.
  */
 const meta: Meta<typeof ResponsiveDialog> = {
   title: 'Overlay/ResponsiveDialog',
@@ -52,24 +55,26 @@ export const Default: Story = {
           render={<Button colorLight="primary">Open</Button>}
         />
         <ResponsiveDialogContent>
-          <ResponsiveDialogTitle
-            render={<Typography variant="heading3" as="h2" />}
-          >
-            Delete document
-          </ResponsiveDialogTitle>
-          <ResponsiveDialogDescription
-            render={(
-              <Typography
-                variant="bodySmall"
-                as="p"
-                textColorLight="grey-600"
-                textColorDark="grey-400"
-                className="mt-2"
-              />
-            )}
-          >
-            This action cannot be undone.
-          </ResponsiveDialogDescription>
+          <ResponsiveDialogContentInner>
+            <ResponsiveDialogTitle
+              render={<Typography variant="heading3" as="h2" />}
+            >
+              Delete document
+            </ResponsiveDialogTitle>
+            <ResponsiveDialogDescription
+              render={(
+                <Typography
+                  variant="bodySmall"
+                  as="p"
+                  textColorLight="grey-600"
+                  textColorDark="grey-400"
+                  className="mt-2"
+                />
+              )}
+            >
+              This action cannot be undone.
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogContentInner>
         </ResponsiveDialogContent>
       </ResponsiveDialog>
     </div>
@@ -87,29 +92,31 @@ export const WithFooter: Story = {
         <ResponsiveDialogTrigger
           render={<Button colorLight="primary">Open</Button>}
         />
-        <ResponsiveDialogContent
-          footerArea={(
-            <div className="flex items-center justify-end gap-2">
-              <ResponsiveDialogClose
-                render={<Button colorLight="secondary">Cancel</Button>}
-              />
-              <Button colorLight="danger">Delete</Button>
-            </div>
-          )}
-        >
-          <ResponsiveDialogTitle
-            className="mb-2"
-            render={<Typography variant="heading3" as="h2" />}
+        <ResponsiveDialogContent>
+          <ResponsiveDialogContentInner
+            footerArea={(
+              <div className="flex items-center justify-end gap-2">
+                <ResponsiveDialogClose
+                  render={<Button colorLight="secondary">Cancel</Button>}
+                />
+                <Button colorLight="danger">Delete</Button>
+              </div>
+            )}
           >
-            Delete document
-          </ResponsiveDialogTitle>
-          <Typography
-            variant="bodySmall"
-            textColorLight="grey-600"
-            textColorDark="grey-400"
-          >
-            “Meeting notes” will be deleted for everyone it is shared with.
-          </Typography>
+            <ResponsiveDialogTitle
+              className="mb-2"
+              render={<Typography variant="heading3" as="h2" />}
+            >
+              Delete document
+            </ResponsiveDialogTitle>
+            <Typography
+              variant="bodySmall"
+              textColorLight="grey-600"
+              textColorDark="grey-400"
+            >
+              “Meeting notes” will be deleted for everyone it is shared with.
+            </Typography>
+          </ResponsiveDialogContentInner>
         </ResponsiveDialogContent>
       </ResponsiveDialog>
     </div>
@@ -131,37 +138,37 @@ export const WithTopbar: Story = {
           <ResponsiveDialogTrigger
             render={<Button colorLight="primary">Open settings</Button>}
           />
-          <ResponsiveDialogContent
-            size="large"
-            isFullHeight
-            topArea={(
-              <ResponsiveDialogTopbar
-                title={isOnSubPage ? 'Account' : 'Settings'}
-                onBack={isOnSubPage
-                  ? () => setIsOnSubPage(false)
-                  : undefined}
-              />
-            )}
-          >
-            {isOnSubPage
-              ? (
-                  <Typography
-                    variant="bodySmall"
-                    textColorLight="grey-600"
-                    textColorDark="grey-400"
-                  >
-                    The Account settings live here.
-                  </Typography>
-                )
-              : (
-                  <NavigationItem
-                    as="button"
-                    type="button"
-                    icon="account"
-                    title="Account"
-                    onClick={() => setIsOnSubPage(true)}
-                  />
-                )}
+          <ResponsiveDialogContent size="large" isFullHeight>
+            <ResponsiveDialogContentInner
+              topArea={(
+                <ResponsiveDialogTopbar
+                  title={isOnSubPage ? 'Account' : 'Settings'}
+                  onBack={isOnSubPage
+                    ? () => setIsOnSubPage(false)
+                    : undefined}
+                />
+              )}
+            >
+              {isOnSubPage
+                ? (
+                    <Typography
+                      variant="bodySmall"
+                      textColorLight="grey-600"
+                      textColorDark="grey-400"
+                    >
+                      The Account settings live here.
+                    </Typography>
+                  )
+                : (
+                    <NavigationItem
+                      as="button"
+                      type="button"
+                      icon="account"
+                      title="Account"
+                      onClick={() => setIsOnSubPage(true)}
+                    />
+                  )}
+            </ResponsiveDialogContentInner>
           </ResponsiveDialogContent>
         </ResponsiveDialog>
       </div>
@@ -185,44 +192,50 @@ export const NestedInsideDrawer: Story = {
           render={<Button colorLight="primary">Open sidebar</Button>}
         />
         <DrawerContent>
-          <div className="flex flex-col items-start gap-4">
-            <BaseDrawer.Title render={<Typography variant="heading3" as="h2" />}>
-              Documents
-            </BaseDrawer.Title>
-            <ResponsiveDialog {...args}>
-              <ResponsiveDialogTrigger
-                render={(
-                  <Button colorLight="secondary">
-                    Delete “Meeting notes”
-                  </Button>
-                )}
-              />
-              <ResponsiveDialogContent
-                footerArea={(
-                  <div className="flex items-center justify-end gap-2">
-                    <ResponsiveDialogClose
-                      render={<Button colorLight="secondary">Cancel</Button>}
-                    />
-                    <Button colorLight="danger">Delete</Button>
-                  </div>
-                )}
-              >
-                <ResponsiveDialogTitle
-                  className="mb-2"
-                  render={<Typography variant="heading3" as="h2" />}
-                >
-                  Delete document
-                </ResponsiveDialogTitle>
-                <Typography
-                  variant="bodySmall"
-                  textColorLight="grey-600"
-                  textColorDark="grey-400"
-                >
-                  “Meeting notes” will be deleted for everyone.
-                </Typography>
-              </ResponsiveDialogContent>
-            </ResponsiveDialog>
-          </div>
+          <DrawerContentInner>
+            <div className="flex flex-col items-start gap-4">
+              <BaseDrawer.Title render={<Typography variant="heading3" as="h2" />}>
+                Documents
+              </BaseDrawer.Title>
+              <ResponsiveDialog {...args}>
+                <ResponsiveDialogTrigger
+                  render={(
+                    <Button colorLight="secondary">
+                      Delete “Meeting notes”
+                    </Button>
+                  )}
+                />
+                <ResponsiveDialogContent>
+                  <ResponsiveDialogContentInner
+                    footerArea={(
+                      <div className="flex items-center justify-end gap-2">
+                        <ResponsiveDialogClose
+                          render={(
+                            <Button colorLight="secondary">Cancel</Button>
+                          )}
+                        />
+                        <Button colorLight="danger">Delete</Button>
+                      </div>
+                    )}
+                  >
+                    <ResponsiveDialogTitle
+                      className="mb-2"
+                      render={<Typography variant="heading3" as="h2" />}
+                    >
+                      Delete document
+                    </ResponsiveDialogTitle>
+                    <Typography
+                      variant="bodySmall"
+                      textColorLight="grey-600"
+                      textColorDark="grey-400"
+                    >
+                      “Meeting notes” will be deleted for everyone.
+                    </Typography>
+                  </ResponsiveDialogContentInner>
+                </ResponsiveDialogContent>
+              </ResponsiveDialog>
+            </div>
+          </DrawerContentInner>
         </DrawerContent>
       </Drawer>
     </div>
