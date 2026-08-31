@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Price > renders on a white background 1`] = `
+<div>
+  <p
+    class="flex items-baseline gap-2"
+  >
+    <span
+      class="antialiased font-inter text-[28px] sm:text-4xl font-bold text-pca-grey-900 dark:text-white"
+    >
+      25 €
+    </span>
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-600 dark:text-pca-grey-400 font-medium"
+    >
+      / year
+    </span>
+  </p>
+</div>
+`;
+
+exports[`Price > renders on the yellow card by default 1`] = `
+<div>
+  <p
+    class="flex items-baseline gap-2"
+  >
+    <span
+      class="antialiased font-inter text-[28px] sm:text-4xl font-bold text-pca-grey-900 dark:text-pca-grey-900"
+    >
+      25 €
+    </span>
+    <span
+      class="antialiased font-inter text-sm text-pca-yellow-900 dark:text-pca-yellow-900 font-medium"
+    >
+      / year
+    </span>
+  </p>
+</div>
+`;
