@@ -23,7 +23,7 @@ export const Price: React.FC<PriceProps> = ({
     <p className={classNames('flex items-baseline gap-2', className)}>
       <Typography
         as="span"
-        variant="heading1"
+        variant="title"
         textColorLight="grey-900"
         textColorDark={background === 'yellow' ? 'grey-900' : 'white'}
       >

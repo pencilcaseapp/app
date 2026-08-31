@@ -14,7 +14,7 @@ exports[`PricingTable > renders on a white background 1`] = `
       class="flex items-baseline gap-2 mt-1.5"
     >
       <span
-        class="antialiased font-inter text-[28px] sm:text-4xl font-bold text-pca-grey-900 dark:text-white"
+        class="antialiased font-inter text-5xl font-bold text-pca-grey-900 dark:text-white"
       >
         25 €
       </span>
@@ -108,7 +108,7 @@ exports[`PricingTable > renders plan, price, features and slots 1`] = `
       class="flex items-baseline gap-2 mt-1.5"
     >
       <span
-        class="antialiased font-inter text-[28px] sm:text-4xl font-bold text-pca-grey-900 dark:text-pca-grey-900"
+        class="antialiased font-inter text-5xl font-bold text-pca-grey-900 dark:text-pca-grey-900"
       >
         25 €
       </span>
