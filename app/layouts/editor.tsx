@@ -28,6 +28,8 @@ import {
 } from '~/contexts/edited-document';
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
+import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
+import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 
 export const handle = {
@@ -65,7 +67,10 @@ export default function LayoutEditor({
           <SidebarProvider>
             {user
               ? (
-                  <EditorSidebar navigation={navigation}>
+                  <EditorSidebar
+                    navigation={navigation}
+                    showUpgrade={!user.hasSubscription}
+                  >
                     <Outlet />
                   </EditorSidebar>
                 )
@@ -81,11 +86,16 @@ type NavigationItemData = { label: string; to: string };
 
 export interface EditorSidebarProps extends PropsWithChildren {
   navigation: NavigationItemData[];
+  showUpgrade?: boolean;
 }
 
 const getNavigationKey = (item: NavigationItemData) => item.to;
 
-function EditorSidebar({ navigation, children }: EditorSidebarProps) {
+function EditorSidebar({
+  navigation,
+  showUpgrade,
+  children,
+}: EditorSidebarProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [activeDocumentTitle] = useDocumentTitle();
@@ -193,8 +203,17 @@ function EditorSidebar({ navigation, children }: EditorSidebarProps) {
             ),
           },
         ]}
+        // The upgrade area adds the meter block, the button, and the
+        // column gap on top of the footer's base height.
+        reservedFooterHeight={showUpgrade ? 223 : 123}
         bottomArea={(
           <>
+            {showUpgrade && (
+              <SidebarUpgrade
+                documentCount={navigation.length}
+                documentLimit={FREE_DOCUMENT_LIMIT}
+              />
+            )}
             {bottomNavigation?.map(item => (
               <NavigationItem
                 onClick={closeOnNavigate}

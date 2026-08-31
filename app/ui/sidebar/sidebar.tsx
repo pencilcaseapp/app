@@ -15,7 +15,10 @@ export type { SidebarMenuItem };
  * from anywhere in the page registers as a nested drawer and stacks on
  * the sidebar instead of just covering it.
  */
-export type SidebarProps = SidebarBaseProps & PropsWithChildren;
+export type SidebarProps = SidebarBaseProps & PropsWithChildren & {
+  /** Height the mobile drawer reserves for the `bottomArea` footer. */
+  reservedFooterHeight?: number;
+};
 
 /**
  * The height of the sidebar's mobile drawer, shared with overlays that
@@ -26,6 +29,9 @@ export const SIDEBAR_DRAWER_MAX_HEIGHT = 'calc(100dvh - 56px)';
 export const Sidebar: FC<SidebarProps> = ({
   bottomArea,
   items,
+  // The footer's rendered height: two navigation items
+  // plus the gap and the footer's own top padding.
+  reservedFooterHeight = 123,
   children,
 }) => {
   const { isSidebarOpen, setIsSidebarOpen } = useSidebarContext();
@@ -37,9 +43,7 @@ export const Sidebar: FC<SidebarProps> = ({
         <DrawerContent
           isFullHeight
           maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
-          // The footer's rendered height: two navigation items
-          // plus the gap and the footer's own top padding.
-          reservedFooterHeight={123}
+          reservedFooterHeight={reservedFooterHeight}
           contentClassName="px-3 pb-6"
           footerArea={bottomArea && (
             <div className="flex flex-col gap-1.5">
