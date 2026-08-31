@@ -5,6 +5,7 @@ import {
 } from '~/contexts/document-title';
 import { SocketClientProvider } from '~/contexts/socket-client';
 import { DocumentGroup } from '~/ui/document-group/document-group';
+import { DocumentGroupEmpty } from '~/ui/document-group/document-group-empty';
 import { DocumentGroupRoot } from '~/ui/document-group/document-root';
 import { DocumentItem } from '~/ui/document-item/document-item';
 import { DropdownMenu } from '~/ui/dropdown-menu/dropdown-menu';
@@ -168,7 +169,11 @@ function EditorSidebar({ navigation }: EditorSidebarProps) {
           content: (
             <DocumentGroupRoot>
               <DocumentGroup icon="trash" title="Deleted" value="deleted">
-                No deleted documents
+                <DocumentGroupEmpty
+                  icon="no-docs"
+                >
+                  No deleted documents
+                </DocumentGroupEmpty>
               </DocumentGroup>
             </DocumentGroupRoot>
           ),

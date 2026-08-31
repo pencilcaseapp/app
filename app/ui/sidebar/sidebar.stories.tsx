@@ -8,6 +8,7 @@ import { Logo } from '../logo/logo';
 import { Topbar } from '../topbar/topbar';
 import { Button } from '../button/button';
 import { DocumentGroup } from '../document-group/document-group';
+import { DocumentGroupEmpty } from '../document-group/document-group-empty';
 import { DocumentItem } from '../document-item/document-item';
 import { DocumentGroupRoot } from '../document-group/document-root';
 import { NavigationItem } from '../navigation-item/navigation-item';
@@ -190,7 +191,9 @@ export const Default: Story = {
               content: (
                 <DocumentGroupRoot>
                   <DocumentGroup icon="space" title="Work Stuff" value="work-related">
-                    No Document(s) in this space...
+                    <DocumentGroupEmpty icon="no-docs">
+                      No documents in this space
+                    </DocumentGroupEmpty>
                   </DocumentGroup>
                 </DocumentGroupRoot>
               ),
@@ -200,7 +203,9 @@ export const Default: Story = {
               content: (
                 <DocumentGroupRoot>
                   <DocumentGroup icon="share" title="Shared" value="share">
-                    No shared documents
+                    <DocumentGroupEmpty icon="share">
+                      No shared documents
+                    </DocumentGroupEmpty>
                   </DocumentGroup>
                 </DocumentGroupRoot>
               ),
@@ -210,7 +215,9 @@ export const Default: Story = {
               content: (
                 <DocumentGroupRoot>
                   <DocumentGroup icon="trash" title="Deleted" value="deleted">
-                    No deleted documents
+                    <DocumentGroupEmpty icon="trash">
+                      No deleted documents
+                    </DocumentGroupEmpty>
                   </DocumentGroup>
                 </DocumentGroupRoot>
               ),
