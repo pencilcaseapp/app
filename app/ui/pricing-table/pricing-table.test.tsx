@@ -42,6 +42,27 @@ describe('PricingTable', () => {
     expect(container).toMatchSnapshot();
   });
 
+  it('renders missing features with the danger X', () => {
+    const { container } = render(
+      <PricingTable
+        {...props}
+        background="white"
+        missingFeatures={['Access control for collaboration']}
+      />,
+    );
+
+    const missing = screen
+      .getByText('Access control for collaboration')
+      .closest('li');
+    const included = screen.getByText('Hosted in the EU').closest('li');
+
+    expect(missing?.querySelector('.text-pca-red-500')).toBeInTheDocument();
+    expect(
+      included?.querySelector('.text-pca-red-500'),
+    ).not.toBeInTheDocument();
+    expect(container).toMatchSnapshot();
+  });
+
   it('renders without action area and fine print', () => {
     render(<PricingTable {...props} />);
 
