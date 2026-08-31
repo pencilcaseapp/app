@@ -1,14 +1,14 @@
 import type { FC } from 'react';
 import { Avatar } from '~/ui/avatar/avatar';
 import { Typography } from '~/ui/typography/typography';
-import type { SettingsDialogUser } from './settings-dialog';
 
-export interface SettingsProfileProps {
-  user: SettingsDialogUser;
+export interface UserProfileProps {
+  name: string | null;
+  email: string;
 }
 
-export const SettingsProfile: FC<SettingsProfileProps> = ({ user }) => {
-  const displayName = user.name || user.email;
+export const UserProfile: FC<UserProfileProps> = ({ name, email }) => {
+  const displayName = name || email;
 
   return (
     <div className="flex items-center gap-4">
@@ -22,7 +22,7 @@ export const SettingsProfile: FC<SettingsProfileProps> = ({ user }) => {
         >
           {displayName}
         </Typography>
-        {user.name && (
+        {name && (
           <Typography
             variant="bodyTiny"
             as="span"
@@ -30,7 +30,7 @@ export const SettingsProfile: FC<SettingsProfileProps> = ({ user }) => {
             textColorDark="grey-400"
             className="truncate"
           >
-            {user.email}
+            {email}
           </Typography>
         )}
       </div>

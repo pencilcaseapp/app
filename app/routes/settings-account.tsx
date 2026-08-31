@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
 import { SettingsDialogContentInner } from '~/components/settings-dialog/settings-dialog';
-import { SettingsProfile } from '~/components/settings-dialog/settings-profile';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
 import { useAppForm } from '~/hooks/use-app-form';
@@ -15,6 +14,7 @@ import { Icon } from '~/ui/icon/icon';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
 import { ResponsiveDialogClose } from '~/ui/responsive-dialog/responsive-dialog';
 import { Typography } from '~/ui/typography/typography';
+import { UserProfile } from '~/ui/user-profile/user-profile';
 import { validateForm } from '~/utils/form';
 import type { Route } from './+types/settings-account';
 
@@ -97,7 +97,7 @@ export default function SettingsAccountRoute({
     >
       <ControlledForm form={form}>
         <div className="flex flex-col gap-6">
-          <SettingsProfile user={user} />
+          <UserProfile name={user.name} email={user.email} />
           <form.AppField name="name">
             {field => (
               <field.TextField

@@ -2,9 +2,9 @@ import type { FC } from 'react';
 import { href, Link } from 'react-router';
 import { Icon } from '~/ui/icon/icon';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
+import { UserProfile } from '~/ui/user-profile/user-profile';
 import { settingsSections } from './settings-dialog';
 import type { SettingsDialogUser } from './settings-dialog';
-import { SettingsProfile } from './settings-profile';
 
 export interface SettingsMenuProps {
   user: SettingsDialogUser;
@@ -21,7 +21,7 @@ const chevron = (
 export const SettingsMenu: FC<SettingsMenuProps> = ({ user }) => {
   return (
     <div className="flex flex-col gap-6">
-      <SettingsProfile user={user} />
+      <UserProfile name={user.name} email={user.email} />
       <div className="flex flex-col gap-2">
         {settingsSections.map(({ id, title, icon }) => (
           <NavigationItem

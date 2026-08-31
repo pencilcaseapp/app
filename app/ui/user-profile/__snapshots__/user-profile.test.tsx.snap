@@ -1,0 +1,72 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`with a name > matches snapshot 1`] = `
+<div>
+  <div
+    class="flex items-center gap-4"
+  >
+    <span
+      class="flex items-center group flex-row gap-3 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 rounded-full focus:z-50"
+      data-state="closed"
+    >
+      <abbr
+        aria-label="Pency Pencilton"
+        class="flex shrink-0 items-center justify-center rounded-full no-underline relative border bg-pca-yellow-500 text-pca-grey-900 border border-pca-grey-800 h-[40px] w-[40px]"
+      >
+        <span
+          class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit!"
+        >
+          P
+        </span>
+      </abbr>
+    </span>
+    <div
+      class="flex min-w-0 flex-col gap-0.5"
+    >
+      <span
+        class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-semibold truncate"
+      >
+        Pency Pencilton
+      </span>
+      <span
+        class="antialiased font-inter text-xs font-normal text-pca-grey-600 dark:text-pca-grey-400 truncate"
+      >
+        pency@pencilcase.app
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`without a name > matches snapshot 1`] = `
+<div>
+  <div
+    class="flex items-center gap-4"
+  >
+    <span
+      class="flex items-center group flex-row gap-3 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 rounded-full focus:z-50"
+      data-state="closed"
+    >
+      <abbr
+        aria-label="pency@pencilcase.app"
+        class="flex shrink-0 items-center justify-center rounded-full no-underline relative border bg-pca-yellow-500 text-pca-grey-900 border border-pca-grey-800 h-[40px] w-[40px]"
+      >
+        <span
+          class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit!"
+        >
+          P
+        </span>
+      </abbr>
+    </span>
+    <div
+      class="flex min-w-0 flex-col gap-0.5"
+    >
+      <span
+        class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-semibold truncate"
+      >
+        pency@pencilcase.app
+      </span>
+    </div>
+  </div>
+</div>
+`;
