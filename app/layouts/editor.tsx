@@ -1,11 +1,4 @@
-import {
-  href,
-  matchPath,
-  NavLink,
-  Outlet,
-  useLocation,
-  useNavigate,
-} from 'react-router';
+import { href, matchPath, NavLink, Outlet, useLocation } from 'react-router';
 import {
   DocumentTitleProvider,
   useDocumentTitle,
@@ -33,16 +26,8 @@ import {
   EditedDocumentProvider,
   useEditedDocument,
 } from '~/contexts/edited-document';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type PropsWithChildren } from 'react';
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
-import {
-  isSettingsSection,
-  SettingsDialog,
-} from '~/components/settings-dialog/settings-dialog';
-import type {
-  SettingsDialogUser,
-  SettingsPage,
-} from '~/components/settings-dialog/settings-dialog';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 
 export const handle = {
@@ -78,10 +63,13 @@ export default function LayoutEditor({
       <EditedDocumentProvider>
         <SocketClientProvider>
           <SidebarProvider>
-            {user && (
-              <EditorSidebar navigation={navigation} user={user} />
-            )}
-            <Outlet />
+            {user
+              ? (
+                  <EditorSidebar navigation={navigation}>
+                    <Outlet />
+                  </EditorSidebar>
+                )
+              : <Outlet />}
           </SidebarProvider>
         </SocketClientProvider>
       </EditedDocumentProvider>
@@ -91,19 +79,17 @@ export default function LayoutEditor({
 
 type NavigationItemData = { label: string; to: string };
 
-export interface EditorSidebarProps {
+export interface EditorSidebarProps extends PropsWithChildren {
   navigation: NavigationItemData[];
-  user: SettingsDialogUser;
 }
 
 const getNavigationKey = (item: NavigationItemData) => item.to;
 
-function EditorSidebar({ navigation, user }: EditorSidebarProps) {
+function EditorSidebar({ navigation, children }: EditorSidebarProps) {
   const location = useLocation();
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [activeDocumentTitle] = useDocumentTitle();
-  const { closeOnNavigate, setIsSidebarOpen } = useSidebarContext();
+  const { closeOnNavigate } = useSidebarContext();
   const { editedDocumentId } = useEditedDocument();
   const [stableNavigation, moveToTop] = useStableOrder(
     navigation,
@@ -121,50 +107,8 @@ function EditorSidebar({ navigation, user }: EditorSidebarProps) {
     location.pathname,
   );
   const settingsUrl = documentMatch?.params.id
-    ? href('/doc/:id/settings/:section?', { id: documentMatch.params.id })
+    ? href('/doc/:id/settings', { id: documentMatch.params.id })
     : null;
-  // The URL drives the dialog, but the dialog stays mounted here so its
-  // open and close animations can play across navigations. `settings`
-  // shows the menu, `settings/:section` deep-links into a section.
-  const settingsMatch = matchPath(
-    '/doc/:id/settings/:section?',
-    location.pathname,
-  );
-  const isSettingsOpen = settingsMatch !== null;
-  const settingsSection = settingsMatch?.params.section;
-  const settingsPage: SettingsPage
-    = settingsSection && isSettingsSection(settingsSection)
-      ? settingsSection
-      : 'menu';
-
-  // A nested drawer needs its parent open beneath it, so a deep link to
-  // the settings URL on mobile brings the sidebar up as well.
-  useEffect(() => {
-    if (isMobile && isSettingsOpen) {
-      setIsSidebarOpen(true);
-    }
-  }, [isMobile, isSettingsOpen, setIsSidebarOpen]);
-
-  const settingsDialog = (
-    <SettingsDialog
-      user={user}
-      open={isSettingsOpen}
-      page={settingsPage}
-      onOpenChange={(open) => {
-        if (!open && documentMatch?.params.id) {
-          void navigate(href('/doc/:id', { id: documentMatch.params.id }));
-        }
-      }}
-      onPageChange={(page) => {
-        if (documentMatch?.params.id) {
-          void navigate(href('/doc/:id/settings/:section?', {
-            id: documentMatch.params.id,
-            section: page === 'menu' ? undefined : page,
-          }));
-        }
-      }}
-    />
-  );
 
   useEffect(() => {
     if (!editedDocumentId) {
@@ -272,11 +216,11 @@ function EditorSidebar({ navigation, user }: EditorSidebarProps) {
                 as={NavLink}
               />
             )}
-            {isMobile && settingsDialog}
           </>
         )}
-      />
-      {!isMobile && settingsDialog}
+      >
+        {children}
+      </Sidebar>
     </>
   );
 }

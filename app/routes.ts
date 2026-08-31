@@ -5,7 +5,12 @@ export default [
   layout('layouts/editor.tsx', [
     route('new', 'routes/new.tsx'),
     route('doc/:id', 'routes/doc.tsx', [
-      route('settings/:section?', 'routes/doc-settings.tsx'),
+      route('settings', 'routes/settings.tsx', [
+        index('routes/settings-menu.tsx'),
+        route('account', 'routes/settings-account.tsx'),
+        route('subscription', 'routes/settings-subscription.tsx'),
+        route('support', 'routes/settings-support.tsx'),
+      ]),
     ]),
   ]),
   layout('layouts/auth.tsx', [
