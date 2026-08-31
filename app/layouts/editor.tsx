@@ -116,8 +116,13 @@ function EditorSidebar({
     { path: '/doc/:id', end: false },
     location.pathname,
   );
+  // Off mobile the link skips the menu page and opens the account
+  // section straight away.
+  const settingsPath = isMobile
+    ? '/doc/:id/settings'
+    : '/doc/:id/settings/account';
   const settingsUrl = documentMatch?.params.id
-    ? href('/doc/:id/settings', { id: documentMatch.params.id })
+    ? href(settingsPath, { id: documentMatch.params.id })
     : null;
 
   useEffect(() => {
