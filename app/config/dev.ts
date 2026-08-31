@@ -55,9 +55,12 @@ export function getConfigDev(): Config {
         .get('CREEM_API_URL')
         .default('https://test-api.creem.io')
         .asString(),
+      // The placeholder is enough for the fake Creem the e2e tests run;
+      // talking to the real test store needs the key from the dashboard
+      // in `.env` (see docs/subscriptions.md).
       apiKey: env
         .get('CREEM_API_KEY')
-        .default('creem_test_1r9JeERaISK4FhcN1W8VY4')
+        .default('creem_test_apikey')
         .asString(),
       productId: env
         .get('CREEM_PRODUCT_ID')
