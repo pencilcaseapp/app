@@ -23,7 +23,7 @@ export const SidebarUpgrade: React.FC<SidebarUpgradeProps> = ({
   const documentsLeft = Math.max(0, documentLimit - documentCount);
 
   return (
-    <div className="flex flex-col gap-4 px-2 pt-2">
+    <div className="flex flex-col gap-4 pt-2">
       <Meter
         label={`${documentsLeft} free doc(s) left.`}
         value={Math.min(documentCount, documentLimit)}
