@@ -40,7 +40,7 @@ export function SubscriptionPaymentFailedEmail({
       <Typography variant="bodySmall" textAlign="center" className="mb-6">
         {body}
       </Typography>
-      <Typography variant="bodySmall" textAlign="center" className="mb-3">
+      <Typography variant="bodySmall" textAlign="center" className="mb-6">
         {action}
       </Typography>
       <LinkButton href={portalUrl} className="mb-6">

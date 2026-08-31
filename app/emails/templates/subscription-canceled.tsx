@@ -36,7 +36,7 @@ export function SubscriptionCanceledEmail({
       <Typography variant="bodySmall" textAlign="center" className="mb-6">
         {body}
       </Typography>
-      <Typography variant="bodySmall" textAlign="center" className="mb-3">
+      <Typography variant="bodySmall" textAlign="center" className="mb-6">
         {closing}
       </Typography>
       <LinkButton href={upgradeUrl}>
