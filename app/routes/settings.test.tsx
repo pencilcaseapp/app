@@ -23,6 +23,17 @@ vi.mock('~/services/document', async (importOriginal) => {
   };
 });
 
+const setIsSidebarOpenMock = vi.fn();
+
+vi.mock('~/ui/sidebar-context/use-sidebar-context', () => ({
+  useSidebarContext: () => ({
+    isSidebarOpen: false,
+    setIsSidebarOpen: setIsSidebarOpenMock,
+    triggerRef: { current: null },
+    closeOnNavigate: vi.fn(),
+  }),
+}));
+
 const MOBILE_QUERY = '(width < 40rem)';
 const SIDE_NAVIGATION_QUERY = '(width >= 64rem)';
 
@@ -234,6 +245,20 @@ describe('the settings routes', () => {
       expect(
         await screen.findByRole('dialog', { name: 'Settings' }),
       ).toHaveClass('rounded-t-3xl');
+    });
+
+    // The drawer stacks on the sidebar it is opened from, so a direct
+    // load has to open the sidebar underneath itself.
+    test('open the sidebar under the drawer', async () => {
+      await renderSettings('/doc/:id/settings', 'mobile');
+
+      expect(setIsSidebarOpenMock).toHaveBeenCalledWith(true);
+    });
+
+    test('leave the sidebar alone off mobile', async () => {
+      await renderSettings('/doc/:id/settings/account', 'tablet');
+
+      expect(setIsSidebarOpenMock).not.toHaveBeenCalled();
     });
   });
 });
