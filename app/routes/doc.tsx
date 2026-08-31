@@ -131,6 +131,8 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
         description="It may have been deleted, moved, or the link you followed is taking you nowhere."
         actionArea={<Button as={Link} to="/">Go home</Button>}
         signInUrl={loaderData.signInUrl}
+        imageSrcLight="/lost-pencil-light.svg"
+        imageSrcDark="/lost-pencil-dark.svg"
       />
     );
   }

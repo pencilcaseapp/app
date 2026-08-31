@@ -8,6 +8,8 @@ export type EmptyStateProps = {
   title: React.ReactNode;
   description?: React.ReactNode;
   actionArea?: React.ReactNode;
+  imageSrcLight?: string;
+  imageSrcDark?: string;
 };
 
 export const EmptyState: FC<EmptyStateProps> = ({
@@ -15,6 +17,8 @@ export const EmptyState: FC<EmptyStateProps> = ({
   title,
   description,
   actionArea,
+  imageSrcLight = '/welcoming-pencil-light.svg',
+  imageSrcDark = '/welcoming-pencil-dark.svg',
 }) => {
   return (
     <div
@@ -24,9 +28,9 @@ export const EmptyState: FC<EmptyStateProps> = ({
       )}
     >
       <picture>
-        <source srcSet="/welcoming-pencil-dark.svg" media="(prefers-color-scheme: dark)" />
+        <source srcSet={imageSrcDark} media="(prefers-color-scheme: dark)" />
         <img
-          src="/welcoming-pencil-light.svg"
+          src={imageSrcLight}
           className="block w-45 h-45 ml-auto mr-auto"
           alt=""
         />
