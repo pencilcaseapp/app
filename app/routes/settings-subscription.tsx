@@ -1,5 +1,11 @@
+import type { MiddlewareFunction } from 'react-router';
 import { SettingsDialogContent } from '~/components/settings-dialog/settings-dialog';
+import { authMiddleware } from '~/middleware/auth';
 import { Typography } from '~/ui/typography/typography';
+
+export const middleware: MiddlewareFunction[] = [
+  authMiddleware,
+];
 
 export default function SettingsSubscriptionRoute() {
   return (

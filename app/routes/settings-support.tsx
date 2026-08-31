@@ -1,8 +1,14 @@
+import type { MiddlewareFunction } from 'react-router';
 import { SettingsDialogContent } from '~/components/settings-dialog/settings-dialog';
 import { commonCopies } from '~/constants/common-copies';
+import { authMiddleware } from '~/middleware/auth';
 import { Icon } from '~/ui/icon/icon';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
 import { Typography } from '~/ui/typography/typography';
+
+export const middleware: MiddlewareFunction[] = [
+  authMiddleware,
+];
 
 const externalLink = (
   <Icon icon="externalLink" className="m-1 text-pca-grey-400" />

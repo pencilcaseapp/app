@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
-import { useActionData, useOutletContext } from 'react-router';
+import { useActionData, type MiddlewareFunction } from 'react-router';
 import { z } from 'zod';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
 import { SettingsDialogContent } from '~/components/settings-dialog/settings-dialog';
-import type { SettingsOutletContext } from '~/components/settings-dialog/settings-dialog';
 import { SettingsProfile } from '~/components/settings-dialog/settings-profile';
 import { userSessionContext } from '~/contexts/user-session';
+import { authMiddleware } from '~/middleware/auth';
 import { useAppForm } from '~/hooks/use-app-form';
 import { useEmitToast } from '~/hooks/use-toast';
 import { updateUser } from '~/repos/user';
@@ -24,6 +24,16 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+export const middleware: MiddlewareFunction[] = [
+  authMiddleware,
+];
+
+export function loader({ context }: Route.LoaderArgs) {
+  const { name, email, newsletter } = context.get(userSessionContext);
+
+  return { user: { name, email, newsletter } };
+}
 
 export async function action({ request, context }: Route.ActionArgs) {
   const form = await validateForm(request, formSchema);
@@ -49,8 +59,9 @@ const chevron = (
  * The account section: the name and the newsletter preference are saved
  * through the footer's save button, the e-mail is not editable yet.
  */
-export default function SettingsAccountRoute() {
-  const { user } = useOutletContext<SettingsOutletContext>();
+export default function SettingsAccountRoute({
+  loaderData: { user },
+}: Route.ComponentProps) {
   const actionData = useActionData() as { saved?: boolean } | undefined;
   const emitToast = useEmitToast();
 
