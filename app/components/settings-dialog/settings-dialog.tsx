@@ -79,7 +79,7 @@ export const SettingsDialogContent: FC<SettingsDialogContentProps> = ({
           title={title}
           onBack={
             !hasSideNavigation && section !== null
-              ? () => void navigate('..')
+              ? () => void navigate('..', { preventScrollReset: true })
               : undefined
           }
         />
@@ -93,6 +93,7 @@ export const SettingsDialogContent: FC<SettingsDialogContentProps> = ({
                     key={id}
                     as={NavLink}
                     to={`../${id}`}
+                    preventScrollReset
                     icon={icon}
                     title={sectionTitle}
                     className={sideNavigationItemClasses}

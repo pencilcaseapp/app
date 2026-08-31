@@ -28,6 +28,7 @@ export const SettingsMenu: FC<SettingsMenuProps> = ({ user }) => {
             key={id}
             as={Link}
             to={id}
+            preventScrollReset
             icon={icon}
             title={title}
             actionArea={chevron}

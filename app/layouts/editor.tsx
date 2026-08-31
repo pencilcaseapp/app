@@ -243,6 +243,9 @@ function EditorSidebar({
                 onClick={isMobile ? undefined : closeOnNavigate}
                 title="Settings"
                 to={settingsUrl}
+                // The dialog opens over the document, so the document
+                // keeps the scroll position it is opened from.
+                preventScrollReset
                 icon="settings"
                 // A plain link, so opening the dialog does not mark the
                 // entry as the active page.
