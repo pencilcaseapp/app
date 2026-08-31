@@ -14,11 +14,6 @@ export interface SettingsDialogUser {
   newsletter: boolean | null;
 }
 
-/** What the settings route hands down to its section routes. */
-export interface SettingsOutletContext {
-  user: SettingsDialogUser;
-}
-
 export type SettingsSection = 'account' | 'subscription' | 'support';
 
 /** From here up the section navigation sits next to the content. */

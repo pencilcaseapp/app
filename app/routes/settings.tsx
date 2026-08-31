@@ -1,34 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useNavigate, type MiddlewareFunction } from 'react-router';
-import type { SettingsOutletContext } from '~/components/settings-dialog/settings-dialog';
-import { ResponsiveDialog } from '~/ui/responsive-dialog/responsive-dialog';
-import { userSessionContext } from '~/contexts/user-session';
+import { Outlet, useNavigate } from 'react-router';
 import { useIsMobile } from '~/hooks/use-is-mobile';
-import { authMiddleware } from '~/middleware/auth';
+import { ResponsiveDialog } from '~/ui/responsive-dialog/responsive-dialog';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
-import type { Route } from './+types/settings';
-
-export const middleware: MiddlewareFunction[] = [
-  authMiddleware,
-];
-
-export function loader({ context }: Route.LoaderArgs) {
-  return {
-    user: context.get(userSessionContext),
-  };
-}
 
 /*
  * The settings dialog over the document it was opened from: this route
  * only keeps the responsive dialog open across the section routes; the
  * outlet renders the menu (index) or a section, each bringing its own
- * dialog content. The dialog mounts closed and opens a frame later so
- * the enter animation plays, and closing waits for the exit animation
+ * authentication, data and dialog content, so nothing is handed down
+ * from here. The dialog mounts closed and opens a frame later so the
+ * enter animation plays, and closing waits for the exit animation
  * before navigating back up to the document.
  */
-export default function Settings({
-  loaderData: { user },
-}: Route.ComponentProps) {
+export default function Settings() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { setIsSidebarOpen } = useSidebarContext();
@@ -72,7 +57,7 @@ export default function Settings({
         }
       }}
     >
-      <Outlet context={{ user } satisfies SettingsOutletContext} />
+      <Outlet />
     </ResponsiveDialog>
   );
 }
