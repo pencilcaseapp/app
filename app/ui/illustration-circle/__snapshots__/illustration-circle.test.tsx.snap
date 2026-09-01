@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`IllustrationCircle > renders the illustration as decoration 1`] = `
+<div>
+  <div
+    class="relative size-30 shrink-0 overflow-hidden rounded-full bg-pca-yellow-300"
+  >
+    <img
+      alt=""
+      class="absolute left-1/2 top-[3px] size-[142px] max-w-none -translate-x-1/2"
+      height="142"
+      src="/upgrade-pencil@2x.png"
+      width="142"
+    />
+  </div>
+</div>
+`;

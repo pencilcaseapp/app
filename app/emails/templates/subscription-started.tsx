@@ -9,7 +9,7 @@ const body = 'Your pencil case PRO subscription is active and all paid '
 const receiptNote = 'Creem, our payment partner, sends your receipt and '
   + 'invoice in a separate email. Their customer portal is also where you '
   + 'manage your payment method and subscription — you can reach it any '
-  + 'time from the upgrade page.';
+  + 'time from your subscription settings.';
 
 export function subscriptionStartedEmailSubject() {
   return 'Welcome to pencil case PRO';

@@ -1,4 +1,5 @@
-import { href, Link } from 'react-router';
+import { Link } from 'react-router';
+import { useIsMobile } from '~/hooks/use-is-mobile';
 import { Button } from '~/ui/button/button';
 import { Meter } from '~/ui/meter/meter';
 import { useIconOnly } from '~/ui/navigation-item/icon-only-context';
@@ -7,13 +8,17 @@ import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 export interface SidebarUpgradeProps {
   documentCount: number;
   documentLimit: number;
+  /** The subscription settings to open. */
+  to: string;
 }
 
 export const SidebarUpgrade: React.FC<SidebarUpgradeProps> = ({
   documentCount,
   documentLimit,
+  to,
 }) => {
   const isIconOnly = useIconOnly();
+  const isMobile = useIsMobile();
   const { closeOnNavigate } = useSidebarContext();
 
   if (isIconOnly) {
@@ -31,9 +36,13 @@ export const SidebarUpgrade: React.FC<SidebarUpgradeProps> = ({
       />
       <Button
         as={Link}
-        to={href('/upgrade')}
+        to={to}
+        // The settings dialog opens over the document, which keeps its
+        // scroll position; on mobile the drawer stacks on the open
+        // sidebar instead of replacing it.
+        preventScrollReset
+        onClick={isMobile ? undefined : closeOnNavigate}
         colorLight="upgrade"
-        onClick={closeOnNavigate}
       >
         Upgrade to Pro
       </Button>

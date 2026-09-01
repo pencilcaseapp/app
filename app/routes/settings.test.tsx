@@ -162,7 +162,7 @@ describe('the settings routes', () => {
         await screen.findByRole('dialog', { name: 'Subscription' }),
       ).toBeInTheDocument();
       expect(
-        screen.getByText('The Subscription settings live here.'),
+        screen.getByRole('button', { name: 'Upgrade to Pro' }),
       ).toBeInTheDocument();
       expect(
         screen.queryByRole('button', { name: 'Save' }),

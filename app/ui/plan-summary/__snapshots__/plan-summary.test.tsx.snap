@@ -1,0 +1,89 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PlanSummary > renders the badge and the detail line 1`] = `
+<div>
+  <div
+    class="flex flex-col"
+  >
+    <span
+      class="antialiased font-inter text-xs font-normal text-pca-grey-900 dark:text-white"
+    >
+      Pencil Case
+    </span>
+    <div
+      class="flex items-center justify-between gap-3"
+    >
+      <h3
+        class="font-inter text-[28px] font-bold antialiased text-pca-grey-900 dark:text-pca-white"
+      >
+        Pro
+      </h3>
+      <span
+        class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-green-300"
+      >
+        <span
+          class="antialiased font-inter text-xs text-pca-green-900 dark:text-pca-green-900 font-semibold leading-[18px] tracking-[0.02em]"
+        >
+          Active
+        </span>
+      </span>
+    </div>
+    <p
+      class="mt-1"
+    >
+      <span
+        class="antialiased font-inter text-base font-normal text-pca-grey-900 dark:text-white"
+      >
+        25 €
+      </span>
+      <span
+        class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white"
+      >
+         / renews yearly
+      </span>
+    </p>
+    <p
+      class="antialiased font-inter text-xs font-normal text-pca-grey-600 dark:text-pca-grey-400 mt-0.5"
+    >
+      Renews at: 06.07.2026
+    </p>
+  </div>
+</div>
+`;
+
+exports[`PlanSummary > renders the plan with its price 1`] = `
+<div>
+  <div
+    class="flex flex-col"
+  >
+    <span
+      class="antialiased font-inter text-xs font-normal text-pca-grey-900 dark:text-white"
+    >
+      Pencil Case
+    </span>
+    <div
+      class="flex items-center justify-between gap-3"
+    >
+      <h3
+        class="font-inter text-[28px] font-bold antialiased text-pca-grey-900 dark:text-pca-white"
+      >
+        Pro
+      </h3>
+    </div>
+    <p
+      class="mt-1"
+    >
+      <span
+        class="antialiased font-inter text-base font-normal text-pca-grey-900 dark:text-white"
+      >
+        25 €
+      </span>
+      <span
+        class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white"
+      >
+         / renews yearly
+      </span>
+    </p>
+  </div>
+</div>
+`;

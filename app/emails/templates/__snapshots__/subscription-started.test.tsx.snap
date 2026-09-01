@@ -6,7 +6,7 @@ PENCIL CASE PRO
 
 Your pencil case PRO subscription is active and all paid features are switched on. Thanks a lot for supporting us!
 
-Creem, our payment partner, sends your receipt and invoice in a separate email. Their customer portal is also where you manage your payment method and subscription — you can reach it any time from the upgrade page."
+Creem, our payment partner, sends your receipt and invoice in a separate email. Their customer portal is also where you manage your payment method and subscription — you can reach it any time from your subscription settings."
 `;
 
 exports[`SubscriptionStartedEmail > matches the rendered markup 1`] = `
@@ -93,7 +93,7 @@ exports[`SubscriptionStartedEmail > matches the rendered markup 1`] = `
                       Creem, our payment partner, sends your receipt and invoice
                       in a separate email. Their customer portal is also where
                       you manage your payment method and subscription — you can
-                      reach it any time from the upgrade page.
+                      reach it any time from your subscription settings.
                     </p>
                   </td>
                 </tr>

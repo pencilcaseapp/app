@@ -9,35 +9,53 @@ on. Nothing about money lives in our code — only state.
 
 ## The flow
 
-- **`/upgrade`** (signed in) shows a single upgrade button, or a
-  "Manage subscription" button once a subscription exists. The action
-  creates a checkout session through `POST /v1/checkouts` — prefilled
-  with the account email, or with the user's `creem_customer_id` when
-  they had a subscription before, so Creem reuses the customer — and
-  redirects the browser to Creem's hosted checkout
-  (`redirectDocument`: leaving the app is always a full navigation).
-  The user id rides along as `metadata.userId`; that metadata is
-  attached to the subscription and comes back in every webhook, which
-  is how events find the account no matter what email was used to pay.
-- **`/upgrade/callback`** is the `success_url`. Creem appends the
+- **`/doc/:id/settings/subscription`** (signed in) is the subscription
+  section of the settings dialog, over the document it was opened
+  from. Without the pro features it shows the upgrade offer — the pro
+  plan, its features and a single button; with them the running
+  subscription: its status as a badge (active, trial, cancelled but
+  paid until the period ends, payment failed), the renewal or end
+  date, and the "Manage Subscription" link into Creem's portal. A
+  user with `has_subscription` set but no subscription row behind it
+  — the pro features handed out for free through `/invite/:code` —
+  sees the plan marked active without a price or a portal link.
+  `getSubscriptionOverview` in `app/services/subscription.ts` decides
+  between the three.
+- The section's **action** creates a checkout session through
+  `POST /v1/checkouts` — prefilled with the account email, or with
+  the user's `creem_customer_id` when they had a subscription before,
+  so Creem reuses the customer — and redirects the browser to Creem's
+  hosted checkout (`redirectDocument`: leaving the app is always a
+  full navigation). The `success_url` is the section's own URL, so
+  the user comes back to the settings over the document they
+  upgraded from. The user id rides along as `metadata.userId`; that
+  metadata is attached to the subscription and comes back in every
+  webhook, which is how events find the account no matter what email
+  was used to pay.
+- The section's **loader** doubles as the callback. Creem appends the
   checkout/subscription/customer ids plus a `signature` — a SHA-256
   over the parameters in URL order, salted with the API key — which
   `verifyRedirectSignature` checks before anything else. The loader
   then loads the subscription from the API, stores it, flips the flag
-  and renders the confirmation. The callback is a UX path, not the
-  source of truth: the webhook does the same idempotent sync, so
-  whichever arrives first wins and the other one is a no-op. A user
-  who closes the tab on Creem's "payment successful" screen still
-  gets pro through the webhook.
+  and redirects to the plain section URL with a toast, so the signed
+  parameters never stay in the address bar. The callback is a UX
+  path, not the source of truth: the webhook does the same idempotent
+  sync, so whichever arrives first wins and the other one is a no-op.
+  A user who closes the tab on Creem's "payment successful" screen
+  still gets pro through the webhook.
+- **`/upgrade`** is the stable address for emails and redirects: it
+  opens the subscription section over the document the user worked
+  on last (creating one for a user without any) and hands its search
+  params on, which is how the billing portal's error toasts arrive.
 - **`/webhooks/creem`** receives Creem's events, verified against the
   `creem-signature` header (HMAC-SHA256 of the raw body with the
   webhook secret). Every event is recorded in `creem_webhook_events`
   under Creem's event id — the raw payload is kept for debugging and
   replay — and then processed.
 - **`/billing-portal`** asks Creem for a customer portal session and
-  redirects to it. The upgrade page opens it in a new tab; inside,
-  customers cancel subscriptions, change payment methods and download
-  invoices without us building any of it.
+  redirects to it. The subscription section opens it in a new tab;
+  inside, customers cancel subscriptions, change payment methods and
+  download invoices without us building any of it.
 
 ## State
 
@@ -105,7 +123,8 @@ three product emails (`app/emails/templates/`):
   `/billing-portal`, and a recovered renewal pays for a lot of
   duplicate emails. Sent on `past_due`, once per event.
 - **subscription-canceled** — Creem sends nothing when a subscription
-  ends; this confirms it and points back to `/upgrade`.
+  ends; this confirms it and points back to `/upgrade`, which opens
+  the subscription settings.
 
 There is no trial email because the product has no trial; add one on
 `subscription.trialing` if that changes.
