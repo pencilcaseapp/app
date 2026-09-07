@@ -42,8 +42,8 @@ export default function UpgradeCallback({
         <Button
           as={Link}
           to={href('/upgrade')}
-          colorLight="secondary"
-          colorDark="secondary"
+          colorLight="transparent"
+          colorDark="transparent"
           className="mb-10 w-full"
         >
           Back to the upgrade page
@@ -75,8 +75,8 @@ export default function UpgradeCallback({
       <Button
         as={Link}
         to={href('/')}
-        colorLight="primary"
-        colorDark="upgrade"
+        colorLight="grey-900"
+        colorDark="yellow-500"
         className="mb-10 w-full"
       >
         Start writing

@@ -51,7 +51,7 @@ export const Default: Story = {
     <div className="flex min-h-dvh items-center justify-center">
       <Dialog {...args}>
         <BaseDialog.Trigger
-          render={<Button colorLight="primary">Open dialog</Button>}
+          render={<Button colorLight="grey-900">Open dialog</Button>}
         />
         <DialogContent size="small">
           <DialogContentInner>
@@ -89,16 +89,16 @@ export const WithFooter: Story = {
     <div className="flex min-h-dvh items-center justify-center">
       <Dialog {...args}>
         <BaseDialog.Trigger
-          render={<Button colorLight="primary">Open dialog</Button>}
+          render={<Button colorLight="grey-900">Open dialog</Button>}
         />
         <DialogContent size="small">
           <DialogContentInner
             footerArea={(
               <div className="flex items-center justify-end gap-2">
                 <BaseDialog.Close
-                  render={<Button colorLight="secondary">Cancel</Button>}
+                  render={<Button colorLight="transparent">Cancel</Button>}
                 />
-                <Button colorLight="danger">Delete</Button>
+                <Button colorLight="red-500">Delete</Button>
               </div>
             )}
           >
@@ -145,7 +145,7 @@ export const WithSideArea: Story = {
 
     return (
       <div className="flex min-h-dvh items-center justify-center">
-        <Button colorLight="primary" onClick={() => setOpen(true)}>
+        <Button colorLight="grey-900" onClick={() => setOpen(true)}>
           Open settings
         </Button>
         <Dialog {...args} open={open} onOpenChange={setOpen}>
@@ -177,7 +177,7 @@ export const WithSideArea: Story = {
                     ))}
                   </div>
                   <Button
-                    colorLight="secondary"
+                    colorLight="transparent"
                     className="w-full justify-start text-pca-red-500! dark:text-pca-red-500!"
                   >
                     Logout
@@ -187,7 +187,7 @@ export const WithSideArea: Story = {
               footerArea={(
                 <div className="flex items-center justify-end gap-2">
                   <BaseDialog.Close
-                    render={<Button colorLight="secondary">Cancel</Button>}
+                    render={<Button colorLight="transparent">Cancel</Button>}
                   />
                   <Button>{isChangingEmail ? 'Continue' : 'Save'}</Button>
                 </div>
@@ -233,7 +233,7 @@ export const WithSideArea: Story = {
                       </Typography>
                       {section === 'Account' && (
                         <Button
-                          colorLight="secondary"
+                          colorLight="transparent"
                           onClick={() => setIsChangingEmail(true)}
                         >
                           Change e-mail

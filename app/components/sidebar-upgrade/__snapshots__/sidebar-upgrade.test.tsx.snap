@@ -37,7 +37,7 @@ exports[`renders meter and upgrade button 1`] = `
       </span>
     </div>
     <a
-      class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 rounded-xl px-4 py-2 lg:px-3 flex-row bg-pca-yellow-500 text-pca-grey-900 hover:bg-pca-yellow-700 active:bg-pca-yellow-700 dark:bg-pca-yellow-500 dark:text-pca-grey-900 dark:hover:bg-pca-yellow-700 dark:active:bg-pca-yellow-700"
+      class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-yellow-500 text-pca-grey-900 hover:bg-pca-yellow-700 active:bg-pca-yellow-700 dark:bg-pca-yellow-500 dark:text-pca-grey-900 dark:hover:bg-pca-yellow-700 dark:active:bg-pca-yellow-700"
       href="/upgrade"
     >
       <span

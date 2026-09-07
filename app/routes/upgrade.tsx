@@ -92,8 +92,8 @@ export default function Upgrade({ loaderData }: Route.ComponentProps) {
             <Button
               type="submit"
               isLoading={navigation.state !== 'idle'}
-              colorLight="primary"
-              colorDark="upgrade"
+              colorLight="grey-900"
+              colorDark="yellow-500"
               className="mb-10 w-full"
             >
               Upgrade
@@ -118,8 +118,8 @@ export default function Upgrade({ loaderData }: Route.ComponentProps) {
             href={href('/billing-portal')}
             target="_blank"
             rel="noopener"
-            colorLight="primary"
-            colorDark="upgrade"
+            colorLight="grey-900"
+            colorDark="yellow-500"
             className="mb-10 w-full"
           >
             Manage subscription

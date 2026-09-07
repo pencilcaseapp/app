@@ -34,7 +34,9 @@ export const Default: Story = {
       'Support small tech',
       'Support development',
     ],
-    actionArea: <Button className="w-full">Upgrade to Pro</Button>,
+    actionArea: (
+      <Button className="w-full" colorDark="grey-900">Upgrade to Pro</Button>
+    ),
     finePrint: 'Secure checkout by Creem.',
   },
 };

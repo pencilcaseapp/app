@@ -125,8 +125,8 @@ export default function Onboarding() {
           )}
         </formOnboarding.AppField>
         <formOnboarding.SubmitButton
-          colorLight="primary"
-          colorDark="upgrade"
+          colorLight="grey-900"
+          colorDark="yellow-500"
           className="mb-4 w-full"
         >
           {commonCopies.actions.continue}
@@ -134,8 +134,8 @@ export default function Onboarding() {
       </ControlledForm>
       <ControlledForm form={formSkip}>
         <formSkip.SubmitButton
-          colorLight="secondary"
-          colorDark="secondary"
+          colorLight="transparent"
+          colorDark="transparent"
           className="mb-10 w-full"
         >
           Skip it
