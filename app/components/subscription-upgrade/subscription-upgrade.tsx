@@ -1,35 +1,58 @@
 import type { FC } from 'react';
 import { Form, useNavigation } from 'react-router';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
-import { PRO_PLAN } from '~/constants/subscription';
+import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { Button } from '~/ui/button/button';
-import { PlanSummary } from '~/ui/plan-summary/plan-summary';
+import { Typography } from '~/ui/typography/typography';
+import { PlanOverview } from '../plan-overview/plan-overview';
+
+export interface SubscriptionUpgradeProps {
+  /** The user's docs, counted against the free limit. */
+  documentCount: number;
+}
+
+const headlineFor = (documentCount: number) => {
+  if (documentCount >= FREE_DOCUMENT_LIMIT) {
+    return `You’ve used all ${FREE_DOCUMENT_LIMIT} of your free docs.`;
+  }
+
+  return `You’ve used ${documentCount} of your ${FREE_DOCUMENT_LIMIT} free docs.`;
+};
 
 /*
- * The upgrade offer of the subscription settings: the pro plan and the
- * button that posts to the route's action, which starts the checkout.
+ * The upgrade offer of the subscription settings: the free plan the
+ * user is on next to pro, under a headline about their own usage.
  */
-export const SubscriptionUpgrade: FC = () => {
+export const SubscriptionUpgrade: FC<SubscriptionUpgradeProps> = ({
+  documentCount,
+}) => (
+  <PlanOverview
+    image="flying-docs"
+    headline={headlineFor(documentCount)}
+    subheadline="Unlimited docs, and you decide who gets in."
+    currentPlan="free"
+  />
+);
+
+/*
+ * The offer's footer, pinned below the section: the button that posts
+ * to the route's action, which starts the checkout.
+ */
+export const SubscriptionUpgradeFooter: FC = () => {
   const navigation = useNavigation();
 
   return (
-    <div className="flex flex-col">
-      <PlanSummary
-        product={PRO_PLAN.product}
-        plan={PRO_PLAN.name}
-        price={PRO_PLAN.price}
-        period={PRO_PLAN.period}
-        className="pb-4"
-      />
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <Typography
+        variant="bodyTiny"
+        textColorLight="grey-600"
+        textColorDark="grey-400"
+      >
+        Secure checkout by Creem.
+      </Typography>
       <Form method="post">
         <AuthenticityTokenInput />
-        <Button
-          type="submit"
-          isLoading={navigation.state !== 'idle'}
-          colorLight="yellow-500"
-          colorDark="yellow-500"
-          className="w-full"
-        >
+        <Button type="submit" isLoading={navigation.state !== 'idle'}>
           Upgrade to Pro
         </Button>
       </Form>
