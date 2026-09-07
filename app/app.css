@@ -9,49 +9,49 @@
 
 
 @theme {
-  --color-pca-white: #FFFFFF;
+  --color-pca-white: oklch(1 0 0);
 
-  --color-pca-grey-100: #F8F8F8;
-  --color-pca-grey-200: #EDEDED;
-  --color-pca-grey-300: #C8C8C8;
-  --color-pca-grey-400: #A4A4A4;
-  --color-pca-grey-500: #808080;
-  --color-pca-grey-600: #5B5B5B;
-  --color-pca-grey-700: #505050;
-  --color-pca-grey-800: #303030;
-  --color-pca-grey-900: #101010;
+  --color-pca-grey-100: oklch(0.975 0 0);
+  --color-pca-grey-200: oklch(0.94 0 0);
+  --color-pca-grey-300: oklch(0.84 0 0);
+  --color-pca-grey-400: oklch(0.719 0 0);
+  --color-pca-grey-500: oklch(0.6 0 0);
+  --color-pca-grey-600: oklch(0.48 0 0);
+  --color-pca-grey-700: oklch(0.37 0 0);
+  --color-pca-grey-800: oklch(0.26 0 0);
+  --color-pca-grey-900: oklch(0.173 0 0);
 
-  --color-pca-blue-300: #C2D2FC;
-  --color-pca-blue-500: #398BF6;
-  --color-pca-blue-700: #0839B7;
-  --color-pca-blue-900: #051C66;
+  --color-pca-blue-300: oklch(0.866 0.061 264);
+  --color-pca-blue-500: oklch(0.641 0.178 264);
+  --color-pca-blue-700: oklch(0.414 0.203 264);
+  --color-pca-blue-900: oklch(0.273 0.132 264);
 
-  --color-pca-yellow-300: #FFEEA8;
-  --color-pca-yellow-500: #FFE365;
-  --color-pca-yellow-700: #D9B93A;
-  --color-pca-yellow-900: #8B7521;
+  --color-pca-yellow-300: oklch(0.947 0.09 96.126);
+  --color-pca-yellow-500: oklch(0.916 0.147 96.825);
+  --color-pca-yellow-700: oklch(0.792 0.144 94.379);
+  --color-pca-yellow-900: oklch(0.568 0.103 93.756);
 
-  --color-pca-pink-300: #FFE5E5;
-  --color-pca-pink-500: #FECCCC;
-  --color-pca-pink-700: #E89A9A;
-  --color-pca-pink-900: #C94747;
+  --color-pca-pink-300: oklch(0.943 0.029 17.67);
+  --color-pca-pink-500: oklch(0.889 0.057 18.277);
+  --color-pca-pink-700: oklch(0.764 0.094 19.462);
+  --color-pca-pink-900: oklch(0.578 0.166 23.882);
 
-  --color-pca-orange-300: #FFD1A8;
-  --color-pca-orange-500: #FF9C41;
-  --color-pca-orange-700: #D9771E;
-  --color-pca-orange-900: #A84C11;
+  --color-pca-orange-300: oklch(0.891 0.07 59.365);
+  --color-pca-orange-500: oklch(0.78 0.156 59.365);
+  --color-pca-orange-700: oklch(0.667 0.153 59.365);
+  --color-pca-orange-900: oklch(0.526 0.124 59.365);
 
-  --color-pca-green-100: #DDFBD0;
-  --color-pca-green-300: #A9F58A;
-  --color-pca-green-500: #52E01F;
-  --color-pca-green-700: #2FA80F;
-  --color-pca-green-900: #1F6B07;
+  --color-pca-green-100: oklch(0.955 0.065 136.207);
+  --color-pca-green-300: oklch(0.896 0.158 137.17);
+  --color-pca-green-500: oklch(0.798 0.246 139.72);
+  --color-pca-green-700: oklch(0.64 0.204 140.756);
+  --color-pca-green-900: oklch(0.463 0.146 140.203);
 
-  --color-pca-red-100: #FFF0F0;
-  --color-pca-red-300: #FECCCC;
-  --color-pca-red-500: #EF4444;
-  --color-pca-red-700: #9E1C1C;
-  --color-pca-red-900: #6B1414;
+  --color-pca-red-100: oklch(0.967 0.016 17.438);
+  --color-pca-red-300: oklch(0.889 0.057 18.277);
+  --color-pca-red-500: oklch(0.637 0.208 25.331);
+  --color-pca-red-700: oklch(0.454 0.165 26.924);
+  --color-pca-red-900: oklch(0.347 0.121 26.208);
 
   --font-inter: Inter, ui-sans-serif, system-ui, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
