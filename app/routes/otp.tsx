@@ -211,8 +211,8 @@ export default function Otp({ loaderData }: Route.ComponentProps) {
         </formVerify.AppField>
 
         <formVerify.SubmitButton
-          colorLight="primary"
-          colorDark="upgrade"
+          colorLight="grey-900"
+          colorDark="yellow-500"
           className="mb-4 w-full"
         >
           {commonCopies.actions.continue}
@@ -223,8 +223,8 @@ export default function Otp({ loaderData }: Route.ComponentProps) {
           {field => <field.HiddenInput />}
         </formResend.AppField>
         <formResend.SubmitButton
-          colorLight="secondary"
-          colorDark="secondary"
+          colorLight="transparent"
+          colorDark="transparent"
           className="mb-10 w-full"
         >
           Resend code

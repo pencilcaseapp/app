@@ -90,7 +90,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
             ? (
                 <ShareLinkButton
                   className="w-full"
-                  colorLight="primary"
+                  colorLight="grey-900"
                   link={shareUrl}
                   label="Share link"
                   disabled={!isShared}
@@ -99,7 +99,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
             : (
                 <CopyLinkButton
                   className="w-full"
-                  colorLight="primary"
+                  colorLight="grey-900"
                   link={shareUrl}
                   label="Copy link"
                   copiedLabel="Link copied!"

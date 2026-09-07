@@ -5,8 +5,93 @@ import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import { Icon } from '../icon/icon';
 import type { PolymorphicComponentPropWithRef } from '../polymorphic-types/polymorphic-types';
 
+/**
+ * Named after the resting fill, like the `textColor*` props of
+ * `Typography`, so a look can be pinned to either theme:
+ * `colorLight="grey-900" colorDark="grey-900"` keeps the dark fill on
+ * a surface that does not follow the theme, e.g. the yellow pricing
+ * card. `transparent` and `glass` have no fill to contrast against, so
+ * their text follows the theme instead.
+ */
 export type ButtonColor
-  = 'primary' | 'secondary' | 'glass' | 'upgrade' | 'danger';
+  = 'grey-900' | 'white' | 'transparent' | 'glass' | 'yellow-500' | 'red-500';
+
+type Look = { enabled: string; disabled: string };
+
+// Tailwind only picks up complete class names, so every look is spelled
+// out twice: once for the light side and once behind `dark:`.
+const LOOKS: Record<ButtonColor, { light: Look; dark: Look }> = {
+  'grey-900': {
+    light: {
+      enabled: 'bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800',
+      disabled: 'bg-pca-grey-300 text-pca-grey-600',
+    },
+    dark: {
+      enabled: 'dark:bg-pca-grey-900 dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800',
+      disabled: 'dark:bg-pca-grey-300 dark:text-pca-grey-600',
+    },
+  },
+  'white': {
+    light: {
+      enabled: 'bg-pca-white text-pca-grey-900 hover:bg-pca-grey-300 active:bg-pca-grey-300',
+      disabled: 'bg-pca-grey-800 text-pca-grey-400',
+    },
+    dark: {
+      enabled: 'dark:bg-pca-white dark:text-pca-grey-900 dark:hover:bg-pca-grey-300 dark:active:bg-pca-grey-300',
+      disabled: 'dark:bg-pca-grey-800 dark:text-pca-grey-400',
+    },
+  },
+  'transparent': {
+    light: {
+      enabled: 'bg-transparent text-pca-grey-900 hover:bg-pca-grey-200 active:bg-pca-grey-200',
+      disabled: 'bg-transparent text-pca-grey-500',
+    },
+    dark: {
+      enabled: 'dark:bg-transparent dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800',
+      disabled: 'dark:bg-transparent dark:text-pca-grey-500',
+    },
+  },
+  'glass': {
+    light: {
+      enabled: 'bg-pca-white/75 backdrop-blur-lg backdrop-saturate-150 text-pca-grey-900 hover:bg-pca-grey-200 active:bg-pca-grey-200',
+      disabled: 'bg-pca-white/75 backdrop-blur-lg backdrop-saturate-150 text-pca-grey-500',
+    },
+    dark: {
+      enabled: 'dark:bg-pca-grey-900/55 dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800',
+      disabled: 'dark:bg-pca-grey-900/55 dark:text-pca-grey-500',
+    },
+  },
+  'yellow-500': {
+    light: {
+      enabled: 'bg-pca-yellow-500 text-pca-grey-900 hover:bg-pca-yellow-700 active:bg-pca-yellow-700',
+      disabled: 'bg-pca-yellow-300 text-pca-yellow-900',
+    },
+    dark: {
+      enabled: 'dark:bg-pca-yellow-500 dark:text-pca-grey-900 dark:hover:bg-pca-yellow-700 dark:active:bg-pca-yellow-700',
+      disabled: 'dark:bg-pca-yellow-900 dark:text-pca-yellow-300',
+    },
+  },
+  'red-500': {
+    light: {
+      enabled: 'bg-pca-red-500 text-pca-white hover:bg-pca-red-700 active:bg-pca-red-700',
+      disabled: 'bg-pca-red-300 text-pca-red-900',
+    },
+    dark: {
+      enabled: 'dark:bg-pca-red-500 dark:text-pca-white dark:hover:bg-pca-red-700 dark:active:bg-pca-red-700',
+      disabled: 'dark:bg-pca-red-900 dark:text-pca-red-300',
+    },
+  },
+};
+
+// The dark look a light look pairs with unless `colorDark` says otherwise.
+const DARK_DEFAULT: Record<ButtonColor, ButtonColor> = {
+  'grey-900': 'white',
+  'white': 'grey-900',
+  'transparent': 'transparent',
+  'glass': 'glass',
+  'yellow-500': 'yellow-500',
+  'red-500': 'red-500',
+};
 
 export type ButtonProps<C extends React.ElementType>
   = PolymorphicComponentPropWithRef<
@@ -29,8 +114,8 @@ export function Button<C extends React.ElementType = 'button'>(
     children,
     isLoading,
     disabled,
-    colorLight = 'primary',
-    colorDark,
+    colorLight = 'grey-900',
+    colorDark = DARK_DEFAULT[colorLight],
     icon,
     iconPosition = 'end',
     className,
@@ -40,101 +125,16 @@ export function Button<C extends React.ElementType = 'button'>(
     ...props
   }: ButtonProps<C>,
 ) {
-  /*
-   * Filled Variants
-   */
-  const filledClasses = classNames([
+  const state = disabled ? 'disabled' : 'enabled';
+
+  const colorClasses = classNames([
     'transition-[background-color,color,box-shadow,scale]',
     'duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9',
     'focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500',
     (disabled || isLoading)
     && 'pointer-events-none',
-  ]);
-
-  const primaryLightFilledClasses = classNames([
-    disabled && 'bg-pca-grey-300 text-pca-grey-600',
-    !disabled
-    && 'bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800',
-  ]);
-
-  const primaryDarkFilledClasses = classNames([
-    disabled && 'dark:bg-pca-grey-800 dark:text-pca-grey-400',
-    !disabled
-    && 'dark:bg-pca-white dark:text-pca-grey-900 dark:hover:bg-pca-grey-300 dark:active:bg-pca-grey-300',
-  ]);
-
-  const secondaryLightFilledClasses = classNames([
-    'bg-transparent',
-    disabled && 'text-pca-grey-500',
-    !disabled
-    && 'text-pca-grey-900 hover:bg-pca-grey-200 active:bg-pca-grey-200',
-  ]);
-
-  const secondaryDarkFilledClasses = classNames([
-    'dark:bg-transparent',
-    disabled && 'dark:text-pca-grey-500',
-    !disabled
-    && 'dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800',
-  ]);
-
-  const glassLightFilledClasses = classNames([
-    'bg-pca-white/75 backdrop-blur-lg backdrop-saturate-150',
-    disabled && 'text-pca-grey-500',
-    !disabled
-    && 'text-pca-grey-900 hover:bg-pca-grey-200 active:bg-pca-grey-200',
-  ]);
-
-  const glassDarkFilledClasses = classNames([
-    'dark:bg-pca-grey-900/55',
-    disabled && 'dark:text-pca-grey-500',
-    !disabled
-    && 'dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800',
-  ]);
-
-  const upgradeLightFilledClasses = classNames([
-    disabled && 'bg-pca-yellow-300 text-pca-yellow-900',
-    !disabled
-    && 'bg-pca-yellow-500 text-pca-grey-900 hover:bg-pca-yellow-700 active:bg-pca-yellow-700',
-  ]);
-
-  const upgradeDarkFilledClasses = classNames([
-    disabled && 'dark:bg-pca-yellow-900 dark:text-pca-yellow-300',
-    !disabled
-    && 'dark:bg-pca-yellow-500 dark:text-pca-grey-900 dark:hover:bg-pca-yellow-700 dark:active:bg-pca-yellow-700',
-  ]);
-
-  const dangerLightFilledClasses = classNames([
-    disabled && 'bg-pca-red-300 text-pca-red-900',
-    !disabled
-    && 'bg-pca-red-500 text-pca-white hover:bg-pca-red-700 active:bg-pca-red-700',
-  ]);
-
-  const dangerDarkFilledClasses = classNames([
-    disabled && 'dark:bg-pca-red-900 dark:text-pca-red-300',
-    !disabled
-    && 'dark:bg-pca-red-500 dark:text-pca-white dark:hover:bg-pca-red-700 dark:active:bg-pca-red-700',
-  ]);
-
-  const colorClasses = classNames([
-    colorLight === 'primary' && primaryLightFilledClasses,
-    !colorDark && colorLight === 'primary' && primaryDarkFilledClasses,
-    colorDark === 'primary' && primaryDarkFilledClasses,
-
-    colorLight === 'secondary' && secondaryLightFilledClasses,
-    !colorDark && colorLight === 'secondary' && secondaryDarkFilledClasses,
-    colorDark === 'secondary' && secondaryDarkFilledClasses,
-
-    colorLight === 'glass' && glassLightFilledClasses,
-    !colorDark && colorLight === 'glass' && glassDarkFilledClasses,
-    colorDark === 'glass' && glassDarkFilledClasses,
-
-    colorLight === 'upgrade' && upgradeLightFilledClasses,
-    !colorDark && colorLight === 'upgrade' && upgradeDarkFilledClasses,
-    colorDark === 'upgrade' && upgradeDarkFilledClasses,
-
-    colorLight === 'danger' && dangerLightFilledClasses,
-    !colorDark && colorLight === 'danger' && dangerDarkFilledClasses,
-    colorDark === 'danger' && dangerDarkFilledClasses,
+    LOOKS[colorLight].light[state],
+    LOOKS[colorDark].dark[state],
   ]);
 
   const baseShapeClasses = classNames([
@@ -153,7 +153,6 @@ export function Button<C extends React.ElementType = 'button'>(
     'active:scale-[0.96] motion-reduce:active:scale-100',
     'flex items-center justify-center',
     'gap-2',
-    filledClasses,
     isOnlyIcon ? iconOnlyClasses : baseShapeClasses,
     iconPosition === 'start' && 'flex-row-reverse',
     iconPosition === 'end' && 'flex-row',

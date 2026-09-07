@@ -32,7 +32,7 @@ export const SidebarUpgrade: React.FC<SidebarUpgradeProps> = ({
       <Button
         as={Link}
         to={href('/upgrade')}
-        colorLight="upgrade"
+        colorLight="yellow-500"
         onClick={closeOnNavigate}
       >
         Upgrade to Pro

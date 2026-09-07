@@ -37,7 +37,7 @@ export const DialogTopbar: FC<DialogTopbarProps> = ({
               type="button"
               icon="chevronLeft"
               iconTitle={backLabel}
-              colorLight="secondary"
+              colorLight="transparent"
               onClick={onBack}
               className={iconButtonClasses}
             />
@@ -66,7 +66,7 @@ export const DialogTopbar: FC<DialogTopbarProps> = ({
             type="button"
             icon="close"
             iconTitle={closeLabel}
-            colorLight="secondary"
+            colorLight="transparent"
             className={iconButtonClasses}
           />
         )}

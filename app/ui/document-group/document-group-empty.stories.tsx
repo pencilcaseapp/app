@@ -60,6 +60,6 @@ export const WithActionArea: Story = {
   args: {
     icon: 'no-docs',
     children: 'No documents here',
-    actionArea: <Button colorLight="primary">Create doc</Button>,
+    actionArea: <Button colorLight="grey-900">Create doc</Button>,
   },
 };

@@ -75,10 +75,12 @@ describe('Button', () => {
 
   describe('light colors', () => {
     test.each<[ButtonColor, string]>([
-      ['primary', 'bg-pca-grey-900'],
-      ['secondary', 'bg-transparent'],
-      ['upgrade', 'bg-pca-yellow-500'],
-      ['danger', 'bg-pca-red-500'],
+      ['grey-900', 'bg-pca-grey-900'],
+      ['white', 'bg-pca-white'],
+      ['transparent', 'bg-transparent'],
+      ['glass', 'bg-pca-white/75'],
+      ['yellow-500', 'bg-pca-yellow-500'],
+      ['red-500', 'bg-pca-red-500'],
     ])('renders %s color with expected class', (color, expectedClass) => {
       const { container } = render(<Button colorLight={color}>{color}</Button>);
       const button = screen.getByRole('button');
@@ -89,15 +91,33 @@ describe('Button', () => {
 
   describe('dark colors', () => {
     test.each<[ButtonColor, string]>([
-      ['primary', 'dark:text-pca-grey-900'],
-      ['secondary', 'dark:text-pca-white'],
-      ['upgrade', 'dark:text-pca-grey-900'],
-      ['danger', 'dark:text-pca-white'],
+      ['grey-900', 'dark:bg-pca-grey-900'],
+      ['white', 'dark:bg-pca-white'],
+      ['transparent', 'dark:bg-transparent'],
+      ['glass', 'dark:bg-pca-grey-900/55'],
+      ['yellow-500', 'dark:bg-pca-yellow-500'],
+      ['red-500', 'dark:bg-pca-red-500'],
     ])('renders %s color with expected class', (color, expectedClass) => {
       const { container } = render(<Button colorDark={color}>{color}</Button>);
       const button = screen.getByRole('button');
       expect(button).toHaveClass(expectedClass);
       expect(container).toMatchSnapshot();
+    });
+
+    test('pairs grey-900 with white unless told otherwise', () => {
+      const { rerender } = render(<Button>Default</Button>);
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass('bg-pca-grey-900', 'dark:bg-pca-white');
+
+      rerender(<Button colorDark="grey-900">Pinned</Button>);
+      expect(button).toHaveClass('bg-pca-grey-900', 'dark:bg-pca-grey-900');
+      expect(button).not.toHaveClass('dark:bg-pca-white');
+    });
+
+    test('mirrors a light color that has no different dark look', () => {
+      render(<Button colorLight="yellow-500">Upgrade</Button>);
+      expect(screen.getByRole('button'))
+        .toHaveClass('bg-pca-yellow-500', 'dark:bg-pca-yellow-500');
     });
   });
 

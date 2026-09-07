@@ -23,7 +23,7 @@ export const DropdownMenuTrigger: FC<DropdownTriggerProps> = ({
             <Button
               icon="horizontalDots"
               type="button"
-              colorLight="secondary"
+              colorLight="transparent"
               iconTitle={iconTitle}
               className="cursor-pointer transition-colors! ease-in data-[state=open]:bg-pca-grey-100! dark:data-[state=open]:bg-pca-grey-800!"
             />

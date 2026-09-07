@@ -52,7 +52,7 @@ export const Default: Story = {
     <div className="flex min-h-dvh items-center justify-center">
       <ResponsiveDialog {...args}>
         <ResponsiveDialogTrigger
-          render={<Button colorLight="primary">Open</Button>}
+          render={<Button colorLight="grey-900">Open</Button>}
         />
         <ResponsiveDialogContent>
           <ResponsiveDialogContentInner>
@@ -90,16 +90,16 @@ export const WithFooter: Story = {
     <div className="flex min-h-dvh items-center justify-center">
       <ResponsiveDialog {...args}>
         <ResponsiveDialogTrigger
-          render={<Button colorLight="primary">Open</Button>}
+          render={<Button colorLight="grey-900">Open</Button>}
         />
         <ResponsiveDialogContent>
           <ResponsiveDialogContentInner
             footerArea={(
               <div className="flex items-center justify-end gap-2">
                 <ResponsiveDialogClose
-                  render={<Button colorLight="secondary">Cancel</Button>}
+                  render={<Button colorLight="transparent">Cancel</Button>}
                 />
-                <Button colorLight="danger">Delete</Button>
+                <Button colorLight="red-500">Delete</Button>
               </div>
             )}
           >
@@ -136,7 +136,7 @@ export const WithTopbar: Story = {
       <div className="flex min-h-dvh items-center justify-center">
         <ResponsiveDialog {...args}>
           <ResponsiveDialogTrigger
-            render={<Button colorLight="primary">Open settings</Button>}
+            render={<Button colorLight="grey-900">Open settings</Button>}
           />
           <ResponsiveDialogContent size="large" isFullHeight>
             <ResponsiveDialogContentInner
@@ -189,7 +189,7 @@ export const NestedInsideDrawer: Story = {
     <div className="flex min-h-dvh items-center justify-center">
       <Drawer>
         <BaseDrawer.Trigger
-          render={<Button colorLight="primary">Open sidebar</Button>}
+          render={<Button colorLight="grey-900">Open sidebar</Button>}
         />
         <DrawerContent>
           <DrawerContentInner>
@@ -200,7 +200,7 @@ export const NestedInsideDrawer: Story = {
               <ResponsiveDialog {...args}>
                 <ResponsiveDialogTrigger
                   render={(
-                    <Button colorLight="secondary">
+                    <Button colorLight="transparent">
                       Delete “Meeting notes”
                     </Button>
                   )}
@@ -211,10 +211,10 @@ export const NestedInsideDrawer: Story = {
                       <div className="flex items-center justify-end gap-2">
                         <ResponsiveDialogClose
                           render={(
-                            <Button colorLight="secondary">Cancel</Button>
+                            <Button colorLight="transparent">Cancel</Button>
                           )}
                         />
-                        <Button colorLight="danger">Delete</Button>
+                        <Button colorLight="red-500">Delete</Button>
                       </div>
                     )}
                   >

@@ -1,112 +1,168 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Button > dark colors > renders danger color with expected class 1`] = `
+exports[`Button > dark colors > renders glass color with expected class 1`] = `
 <div>
   <button
-    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 rounded-xl px-4 py-2 lg:px-3 flex-row bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-pca-red-500 dark:text-pca-white dark:hover:bg-pca-red-700 dark:active:bg-pca-red-700"
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-pca-grey-900/55 dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800"
   >
     <span
       class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
-      danger
+      glass
     </span>
   </button>
 </div>
 `;
 
-exports[`Button > dark colors > renders primary color with expected class 1`] = `
+exports[`Button > dark colors > renders grey-900 color with expected class 1`] = `
 <div>
   <button
-    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 rounded-xl px-4 py-2 lg:px-3 flex-row bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-pca-white dark:text-pca-grey-900 dark:hover:bg-pca-grey-300 dark:active:bg-pca-grey-300"
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-pca-grey-900 dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800"
   >
     <span
       class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
-      primary
+      grey-900
     </span>
   </button>
 </div>
 `;
 
-exports[`Button > dark colors > renders secondary color with expected class 1`] = `
+exports[`Button > dark colors > renders red-500 color with expected class 1`] = `
 <div>
   <button
-    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 rounded-xl px-4 py-2 lg:px-3 flex-row bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-transparent dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800"
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-pca-red-500 dark:text-pca-white dark:hover:bg-pca-red-700 dark:active:bg-pca-red-700"
   >
     <span
       class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
-      secondary
+      red-500
     </span>
   </button>
 </div>
 `;
 
-exports[`Button > dark colors > renders upgrade color with expected class 1`] = `
+exports[`Button > dark colors > renders transparent color with expected class 1`] = `
 <div>
   <button
-    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 rounded-xl px-4 py-2 lg:px-3 flex-row bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-pca-yellow-500 dark:text-pca-grey-900 dark:hover:bg-pca-yellow-700 dark:active:bg-pca-yellow-700"
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-transparent dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800"
   >
     <span
       class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
-      upgrade
+      transparent
     </span>
   </button>
 </div>
 `;
 
-exports[`Button > light colors > renders danger color with expected class 1`] = `
+exports[`Button > dark colors > renders white color with expected class 1`] = `
 <div>
   <button
-    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 rounded-xl px-4 py-2 lg:px-3 flex-row bg-pca-red-500 text-pca-white hover:bg-pca-red-700 active:bg-pca-red-700 dark:bg-pca-red-500 dark:text-pca-white dark:hover:bg-pca-red-700 dark:active:bg-pca-red-700"
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-pca-white dark:text-pca-grey-900 dark:hover:bg-pca-grey-300 dark:active:bg-pca-grey-300"
   >
     <span
       class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
-      danger
+      white
     </span>
   </button>
 </div>
 `;
 
-exports[`Button > light colors > renders primary color with expected class 1`] = `
+exports[`Button > dark colors > renders yellow-500 color with expected class 1`] = `
 <div>
   <button
-    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 rounded-xl px-4 py-2 lg:px-3 flex-row bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-pca-white dark:text-pca-grey-900 dark:hover:bg-pca-grey-300 dark:active:bg-pca-grey-300"
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-pca-yellow-500 dark:text-pca-grey-900 dark:hover:bg-pca-yellow-700 dark:active:bg-pca-yellow-700"
   >
     <span
       class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
-      primary
+      yellow-500
     </span>
   </button>
 </div>
 `;
 
-exports[`Button > light colors > renders secondary color with expected class 1`] = `
+exports[`Button > light colors > renders glass color with expected class 1`] = `
 <div>
   <button
-    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 rounded-xl px-4 py-2 lg:px-3 flex-row bg-transparent text-pca-grey-900 hover:bg-pca-grey-200 active:bg-pca-grey-200 dark:bg-transparent dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800"
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-white/75 backdrop-blur-lg backdrop-saturate-150 text-pca-grey-900 hover:bg-pca-grey-200 active:bg-pca-grey-200 dark:bg-pca-grey-900/55 dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800"
   >
     <span
       class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
-      secondary
+      glass
     </span>
   </button>
 </div>
 `;
 
-exports[`Button > light colors > renders upgrade color with expected class 1`] = `
+exports[`Button > light colors > renders grey-900 color with expected class 1`] = `
 <div>
   <button
-    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 rounded-xl px-4 py-2 lg:px-3 flex-row bg-pca-yellow-500 text-pca-grey-900 hover:bg-pca-yellow-700 active:bg-pca-yellow-700 dark:bg-pca-yellow-500 dark:text-pca-grey-900 dark:hover:bg-pca-yellow-700 dark:active:bg-pca-yellow-700"
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-grey-900 text-pca-white hover:bg-pca-grey-800 active:bg-pca-grey-800 dark:bg-pca-white dark:text-pca-grey-900 dark:hover:bg-pca-grey-300 dark:active:bg-pca-grey-300"
   >
     <span
       class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
     >
-      upgrade
+      grey-900
+    </span>
+  </button>
+</div>
+`;
+
+exports[`Button > light colors > renders red-500 color with expected class 1`] = `
+<div>
+  <button
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-red-500 text-pca-white hover:bg-pca-red-700 active:bg-pca-red-700 dark:bg-pca-red-500 dark:text-pca-white dark:hover:bg-pca-red-700 dark:active:bg-pca-red-700"
+  >
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+    >
+      red-500
+    </span>
+  </button>
+</div>
+`;
+
+exports[`Button > light colors > renders transparent color with expected class 1`] = `
+<div>
+  <button
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-transparent text-pca-grey-900 hover:bg-pca-grey-200 active:bg-pca-grey-200 dark:bg-transparent dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800"
+  >
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+    >
+      transparent
+    </span>
+  </button>
+</div>
+`;
+
+exports[`Button > light colors > renders white color with expected class 1`] = `
+<div>
+  <button
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-white text-pca-grey-900 hover:bg-pca-grey-300 active:bg-pca-grey-300 dark:bg-pca-grey-900 dark:text-pca-white dark:hover:bg-pca-grey-800 dark:active:bg-pca-grey-800"
+  >
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+    >
+      white
+    </span>
+  </button>
+</div>
+`;
+
+exports[`Button > light colors > renders yellow-500 color with expected class 1`] = `
+<div>
+  <button
+    class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-yellow-500 text-pca-grey-900 hover:bg-pca-yellow-700 active:bg-pca-yellow-700 dark:bg-pca-yellow-500 dark:text-pca-grey-900 dark:hover:bg-pca-yellow-700 dark:active:bg-pca-yellow-700"
+  >
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+    >
+      yellow-500
     </span>
   </button>
 </div>
