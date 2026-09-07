@@ -36,7 +36,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
   const cardClasses = classNames([
     'rounded-2xl p-6',
     onYellow && [
-      'bg-pca-yellow-500 shadow-lg shadow-pca-yellow-900/20',
+      'bg-pca-yellow-500 border border-pca-grey-900',
       '-rotate-1 transition-transform duration-300 ease-out hover:rotate-0',
       'motion-reduce:transform-none motion-reduce:transition-none',
     ],
@@ -50,11 +50,11 @@ export const PricingTable: React.FC<PricingTableProps> = ({
     <div className={classNames(cardClasses, className)}>
       <Typography
         variant="bodyTiny"
-        fontWeight="bold"
-        textTransform="uppercase"
+        fontWeight="semibold"
         textColorLight={onYellow ? 'yellow-900' : 'grey-600'}
         textColorDark={onYellow ? 'yellow-900' : 'grey-400'}
-        className="tracking-[0.16em]"
+        // className="tracking-[0.16em]"
+        className="leading-[18px] tracking-[0.02em]"
       >
         {plan}
       </Typography>
@@ -64,6 +64,18 @@ export const PricingTable: React.FC<PricingTableProps> = ({
         background={background}
         className="mt-1.5"
       />
+      {actionArea && <div className="mt-5">{actionArea}</div>}
+      {finePrint && (
+        <Typography
+          variant="bodyTiny"
+          textAlign="center"
+          textColorLight={onYellow ? 'yellow-900' : 'grey-600'}
+          textColorDark={onYellow ? 'yellow-900' : 'grey-400'}
+          className="mt-3"
+        >
+          {finePrint}
+        </Typography>
+      )}
       <ul className="mt-4 flex flex-col gap-3">
         {features.map(feature => (
           <ListItem
@@ -87,18 +99,6 @@ export const PricingTable: React.FC<PricingTableProps> = ({
           </ListItem>
         ))}
       </ul>
-      {actionArea && <div className="mt-5">{actionArea}</div>}
-      {finePrint && (
-        <Typography
-          variant="bodyTiny"
-          textAlign="center"
-          textColorLight={onYellow ? 'yellow-900' : 'grey-600'}
-          textColorDark={onYellow ? 'yellow-900' : 'grey-400'}
-          className="mt-3"
-        >
-          {finePrint}
-        </Typography>
-      )}
     </div>
   );
 };

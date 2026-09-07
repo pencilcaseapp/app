@@ -24,6 +24,7 @@ export const Price: React.FC<PriceProps> = ({
       <Typography
         as="span"
         variant="title"
+        fontWeight="semibold"
         textColorLight="grey-900"
         textColorDark={background === 'yellow' ? 'grey-900' : 'white'}
       >

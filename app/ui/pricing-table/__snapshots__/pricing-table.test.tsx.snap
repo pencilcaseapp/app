@@ -6,7 +6,7 @@ exports[`PricingTable > renders missing features with the danger X 1`] = `
     class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-800"
   >
     <p
-      class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-bold uppercase tracking-[0.16em]"
+      class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
     >
       pencil case pro
     </p>
@@ -14,7 +14,7 @@ exports[`PricingTable > renders missing features with the danger X 1`] = `
       class="flex items-baseline gap-2 mt-1.5"
     >
       <span
-        class="antialiased font-inter text-5xl font-bold text-pca-grey-900 dark:text-white"
+        class="antialiased font-inter text-5xl text-pca-grey-900 dark:text-white font-semibold"
       >
         25 €
       </span>
@@ -131,7 +131,7 @@ exports[`PricingTable > renders on a white background 1`] = `
     class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-800"
   >
     <p
-      class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-bold uppercase tracking-[0.16em]"
+      class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
     >
       pencil case pro
     </p>
@@ -139,7 +139,7 @@ exports[`PricingTable > renders on a white background 1`] = `
       class="flex items-baseline gap-2 mt-1.5"
     >
       <span
-        class="antialiased font-inter text-5xl font-bold text-pca-grey-900 dark:text-white"
+        class="antialiased font-inter text-5xl text-pca-grey-900 dark:text-white font-semibold"
       >
         25 €
       </span>
@@ -222,10 +222,10 @@ exports[`PricingTable > renders on a white background 1`] = `
 exports[`PricingTable > renders plan, price, features and slots 1`] = `
 <div>
   <div
-    class="rounded-2xl p-6 bg-pca-yellow-500 shadow-lg shadow-pca-yellow-900/20 -rotate-1 transition-transform duration-300 ease-out hover:rotate-0 motion-reduce:transform-none motion-reduce:transition-none"
+    class="rounded-2xl p-6 bg-pca-yellow-500 border border-pca-grey-900 -rotate-1 transition-transform duration-300 ease-out hover:rotate-0 motion-reduce:transform-none motion-reduce:transition-none"
   >
     <p
-      class="antialiased font-inter text-xs text-pca-yellow-900 dark:text-pca-yellow-900 font-bold uppercase tracking-[0.16em]"
+      class="antialiased font-inter text-xs text-pca-yellow-900 dark:text-pca-yellow-900 font-semibold leading-[18px] tracking-[0.02em]"
     >
       pencil case pro
     </p>
@@ -233,7 +233,7 @@ exports[`PricingTable > renders plan, price, features and slots 1`] = `
       class="flex items-baseline gap-2 mt-1.5"
     >
       <span
-        class="antialiased font-inter text-5xl font-bold text-pca-grey-900 dark:text-pca-grey-900"
+        class="antialiased font-inter text-5xl text-pca-grey-900 dark:text-pca-grey-900 font-semibold"
       >
         25 €
       </span>
@@ -242,6 +242,18 @@ exports[`PricingTable > renders plan, price, features and slots 1`] = `
       >
         / year
       </span>
+    </p>
+    <div
+      class="mt-5"
+    >
+      <button>
+        Upgrade to Pro
+      </button>
+    </div>
+    <p
+      class="antialiased font-inter text-xs font-normal text-pca-yellow-900 dark:text-pca-yellow-900 text-center mt-3"
+    >
+      Secure checkout by Creem.
     </p>
     <ul
       class="mt-4 flex flex-col gap-3"
@@ -309,18 +321,6 @@ exports[`PricingTable > renders plan, price, features and slots 1`] = `
         </span>
       </li>
     </ul>
-    <div
-      class="mt-5"
-    >
-      <button>
-        Upgrade to Pro
-      </button>
-    </div>
-    <p
-      class="antialiased font-inter text-xs font-normal text-pca-yellow-900 dark:text-pca-yellow-900 text-center mt-3"
-    >
-      Secure checkout by Creem.
-    </p>
   </div>
 </div>
 `;

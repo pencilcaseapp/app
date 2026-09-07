@@ -40,27 +40,31 @@ export const Default: Story = {
     pricingArea: (
       <PlanComparison
         currentPlan={{
-          plan: 'pencil case free',
+          plan: 'Pencil Case Free',
           amount: '0 €',
           period: '/ year',
           features: [
-            '3 docs',
+            '5 docs',
             'Hosted in the EU',
             'Support small tech',
+            'No tracking',
           ],
           missingFeatures: [
             'Unlimited docs',
             'Access control for collaboration',
           ],
+          actionArea: <Button disabled={true} className="w-full">Current Plan</Button>,
+          finePrint: 'Free plan for life.',
         }}
         upgradePlan={{
-          plan: 'pencil case pro',
+          plan: 'Pencil Case Pro',
           amount: '25 €',
           period: '/ year',
           features: [
             'Unlimited docs',
             'Access control for collaboration',
             'Hosted in the EU',
+            'No tracking',
             'Support small tech',
             'Support development',
           ],
@@ -88,7 +92,7 @@ export const SinglePlan: Story = {
     trigger: <Button colorLight="upgrade">Upgrade to Pro</Button>,
     pricingArea: (
       <PricingTable
-        plan="pencil case pro"
+        plan="Pencil Case Pro"
         amount="25 €"
         period="/ year"
         features={[
