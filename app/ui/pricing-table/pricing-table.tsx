@@ -37,8 +37,12 @@ export const PricingTable: React.FC<PricingTableProps> = ({
     'rounded-2xl p-6',
     onYellow && [
       'bg-pca-yellow-500 border border-pca-grey-900',
-      '-rotate-1 transition-transform duration-300 ease-out hover:rotate-0',
-      'motion-reduce:transform-none motion-reduce:transition-none',
+      // `-rotate-1` sets `rotate`, which `transform-none` would not
+      // reset, so reduced motion keeps the tilt and drops the hover.
+      '-rotate-1 transition-transform duration-150 ease-out',
+      'has-[button:hover]:rotate-0',
+      'motion-reduce:transition-none',
+      'motion-reduce:has-[button:hover]:-rotate-1',
     ],
     !onYellow && [
       'border border-pca-grey-200 bg-pca-white',

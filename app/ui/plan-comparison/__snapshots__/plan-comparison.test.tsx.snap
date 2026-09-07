@@ -64,7 +64,7 @@ exports[`PlanComparison > renders both plans 1`] = `
       </ul>
     </div>
     <div
-      class="rounded-2xl p-6 bg-pca-yellow-500 border border-pca-grey-900 -rotate-1 transition-transform duration-300 ease-out hover:rotate-0 motion-reduce:transform-none motion-reduce:transition-none"
+      class="rounded-2xl p-6 bg-pca-yellow-500 border border-pca-grey-900 -rotate-1 transition-transform duration-150 ease-out has-[button:hover]:rotate-0 motion-reduce:transition-none motion-reduce:has-[button:hover]:-rotate-1"
     >
       <p
         class="antialiased font-inter text-xs text-pca-yellow-900 dark:text-pca-yellow-900 font-semibold leading-[18px] tracking-[0.02em]"
