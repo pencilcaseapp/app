@@ -97,7 +97,7 @@ exports[`PricingTable > renders on a white background 1`] = `
 exports[`PricingTable > renders plan, price, features and slots 1`] = `
 <div>
   <div
-    class="rounded-2xl p-6 bg-pca-yellow-500 shadow-lg shadow-pca-yellow-900/20 -rotate-1 transition-transform duration-300 ease-out hover:rotate-0 motion-reduce:transform-none motion-reduce:transition-none"
+    class="rounded-2xl p-6 bg-pca-yellow-500 shadow-lg shadow-pca-yellow-900/20 -rotate-1 hover:rotate-0 hover:shadow-md transition-[transform,box-shadow] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transform-none motion-reduce:transition-none"
   >
     <p
       class="antialiased font-inter text-xs text-pca-yellow-900 dark:text-pca-yellow-900 font-bold uppercase tracking-[0.16em]"

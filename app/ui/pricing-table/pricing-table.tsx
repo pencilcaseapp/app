@@ -34,7 +34,9 @@ export const PricingTable: React.FC<PricingTableProps> = ({
     'rounded-2xl p-6',
     onYellow && [
       'bg-pca-yellow-500 shadow-lg shadow-pca-yellow-900/20',
-      '-rotate-1 transition-transform duration-300 ease-out hover:rotate-0',
+      '-rotate-1 hover:rotate-0 hover:shadow-md',
+      'transition-[transform,box-shadow] duration-200',
+      'ease-[cubic-bezier(0.23,1,0.32,1)]',
       'motion-reduce:transform-none motion-reduce:transition-none',
     ],
     !onYellow && [
