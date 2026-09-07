@@ -14,6 +14,8 @@ describe('Badge', () => {
     { variant: 'success', bg: 'bg-pca-green-300' },
     { variant: 'warning', bg: 'bg-pca-orange-300' },
     { variant: 'danger', bg: 'bg-pca-red-300' },
+    { variant: 'neutral', bg: 'bg-pca-grey-200' },
+    { variant: 'dark', bg: 'bg-pca-grey-900' },
   ] as const;
 
   it.each(variants)('variant $variant — applies the correct background class', ({ variant, bg }) => {

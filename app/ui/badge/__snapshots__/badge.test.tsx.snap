@@ -14,6 +14,20 @@ exports[`Badge > variant 'danger' — matches snapshot 1`] = `
 </div>
 `;
 
+exports[`Badge > variant 'dark' — matches snapshot 1`] = `
+<div>
+  <span
+    class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-grey-900"
+  >
+    <span
+      class="antialiased font-inter text-xs text-white dark:text-white font-semibold leading-[18px] tracking-[0.02em]"
+    >
+      Title
+    </span>
+  </span>
+</div>
+`;
+
 exports[`Badge > variant 'info' — matches snapshot 1`] = `
 <div>
   <span
@@ -21,6 +35,20 @@ exports[`Badge > variant 'info' — matches snapshot 1`] = `
   >
     <span
       class="antialiased font-inter text-xs text-pca-blue-900 dark:text-pca-blue-900 font-semibold leading-[18px] tracking-[0.02em]"
+    >
+      Title
+    </span>
+  </span>
+</div>
+`;
+
+exports[`Badge > variant 'neutral' — matches snapshot 1`] = `
+<div>
+  <span
+    class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-grey-200 dark:bg-pca-grey-800"
+  >
+    <span
+      class="antialiased font-inter text-xs text-pca-grey-900 dark:text-white font-semibold leading-[18px] tracking-[0.02em]"
     >
       Title
     </span>
