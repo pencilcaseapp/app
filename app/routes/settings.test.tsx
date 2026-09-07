@@ -162,7 +162,7 @@ describe('the settings routes', () => {
         await screen.findByRole('dialog', { name: 'Subscription' }),
       ).toBeInTheDocument();
       expect(
-        screen.getByText('The Subscription settings live here.'),
+        screen.getByText(/You’ve used \d of your 3 free docs\./),
       ).toBeInTheDocument();
       expect(
         screen.queryByRole('button', { name: 'Save' }),
