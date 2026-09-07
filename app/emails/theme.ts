@@ -1,20 +1,20 @@
 export const theme = `@theme {
   --color-pca-white: #FFFFFF;
 
-  --color-pca-grey-100: #F8F8F8;
-  --color-pca-grey-200: #EDEDED;
-  --color-pca-grey-300: #C8C8C8;
+  --color-pca-grey-100: #F7F7F7;
+  --color-pca-grey-200: #EBEBEB;
+  --color-pca-grey-300: #CACACA;
   --color-pca-grey-400: #A4A4A4;
   --color-pca-grey-500: #808080;
-  --color-pca-grey-600: #5B5B5B;
-  --color-pca-grey-700: #505050;
-  --color-pca-grey-800: #303030;
+  --color-pca-grey-600: #5D5D5D;
+  --color-pca-grey-700: #404040;
+  --color-pca-grey-800: #242424;
   --color-pca-grey-900: #101010;
 
-  --color-pca-blue-300: #C2D2FC;
-  --color-pca-blue-500: #398BF6;
-  --color-pca-blue-700: #0839B7;
-  --color-pca-blue-900: #051C66;
+  --color-pca-blue-300: #BFD3FC;
+  --color-pca-blue-500: #5386F7;
+  --color-pca-blue-700: #0C39B7;
+  --color-pca-blue-900: #041C66;
 
   --color-pca-yellow-300: #FFEEA8;
   --color-pca-yellow-500: #FFE365;
@@ -26,16 +26,16 @@ export const theme = `@theme {
   --color-pca-pink-700: #E89A9A;
   --color-pca-pink-900: #C94747;
 
-  --color-pca-orange-300: #FFD1A8;
+  --color-pca-orange-300: #FFD1AD;
   --color-pca-orange-500: #FF9C41;
-  --color-pca-orange-700: #D9771E;
-  --color-pca-orange-900: #A84C11;
+  --color-pca-orange-700: #D77911;
+  --color-pca-orange-900: #9D5600;
 
   --color-pca-green-100: #DDFBD0;
   --color-pca-green-300: #A9F58A;
   --color-pca-green-500: #52E01F;
-  --color-pca-green-700: #2FA80F;
-  --color-pca-green-900: #1F6B07;
+  --color-pca-green-700: #2FA810;
+  --color-pca-green-900: #1F6B06;
 
   --color-pca-red-100: #FFF0F0;
   --color-pca-red-300: #FECCCC;

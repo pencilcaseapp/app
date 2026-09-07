@@ -28,6 +28,31 @@ describe('Button', () => {
     expect(screen.getByText('Loading')).toBeInTheDocument();
   });
 
+  test('announces loading and ignores clicks while loading', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(<Button isLoading onClick={onClick}>Loading</Button>);
+    const button = screen.getByRole('button');
+
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    expect(button).not.toBeDisabled();
+
+    button.focus();
+    await user.keyboard('{Enter}');
+    await user.keyboard(' ');
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  test('keeps focus on the button while loading', () => {
+    const { rerender } = render(<Button>Save</Button>);
+    const button = screen.getByRole('button');
+    button.focus();
+
+    rerender(<Button isLoading>Save</Button>);
+    expect(button).toHaveFocus();
+  });
+
   test('appends custom className', () => {
     render(<Button className="my-custom-class">Styled</Button>);
     expect(screen.getByRole('button').className).toMatch(/my-custom-class/);
