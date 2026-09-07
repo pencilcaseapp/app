@@ -57,7 +57,6 @@ export const PricingTable: React.FC<PricingTableProps> = ({
         fontWeight="semibold"
         textColorLight={onYellow ? 'yellow-900' : 'grey-600'}
         textColorDark={onYellow ? 'yellow-900' : 'grey-400'}
-        // className="tracking-[0.16em]"
         className="leading-[18px] tracking-[0.02em]"
       >
         {plan}
@@ -94,11 +93,12 @@ export const PricingTable: React.FC<PricingTableProps> = ({
           <ListItem
             key={feature}
             icon="close"
-            iconColorLight="red-500"
-            iconColorDark="red-500"
+            iconColorLight={onYellow ? 'red-700' : 'red-500'}
+            iconColorDark={onYellow ? 'red-700' : 'red-500'}
             textColorLight={onYellow ? 'grey-900' : 'grey-600'}
             textColorDark={onYellow ? 'grey-900' : 'grey-400'}
           >
+            <span className="sr-only">Not included: </span>
             {feature}
           </ListItem>
         ))}

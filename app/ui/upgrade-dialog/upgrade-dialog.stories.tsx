@@ -53,7 +53,9 @@ export const Default: Story = {
             'Unlimited docs',
             'Access control for collaboration',
           ],
-          actionArea: <Button disabled={true} className="w-full">Current Plan</Button>,
+          actionArea: (
+            <Button disabled className="w-full">Current plan</Button>
+          ),
           finePrint: 'Free plan for life.',
         }}
         upgradePlan={{

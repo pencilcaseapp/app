@@ -18,7 +18,8 @@ export interface PlanComparisonProps {
  * Compares the current plan against the upgrade side by side: the
  * current plan follows the page theme, the upgrade keeps the yellow
  * card. Below Tailwind's `sm` breakpoint the cards stack, the upgrade
- * first.
+ * first — it also comes first in the DOM, so the reading order matches
+ * the stacked layout.
  */
 export const PlanComparison: FC<PlanComparisonProps> = ({
   currentPlan,
@@ -32,12 +33,12 @@ export const PlanComparison: FC<PlanComparisonProps> = ({
         className,
       )}
     >
+      <PricingTable {...upgradePlan} background="yellow" />
       <PricingTable
         {...currentPlan}
         background="white"
-        className="order-last sm:order-none"
+        className="sm:order-first"
       />
-      <PricingTable {...upgradePlan} background="yellow" />
     </div>
   );
 };
