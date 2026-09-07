@@ -44,8 +44,8 @@ export function Button<C extends React.ElementType = 'button'>(
    * Filled Variants
    */
   const filledClasses = classNames([
-    'transition-[background-color,color,box-shadow,transform]',
-    'duration-150 ease-out h-11 lg:h-9',
+    'transition-[background-color,color,box-shadow,scale]',
+    'duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9',
     'focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500',
     (disabled || isLoading)
     && 'pointer-events-none',
@@ -149,7 +149,8 @@ export function Button<C extends React.ElementType = 'button'>(
   const isOnlyIcon = !children && icon;
 
   const classes = classNames([
-    'relative overflow-hidden active:scale-[0.97]',
+    'relative overflow-hidden',
+    'active:scale-[0.96] motion-reduce:active:scale-100',
     'flex items-center justify-center',
     'gap-2',
     filledClasses,
