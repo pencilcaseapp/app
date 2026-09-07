@@ -3,6 +3,7 @@ import { ListItem } from '../list-item/list-item';
 import type { PriceBackground } from '../price/price';
 import { Price } from '../price/price';
 import { Typography } from '../typography/typography';
+import { pricingSurfaceClasses } from './pricing-surface';
 
 export interface PricingTableProps {
   plan: string;
@@ -33,22 +34,10 @@ export const PricingTable: React.FC<PricingTableProps> = ({
 }) => {
   const onYellow = background === 'yellow';
 
-  const cardClasses = classNames([
+  const cardClasses = classNames(
     'rounded-2xl p-6',
-    onYellow && [
-      'bg-pca-yellow-500 border border-pca-grey-900',
-      // `-rotate-1` sets `rotate`, which `transform-none` would not
-      // reset, so reduced motion keeps the tilt and drops the hover.
-      '-rotate-1 transition-transform duration-150 ease-out',
-      'has-[button:hover]:rotate-0',
-      'motion-reduce:transition-none',
-      'motion-reduce:has-[button:hover]:-rotate-1',
-    ],
-    !onYellow && [
-      'border border-pca-grey-200 bg-pca-white',
-      'dark:border-pca-grey-700 dark:bg-pca-grey-900',
-    ],
-  ]);
+    pricingSurfaceClasses(background),
+  );
 
   return (
     <div className={classNames(cardClasses, className)}>
