@@ -71,7 +71,7 @@ exports[`PlanComparison > renders both plans 1`] = `
       </ul>
     </div>
     <div
-      class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-800 sm:order-first"
+      class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900 sm:order-first"
     >
       <p
         class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"

@@ -46,7 +46,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
     ],
     !onYellow && [
       'border border-pca-grey-200 bg-pca-white',
-      'dark:border-pca-grey-700 dark:bg-pca-grey-800',
+      'dark:border-pca-grey-700 dark:bg-pca-grey-900',
     ],
   ]);
 
