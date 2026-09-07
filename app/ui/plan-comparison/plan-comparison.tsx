@@ -17,9 +17,10 @@ export interface PlanComparisonProps {
 /*
  * Compares the current plan against the upgrade side by side: the
  * current plan follows the page theme, the upgrade keeps the yellow
- * card. Below Tailwind's `sm` breakpoint the cards stack, the upgrade
- * first — it also comes first in the DOM, so the reading order matches
- * the stacked layout.
+ * card. The columns follow the container rather than the viewport, so
+ * the cards also stack inside a narrow dialog column: below Tailwind's
+ * `@lg` container step (32rem) the upgrade sits on top — it also comes
+ * first in the DOM, so the reading order matches the stacked layout.
  */
 export const PlanComparison: FC<PlanComparisonProps> = ({
   currentPlan,
@@ -27,18 +28,15 @@ export const PlanComparison: FC<PlanComparisonProps> = ({
   className,
 }) => {
   return (
-    <div
-      className={classNames(
-        'grid items-stretch gap-4 sm:grid-cols-2',
-        className,
-      )}
-    >
-      <PricingTable {...upgradePlan} background="yellow" />
-      <PricingTable
-        {...currentPlan}
-        background="white"
-        className="sm:order-first"
-      />
+    <div className={classNames('@container', className)}>
+      <div className="grid items-stretch gap-4 @lg:grid-cols-2">
+        <PricingTable {...upgradePlan} background="yellow" />
+        <PricingTable
+          {...currentPlan}
+          background="white"
+          className="@lg:order-first"
+        />
+      </div>
     </div>
   );
 };

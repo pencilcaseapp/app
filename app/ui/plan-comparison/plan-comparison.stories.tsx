@@ -4,8 +4,8 @@ import { PlanComparison } from './plan-comparison';
 
 /**
  * `PlanComparison` puts the current plan next to the yellow upgrade
- * card, e.g. inside the `UpgradeDialog`. On narrow viewports the cards
- * stack with the upgrade on top.
+ * card, e.g. inside the `UpgradeDialog`. The columns follow the
+ * container: below 32rem the cards stack with the upgrade on top.
  */
 const meta: Meta<typeof PlanComparison> = {
   title: 'Data Display/PlanComparison',
@@ -53,4 +53,19 @@ export const Default: Story = {
       finePrint: 'Secure checkout by Creem.',
     },
   },
+};
+
+/**
+ * In a column narrower than 32rem, e.g. the settings dialog on a
+ * tablet or the bottom sheet, the cards stack with the upgrade first.
+ */
+export const Narrow: Story = {
+  decorators: [
+    Story => (
+      <div className="max-w-sm">
+        <Story />
+      </div>
+    ),
+  ],
+  args: Default.args,
 };
