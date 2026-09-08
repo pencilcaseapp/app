@@ -1,10 +1,10 @@
 import classNames from 'classnames';
 import type { FC } from 'react';
-import { PricingTable } from '../pricing-table/pricing-table';
-import type { PricingTableProps } from '../pricing-table/pricing-table';
+import { PricingCard } from '../pricing-card/pricing-card';
+import type { PricingCardProps } from '../pricing-card/pricing-card';
 
 export type PlanComparisonPlan
-  = Omit<PricingTableProps, 'background' | 'className'>;
+  = Omit<PricingCardProps, 'background' | 'size' | 'className'>;
 
 export interface PlanComparisonProps {
   /** The plan the user is on, rendered flat on the page surface. */
@@ -30,8 +30,8 @@ export const PlanComparison: FC<PlanComparisonProps> = ({
   return (
     <div className={classNames('@container', className)}>
       <div className="grid items-stretch gap-4 @lg:grid-cols-2">
-        <PricingTable {...upgradePlan} background="yellow" />
-        <PricingTable
+        <PricingCard {...upgradePlan} background="yellow" />
+        <PricingCard
           {...currentPlan}
           background="white"
           className="@lg:order-first"

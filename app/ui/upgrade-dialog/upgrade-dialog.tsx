@@ -25,7 +25,7 @@ export type UpgradeDialogProps = {
   title?: string;
   headline: string;
   description?: string;
-  /** The pricing area, e.g. a `PlanComparison` or a `PricingTable`. */
+  /** The pricing area, e.g. a `PlanComparison` or a `PricingCard`. */
   pricingArea: ReactNode;
   /** Rendered as the dialog trigger, e.g. an upgrade `Button`. */
   trigger?: ResponsiveDialogTriggerProps['render'];

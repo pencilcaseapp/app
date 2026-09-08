@@ -3,6 +3,8 @@ import { Typography } from '../typography/typography';
 
 export type PriceBackground = 'yellow' | 'white';
 
+export type PriceSize = 'default' | 'small';
+
 export interface PriceProps {
   amount: string;
   period: string;
@@ -10,6 +12,9 @@ export interface PriceProps {
    * which keeps the same colors in both themes; `white` follows the
    * page background. */
   background?: PriceBackground;
+  /** `small` is the compact pricing card, where the period may wrap
+   * under the amount. */
+  size?: PriceSize;
   className?: string;
 }
 
@@ -17,16 +22,26 @@ export const Price: React.FC<PriceProps> = ({
   amount,
   period,
   background = 'yellow',
+  size = 'default',
   className,
 }) => {
+  const small = size === 'small';
+
   return (
-    <p className={classNames('flex items-baseline gap-2', className)}>
+    <p
+      className={classNames(
+        'flex items-baseline',
+        small ? 'flex-wrap gap-x-1.5' : 'gap-2',
+        className,
+      )}
+    >
       <Typography
         as="span"
         variant="title"
         fontWeight="semibold"
         textColorLight="grey-900"
         textColorDark={background === 'yellow' ? 'grey-900' : 'white'}
+        className={classNames(small && 'text-3xl!')}
       >
         {amount}
       </Typography>
