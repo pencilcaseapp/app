@@ -3,7 +3,7 @@
 exports[`PricingTable > renders missing features with the danger X 1`] = `
 <div>
   <div
-    class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-800"
+    class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900"
   >
     <p
       class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
@@ -117,6 +117,11 @@ exports[`PricingTable > renders missing features with the danger X 1`] = `
         <span
           class="antialiased font-inter text-sm text-pca-grey-600 dark:text-pca-grey-400 font-medium"
         >
+          <span
+            class="sr-only"
+          >
+            Not included: 
+          </span>
           Access control for collaboration
         </span>
       </li>
@@ -128,7 +133,7 @@ exports[`PricingTable > renders missing features with the danger X 1`] = `
 exports[`PricingTable > renders on a white background 1`] = `
 <div>
   <div
-    class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-800"
+    class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900"
   >
     <p
       class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
@@ -222,7 +227,7 @@ exports[`PricingTable > renders on a white background 1`] = `
 exports[`PricingTable > renders plan, price, features and slots 1`] = `
 <div>
   <div
-    class="rounded-2xl p-6 bg-pca-yellow-500 border border-pca-grey-900 -rotate-1 transition-transform duration-300 ease-out hover:rotate-0 motion-reduce:transform-none motion-reduce:transition-none"
+    class="rounded-2xl p-6 bg-pca-yellow-500 border border-pca-grey-900 -rotate-1 transition-transform duration-150 ease-out has-[button:hover]:rotate-0 motion-reduce:transition-none motion-reduce:has-[button:hover]:-rotate-1"
   >
     <p
       class="antialiased font-inter text-xs text-pca-yellow-900 dark:text-pca-yellow-900 font-semibold leading-[18px] tracking-[0.02em]"
