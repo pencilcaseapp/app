@@ -11,7 +11,7 @@ const props = {
   headline: 'Need more docs?',
   description: 'You have reached the limits of the free plan.',
   pricingArea: <span>Pricing area content</span>,
-  trigger: <Button colorLight="upgrade">Upgrade to Pro</Button>,
+  trigger: <Button colorLight="yellow-500">Upgrade to Pro</Button>,
 };
 
 describe('UpgradeDialog', () => {

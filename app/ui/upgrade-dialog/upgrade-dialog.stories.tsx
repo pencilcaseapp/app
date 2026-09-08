@@ -36,7 +36,7 @@ export const Default: Story = {
     description:
       'You have reached the limits of the free plan, '
       + 'but getting more is easy.',
-    trigger: <Button colorLight="upgrade">Upgrade to Pro</Button>,
+    trigger: <Button colorLight="yellow-500">Upgrade to Pro</Button>,
     pricingArea: (
       <PlanComparison
         currentPlan={{
@@ -70,7 +70,7 @@ export const Default: Story = {
             'Support small tech',
             'Support development',
           ],
-          actionArea: <Button className="w-full">Upgrade to Pro</Button>,
+          actionArea: <Button className="w-full" colorDark="grey-900">Upgrade to Pro</Button>,
           finePrint: 'Secure checkout by Creem.',
         }}
       />
@@ -91,7 +91,7 @@ export const SinglePlan: Story = {
   args: {
     headline: 'Go pro',
     size: 'small',
-    trigger: <Button colorLight="upgrade">Upgrade to Pro</Button>,
+    trigger: <Button colorLight="yellow-500">Upgrade to Pro</Button>,
     pricingArea: (
       <PricingTable
         plan="Pencil Case Pro"
@@ -102,7 +102,7 @@ export const SinglePlan: Story = {
           'Access control for collaboration',
           'Hosted in the EU',
         ]}
-        actionArea={<Button className="w-full">Upgrade to Pro</Button>}
+        actionArea={<Button className="w-full" colorDark="grey-900">Upgrade to Pro</Button>}
         finePrint="Secure checkout by Creem."
       />
     ),
