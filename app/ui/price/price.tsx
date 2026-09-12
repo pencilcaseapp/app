@@ -8,12 +8,7 @@ export type PriceSize = 'default' | 'small';
 export interface PriceProps {
   amount: string;
   period: string;
-  /** The surface the price sits on. `yellow` is the pricing card,
-   * which keeps the same colors in both themes; `white` follows the
-   * page background. */
   background?: PriceBackground;
-  /** `small` is the compact pricing card, where the period may wrap
-   * under the amount. */
   size?: PriceSize;
   className?: string;
 }

@@ -21,15 +21,11 @@ import {
 import { Typography } from '../typography/typography';
 
 export type UpgradeDialogProps = {
-  /** The topbar title, which also labels the dialog. */
   title?: string;
   headline: string;
   description?: string;
-  /** The pricing area, e.g. a `PlanComparison` or a `PricingCard`. */
   pricingArea: ReactNode;
-  /** Rendered as the dialog trigger, e.g. an upgrade `Button`. */
   trigger?: ResponsiveDialogTriggerProps['render'];
-  /** Dialog only. */
   size?: DialogSize;
   closeLabel?: string;
   imageSrcLight?: string;

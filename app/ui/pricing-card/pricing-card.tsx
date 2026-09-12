@@ -11,30 +11,16 @@ export interface PricingCardProps {
   plan: string;
   amount: string;
   period: string;
-  /** The card surface. `yellow` is the upgrade card, which keeps
-   * its colors in both themes; `white` follows the page theme,
-   * e.g. to compare plans side by side. */
   background?: PriceBackground;
-  /** `compact` is the small card for a row of plans above a
-   * `PlanMatrix`: tighter padding, a smaller price and room for the
-   * badge on narrow screens. */
   size?: PricingCardSize;
-  /** A `Badge` marking the plan, e.g. the current one. */
   badge?: ReactNode;
   features?: string[];
-  /** Features the plan lacks, listed after `features` with a muted X. */
   missingFeatures?: string[];
   actionArea?: ReactNode;
   finePrint?: string;
   className?: string;
 }
 
-/*
- * The badge sits at the end of the plan-name row; in a compact card
- * below `sm` the name would wrap beside it, so the badge moves to a
- * row at the top, reserved in every card so the prices in a row keep
- * one baseline.
- */
 export const PricingCard: FC<PricingCardProps> = ({
   plan,
   amount,
@@ -60,8 +46,6 @@ export const PricingCard: FC<PricingCardProps> = ({
         compact ? 'p-3' : 'p-6',
         onYellow && [
           'bg-pca-yellow-500 border border-pca-grey-900',
-          // `-rotate-1` sets `rotate`, which `transform-none` would not
-          // reset, so reduced motion keeps the tilt and drops the hover.
           '-rotate-1 transition-transform duration-150 ease-out',
           'has-[button:hover]:rotate-0',
           'motion-reduce:transition-none',
