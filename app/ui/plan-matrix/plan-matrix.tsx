@@ -72,7 +72,7 @@ const Cell: FC<{ value: PlanMatrixCell; emphasis: boolean }> = ({
  * The feature matrix: one row per feature, one narrow column per plan,
  * a check or a cross where a cell has nothing to print. The plan names
  * are plain column heads, so the feature column keeps its width even
- * in a drawer; the cards with the prices go above it (compact `PricingCard`s).
+ * in a drawer; the compact `PricingCard`s with the prices go above it.
  */
 export const PlanMatrix: FC<PlanMatrixProps> = ({
   caption,

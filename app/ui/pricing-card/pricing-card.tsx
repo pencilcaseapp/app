@@ -30,12 +30,10 @@ export interface PricingCardProps {
 }
 
 /*
- * The pricing card: plan name and price on the yellow upgrade surface
- * or the flat white one, with optional feature list, action area and
- * fine print. The badge sits at the end of the plan-name row; in a
- * compact card below `sm` the name would wrap beside it, so the badge
- * moves to a row at the top, reserved in every card so the prices in
- * a row keep one baseline.
+ * The badge sits at the end of the plan-name row; in a compact card
+ * below `sm` the name would wrap beside it, so the badge moves to a
+ * row at the top, reserved in every card so the prices in a row keep
+ * one baseline.
  */
 export const PricingCard: FC<PricingCardProps> = ({
   plan,

@@ -36,13 +36,6 @@ export type UpgradeDialogProps = {
   imageSrcDark?: string;
 } & Omit<ResponsiveDialogProps, 'children'>;
 
-/*
- * The upgrade prompt: a `ResponsiveDialog` with the topbar of the
- * settings dialog, a headline, an optional description and a slot for
- * the pricing content — e.g. a `PlanComparison` of the free and pro
- * plans. Open it through the `trigger` or control it via
- * `open`/`onOpenChange`.
- */
 export const UpgradeDialog: FC<UpgradeDialogProps> = ({
   title = 'Upgrade to Pro',
   headline,

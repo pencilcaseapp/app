@@ -41,7 +41,7 @@ export const Price: React.FC<PriceProps> = ({
         fontWeight="semibold"
         textColorLight="grey-900"
         textColorDark={background === 'yellow' ? 'grey-900' : 'white'}
-        className={classNames(small && 'text-3xl!')}
+        className={small ? 'text-3xl!' : undefined}
       >
         {amount}
       </Typography>
