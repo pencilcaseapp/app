@@ -22,7 +22,7 @@ export interface PricingCardProps {
   /** A `Badge` marking the plan, e.g. the current one. */
   badge?: ReactNode;
   features?: string[];
-  /** Features the plan lacks, listed after `features` with a red X. */
+  /** Features the plan lacks, listed after `features` with a muted X. */
   missingFeatures?: string[];
   actionArea?: ReactNode;
   finePrint?: string;
@@ -133,8 +133,8 @@ export const PricingCard: FC<PricingCardProps> = ({
             <ListItem
               key={feature}
               icon="close"
-              iconColorLight={onYellow ? 'red-700' : 'red-500'}
-              iconColorDark={onYellow ? 'red-700' : 'red-500'}
+              iconColorLight={onYellow ? 'yellow-900' : 'grey-400'}
+              iconColorDark={onYellow ? 'yellow-900' : 'grey-600'}
               textColorLight={onYellow ? 'grey-900' : 'grey-600'}
               textColorDark={onYellow ? 'grey-900' : 'grey-400'}
             >

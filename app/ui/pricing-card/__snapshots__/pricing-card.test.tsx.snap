@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PricingCard > renders missing features with the danger X 1`] = `
+exports[`PricingCard > renders missing features with the muted X 1`] = `
 <div>
   <div
     class="rounded-2xl text-left p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900"
@@ -97,7 +97,7 @@ exports[`PricingCard > renders missing features with the danger X 1`] = `
         class="flex items-center gap-2.5"
       >
         <span
-          class="antialiased font-inter text-base font-normal text-pca-red-500 dark:text-pca-red-500 flex shrink-0"
+          class="antialiased font-inter text-base font-normal text-pca-grey-400 dark:text-pca-grey-600 flex shrink-0"
         >
           <svg
             aria-hidden="true"

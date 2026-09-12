@@ -43,7 +43,7 @@ describe('PricingCard', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('renders missing features with the danger X', () => {
+  it('renders missing features with the muted X', () => {
     const { container } = render(
       <PricingCard
         {...props}
@@ -57,9 +57,9 @@ describe('PricingCard', () => {
       .closest('li');
     const included = screen.getByText('Hosted in the EU').closest('li');
 
-    expect(missing?.querySelector('.text-pca-red-500')).toBeInTheDocument();
+    expect(missing?.querySelector('.text-pca-grey-400')).toBeInTheDocument();
     expect(
-      included?.querySelector('.text-pca-red-500'),
+      included?.querySelector('.text-pca-grey-400'),
     ).not.toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
