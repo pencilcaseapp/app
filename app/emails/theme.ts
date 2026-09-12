@@ -19,7 +19,7 @@ export const theme = `@theme {
   --color-pca-yellow-300: #FFEEA8;
   --color-pca-yellow-500: #FFE365;
   --color-pca-yellow-700: #D9B93A;
-  --color-pca-yellow-900: #8B7521;
+  --color-pca-yellow-900: #6E5C15;
 
   --color-pca-pink-300: #FFE5E5;
   --color-pca-pink-500: #FECCCC;

@@ -46,7 +46,7 @@ export const Default: Story = {
  */
 export const WithoutAction: Story = {
   args: {
-    plan: 'pencil case pro',
+    plan: 'Pencil Case Pro',
     amount: '25 €',
     period: '/ year',
     features: [
@@ -62,7 +62,7 @@ export const WithoutAction: Story = {
  */
 export const OnWhite: Story = {
   args: {
-    plan: 'pencil case free',
+    plan: 'Pencil Case Free',
     amount: '0 €',
     period: '/ year',
     background: 'white',
@@ -70,6 +70,10 @@ export const OnWhite: Story = {
       '3 docs',
       'Hosted in the EU',
       'Support small tech',
+    ],
+    missingFeatures: [
+      'Unlimited docs',
+      'Access control for collaboration',
     ],
   },
 };

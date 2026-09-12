@@ -1,0 +1,110 @@
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Button } from '../button/button';
+import { PlanComparison } from '../plan-comparison/plan-comparison';
+import { PricingTable } from '../pricing-table/pricing-table';
+import { UpgradeDialog } from './upgrade-dialog';
+
+/**
+ * `UpgradeDialog` is the upgrade prompt: a `ResponsiveDialog` with a
+ * headline, an optional description and a slot for the pricing
+ * content. Below Tailwind's `sm` breakpoint it opens as the bottom
+ * sheet drawer.
+ */
+const meta: Meta<typeof UpgradeDialog> = {
+  title: 'Overlay/UpgradeDialog',
+  component: UpgradeDialog,
+  parameters: {
+    layout: 'fullscreen',
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof UpgradeDialog>;
+
+/**
+ * The full upsell: the free plan compared against pro through
+ * `PlanComparison`.
+ */
+export const Default: Story = {
+  render: args => (
+    <div className="flex min-h-dvh items-center justify-center">
+      <UpgradeDialog {...args} />
+    </div>
+  ),
+  args: {
+    headline: 'Need more docs?',
+    description:
+      'You have reached the limits of the free plan, '
+      + 'but getting more is easy.',
+    trigger: <Button colorLight="yellow-500">Upgrade to Pro</Button>,
+    pricingArea: (
+      <PlanComparison
+        currentPlan={{
+          plan: 'Pencil Case Free',
+          amount: '0 €',
+          period: '/ year',
+          features: [
+            '5 docs',
+            'Hosted in the EU',
+            'Support small tech',
+            'No tracking',
+          ],
+          missingFeatures: [
+            'Unlimited docs',
+            'Access control for collaboration',
+          ],
+          actionArea: (
+            <Button disabled className="w-full">Current plan</Button>
+          ),
+          finePrint: 'Free plan for life.',
+        }}
+        upgradePlan={{
+          plan: 'Pencil Case Pro',
+          amount: '25 €',
+          period: '/ year',
+          features: [
+            'Unlimited docs',
+            'Access control for collaboration',
+            'Hosted in the EU',
+            'No tracking',
+            'Support small tech',
+            'Support development',
+          ],
+          actionArea: <Button className="w-full" colorDark="grey-900">Upgrade to Pro</Button>,
+          finePrint: 'Secure checkout by Creem.',
+        }}
+      />
+    ),
+  },
+};
+
+/**
+ * With a single pricing card in the slot the small dialog size fits
+ * better.
+ */
+export const SinglePlan: Story = {
+  render: args => (
+    <div className="flex min-h-dvh items-center justify-center">
+      <UpgradeDialog {...args} />
+    </div>
+  ),
+  args: {
+    headline: 'Go pro',
+    size: 'small',
+    trigger: <Button colorLight="yellow-500">Upgrade to Pro</Button>,
+    pricingArea: (
+      <PricingTable
+        plan="Pencil Case Pro"
+        amount="25 €"
+        period="/ year"
+        features={[
+          'Unlimited docs',
+          'Access control for collaboration',
+          'Hosted in the EU',
+        ]}
+        actionArea={<Button className="w-full" colorDark="grey-900">Upgrade to Pro</Button>}
+        finePrint="Secure checkout by Creem."
+      />
+    ),
+  },
+};
