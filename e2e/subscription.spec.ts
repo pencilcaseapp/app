@@ -48,6 +48,10 @@ test('upgrading to pro through the Creem checkout', async ({ userA }) => {
  * inside the payment provider's iframe, with the cardholder name and
  * the pay button outside it. 4111… is Creem's always-succeeding test
  * card; expiry, CVC and the billing address can be anything.
+ *
+ * The cardholder name goes in before the card fields: the provider's
+ * SDK pulls the focus back into its iframe right after a card field
+ * changes, and a name typed in that moment lands in the CVC instead.
  */
 async function payWithTestCard(page: Page): Promise<void> {
   await page.getByRole('textbox', { name: 'Full name' })
@@ -62,13 +66,16 @@ async function payWithTestCard(page: Page): Promise<void> {
 
   await page.getByRole('button', { name: 'Continue to payment' }).click();
 
+  const cardholderName
+    = page.getByRole('textbox', { name: 'Cardholder Name' });
+  await cardholderName.fill('E2E Tester');
+
   const cardFrame = page.frameLocator('iframe[title="card_form"]');
   await cardFrame.getByRole('textbox', { name: 'Card number' })
     .fill('4111111111111111');
   await cardFrame.getByRole('textbox', { name: 'MM/YY' }).fill('12/30');
   await cardFrame.getByRole('textbox', { name: 'CVC/CVV' }).fill('123');
-  await page.getByRole('textbox', { name: 'Cardholder Name' })
-    .fill('E2E Tester');
 
+  await expect(cardholderName).toHaveValue('E2E Tester');
   await page.getByRole('button', { name: /^Pay €/ }).click();
 }
