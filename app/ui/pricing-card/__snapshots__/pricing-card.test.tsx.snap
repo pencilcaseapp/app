@@ -1,15 +1,19 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PricingTable > renders missing features with the danger X 1`] = `
+exports[`PricingCard > renders missing features with the muted X 1`] = `
 <div>
   <div
-    class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900"
+    class="rounded-2xl text-left p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900"
   >
-    <p
-      class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
+    <div
+      class="flex items-start justify-between gap-2"
     >
-      pencil case pro
-    </p>
+      <p
+        class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
+      >
+        pencil case pro
+      </p>
+    </div>
     <p
       class="flex items-baseline gap-2 mt-1.5"
     >
@@ -93,7 +97,7 @@ exports[`PricingTable > renders missing features with the danger X 1`] = `
         class="flex items-center gap-2.5"
       >
         <span
-          class="antialiased font-inter text-base font-normal text-pca-red-500 dark:text-pca-red-500 flex shrink-0"
+          class="antialiased font-inter text-base font-normal text-pca-grey-400 dark:text-pca-grey-600 flex shrink-0"
         >
           <svg
             aria-hidden="true"
@@ -130,16 +134,20 @@ exports[`PricingTable > renders missing features with the danger X 1`] = `
 </div>
 `;
 
-exports[`PricingTable > renders on a white background 1`] = `
+exports[`PricingCard > renders on a white background 1`] = `
 <div>
   <div
-    class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900"
+    class="rounded-2xl text-left p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900"
   >
-    <p
-      class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
+    <div
+      class="flex items-start justify-between gap-2"
     >
-      pencil case pro
-    </p>
+      <p
+        class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
+      >
+        pencil case pro
+      </p>
+    </div>
     <p
       class="flex items-baseline gap-2 mt-1.5"
     >
@@ -224,16 +232,20 @@ exports[`PricingTable > renders on a white background 1`] = `
 </div>
 `;
 
-exports[`PricingTable > renders plan, price, features and slots 1`] = `
+exports[`PricingCard > renders plan, price, features and slots 1`] = `
 <div>
   <div
-    class="rounded-2xl p-6 bg-pca-yellow-500 border border-pca-grey-900 -rotate-1 transition-transform duration-150 ease-out has-[button:hover]:rotate-0 motion-reduce:transition-none motion-reduce:has-[button:hover]:-rotate-1"
+    class="rounded-2xl text-left p-6 bg-pca-yellow-500 border border-pca-grey-900 -rotate-1 transition-transform duration-150 ease-out has-[button:hover]:rotate-0 motion-reduce:transition-none motion-reduce:has-[button:hover]:-rotate-1"
   >
-    <p
-      class="antialiased font-inter text-xs text-pca-yellow-900 dark:text-pca-yellow-900 font-semibold leading-[18px] tracking-[0.02em]"
+    <div
+      class="flex items-start justify-between gap-2"
     >
-      pencil case pro
-    </p>
+      <p
+        class="antialiased font-inter text-xs text-pca-yellow-900 dark:text-pca-yellow-900 font-semibold leading-[18px] tracking-[0.02em]"
+      >
+        pencil case pro
+      </p>
+    </div>
     <p
       class="flex items-baseline gap-2 mt-1.5"
     >
@@ -326,6 +338,99 @@ exports[`PricingTable > renders plan, price, features and slots 1`] = `
         </span>
       </li>
     </ul>
+  </div>
+</div>
+`;
+
+exports[`PricingCard > renders the compact card without a feature list 1`] = `
+<div>
+  <div
+    class="rounded-2xl text-left p-3 bg-pca-yellow-500 border border-pca-grey-900 -rotate-1 transition-transform duration-150 ease-out has-[button:hover]:rotate-0 motion-reduce:transition-none motion-reduce:has-[button:hover]:-rotate-1"
+  >
+    <div
+      class="mb-2 flex h-6.5 items-center sm:hidden"
+    />
+    <div
+      class="flex items-start justify-between gap-2"
+    >
+      <p
+        class="antialiased font-inter text-xs text-pca-yellow-900 dark:text-pca-yellow-900 font-semibold leading-[18px] tracking-[0.02em]"
+      >
+        Pencil Case Pro
+      </p>
+    </div>
+    <p
+      class="flex items-baseline flex-wrap gap-x-1.5 mt-1"
+    >
+      <span
+        class="antialiased font-inter text-5xl text-pca-grey-900 dark:text-pca-grey-900 font-semibold text-3xl!"
+      >
+        25 €
+      </span>
+      <span
+        class="antialiased font-inter text-sm text-pca-yellow-900 dark:text-pca-yellow-900 font-medium"
+      >
+        / year
+      </span>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`PricingCard > reserves a badge row in the compact card 1`] = `
+<div>
+  <div
+    class="rounded-2xl text-left p-3 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900"
+  >
+    <div
+      class="mb-2 flex h-6.5 items-center sm:hidden"
+    >
+      <span
+        class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-blue-300"
+      >
+        <span
+          class="antialiased font-inter text-xs text-pca-blue-900 dark:text-pca-blue-900 font-semibold leading-[18px] tracking-[0.02em]"
+        >
+          Current
+        </span>
+      </span>
+    </div>
+    <div
+      class="flex items-start justify-between gap-2"
+    >
+      <p
+        class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
+      >
+        Pencil Case Free
+      </p>
+      <div
+        class="-mt-1 -mr-1 shrink-0 hidden sm:block"
+      >
+        <span
+          class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-blue-300"
+        >
+          <span
+            class="antialiased font-inter text-xs text-pca-blue-900 dark:text-pca-blue-900 font-semibold leading-[18px] tracking-[0.02em]"
+          >
+            Current
+          </span>
+        </span>
+      </div>
+    </div>
+    <p
+      class="flex items-baseline flex-wrap gap-x-1.5 mt-1"
+    >
+      <span
+        class="antialiased font-inter text-5xl text-pca-grey-900 dark:text-white font-semibold text-3xl!"
+      >
+        0 €
+      </span>
+      <span
+        class="antialiased font-inter text-sm text-pca-grey-600 dark:text-pca-grey-400 font-medium"
+      >
+        / year
+      </span>
+    </p>
   </div>
 </div>
 `;

@@ -9,13 +9,17 @@ exports[`PlanComparison > renders both plans 1`] = `
       class="grid items-stretch gap-4 @lg:grid-cols-2"
     >
       <div
-        class="rounded-2xl p-6 bg-pca-yellow-500 border border-pca-grey-900 -rotate-1 transition-transform duration-150 ease-out has-[button:hover]:rotate-0 motion-reduce:transition-none motion-reduce:has-[button:hover]:-rotate-1"
+        class="rounded-2xl text-left p-6 bg-pca-yellow-500 border border-pca-grey-900 -rotate-1 transition-transform duration-150 ease-out has-[button:hover]:rotate-0 motion-reduce:transition-none motion-reduce:has-[button:hover]:-rotate-1"
       >
-        <p
-          class="antialiased font-inter text-xs text-pca-yellow-900 dark:text-pca-yellow-900 font-semibold leading-[18px] tracking-[0.02em]"
+        <div
+          class="flex items-start justify-between gap-2"
         >
-          pencil case pro
-        </p>
+          <p
+            class="antialiased font-inter text-xs text-pca-yellow-900 dark:text-pca-yellow-900 font-semibold leading-[18px] tracking-[0.02em]"
+          >
+            pencil case pro
+          </p>
+        </div>
         <p
           class="flex items-baseline gap-2 mt-1.5"
         >
@@ -74,13 +78,17 @@ exports[`PlanComparison > renders both plans 1`] = `
         </ul>
       </div>
       <div
-        class="rounded-2xl p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900 @lg:order-first"
+        class="rounded-2xl text-left p-6 border border-pca-grey-200 bg-pca-white dark:border-pca-grey-700 dark:bg-pca-grey-900 @lg:order-first"
       >
-        <p
-          class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
+        <div
+          class="flex items-start justify-between gap-2"
         >
-          pencil case free
-        </p>
+          <p
+            class="antialiased font-inter text-xs text-pca-grey-600 dark:text-pca-grey-400 font-semibold leading-[18px] tracking-[0.02em]"
+          >
+            pencil case free
+          </p>
+        </div>
         <p
           class="flex items-baseline gap-2 mt-1.5"
         >

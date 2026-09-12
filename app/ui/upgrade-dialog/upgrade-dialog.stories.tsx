@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '../button/button';
 import { PlanComparison } from '../plan-comparison/plan-comparison';
-import { PricingTable } from '../pricing-table/pricing-table';
+import { PricingCard } from '../pricing-card/pricing-card';
 import { UpgradeDialog } from './upgrade-dialog';
 
 /**
@@ -93,7 +93,7 @@ export const SinglePlan: Story = {
     size: 'small',
     trigger: <Button colorLight="yellow-500">Upgrade to Pro</Button>,
     pricingArea: (
-      <PricingTable
+      <PricingCard
         plan="Pencil Case Pro"
         amount="25 €"
         period="/ year"

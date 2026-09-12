@@ -35,8 +35,8 @@ describe('PlanComparison', () => {
   it('renders the current plan flat and the upgrade on yellow', () => {
     render(<PlanComparison {...props} />);
 
-    const currentCard = screen.getByText('pencil case free').closest('div');
-    const upgradeCard = screen.getByText('pencil case pro').closest('div');
+    const currentCard = screen.getByText('pencil case free').closest('.rounded-2xl');
+    const upgradeCard = screen.getByText('pencil case pro').closest('.rounded-2xl');
 
     expect(currentCard).toHaveClass('bg-pca-white');
     expect(upgradeCard).toHaveClass('bg-pca-yellow-500');

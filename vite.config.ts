@@ -16,6 +16,8 @@ export default defineConfig({
   ],
   optimizeDeps: {
     entries: [
+      'app/root.tsx',
+      'app/layouts/*.tsx',
       'app/routes/*.tsx',
     ],
   },

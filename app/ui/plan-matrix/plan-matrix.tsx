@@ -3,23 +3,19 @@ import type { FC } from 'react';
 import { Icon } from '../icon/icon';
 import { Typography } from '../typography/typography';
 
-/** A cell: a value to print, or whether the feature is included. */
 export type PlanMatrixCell = string | boolean;
 
 export interface PlanMatrixPlan {
   name: string;
-  /** Sets the plan's column in the strong text colour. */
   emphasis?: boolean;
 }
 
 export interface PlanMatrixRow {
   label: string;
-  /** One cell per plan, in the order of `plans`. */
   cells: PlanMatrixCell[];
 }
 
 export interface PlanMatrixProps {
-  /** Read by assistive technology only. */
   caption: string;
   plans: PlanMatrixPlan[];
   rows: PlanMatrixRow[];
@@ -68,12 +64,6 @@ const Cell: FC<{ value: PlanMatrixCell; emphasis: boolean }> = ({
       );
 };
 
-/*
- * The feature matrix: one row per feature, one narrow column per plan,
- * a check or a cross where a cell has nothing to print. The plan names
- * are plain column heads, so the feature column keeps its width even
- * in a drawer; the cards with the prices go above it (`PlanCard`).
- */
 export const PlanMatrix: FC<PlanMatrixProps> = ({
   caption,
   plans,

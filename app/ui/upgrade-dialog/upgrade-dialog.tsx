@@ -21,28 +21,17 @@ import {
 import { Typography } from '../typography/typography';
 
 export type UpgradeDialogProps = {
-  /** The topbar title, which also labels the dialog. */
   title?: string;
   headline: string;
   description?: string;
-  /** The pricing area, e.g. a `PlanComparison` or a `PricingTable`. */
   pricingArea: ReactNode;
-  /** Rendered as the dialog trigger, e.g. an upgrade `Button`. */
   trigger?: ResponsiveDialogTriggerProps['render'];
-  /** Dialog only. */
   size?: DialogSize;
   closeLabel?: string;
   imageSrcLight?: string;
   imageSrcDark?: string;
 } & Omit<ResponsiveDialogProps, 'children'>;
 
-/*
- * The upgrade prompt: a `ResponsiveDialog` with the topbar of the
- * settings dialog, a headline, an optional description and a slot for
- * the pricing content — e.g. a `PlanComparison` of the free and pro
- * plans. Open it through the `trigger` or control it via
- * `open`/`onOpenChange`.
- */
 export const UpgradeDialog: FC<UpgradeDialogProps> = ({
   title = 'Upgrade to Pro',
   headline,
