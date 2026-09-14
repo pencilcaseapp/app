@@ -243,6 +243,7 @@ export default function SettingsAccountEmailVerifyRoute({
               <field.OneTimePasswordField
                 label="Verification Code"
                 hint="Check your inbox for the code."
+                className="max-w-85"
               />
             )}
           </formVerify.AppField>
