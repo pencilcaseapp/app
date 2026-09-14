@@ -189,7 +189,9 @@ account can flood an address), expires the user's earlier requests and
 sends the code to the new address; `verifyEmailChange` only accepts a
 request of the session's user, burns attempts like the sign-in OTP (five,
 then the request expires), checks the address is still free and only then
-writes `users.email`. Requests expire after fifteen minutes and the
+writes `users.email`; the route then calls `signOutOtherSessions`, so
+whoever could sign in through the old mailbox loses their sessions while
+the one doing the change keeps theirs. Requests expire after fifteen minutes and the
 `clean-up-expired-email-change-requests` job deletes them a day later,
 like the OTPs. The success toast travels back to the account section
 through `SearchParamToast`.

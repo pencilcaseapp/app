@@ -10,6 +10,7 @@ import { useAppForm } from '~/hooks/use-app-form';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 import { authMiddleware } from '~/middleware/auth';
 import { getValidEmailChangeRequest } from '~/repos/email-change-request';
+import { signOutOtherSessions } from '~/services/auth';
 import {
   initEmailChange,
   InitEmailChangeError,
@@ -108,6 +109,9 @@ export async function action({ request, params, context }: Route.ActionArgs) {
           }
         }
       }
+
+      // The old mailbox could sign in until now; its sessions end here.
+      await signOutOtherSessions(request, user.id);
 
       return redirect(withSearchParams(accountUrl, {
         [SearchParamToast.ToastSuccess]: emailChangeCopies.changed,

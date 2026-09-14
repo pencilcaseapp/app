@@ -32,6 +32,13 @@ vi.mock('~/repos/email-change-request', () => ({
     getValidEmailChangeRequestMock(...args),
 }));
 
+const signOutOtherSessionsMock = vi.fn();
+vi.mock('~/services/auth', async importOriginal => ({
+  ...await importOriginal<typeof import('~/services/auth')>(),
+  signOutOtherSessions: (...args: unknown[]) =>
+    signOutOtherSessionsMock(...args),
+}));
+
 const initEmailChangeMock = vi.fn();
 const verifyEmailChangeMock = vi.fn();
 vi.mock('~/services/email-change', async importOriginal => ({
@@ -136,6 +143,8 @@ describe('the verify e-mail change route', () => {
     await vi.waitFor(() => {
       expect(verifyEmailChangeMock)
         .toHaveBeenCalledWith(userFixture, request.id, '123456');
+      expect(signOutOtherSessionsMock)
+        .toHaveBeenCalledWith(expect.any(Request), userFixture.id);
       expect(redirectMock).toHaveBeenCalledWith(
         `${accountUrl}?toastSuccess=E-mail+successfully+changed`,
       );
@@ -153,6 +162,7 @@ describe('the verify e-mail change route', () => {
       'Invalid code. Please check the code and try again.',
     )).toBeInTheDocument();
     expect(redirectMock).not.toHaveBeenCalled();
+    expect(signOutOtherSessionsMock).not.toHaveBeenCalled();
   });
 
   test('start over on an expired code', async () => {
