@@ -16,10 +16,11 @@ import { Typography } from '~/ui/typography/typography';
 export interface DeleteDocumentDialogProps {
   documentId: string;
   documentTitle: string;
+  shared: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Called once the document is deleted, right before the dialog closes. */
-  onDeleted?: (documentId: string) => void;
+  /** Called when the deletion is submitted, before the request goes out. */
+  onDelete?: (documentId: string) => void;
 }
 
 /*
@@ -30,9 +31,10 @@ export interface DeleteDocumentDialogProps {
 export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
   documentId,
   documentTitle,
+  shared,
   open,
   onOpenChange,
-  onDeleted,
+  onDelete,
 }) => {
   // One fetcher per document, so a result never carries over to the
   // next document the dialog opens for.
@@ -40,20 +42,22 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
     key: `delete-document-${documentId}`,
   });
   const deletedId = fetcher.data?.id;
-  const handledIdRef = useRef<string>(undefined);
+  const closedForRef = useRef<string>(undefined);
 
   useEffect(() => {
-    if (!deletedId || handledIdRef.current === deletedId) {
+    if (!deletedId || closedForRef.current === deletedId) {
       return;
     }
 
-    handledIdRef.current = deletedId;
-    onDeleted?.(deletedId);
+    closedForRef.current = deletedId;
     onOpenChange(false);
-  }, [deletedId, onDeleted, onOpenChange]);
+  }, [deletedId, onOpenChange]);
 
-  const description = `“${documentTitle}” will be deleted for`
-    + ' everyone it is shared with.';
+  const description = (shared
+    ? `“${documentTitle}” will be deleted for everyone it is shared with.`
+    : `“${documentTitle}” will be moved to Deleted.`)
+  + ' You can restore it from Deleted for 30 days, after that it is'
+  + ' permanently deleted.';
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
@@ -63,6 +67,7 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
             <fetcher.Form
               method="post"
               action={href('/doc/:id/delete', { id: documentId })}
+              onSubmit={() => onDelete?.(documentId)}
               className="flex items-center justify-end gap-2"
             >
               <AuthenticityTokenInput />

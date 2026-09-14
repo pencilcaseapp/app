@@ -107,6 +107,7 @@ export async function getDocumentList(userId: string) {
   return db.select({
     id: documents.id,
     title: documents.title,
+    shared: documents.shared,
     userId: documents.userId,
   })
     .from(documents)

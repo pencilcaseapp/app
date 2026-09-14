@@ -147,11 +147,13 @@ describe('getDocumentList', () => {
       {
         id: document2.id,
         title: document2.title,
+        shared: false,
         userId: user.id,
       },
       {
         id: document1.id,
         title: document1.title,
+        shared: false,
         userId: user.id,
       },
     ]);
@@ -169,11 +171,13 @@ describe('getDocumentList', () => {
     expect(documents).toContainEqual({
       id: ownDocument.id,
       title: ownDocument.title,
+      shared: false,
       userId: collaborator.id,
     });
     expect(documents).toContainEqual({
       id: sharedDocument.id,
       title: sharedDocument.title,
+      shared: true,
       userId: owner.id,
     });
   });
@@ -196,7 +200,12 @@ describe('getDocumentList', () => {
     const documents = await getDocumentList(user.id);
 
     expect(documents).toStrictEqual([
-      { id: document.id, title: document.title, userId: user.id },
+      {
+        id: document.id,
+        title: document.title,
+        shared: false,
+        userId: user.id,
+      },
     ]);
     expect(documents).not.toContainEqual(
       expect.objectContaining({ id: deleted.id }),

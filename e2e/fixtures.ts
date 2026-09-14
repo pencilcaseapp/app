@@ -53,7 +53,7 @@ export class AppUser {
     await this.page.getByRole('menuitem', { name: 'Delete' }).click();
 
     const dialog = this.page.getByRole('dialog');
-    await expect(dialog).toContainText(`“${title}” will be deleted`);
+    await expect(dialog).toContainText(`“${title}” will be`);
 
     const deleted = this.waitForPost('/delete');
     await dialog.getByRole('button', { name: 'Delete' }).click();
