@@ -155,7 +155,9 @@ export async function deleteDocument(
 
 /**
  * Undoes a soft deletion for the owner. The document comes back private;
- * sharing it again is a separate, deliberate step.
+ * sharing it again is a separate, deliberate step. The owner's read-only
+ * connections are closed like on delete, so the editor reconnects with
+ * full access the same way in both directions.
  */
 export async function restoreDocument(
   documentId: string,
@@ -166,6 +168,8 @@ export async function restoreDocument(
   if (!document) {
     return [DeleteDocumentError.PermissionDenied];
   }
+
+  closeDocumentConnections({ documentId: document.id });
 
   return [null, { id: document.id }];
 }

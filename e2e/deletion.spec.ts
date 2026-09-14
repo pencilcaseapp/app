@@ -93,3 +93,22 @@ test('deleting the open document scrolls up to the notice', async ({
   await expect(userA.deletedNotice).toBeInViewport();
   expect(await userA.page.evaluate(() => window.scrollY)).toBe(0);
 });
+
+test('edits after a restore are persisted', async ({ userA }) => {
+  await userA.createDocument();
+  const heading = `Restored doc ${Date.now()}`;
+  await userA.typeLines(heading);
+
+  await userA.deleteDocument(heading);
+  await expect(userA.deletedNotice).toBeVisible();
+  await userA.restoreDocument(heading);
+  await expect(userA.deletedNotice).toBeHidden();
+
+  await userA.appendLinesAfter(heading, 'Written after the restore.');
+
+  await expect(async () => {
+    await userA.page.reload();
+    await expect(userA.editor)
+      .toContainText('Written after the restore.', { timeout: 3000 });
+  }).toPass({ timeout: 15_000 });
+});

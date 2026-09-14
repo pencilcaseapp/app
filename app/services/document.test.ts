@@ -390,11 +390,25 @@ describe('restoreDocument', () => {
       .toHaveBeenCalledWith(documentFixture.id, userFixture.id);
   });
 
+  it('closes the read-only connections so the editor reconnects', async () => {
+    restoreDocumentRowMock.mockResolvedValue({
+      id: documentFixture.id,
+      deletedAt: null,
+    });
+
+    await restoreDocument(documentFixture.id, userFixture.id);
+
+    expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+    });
+  });
+
   it('denies somebody who does not own the document', async () => {
     restoreDocumentRowMock.mockResolvedValue(undefined);
 
     const [error] = await restoreDocument(documentFixture.id, otherUserId);
 
     expect(error).toBe(DeleteDocumentError.PermissionDenied);
+    expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
   });
 });
