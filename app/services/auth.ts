@@ -1,5 +1,5 @@
 import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, expireOtp, getValidOtp, markOtpAsUsed, recordFailedOtpAttempt } from '~/repos/otp';
-import { createUserSession, expireUserSession, getOrCreateUserByEmail, getAndRefreshUserSession, updateUser, type User } from '~/repos/user';
+import { createUserSession, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getAndRefreshUserSession, updateUser, type User } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
 import { createHash, randomBytes, randomInt } from 'node:crypto';
@@ -166,6 +166,22 @@ export async function signOut(request: Request) {
   }
 
   return destroySession(cookieSession);
+}
+
+/**
+ * Signs the user out everywhere but the session behind the request's
+ * cookie, for after a credential change: whoever got in through the old
+ * mailbox does not keep their session.
+ */
+export async function signOutOtherSessions(request: Request, userId: string) {
+  const cookieSession = await getSession(request.headers.get('Cookie'));
+  const token = cookieSession.get('token');
+
+  if (!token) {
+    return;
+  }
+
+  await expireOtherUserSessions(userId, hashUserSessionToken(token));
 }
 
 /**

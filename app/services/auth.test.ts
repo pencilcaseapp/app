@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import { createSessionCookie, getAuthSession, getSignInUrl, initMagicCode, InitMagicCodeError, onboardUser, signOut, verifyMagicCode, VerifyMagicCodeError } from './auth';
+import { createSessionCookie, getAuthSession, getSignInUrl, initMagicCode, InitMagicCodeError, onboardUser, signOut, signOutOtherSessions, verifyMagicCode, VerifyMagicCodeError } from './auth';
 import { userFixture, userSessionFixture } from '~/test/fixtures/user';
 import argon2 from 'argon2';
 import { otpFixture } from '~/test/fixtures/otp';
@@ -31,6 +31,7 @@ vi.mock('~/repos/otp', async (importOriginal) => {
 
 const getAndRefreshUserSessionMock = vi.fn();
 const expireUserSessionMock = vi.fn();
+const expireOtherUserSessionsMock = vi.fn();
 const updateUserMock = vi.fn();
 const getOrCreateUserByEmailMock = vi.fn(() => userFixture);
 vi.mock('~/repos/user', () => ({
@@ -43,6 +44,8 @@ vi.mock('~/repos/user', () => ({
   getAndRefreshUserSession: (...args: unknown[]) =>
     getAndRefreshUserSessionMock(...args),
   expireUserSession: (...args: unknown[]) => expireUserSessionMock(...args),
+  expireOtherUserSessions: (...args: unknown[]) =>
+    expireOtherUserSessionsMock(...args),
   updateUser: (...args: unknown[]) => updateUserMock(...args),
 }));
 
@@ -391,5 +394,26 @@ describe('getSignInUrl', () => {
 
     expect(getSignInUrl('https://example.com')).toEqual(`/signin?returnUrl=${expectedReturnUrl}`);
     expect(getSignInUrl('//example.com')).toEqual(`/signin?returnUrl=${expectedReturnUrl}`);
+  });
+});
+
+describe('signOutOtherSessions', () => {
+  it('expires every session but the one behind the cookie', async () => {
+    const request = new Request('http://localhost', {
+      headers: {
+        Cookie: validSessionCookie,
+      },
+    });
+
+    await signOutOtherSessions(request, userFixture.id);
+
+    expect(expireOtherUserSessionsMock)
+      .toHaveBeenCalledWith(userFixture.id, 'hashed-token');
+  });
+
+  it('does nothing without a session cookie', async () => {
+    await signOutOtherSessions(new Request('http://localhost'), userFixture.id);
+
+    expect(expireOtherUserSessionsMock).not.toHaveBeenCalled();
   });
 });

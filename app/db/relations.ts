@@ -8,6 +8,7 @@ export const relations = defineRelations(schema, r => ({
     sessions: r.many.sessions(),
     documentCollaborators: r.many.documentCollaborators(),
     subscriptions: r.many.subscriptions(),
+    emailChangeRequests: r.many.emailChangeRequests(),
   },
   subscriptions: {
     user: r.one.users({
@@ -19,6 +20,13 @@ export const relations = defineRelations(schema, r => ({
   otps: {
     user: r.one.users({
       from: r.otps.userId,
+      to: r.users.id,
+      optional: false,
+    }),
+  },
+  emailChangeRequests: {
+    user: r.one.users({
+      from: r.emailChangeRequests.userId,
       to: r.users.id,
       optional: false,
     }),

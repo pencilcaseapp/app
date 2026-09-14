@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useActionData, type MiddlewareFunction } from 'react-router';
+import { href, Link, useActionData, type MiddlewareFunction } from 'react-router';
 import { z } from 'zod';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
@@ -57,10 +57,12 @@ const chevron = (
 
 /*
  * The account section: the name and the newsletter preference are saved
- * through the footer's save button, the e-mail is not editable yet.
+ * through the footer's save button, the e-mail changes through the
+ * verified flow stacked on this page.
  */
 export default function SettingsAccountRoute({
   loaderData: { user },
+  params,
 }: Route.ComponentProps) {
   const actionData = useActionData() as { saved?: boolean } | undefined;
   const emitToast = useEmitToast();
@@ -112,8 +114,9 @@ export default function SettingsAccountRoute({
               Change e-mail
             </Typography>
             <NavigationItem
-              as="button"
-              type="button"
+              as={Link}
+              to={href('/doc/:id/settings/account/email', { id: params.id })}
+              preventScrollReset
               icon="mail"
               title={user.email}
               actionArea={chevron}

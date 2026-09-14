@@ -33,6 +33,28 @@ export const otps = pgTable('otps', {
   index('otps_expires_at_idx').on(table.expiresAt),
 ]);
 
+/*
+ * A pending change of a user's address: the code is sent to the new
+ * address and the user row only picks it up once the code is verified.
+ */
+export const emailChangeRequests = pgTable('email_change_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  email: text('email').notNull(),
+  canonicalEmail: text('canonical_email').notNull(),
+  codeHash: text('code_hash').notNull(),
+  attempts: integer('attempts').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  expiresAt: timestamp('expires_at').notNull().default(sql`(CURRENT_TIMESTAMP + INTERVAL '15 minutes')`),
+  usedAt: timestamp('used_at'),
+}, table => [
+  index('email_change_requests_user_id_idx').on(table.userId),
+  index('email_change_requests_canonical_email_idx')
+    .on(table.canonicalEmail),
+  index('email_change_requests_expires_at_idx').on(table.expiresAt),
+]);
+
 export const sessions = pgTable('sessions', {
   id: uuid('id').primaryKey().defaultRandom(),
   tokenHash: text('token_hash').notNull().unique(),

@@ -1,4 +1,4 @@
-import { and, eq, inArray, lt, sql, type InferSelectModel } from 'drizzle-orm';
+import { and, eq, gt, inArray, lt, ne, sql, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { users } from '~/db/schema';
@@ -172,6 +172,23 @@ export async function expireUserSession(tokenHash: string) {
     .returning();
 
   return session;
+}
+
+export async function expireOtherUserSessions(
+  userId: string,
+  keptTokenHash: string,
+) {
+  return db
+    .update(sessions)
+    .set({
+      expiresAt: new Date(),
+    })
+    .where(and(
+      eq(sessions.userId, userId),
+      ne(sessions.tokenHash, keptTokenHash),
+      gt(sessions.expiresAt, new Date()),
+    ))
+    .returning();
 }
 
 export async function getUserSession(id: string) {

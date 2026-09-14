@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createUser, createUserSession, deleteSessionsExpiredBefore, expireUserSession, getOrCreateUserByEmail, getUser, getUserByCreemCustomerId, getUserByEmail, getAndRefreshUserSession, getUserSession, updateUser } from './user';
+import { createUser, createUserSession, deleteSessionsExpiredBefore, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getUser, getUserByCreemCustomerId, getUserByEmail, getAndRefreshUserSession, getUserSession, updateUser } from './user';
 import { createExpiredUserSession, createTestUser, createValidUserSession } from '~/test/data-factories/user';
 import { faker } from '@faker-js/faker';
 
@@ -228,6 +228,25 @@ describe('expireUserSession', () => {
     const session = await expireUserSession('non-existent-token-hash');
 
     expect(session).toBeUndefined();
+  });
+});
+
+describe('expireOtherUserSessions', () => {
+  it('expires every session of the user but the kept one', async () => {
+    const userFixture = await createTestUser();
+    const otherUser = await createTestUser();
+    const kept = await createValidUserSession(userFixture.id);
+    const other = await createValidUserSession(userFixture.id);
+    const someoneElses = await createValidUserSession(otherUser.id);
+
+    const expired
+      = await expireOtherUserSessions(userFixture.id, kept.tokenHash);
+
+    expect(expired.map(({ id }) => id)).toEqual([other.id]);
+    expect(await getAndRefreshUserSession(other.tokenHash)).toBeNull();
+    expect(await getAndRefreshUserSession(kept.tokenHash)).not.toBeNull();
+    expect(await getAndRefreshUserSession(someoneElses.tokenHash))
+      .not.toBeNull();
   });
 });
 

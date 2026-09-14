@@ -1,5 +1,9 @@
 import { href } from 'react-router';
 import { getConfig } from '~/config';
+import {
+  EmailChangeCodeEmail,
+  emailChangeCodeEmailSubject,
+} from '~/emails/templates/email-change-code';
 import { OtpCodeEmail, otpCodeEmailSubject } from '~/emails/templates/otp-code';
 import {
   SubscriptionCanceledEmail,
@@ -27,6 +31,19 @@ export async function sendEmailMagicCode(input: {
     to,
     subject: otpCodeEmailSubject(code),
     email: <OtpCodeEmail code={code} />,
+  });
+}
+
+export async function sendEmailChangeCode(input: {
+  to: EmailData;
+  code: string;
+}) {
+  const { to, code } = input;
+
+  await sendEmail({
+    to,
+    subject: emailChangeCodeEmailSubject(code),
+    email: <EmailChangeCodeEmail code={code} />,
   });
 }
 

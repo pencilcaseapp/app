@@ -64,8 +64,8 @@ describe('the settings account route', () => {
     expect(screen.getByLabelText('Subscribe to Newsletter'))
       .not.toBeChecked();
     expect(
-      screen.getByRole('button', { name: user.email }),
-    ).toBeInTheDocument();
+      screen.getByRole('link', { name: user.email }),
+    ).toHaveAttribute('href', `/doc/${DOC_ID}/settings/account/email`);
   });
 
   test('save the name and the newsletter preference', async () => {
