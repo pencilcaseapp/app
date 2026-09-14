@@ -197,7 +197,9 @@ export async function setDocumentShared(input: SetDocumentSharedInput) {
 /**
  * Marks the document deleted and turns sharing off in the same update.
  * Scoped to the owner like `setDocumentShared`; returns `undefined` when
- * the document does not exist or belongs to somebody else.
+ * the document does not exist or belongs to somebody else. Neither this
+ * nor the restore touches `updatedAt`: the content did not change, and a
+ * restored document should land back where it was in the navigation.
  */
 export async function softDeleteDocument(documentId: string, ownerId: string) {
   if (!isUuid(documentId) || !isUuid(ownerId)) {
@@ -205,7 +207,7 @@ export async function softDeleteDocument(documentId: string, ownerId: string) {
   }
 
   const [document] = await db.update(documents)
-    .set({ deletedAt: sql`NOW()`, shared: false, updatedAt: sql`NOW()` })
+    .set({ deletedAt: sql`NOW()`, shared: false })
     .where(and(
       eq(documents.id, documentId),
       eq(documents.userId, ownerId),
@@ -228,7 +230,7 @@ export async function restoreDocument(documentId: string, ownerId: string) {
   }
 
   const [document] = await db.update(documents)
-    .set({ deletedAt: null, updatedAt: sql`NOW()` })
+    .set({ deletedAt: null })
     .where(and(
       eq(documents.id, documentId),
       eq(documents.userId, ownerId),

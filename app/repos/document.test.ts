@@ -241,6 +241,16 @@ describe('softDeleteDocument', () => {
     expect(document?.shared).toBe(false);
   });
 
+  it('does not count as an edit', async () => {
+    const user = await createTestUser();
+    const fixture = await createDocumentWithTitle(user.id);
+
+    await softDeleteDocument(fixture.id, user.id);
+
+    const document = await getDocument(fixture.id);
+    expect(document?.updatedAt).toStrictEqual(fixture.updatedAt);
+  });
+
   it('returns undefined for somebody who is not the owner', async () => {
     const owner = await createTestUser();
     const other = await createTestUser();
@@ -270,6 +280,20 @@ describe('restoreDocument', () => {
     const document = await getDocument(fixture.id);
     expect(document?.deletedAt).toBeNull();
     expect(document?.shared).toBe(false);
+  });
+
+  it('keeps the document in its place in the navigation', async () => {
+    const user = await createTestUser();
+    const older = await createDocumentWithTitle(user.id);
+    const newer = await createDocumentWithTitle(user.id);
+
+    await softDeleteDocument(older.id, user.id);
+    await restoreDocument(older.id, user.id);
+
+    const document = await getDocument(older.id);
+    expect(document?.updatedAt).toStrictEqual(older.updatedAt);
+    expect((await getDocumentList(user.id)).map(item => item.id))
+      .toStrictEqual([newer.id, older.id]);
   });
 
   it('returns undefined for somebody who is not the owner', async () => {

@@ -235,7 +235,8 @@ same owner-scoped update (`softDeleteDocument`), then drops the
 collaborators and closes every live connection, so the document vanishes
 for everybody at once. A deleted document is not found for anyone, the
 owner included; `restoreDocument` clears the stamp but leaves sharing off —
-the owner shares again on purpose. The sidebar posts to the resource routes
+the owner shares again on purpose. Neither touches `updatedAt`: nothing was
+edited, and a restored document lands back where it was in the navigation. The sidebar posts to the resource routes
 `/doc/:id/delete` (from `DeleteDocumentDialog`'s fetcher form) and
 `/doc/:id/restore` (the row menu of the Deleted group, whose rows are
 `DocumentItem`s without a link). Deleting the open document navigates to
