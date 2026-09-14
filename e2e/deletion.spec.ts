@@ -11,6 +11,8 @@ test('a deleted document moves to Deleted and back on restore', async ({
   await userA.deleteDocument(heading);
 
   await expect(userA.documentInAllDocs(heading)).toBeHidden();
+  // It was the only document, so All Docs shows its empty state.
+  await expect(userA.page.getByText('No documents')).toBeVisible();
   await userA.openDeletedDocs();
   await expect(userA.documentInDeleted(heading)).toBeVisible();
 

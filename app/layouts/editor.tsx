@@ -180,6 +180,11 @@ function EditorSidebar({
               <>
                 <DocumentGroupRoot defaultValue={['all-docs']}>
                   <DocumentGroup icon="space" title="All Docs" value="all-docs">
+                    {stableNavigation.length === 0 && (
+                      <DocumentGroupEmpty icon="no-docs">
+                        No documents
+                      </DocumentGroupEmpty>
+                    )}
                     {stableNavigation.map((item) => {
                       const isActive = item.to === location.pathname;
                       const label = isActive ? activeDocumentTitle : item.label;
