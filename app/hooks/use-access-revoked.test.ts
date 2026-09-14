@@ -6,8 +6,18 @@ import { useAccessRevoked } from './use-access-revoked';
 
 function fakeProvider() {
   const callbacks = new Map<string, Set<(payload?: unknown) => void>>();
-
-  return {
+  const providerMap = new Map<string, unknown>();
+  const provider = {
+    effectiveName: 'doc-1',
+    configuration: { websocketProvider: { configuration: { providerMap } } },
+    providerMap,
+    detach: vi.fn(() => {
+      // The real detach sends a close for a provider still in the map.
+      if (providerMap.has('doc-1')) {
+        provider.closeSent = true;
+      }
+    }),
+    closeSent: false,
     on(event: string, fn: (payload?: unknown) => void) {
       callbacks.set(event, (callbacks.get(event) ?? new Set()).add(fn));
     },
@@ -18,6 +28,9 @@ function fakeProvider() {
       callbacks.get(event)?.forEach(fn => fn(payload));
     },
   };
+  providerMap.set('doc-1', provider);
+
+  return provider;
 }
 
 function renderAccessRevoked(
@@ -43,6 +56,22 @@ describe('useAccessRevoked', () => {
     expect(onAccessRevoked).toHaveBeenCalledTimes(1);
   });
 
+  it('should let go of the provider without a close of its own', () => {
+    const provider = fakeProvider();
+    const onAccessRevoked = vi.fn(() => {
+      expect(provider.detach).toHaveBeenCalledTimes(1);
+    });
+    renderAccessRevoked(provider, onAccessRevoked);
+
+    provider.emit('close', {
+      event: { code: 1000, reason: LiveCloseReason.AccessRevoked },
+    });
+
+    expect(onAccessRevoked).toHaveBeenCalledTimes(1);
+    expect(provider.providerMap.has('doc-1')).toBe(false);
+    expect(provider.closeSent).toBe(false);
+  });
+
   it('should ignore a connection that closed for another reason', () => {
     const provider = fakeProvider();
     const onAccessRevoked = vi.fn();
@@ -53,6 +82,7 @@ describe('useAccessRevoked', () => {
     });
 
     expect(onAccessRevoked).not.toHaveBeenCalled();
+    expect(provider.detach).not.toHaveBeenCalled();
   });
 
   it('should report a rejected reconnect', () => {
@@ -63,6 +93,8 @@ describe('useAccessRevoked', () => {
     provider.emit('authenticationFailed', { reason: 'Forbidden' });
 
     expect(onAccessRevoked).toHaveBeenCalledTimes(1);
+    expect(provider.detach).toHaveBeenCalledTimes(1);
+    expect(provider.closeSent).toBe(false);
   });
 
   it('should stop listening when unmounted', () => {

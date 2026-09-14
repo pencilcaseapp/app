@@ -26,7 +26,7 @@ import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import { Sidebar } from '~/ui/sidebar/sidebar';
 import type { Route } from './+types/editor';
 import { optionalUserSessionContext } from '~/contexts/user-session';
-import { getDocumentList } from '~/repos/document';
+import { getDeletedDocumentList, getDocumentList } from '~/repos/document';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { useStableOrder } from '~/hooks/use-stable-order';
 import {
@@ -35,6 +35,7 @@ import {
 } from '~/contexts/edited-document';
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
+import { RestoreDocumentMenu } from '~/components/restore-document-menu/restore-document-menu';
 import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { useIsMobile } from '~/hooks/use-is-mobile';
@@ -49,8 +50,21 @@ const bottomNavigation = [
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
-  const documentList = user ? await getDocumentList(user.id) : [];
+  const [documentList, deletedDocumentList] = user
+    ? await Promise.all([
+        getDocumentList(user.id),
+        getDeletedDocumentList(user.id),
+      ])
+    : [[], []];
   const navigation = documentList.map(doc => ({
+    id: doc.id,
+    label: doc.title ?? 'Untitled',
+    to: href('/doc/:id', { id: doc.id }),
+    shared: doc.shared,
+    isOwner: doc.userId === user?.id,
+  }));
+  const deletedNavigation = deletedDocumentList.map(doc => ({
+    id: doc.id,
     label: doc.title ?? 'Untitled',
     to: href('/doc/:id', { id: doc.id }),
   }));
@@ -58,6 +72,7 @@ export async function loader({ context }: Route.LoaderArgs) {
   return {
     user,
     navigation,
+    deletedNavigation,
   };
 }
 
@@ -65,6 +80,7 @@ export default function LayoutEditor({
   loaderData: {
     user,
     navigation,
+    deletedNavigation,
   },
 }: Route.ComponentProps) {
   return (
@@ -76,6 +92,7 @@ export default function LayoutEditor({
               ? (
                   <EditorSidebar
                     navigation={navigation}
+                    deletedNavigation={deletedNavigation}
                     showUpgrade={!user.hasSubscription}
                   >
                     <Outlet />
@@ -89,10 +106,19 @@ export default function LayoutEditor({
   );
 };
 
-type NavigationItemData = { label: string; to: string };
+type NavigationItemData = {
+  id: string;
+  label: string;
+  to: string;
+  shared: boolean;
+  isOwner: boolean;
+};
+type DeletedItemData = { id: string; label: string; to: string };
+type DocumentToDelete = { id: string; label: string; shared: boolean };
 
 export interface EditorSidebarProps extends PropsWithChildren {
   navigation: NavigationItemData[];
+  deletedNavigation: DeletedItemData[];
   showUpgrade?: boolean;
 }
 
@@ -100,6 +126,7 @@ const getNavigationKey = (item: NavigationItemData) => item.to;
 
 function EditorSidebar({
   navigation,
+  deletedNavigation,
   showUpgrade,
   children,
 }: EditorSidebarProps) {
@@ -115,7 +142,7 @@ function EditorSidebar({
   // The document stays set while the dialog animates out, so its
   // title does not vanish from the copy mid-close.
   const [documentToDelete, setDocumentToDelete]
-    = useState<NavigationItemData>();
+    = useState<DocumentToDelete>();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   // Settings lives under the open document, so the entry only exists
   // while one is open (the only editor page — `/new` always redirects).
@@ -153,6 +180,11 @@ function EditorSidebar({
               <>
                 <DocumentGroupRoot defaultValue={['all-docs']}>
                   <DocumentGroup icon="space" title="All Docs" value="all-docs">
+                    {stableNavigation.length === 0 && (
+                      <DocumentGroupEmpty icon="no-docs">
+                        No documents
+                      </DocumentGroupEmpty>
+                    )}
                     {stableNavigation.map((item) => {
                       const isActive = item.to === location.pathname;
                       const label = isActive ? activeDocumentTitle : item.label;
@@ -164,7 +196,9 @@ function EditorSidebar({
                           to={item.to}
                           key={item.to}
                           onClick={closeOnNavigate}
-                          actionArea={(
+                          // Only the owner may delete, so a collaborator
+                          // gets no menu at all.
+                          actionArea={item.isOwner && (
                             <DropdownMenu>
                               <DropdownMenuTrigger iconTitle="Item options" />
                               <DropdownMenuPortal>
@@ -172,7 +206,11 @@ function EditorSidebar({
                                   <DropdownMenuItem
                                     as="button"
                                     onClick={() => {
-                                      setDocumentToDelete({ ...item, label });
+                                      setDocumentToDelete({
+                                        id: item.id,
+                                        label,
+                                        shared: item.shared,
+                                      });
                                       setIsDeleteDialogOpen(true);
                                     }}
                                     color="danger"
@@ -191,28 +229,45 @@ function EditorSidebar({
                     })}
                   </DocumentGroup>
                 </DocumentGroupRoot>
-                <DeleteDocumentDialog
-                  documentTitle={documentToDelete?.label}
-                  open={isDeleteDialogOpen}
-                  onOpenChange={setIsDeleteDialogOpen}
-                  onConfirm={() => {
-                    console.log('delete', documentToDelete?.to);
-                    setIsDeleteDialogOpen(false);
-                  }}
-                />
+                {documentToDelete && (
+                  <DeleteDocumentDialog
+                    documentId={documentToDelete.id}
+                    documentTitle={documentToDelete.label}
+                    shared={documentToDelete.shared}
+                    open={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                  />
+                )}
               </>
             ),
           },
           {
-            key: 'Deleted',
+            key: 'deleted',
             content: (
               <DocumentGroupRoot>
                 <DocumentGroup icon="trash" title="Deleted" value="deleted">
-                  <DocumentGroupEmpty
-                    icon="no-docs"
-                  >
-                    No deleted documents
-                  </DocumentGroupEmpty>
+                  {deletedNavigation.length === 0 && (
+                    <DocumentGroupEmpty icon="no-docs">
+                      No deleted documents
+                    </DocumentGroupEmpty>
+                  )}
+                  {deletedNavigation.map((item) => {
+                    const isActive = item.to === location.pathname;
+                    const label = isActive ? activeDocumentTitle : item.label;
+
+                    return (
+                      <DocumentItem
+                        title={label}
+                        as={NavLink}
+                        to={item.to}
+                        key={item.to}
+                        onClick={closeOnNavigate}
+                        actionArea={(
+                          <RestoreDocumentMenu documentId={item.id} />
+                        )}
+                      />
+                    );
+                  })}
                 </DocumentGroup>
               </DocumentGroupRoot>
             ),

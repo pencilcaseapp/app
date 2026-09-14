@@ -133,12 +133,16 @@ with backoff.
 
 **Live authorisation — `app/live/connections.ts`.** The upgrade request never
 passes through the route middleware, so `onConnect` resolves the session from
-the cookie itself (`getAuthUserByCookie`) and asks `canOpenDocument`; throwing
+the cookie itself (`getAuthUserByCookie`) and asks `getLiveAccess`; throwing
 there rejects that one document, not the whole socket, which is shared between
 all documents a client has open. Unsharing calls `closeDocumentConnections`,
 which closes the live connections of everybody but the owner, so access is
 revoked immediately instead of at the next request. The client turns that into
-the permission denied screen via `useAccessRevoked` → `revalidate()`. The two
+the permission denied screen via `useAccessRevoked` → `revalidate()`; the
+hook also drops the provider from the shared socket right there, without
+the close `detach` would send, because the server queues a close for a
+connection it no longer has as the first message of the next connection to
+that document — and closes that one with it. The two
 sides find each other through `globalThis`: `server.ts` and the routes are
 separate bundles in prod, so importing the instance would give each of them
 their own. Closing is per process, and the Redis extension does not propagate
@@ -229,12 +233,38 @@ screen, so
 `useCursorNameBounds` measures the tags it drew and nudges them sideways with
 a `transform` — the only property those rules leave alone.
 
+**Deletion — `app/services/document.ts`.** Documents are soft deleted:
+`deleteDocument` stamps `documents.deleted_at` and turns sharing off in the
+same owner-scoped update (`softDeleteDocument`), then drops the
+collaborators and closes every live connection, so the document vanishes
+for everybody else at once. A deleted document is not found for anyone but
+its owner, who can still open it read-only: `openDocument` reports it as
+`deleted`, the doc route then shows a notice above the content and drops
+the share panel, and `getLiveAccess` hands the live server a read-only
+connection (Hocuspocus drops that connection's own updates). Deleting or
+restoring changes the editor's `key`, so it reconnects with the new access,
+and both close the document's connections server side, which
+`useAccessRevoked` answers by letting go of the provider on the spot (see
+its comment for why the unmount must not send a close of its own).
+`restoreDocument` clears the stamp but leaves sharing off — the owner shares
+again on purpose, and `setDocumentShared` refuses a deleted document.
+Neither delete nor restore touches `updatedAt`: nothing was edited, and a
+restored document lands back where it was in the navigation. The sidebar
+posts to the resource routes `/doc/:id/delete` (from
+`DeleteDocumentDialog`'s fetcher form) and `/doc/:id/restore` (the row
+menu of the Deleted group, whose rows link to the read-only view). The
+`purge-deleted-documents` job hard deletes rows past
+`DELETED_DOCUMENT_RETENTION_DAYS` (`app/constants/document.ts`, also the
+number the dialog and the notice quote) every night.
+
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader
 order would reshuffle the navigation on each revalidation. `useStableOrder`
 (`app/hooks/use-stable-order.ts`) therefore freezes the order for as long as the
 layout stays mounted — items still come from the loader (titles stay fresh),
-only their positions are remembered; unseen items go to the front. Its
+only their positions are remembered; an unseen item slots in below the item
+the server lists above it, so a new document goes to the front and a restored
+one returns to its place. Its
 `moveToTop` applies a one-off move, which is how the document you start editing
 catches up: `useFirstLocalEdit` reports the first Y.Doc update that does not
 originate from the Hocuspocus provider, and `EditedDocumentProvider`

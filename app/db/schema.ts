@@ -52,6 +52,7 @@ export const documents = pgTable('documents', {
   shared: boolean('shared').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at'),
   userId: uuid('user_id').notNull().references(() => users.id),
 }, table => [
   index('documents_user_id_idx').on(table.userId),

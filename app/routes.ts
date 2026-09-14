@@ -13,6 +13,8 @@ export default [
       ]),
     ]),
   ]),
+  route('doc/:id/delete', 'routes/doc-delete.ts'),
+  route('doc/:id/restore', 'routes/doc-restore.ts'),
   layout('layouts/auth.tsx', [
     route('signin', 'routes/signin.tsx'),
     route('otp/:otpId', 'routes/otp.tsx'),

@@ -12,8 +12,10 @@ type Promotion = {
  * instance when navigating between documents) can hand back a differently
  * sorted list and make the navigation items jump around. This hook remembers
  * the order the items were first seen in and keeps it: items that disappeared
- * are dropped, items that are new are prepended in the order the server
- * returned them, everything else stays where it was.
+ * are dropped, items that are new slot in right below the item the server
+ * lists above them (a new document, which the server sorts first, goes to the
+ * front; a restored one returns to its place), everything else stays where it
+ * was.
  *
  * The returned `moveToTop` pulls a single item to the front, which is how an
  * edited document catches up with the order the server would return. It moves
@@ -30,12 +32,18 @@ export function useStableOrder<T>(items: T[], getKey: (item: T) => string) {
 
   const orderedItems = useMemo(() => {
     const itemsByKey = new Map(items.map(item => [getKey(item), item]));
-    const knownKeys = orderRef.current.filter(key => itemsByKey.has(key));
-    const knownKeySet = new Set(knownKeys);
-    const newKeys = [...itemsByKey.keys()]
-      .filter(key => !knownKeySet.has(key));
+    const serverKeys = [...itemsByKey.keys()];
+    let keys = orderRef.current.filter(key => itemsByKey.has(key));
 
-    let keys = [...newKeys, ...knownKeys];
+    serverKeys.forEach((key, index) => {
+      if (keys.includes(key)) {
+        return;
+      }
+
+      // Walked in server order, so the item above has already been placed.
+      const above = index > 0 ? keys.indexOf(serverKeys[index - 1]) + 1 : 0;
+      keys.splice(above, 0, key);
+    });
 
     // A move is a one-off: applying it to the remembered order and marking it
     // done keeps it from outranking items that only show up later.

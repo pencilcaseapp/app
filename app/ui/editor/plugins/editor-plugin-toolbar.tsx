@@ -27,10 +27,11 @@ export interface EditorPluginToolbarProps {
   avatars: Collaborator[];
   topbarLeft?: React.ReactNode;
   topbarRight?: React.ReactNode;
+  editable?: boolean;
 }
 
 export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
-  = ({ avatars, topbarLeft, topbarRight }) => {
+  = ({ avatars, topbarLeft, topbarRight, editable = true }) => {
     const [editor] = useLexicalComposerContext();
     const [formatBlock, setFormatBlock] = useState<EditorFormatBlock>('p');
     const [textStyle, setTextStyle] = useState({
@@ -158,7 +159,7 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
           </>
         )}
         center={(
-          (isWide || isVirtualKeyboardOpen) && (
+          editable && (isWide || isVirtualKeyboardOpen) && (
             <Toolbar isScrolling={isScrolling}>
               <ToolbarGroup>
                 <ToolbarToggle isActive={formatBlock === 'h1'} onMouseDown={handleEditorFocus} onClick={() => toggleHeadline('h1')} icon="h1" tooltipLabel="Heading 1" />

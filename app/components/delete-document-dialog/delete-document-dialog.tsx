@@ -1,4 +1,8 @@
-import type { FC } from 'react';
+import { useEffect, useRef, type FC } from 'react';
+import { href, useFetcher } from 'react-router';
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
+import { DELETED_DOCUMENT_RETENTION_DAYS } from '~/constants/document';
+import type { action as deleteAction } from '~/routes/doc-delete';
 import { Button } from '~/ui/button/button';
 import {
   ResponsiveDialog,
@@ -11,10 +15,11 @@ import { ResponsiveDialogContentInner } from '~/ui/responsive-dialog/responsive-
 import { Typography } from '~/ui/typography/typography';
 
 export interface DeleteDocumentDialogProps {
-  documentTitle?: string;
+  documentId: string;
+  documentTitle: string;
+  shared: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
 }
 
 /*
@@ -23,27 +28,59 @@ export interface DeleteDocumentDialogProps {
  * centered dialog.
  */
 export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
+  documentId,
   documentTitle,
+  shared,
   open,
   onOpenChange,
-  onConfirm,
 }) => {
-  const description = `“${documentTitle}” will be deleted for`
-    + ' everyone it is shared with.';
+  const fetcher = useFetcher<typeof deleteAction>();
+  const previousStateRef = useRef(fetcher.state);
+
+  // Close once the submission comes back. The result itself is no signal:
+  // deleting a restored document again returns the very same id.
+  useEffect(() => {
+    const submitted = previousStateRef.current === 'submitting'
+      && fetcher.state !== 'submitting';
+    previousStateRef.current = fetcher.state;
+
+    if (submitted && fetcher.data?.id) {
+      onOpenChange(false);
+    }
+  }, [fetcher.state, fetcher.data, onOpenChange]);
+
+  const description = (shared
+    ? `“${documentTitle}” will be deleted for everyone it is shared with.`
+    : `“${documentTitle}” will be moved to Deleted.`)
+  + ` You can restore it from Deleted for ${DELETED_DOCUMENT_RETENTION_DAYS}`
+  + ' days, after that it is permanently deleted.';
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent minHeight="40dvh">
         <ResponsiveDialogContentInner
           footerArea={(
-            <div className="flex items-center justify-end gap-2">
+            <fetcher.Form
+              method="post"
+              action={href('/doc/:id/delete', { id: documentId })}
+              className="flex items-center justify-end gap-2"
+            >
+              <AuthenticityTokenInput />
               <ResponsiveDialogClose
-                render={<Button colorLight="transparent">Cancel</Button>}
+                render={(
+                  <Button type="button" colorLight="transparent">
+                    Cancel
+                  </Button>
+                )}
               />
-              <Button colorLight="red-500" onClick={onConfirm}>
+              <Button
+                type="submit"
+                colorLight="red-500"
+                isLoading={fetcher.state !== 'idle'}
+              >
                 Delete
               </Button>
-            </div>
+            </fetcher.Form>
           )}
         >
           <ResponsiveDialogTitle

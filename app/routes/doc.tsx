@@ -15,17 +15,23 @@ import { validateForm } from '~/utils/form';
 import { useDocumentTitle } from '~/contexts/document-title';
 import { useEditedDocument } from '~/contexts/edited-document';
 import { useCallback } from 'react';
+import { useScrollToTopOn } from '~/hooks/use-scroll-to-top-on';
 import { MenuOrSignInButton } from '~/components/menu-or-sign-in-button/menu-or-sign-in-button';
 import { SharePanel } from '~/components/share-panel/share-panel';
 import { Button } from '~/ui/button/button';
 import { DocEmptyState } from '~/components/doc-empty-state/doc-empty-state';
 import { PageTitle } from '~/components/page-title/page-title';
 import { getUserPresenceIdentity } from '~/utils/presence';
+import { Notification } from '~/ui/notification/notification';
+import { DELETED_DOCUMENT_RETENTION_DAYS } from '~/constants/document';
 
 enum DocumentError {
   NotFound,
   PermissionDenied,
 }
+
+const DELETED_DOCUMENT_NOTICE = 'This document is deleted and will be'
+  + ` removed for good in ${DELETED_DOCUMENT_RETENTION_DAYS} days.`;
 
 const shareSchema = z.object({
   shared: z.boolean(),
@@ -81,6 +87,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     signInUrl: user ? null : getSignInUrl(documentUrl),
     isOwner: document.isOwner,
     shared: document.shared,
+    deleted: document.deleted,
     presence: user ? getUserPresenceIdentity(user) : null,
     shareUrl: new URL(documentUrl, request.url).toString(),
   };
@@ -123,6 +130,10 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
   const onAccessRevoked = useCallback(() => {
     void revalidate();
   }, [revalidate]);
+  const deleted = loaderData.ok && loaderData.deleted;
+  // Deleting the open document puts the notice above the content, out of
+  // sight for a reader halfway down a long document.
+  useScrollToTopOn(deleted);
 
   if (!loaderData.ok && loaderData.error === DocumentError.NotFound) {
     return (
@@ -152,18 +163,27 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
       <PageTitle>{title}</PageTitle>
       <ClientOnly>
         <CollaborativeEditor
-          key={params.id}
+          // Deleting or restoring changes the access the live server grants,
+          // so the editor reconnects.
+          key={`${params.id}:${deleted}`}
           id={params.id}
           presence={loaderData.ok ? loaderData.presence : null}
           onTitleChange={setTitle}
           onFirstEdit={onFirstEdit}
           onAccessRevoked={onAccessRevoked}
+          editable={!deleted}
+          notification={deleted && (
+            <Notification
+              variant="warning"
+              title={DELETED_DOCUMENT_NOTICE}
+            />
+          )}
           topbarLeft={(
             <MenuOrSignInButton
               signInUrl={loaderData.ok ? loaderData.signInUrl : null}
             />
           )}
-          topbarRight={loaderData.ok && loaderData.isOwner
+          topbarRight={loaderData.ok && loaderData.isOwner && !deleted
             ? (
                 <SharePanel
                   documentId={params.id}

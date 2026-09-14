@@ -2,13 +2,21 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useEffect, useRef } from 'react';
+import classNames from 'classnames';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { BLUR_COMMAND, COMMAND_PRIORITY_CRITICAL } from 'lexical';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
 
-export const EditorPluginRichText: React.FC = () => {
+export interface EditorPluginRichTextProps {
+  /** Rendered above the content, taking over the topbar clearance. */
+  topArea?: React.ReactNode;
+}
+
+export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
+  topArea,
+}) => {
   const contenteditableRef = useRef<HTMLDivElement>(null);
   const [isVirtualKeyboardOpen] = useVirtualKeyboard();
   const [editor] = useLexicalComposerContext();
@@ -63,16 +71,26 @@ export const EditorPluginRichText: React.FC = () => {
   }, [isVirtualKeyboardOpen]);
 
   return (
-    <RichTextPlugin
-      contentEditable={(
-        <ContentEditable
-          ref={contenteditableRef}
-          aria-placeholder="Type something …"
-          placeholder={<span />}
-          className="pt-15 md:pt-27 pb-3 md:pb-12 w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)] overflow-y-auto"
-        />
+    <>
+      {topArea && (
+        <div className="pt-15 md:pt-27 px-4 md:px-[calc((100%-730px)/2)]">
+          {topArea}
+        </div>
       )}
-      ErrorBoundary={LexicalErrorBoundary}
-    />
+      <RichTextPlugin
+        contentEditable={(
+          <ContentEditable
+            ref={contenteditableRef}
+            aria-placeholder="Type something …"
+            placeholder={<span />}
+            className={classNames([
+              topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
+              'pb-3 md:pb-12 w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)] overflow-y-auto',
+            ])}
+          />
+        )}
+        ErrorBoundary={LexicalErrorBoundary}
+      />
+    </>
   );
 };
