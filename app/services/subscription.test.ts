@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   completeProCheckout,
   CompleteProCheckoutError,
@@ -116,6 +116,12 @@ function webhookEvent(
   return JSON.stringify({ id, eventType, created_at: 1, object });
 }
 
+// The service logs the failures below on purpose, so the tests covering
+// them assert the message instead of letting it into the test output.
+function silenceLog(method: 'error' | 'warn') {
+  return vi.spyOn(console, method).mockImplementation(() => {});
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
 
@@ -129,6 +135,10 @@ beforeEach(() => {
   hasSubscriptionWithStatusMock.mockResolvedValue(true);
   recordWebhookEventMock.mockResolvedValue({ id: 'evt_123' });
   getWebhookEventMock.mockResolvedValue(undefined);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe('redeemInviteCode', () => {
@@ -233,6 +243,7 @@ describe('startProCheckout', () => {
   });
 
   it('reports a failing checkout creation', async () => {
+    const log = silenceLog('error');
     createCheckoutSessionMock.mockRejectedValue(new Error('down'));
 
     const [error] = await startProCheckout(
@@ -241,6 +252,10 @@ describe('startProCheckout', () => {
     );
 
     expect(error).toBe(StartProCheckoutError.CheckoutFailed);
+    expect(log).toHaveBeenCalledWith(
+      'Creating a Creem checkout session failed',
+      expect.any(Error),
+    );
   });
 });
 
@@ -274,11 +289,16 @@ describe('completeProCheckout', () => {
   });
 
   it('reports a subscription Creem does not know', async () => {
+    const log = silenceLog('error');
     getSubscriptionMock.mockRejectedValue(new Error('404'));
 
     const [error] = await completeProCheckout(callbackParams());
 
     expect(error).toBe(CompleteProCheckoutError.SubscriptionNotFound);
+    expect(log).toHaveBeenCalledWith(
+      'Loading the Creem subscription failed',
+      expect.any(Error),
+    );
   });
 
   it('stores the subscription and switches the features on', async () => {
@@ -552,6 +572,7 @@ describe('handleCreemWebhook', () => {
   });
 
   it('skips a subscription no user can be found for', async () => {
+    const log = silenceLog('warn');
     getUserMock.mockResolvedValue(undefined);
 
     const [error] = await handleCreemWebhook(
@@ -562,10 +583,13 @@ describe('handleCreemWebhook', () => {
     expect(error).toBeNull();
     expect(upsertSubscriptionMock).not.toHaveBeenCalled();
     expect(markWebhookEventProcessedMock).toHaveBeenCalledWith('evt_123');
+    expect(log)
+      .toHaveBeenCalledWith('No user found for Creem subscription sub_123');
   });
 
   it('never links a Creem customer another user already holds',
     async () => {
+      const log = silenceLog('warn');
       getUserByCreemCustomerIdMock
         .mockResolvedValue({ ...userFixture, id: 'other-user' });
 
@@ -578,6 +602,9 @@ describe('handleCreemWebhook', () => {
         hasSubscription: true,
         creemCustomerId: undefined,
       });
+      expect(log).toHaveBeenCalledWith(
+        'Creem customer cust_123 is already linked to another user',
+      );
     });
 });
 
@@ -604,6 +631,7 @@ describe('getBillingPortalUrl', () => {
   });
 
   it('reports a failing portal creation', async () => {
+    const log = silenceLog('error');
     createBillingPortalSessionMock.mockRejectedValue(new Error('down'));
 
     const [error] = await getBillingPortalUrl(
@@ -611,5 +639,9 @@ describe('getBillingPortalUrl', () => {
     );
 
     expect(error).toBe(GetBillingPortalUrlError.PortalFailed);
+    expect(log).toHaveBeenCalledWith(
+      'Creating a Creem portal session failed',
+      expect.any(Error),
+    );
   });
 });
