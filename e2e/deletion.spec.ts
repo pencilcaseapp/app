@@ -74,3 +74,22 @@ test('deleting a shared document unshares it', async ({ userA, userB }) => {
   await userB.openDeletedDocs();
   await expect(userB.documentInDeleted(heading)).toHaveCount(0);
 });
+
+test('deleting the open document scrolls up to the notice', async ({
+  userA,
+}) => {
+  await userA.createDocument();
+  const heading = `Long doc ${Date.now()}`;
+  const lines = Array.from({ length: 60 }, (_, index) => `Line ${index}`);
+  await userA.typeLines(heading, ...lines);
+
+  await userA.page.evaluate(() =>
+    window.scrollTo(0, document.body.scrollHeight),
+  );
+  expect(await userA.page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+
+  await userA.deleteDocument(heading);
+
+  await expect(userA.deletedNotice).toBeInViewport();
+  expect(await userA.page.evaluate(() => window.scrollY)).toBe(0);
+});

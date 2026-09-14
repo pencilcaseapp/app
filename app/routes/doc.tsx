@@ -15,6 +15,7 @@ import { validateForm } from '~/utils/form';
 import { useDocumentTitle } from '~/contexts/document-title';
 import { useEditedDocument } from '~/contexts/edited-document';
 import { useCallback } from 'react';
+import { useScrollToTopOn } from '~/hooks/use-scroll-to-top-on';
 import { MenuOrSignInButton } from '~/components/menu-or-sign-in-button/menu-or-sign-in-button';
 import { SharePanel } from '~/components/share-panel/share-panel';
 import { Button } from '~/ui/button/button';
@@ -128,6 +129,10 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
   const onAccessRevoked = useCallback(() => {
     void revalidate();
   }, [revalidate]);
+  const deleted = loaderData.ok && loaderData.deleted;
+  // Deleting the open document puts the notice above the content, out of
+  // sight for a reader halfway down a long document.
+  useScrollToTopOn(deleted);
 
   if (!loaderData.ok && loaderData.error === DocumentError.NotFound) {
     return (
@@ -151,8 +156,6 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
       />
     );
   }
-
-  const deleted = loaderData.ok && loaderData.deleted;
 
   return (
     <>
