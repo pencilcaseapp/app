@@ -229,6 +229,18 @@ screen, so
 `useCursorNameBounds` measures the tags it drew and nudges them sideways with
 a `transform` — the only property those rules leave alone.
 
+**Deletion — `app/services/document.ts`.** Documents are soft deleted:
+`deleteDocument` stamps `documents.deleted_at` and turns sharing off in the
+same owner-scoped update (`softDeleteDocument`), then drops the
+collaborators and closes every live connection, so the document vanishes
+for everybody at once. A deleted document is not found for anyone, the
+owner included; `restoreDocument` clears the stamp but leaves sharing off —
+the owner shares again on purpose. The sidebar posts to the resource routes
+`/doc/:id/delete` (from `DeleteDocumentDialog`'s fetcher form) and
+`/doc/:id/restore` (the row menu of the Deleted group, whose rows are
+`DocumentItem`s without a link). Deleting the open document navigates to
+`/`, which picks the next one. Nothing purges deleted rows yet.
+
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader
 order would reshuffle the navigation on each revalidation. `useStableOrder`

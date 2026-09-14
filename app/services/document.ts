@@ -2,7 +2,9 @@ import {
   connectCollaborator,
   getDocumentForViewer,
   removeCollaboratorsForDocument,
+  restoreDocument as restoreDocumentRow,
   setDocumentShared,
+  softDeleteDocument,
 } from '~/repos/document';
 import { closeDocumentConnections } from '~/live/connections';
 
@@ -32,7 +34,7 @@ export async function openDocument(
 ): Promise<OpenDocumentResult> {
   const document = await getDocumentForViewer(documentId, userId);
 
-  if (!document) {
+  if (!document || document.deletedAt) {
     return [OpenDocumentError.NotFound];
   }
 
@@ -59,7 +61,7 @@ export async function openDocument(
 export async function canOpenDocument(documentId: string, userId?: string) {
   const document = await getDocumentForViewer(documentId, userId);
 
-  return !!document && hasAccess(document, userId);
+  return !!document && !document.deletedAt && hasAccess(document, userId);
 }
 
 export enum ShareDocumentError {
@@ -102,6 +104,63 @@ export async function shareDocument(
   }
 
   return [null, { shared: document.shared }];
+}
+
+export enum DeleteDocumentError {
+  PermissionDenied,
+}
+
+export type DeleteDocumentResult
+  = [DeleteDocumentError] | [null, { id: string }];
+
+export interface OwnedDocumentInput {
+  documentId: string;
+  userId: string;
+}
+
+/**
+ * Soft deletes a document. Only the owner may delete, collaborators are
+ * rejected by the owner-scoped update. Deleting also unshares: the
+ * collaborators are dropped and every live connection is closed, so the
+ * document is gone for everybody at once.
+ */
+export async function deleteDocument(
+  input: OwnedDocumentInput,
+): Promise<DeleteDocumentResult> {
+  const { documentId, userId } = input;
+  const document = await softDeleteDocument({
+    documentId,
+    ownerId: userId,
+  });
+
+  if (!document) {
+    return [DeleteDocumentError.PermissionDenied];
+  }
+
+  await removeCollaboratorsForDocument(document.id);
+  closeDocumentConnections({ documentId: document.id });
+
+  return [null, { id: document.id }];
+}
+
+/**
+ * Undoes a soft deletion for the owner. The document comes back private;
+ * sharing it again is a separate, deliberate step.
+ */
+export async function restoreDocument(
+  input: OwnedDocumentInput,
+): Promise<DeleteDocumentResult> {
+  const { documentId, userId } = input;
+  const document = await restoreDocumentRow({
+    documentId,
+    ownerId: userId,
+  });
+
+  if (!document) {
+    return [DeleteDocumentError.PermissionDenied];
+  }
+
+  return [null, { id: document.id }];
 }
 
 interface DocumentAccess {

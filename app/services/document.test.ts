@@ -3,8 +3,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   canOpenDocument,
+  deleteDocument,
+  DeleteDocumentError,
   openDocument,
   OpenDocumentError,
+  restoreDocument,
   shareDocument,
   ShareDocumentError,
 } from './document';
@@ -15,6 +18,8 @@ const getDocumentForViewerMock = vi.fn();
 const connectCollaboratorMock = vi.fn();
 const setDocumentSharedMock = vi.fn();
 const removeCollaboratorsForDocumentMock = vi.fn();
+const softDeleteDocumentMock = vi.fn();
+const restoreDocumentRowMock = vi.fn();
 vi.mock('~/repos/document', () => ({
   getDocumentForViewer: (...args: unknown[]) =>
     getDocumentForViewerMock(...args),
@@ -22,6 +27,8 @@ vi.mock('~/repos/document', () => ({
   setDocumentShared: (...args: unknown[]) => setDocumentSharedMock(...args),
   removeCollaboratorsForDocument: (...args: unknown[]) =>
     removeCollaboratorsForDocumentMock(...args),
+  softDeleteDocument: (...args: unknown[]) => softDeleteDocumentMock(...args),
+  restoreDocument: (...args: unknown[]) => restoreDocumentRowMock(...args),
 }));
 
 const closeDocumentConnectionsMock = vi.fn();
@@ -35,6 +42,7 @@ const otherUserId = 'e6d9c8f1-0000-4000-8000-000000000000';
 function viewerDocument(overrides?: Partial<{
   shared: boolean;
   userId: string;
+  deletedAt: Date | null;
   isCollaborator: boolean;
 }>) {
   return {
@@ -42,6 +50,7 @@ function viewerDocument(overrides?: Partial<{
     title: documentFixture.title,
     shared: false,
     userId: userFixture.id,
+    deletedAt: null,
     isCollaborator: false,
     ...overrides,
   };
@@ -58,6 +67,17 @@ describe('openDocument', () => {
     const [error] = await openDocument(documentFixture.id, userFixture.id);
 
     expect(error).toBe(OpenDocumentError.NotFound);
+  });
+
+  it('returns not found for a deleted document, even to its owner', async () => {
+    getDocumentForViewerMock.mockResolvedValue(
+      viewerDocument({ deletedAt: new Date() }),
+    );
+
+    const [error] = await openDocument(documentFixture.id, userFixture.id);
+
+    expect(error).toBe(OpenDocumentError.NotFound);
+    expect(connectCollaboratorMock).not.toHaveBeenCalled();
   });
 
   it('reads the document and the collaborator status in one query', async () => {
@@ -236,6 +256,15 @@ describe('canOpenDocument', () => {
       .toBe(false);
   });
 
+  it('rejects a deleted document', async () => {
+    getDocumentForViewerMock.mockResolvedValue(
+      viewerDocument({ deletedAt: new Date() }),
+    );
+
+    expect(await canOpenDocument(documentFixture.id, userFixture.id))
+      .toBe(false);
+  });
+
   it('lets the owner into a private document', async () => {
     getDocumentForViewerMock.mockResolvedValue(viewerDocument());
 
@@ -268,5 +297,89 @@ describe('canOpenDocument', () => {
     await canOpenDocument(documentFixture.id, userFixture.id);
 
     expect(connectCollaboratorMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('deleteDocument', () => {
+  it('soft deletes a document for its owner', async () => {
+    softDeleteDocumentMock.mockResolvedValue({
+      id: documentFixture.id,
+      deletedAt: new Date(),
+    });
+
+    const [error, result] = await deleteDocument({
+      documentId: documentFixture.id,
+      userId: userFixture.id,
+    });
+
+    expect(error).toBeNull();
+    expect(result).toStrictEqual({ id: documentFixture.id });
+    expect(softDeleteDocumentMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      ownerId: userFixture.id,
+    });
+  });
+
+  it('drops the collaborators and closes every connection', async () => {
+    softDeleteDocumentMock.mockResolvedValue({
+      id: documentFixture.id,
+      deletedAt: new Date(),
+    });
+
+    await deleteDocument({
+      documentId: documentFixture.id,
+      userId: userFixture.id,
+    });
+
+    expect(removeCollaboratorsForDocumentMock)
+      .toHaveBeenCalledWith(documentFixture.id);
+    expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+    });
+  });
+
+  it('denies somebody who does not own the document', async () => {
+    softDeleteDocumentMock.mockResolvedValue(undefined);
+
+    const [error] = await deleteDocument({
+      documentId: documentFixture.id,
+      userId: otherUserId,
+    });
+
+    expect(error).toBe(DeleteDocumentError.PermissionDenied);
+    expect(removeCollaboratorsForDocumentMock).not.toHaveBeenCalled();
+    expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('restoreDocument', () => {
+  it('restores a deleted document for its owner', async () => {
+    restoreDocumentRowMock.mockResolvedValue({
+      id: documentFixture.id,
+      deletedAt: null,
+    });
+
+    const [error, result] = await restoreDocument({
+      documentId: documentFixture.id,
+      userId: userFixture.id,
+    });
+
+    expect(error).toBeNull();
+    expect(result).toStrictEqual({ id: documentFixture.id });
+    expect(restoreDocumentRowMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      ownerId: userFixture.id,
+    });
+  });
+
+  it('denies somebody who does not own the document', async () => {
+    restoreDocumentRowMock.mockResolvedValue(undefined);
+
+    const [error] = await restoreDocument({
+      documentId: documentFixture.id,
+      userId: otherUserId,
+    });
+
+    expect(error).toBe(DeleteDocumentError.PermissionDenied);
   });
 });

@@ -4,8 +4,11 @@ import {
   matchPath,
   NavLink,
   Outlet,
+  useFetcher,
   useLocation,
+  useNavigate,
 } from 'react-router';
+import { useAuthenticityToken } from 'remix-utils/csrf/react';
 import {
   DocumentTitleProvider,
   useDocumentTitle,
@@ -26,14 +29,19 @@ import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import { Sidebar } from '~/ui/sidebar/sidebar';
 import type { Route } from './+types/editor';
 import { optionalUserSessionContext } from '~/contexts/user-session';
-import { getDocumentList } from '~/repos/document';
+import { getDeletedDocumentList, getDocumentList } from '~/repos/document';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { useStableOrder } from '~/hooks/use-stable-order';
 import {
   EditedDocumentProvider,
   useEditedDocument,
 } from '~/contexts/edited-document';
-import { useEffect, useState, type PropsWithChildren } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type PropsWithChildren,
+} from 'react';
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
 import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
@@ -49,15 +57,27 @@ const bottomNavigation = [
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
-  const documentList = user ? await getDocumentList(user.id) : [];
+  const [documentList, deletedDocumentList] = user
+    ? await Promise.all([
+        getDocumentList(user.id),
+        getDeletedDocumentList(user.id),
+      ])
+    : [[], []];
   const navigation = documentList.map(doc => ({
+    id: doc.id,
     label: doc.title ?? 'Untitled',
     to: href('/doc/:id', { id: doc.id }),
+    isOwner: doc.userId === user?.id,
+  }));
+  const deletedNavigation = deletedDocumentList.map(doc => ({
+    id: doc.id,
+    label: doc.title ?? 'Untitled',
   }));
 
   return {
     user,
     navigation,
+    deletedNavigation,
   };
 }
 
@@ -65,6 +85,7 @@ export default function LayoutEditor({
   loaderData: {
     user,
     navigation,
+    deletedNavigation,
   },
 }: Route.ComponentProps) {
   return (
@@ -76,6 +97,7 @@ export default function LayoutEditor({
               ? (
                   <EditorSidebar
                     navigation={navigation}
+                    deletedNavigation={deletedNavigation}
                     showUpgrade={!user.hasSubscription}
                   >
                     <Outlet />
@@ -89,10 +111,17 @@ export default function LayoutEditor({
   );
 };
 
-type NavigationItemData = { label: string; to: string };
+type NavigationItemData = {
+  id: string;
+  label: string;
+  to: string;
+  isOwner: boolean;
+};
+type DeletedItemData = { id: string; label: string };
 
 export interface EditorSidebarProps extends PropsWithChildren {
   navigation: NavigationItemData[];
+  deletedNavigation: DeletedItemData[];
   showUpgrade?: boolean;
 }
 
@@ -100,10 +129,12 @@ const getNavigationKey = (item: NavigationItemData) => item.to;
 
 function EditorSidebar({
   navigation,
+  deletedNavigation,
   showUpgrade,
   children,
 }: EditorSidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [activeDocumentTitle] = useDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
@@ -115,7 +146,7 @@ function EditorSidebar({
   // The document stays set while the dialog animates out, so its
   // title does not vanish from the copy mid-close.
   const [documentToDelete, setDocumentToDelete]
-    = useState<NavigationItemData>();
+    = useState<DeletedItemData>();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   // Settings lives under the open document, so the entry only exists
   // while one is open (the only editor page — `/new` always redirects).
@@ -143,6 +174,14 @@ function EditorSidebar({
     moveToTop(href('/doc/:id', { id: editedDocumentId }));
   }, [editedDocumentId, moveToTop]);
 
+  // Deleting the open document would leave the editor on a not found
+  // page; the startpage picks the next document (or creates one).
+  const onDeleted = useCallback((documentId: string) => {
+    if (documentMatch?.params.id === documentId) {
+      void navigate(href('/'));
+    }
+  }, [documentMatch?.params.id, navigate]);
+
   return (
     <>
       <Sidebar
@@ -164,7 +203,9 @@ function EditorSidebar({
                           to={item.to}
                           key={item.to}
                           onClick={closeOnNavigate}
-                          actionArea={(
+                          // Only the owner may delete, so a collaborator
+                          // gets no menu at all.
+                          actionArea={item.isOwner && (
                             <DropdownMenu>
                               <DropdownMenuTrigger iconTitle="Item options" />
                               <DropdownMenuPortal>
@@ -172,7 +213,10 @@ function EditorSidebar({
                                   <DropdownMenuItem
                                     as="button"
                                     onClick={() => {
-                                      setDocumentToDelete({ ...item, label });
+                                      setDocumentToDelete({
+                                        id: item.id,
+                                        label,
+                                      });
                                       setIsDeleteDialogOpen(true);
                                     }}
                                     color="danger"
@@ -191,28 +235,38 @@ function EditorSidebar({
                     })}
                   </DocumentGroup>
                 </DocumentGroupRoot>
-                <DeleteDocumentDialog
-                  documentTitle={documentToDelete?.label}
-                  open={isDeleteDialogOpen}
-                  onOpenChange={setIsDeleteDialogOpen}
-                  onConfirm={() => {
-                    console.log('delete', documentToDelete?.to);
-                    setIsDeleteDialogOpen(false);
-                  }}
-                />
+                {documentToDelete && (
+                  <DeleteDocumentDialog
+                    documentId={documentToDelete.id}
+                    documentTitle={documentToDelete.label}
+                    open={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                    onDeleted={onDeleted}
+                  />
+                )}
               </>
             ),
           },
           {
-            key: 'Deleted',
+            key: 'deleted',
             content: (
               <DocumentGroupRoot>
                 <DocumentGroup icon="trash" title="Deleted" value="deleted">
-                  <DocumentGroupEmpty
-                    icon="no-docs"
-                  >
-                    No deleted documents
-                  </DocumentGroupEmpty>
+                  {deletedNavigation.length === 0 && (
+                    <DocumentGroupEmpty icon="no-docs">
+                      No deleted documents
+                    </DocumentGroupEmpty>
+                  )}
+                  {deletedNavigation.map(item => (
+                    // A deleted document cannot be opened, so the row is
+                    // not a link; restoring is its only action.
+                    <DocumentItem
+                      as="div"
+                      title={item.label}
+                      key={item.id}
+                      actionArea={<RestoreDocumentMenu documentId={item.id} />}
+                    />
+                  ))}
                 </DocumentGroup>
               </DocumentGroupRoot>
             ),
@@ -262,5 +316,30 @@ function EditorSidebar({
         {children}
       </Sidebar>
     </>
+  );
+}
+
+function RestoreDocumentMenu({ documentId }: { documentId: string }) {
+  const fetcher = useFetcher();
+  const csrfToken = useAuthenticityToken();
+
+  const restore = () => {
+    void fetcher.submit(
+      { csrf: csrfToken },
+      { method: 'post', action: href('/doc/:id/restore', { id: documentId }) },
+    );
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger iconTitle="Item options" />
+      <DropdownMenuPortal>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem as="button" onClick={restore} icon="restore">
+            Restore
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenuPortal>
+    </DropdownMenu>
   );
 }

@@ -1,4 +1,14 @@
-import { and, desc, eq, exists, or, sql, type InferSelectModel } from 'drizzle-orm';
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  isNotNull,
+  isNull,
+  or,
+  sql,
+  type InferSelectModel,
+} from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { documentCollaborators, documents } from '~/db/schema';
@@ -60,6 +70,7 @@ export async function getDocumentForViewer(id: string, viewerId?: string) {
     title: documents.title,
     shared: documents.shared,
     userId: documents.userId,
+    deletedAt: documents.deletedAt,
     isCollaborator: sql<boolean>`${collaborates}`,
   })
     .from(documents)
@@ -85,7 +96,42 @@ export async function getDocumentTitle(id: string) {
   return doc?.title ?? null;
 }
 
+/**
+ * The documents the user owns or collaborates on, deleted ones left out.
+ */
 export async function getDocumentList(userId: string) {
+  if (!isUuid(userId)) {
+    return [];
+  }
+
+  return db.select({
+    id: documents.id,
+    title: documents.title,
+    userId: documents.userId,
+  })
+    .from(documents)
+    .where(and(
+      isNull(documents.deletedAt),
+      or(
+        eq(documents.userId, userId),
+        exists(
+          db.select({ one: sql`1` })
+            .from(documentCollaborators)
+            .where(and(
+              eq(documentCollaborators.documentId, documents.id),
+              eq(documentCollaborators.userId, userId),
+            )),
+        ),
+      ),
+    ))
+    .orderBy(desc(documents.updatedAt));
+}
+
+/**
+ * The deleted documents the user owns. Deleting drops the collaborators, so
+ * a document somebody else deleted never shows up here.
+ */
+export async function getDeletedDocumentList(userId: string) {
   if (!isUuid(userId)) {
     return [];
   }
@@ -95,18 +141,11 @@ export async function getDocumentList(userId: string) {
     title: documents.title,
   })
     .from(documents)
-    .where(or(
+    .where(and(
       eq(documents.userId, userId),
-      exists(
-        db.select({ one: sql`1` })
-          .from(documentCollaborators)
-          .where(and(
-            eq(documentCollaborators.documentId, documents.id),
-            eq(documentCollaborators.userId, userId),
-          )),
-      ),
+      isNotNull(documents.deletedAt),
     ))
-    .orderBy(desc(documents.updatedAt));
+    .orderBy(desc(documents.deletedAt));
 }
 
 export async function updateDocument(
@@ -150,6 +189,62 @@ export async function setDocumentShared(input: SetDocumentSharedInput) {
     .returning({
       id: documents.id,
       shared: documents.shared,
+    });
+
+  return document;
+}
+
+export interface OwnedDocumentInput {
+  documentId: string;
+  ownerId: string;
+}
+
+/**
+ * Marks the document deleted and turns sharing off in the same update.
+ * Scoped to the owner like `setDocumentShared`; returns `undefined` when
+ * the document does not exist or belongs to somebody else.
+ */
+export async function softDeleteDocument(input: OwnedDocumentInput) {
+  const { documentId, ownerId } = input;
+
+  if (!isUuid(documentId) || !isUuid(ownerId)) {
+    return undefined;
+  }
+
+  const [document] = await db.update(documents)
+    .set({ deletedAt: sql`NOW()`, shared: false, updatedAt: sql`NOW()` })
+    .where(and(
+      eq(documents.id, documentId),
+      eq(documents.userId, ownerId),
+    ))
+    .returning({
+      id: documents.id,
+      deletedAt: documents.deletedAt,
+    });
+
+  return document;
+}
+
+/**
+ * Undoes the soft deletion. Sharing stays off — the owner has to share the
+ * document again on purpose.
+ */
+export async function restoreDocument(input: OwnedDocumentInput) {
+  const { documentId, ownerId } = input;
+
+  if (!isUuid(documentId) || !isUuid(ownerId)) {
+    return undefined;
+  }
+
+  const [document] = await db.update(documents)
+    .set({ deletedAt: null, updatedAt: sql`NOW()` })
+    .where(and(
+      eq(documents.id, documentId),
+      eq(documents.userId, ownerId),
+    ))
+    .returning({
+      id: documents.id,
+      deletedAt: documents.deletedAt,
     });
 
   return document;

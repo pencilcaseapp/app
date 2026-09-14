@@ -28,6 +28,16 @@ export async function createSharedDocument(userId: string) {
   return document;
 }
 
+export async function createDeletedDocument(userId: string) {
+  const [document] = await db.insert(documents).values({
+    title: faker.lorem.sentence({ min: 3, max: 10 }),
+    deletedAt: faker.date.recent(),
+    userId: userId ?? null,
+  }).returning();
+
+  return document;
+}
+
 export async function connectDocumentCollaborator(
   documentId: string,
   userId: string,

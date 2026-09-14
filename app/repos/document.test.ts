@@ -1,7 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { connectCollaborator, createDocument, getDocument, getDocumentForViewer, getDocumentList, getDocumentTitle, removeCollaboratorsForDocument, setDocumentShared, updateDocument } from './document';
+import {
+  connectCollaborator,
+  createDocument,
+  getDeletedDocumentList,
+  getDocument,
+  getDocumentForViewer,
+  getDocumentList,
+  getDocumentTitle,
+  removeCollaboratorsForDocument,
+  restoreDocument,
+  setDocumentShared,
+  softDeleteDocument,
+  updateDocument,
+} from './document';
 import { db } from '~/db';
-import { connectDocumentCollaborator, createDocumentWithTitle, createEmptyDocument, createSharedDocument } from '~/test/data-factories/document';
+import {
+  connectDocumentCollaborator,
+  createDeletedDocument,
+  createDocumentWithTitle,
+  createEmptyDocument,
+  createSharedDocument,
+} from '~/test/data-factories/document';
 import { createTestUser } from '~/test/data-factories/user';
 
 describe('createDocument', () => {
@@ -23,6 +42,7 @@ describe('createDocument', () => {
       shared: false,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
+      deletedAt: null,
       userId: user.id,
     });
   });
@@ -65,6 +85,7 @@ describe('updateDocument', () => {
       shared: false,
       createdAt: fixture.createdAt,
       updatedAt: expect.any(Date),
+      deletedAt: null,
       userId: user.id,
     });
   });
@@ -126,10 +147,12 @@ describe('getDocumentList', () => {
       {
         id: document2.id,
         title: document2.title,
+        userId: user.id,
       },
       {
         id: document1.id,
         title: document1.title,
+        userId: user.id,
       },
     ]);
   });
@@ -146,10 +169,12 @@ describe('getDocumentList', () => {
     expect(documents).toContainEqual({
       id: ownDocument.id,
       title: ownDocument.title,
+      userId: collaborator.id,
     });
     expect(documents).toContainEqual({
       id: sharedDocument.id,
       title: sharedDocument.title,
+      userId: owner.id,
     });
   });
 
@@ -161,6 +186,123 @@ describe('getDocumentList', () => {
     const documents = await getDocumentList(user.id);
 
     expect(documents.filter(item => item.id === document.id)).toHaveLength(1);
+  });
+
+  it('leaves deleted documents out', async () => {
+    const user = await createTestUser();
+    const document = await createDocumentWithTitle(user.id);
+    const deleted = await createDeletedDocument(user.id);
+
+    const documents = await getDocumentList(user.id);
+
+    expect(documents).toStrictEqual([
+      { id: document.id, title: document.title, userId: user.id },
+    ]);
+    expect(documents).not.toContainEqual(
+      expect.objectContaining({ id: deleted.id }),
+    );
+  });
+});
+
+describe('getDeletedDocumentList', () => {
+  it('returns only the deleted documents the user owns', async () => {
+    const user = await createTestUser();
+    const other = await createTestUser();
+    await createDocumentWithTitle(user.id);
+    const deleted = await createDeletedDocument(user.id);
+    await createDeletedDocument(other.id);
+
+    const documents = await getDeletedDocumentList(user.id);
+
+    expect(documents).toStrictEqual([
+      { id: deleted.id, title: deleted.title },
+    ]);
+  });
+
+  it('returns an empty list for an invalid id', async () => {
+    expect(await getDeletedDocumentList('not-a-uuid')).toStrictEqual([]);
+  });
+});
+
+describe('softDeleteDocument', () => {
+  it('marks the document deleted and turns sharing off', async () => {
+    const user = await createTestUser();
+    const fixture = await createSharedDocument(user.id);
+
+    const deleted = await softDeleteDocument({
+      documentId: fixture.id,
+      ownerId: user.id,
+    });
+
+    expect(deleted).toStrictEqual({
+      id: fixture.id,
+      deletedAt: expect.any(Date),
+    });
+
+    const document = await getDocument(fixture.id);
+    expect(document?.deletedAt).toBeInstanceOf(Date);
+    expect(document?.shared).toBe(false);
+  });
+
+  it('returns undefined for somebody who is not the owner', async () => {
+    const owner = await createTestUser();
+    const other = await createTestUser();
+    const fixture = await createSharedDocument(owner.id);
+
+    expect(await softDeleteDocument({
+      documentId: fixture.id,
+      ownerId: other.id,
+    })).toBeUndefined();
+
+    const document = await getDocument(fixture.id);
+    expect(document?.deletedAt).toBeNull();
+    expect(document?.shared).toBe(true);
+  });
+
+  it('returns undefined for an invalid id', async () => {
+    expect(await softDeleteDocument({
+      documentId: 'not-a-uuid',
+      ownerId: 'not-a-uuid',
+    })).toBeUndefined();
+  });
+});
+
+describe('restoreDocument', () => {
+  it('clears the deletion and keeps sharing off', async () => {
+    const user = await createTestUser();
+    const fixture = await createDeletedDocument(user.id);
+
+    const restored = await restoreDocument({
+      documentId: fixture.id,
+      ownerId: user.id,
+    });
+
+    expect(restored).toStrictEqual({ id: fixture.id, deletedAt: null });
+
+    const document = await getDocument(fixture.id);
+    expect(document?.deletedAt).toBeNull();
+    expect(document?.shared).toBe(false);
+  });
+
+  it('returns undefined for somebody who is not the owner', async () => {
+    const owner = await createTestUser();
+    const other = await createTestUser();
+    const fixture = await createDeletedDocument(owner.id);
+
+    expect(await restoreDocument({
+      documentId: fixture.id,
+      ownerId: other.id,
+    })).toBeUndefined();
+
+    const document = await getDocument(fixture.id);
+    expect(document?.deletedAt).toBeInstanceOf(Date);
+  });
+
+  it('returns undefined for an invalid id', async () => {
+    expect(await restoreDocument({
+      documentId: 'not-a-uuid',
+      ownerId: 'not-a-uuid',
+    })).toBeUndefined();
   });
 });
 
@@ -253,6 +395,7 @@ describe('getDocumentForViewer', () => {
         title: fixture.title,
         shared: true,
         userId: owner.id,
+        deletedAt: null,
         isCollaborator: false,
       });
 
