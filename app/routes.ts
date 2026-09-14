@@ -8,6 +8,11 @@ export default [
       route('settings', 'routes/settings.tsx', [
         index('routes/settings-menu.tsx'),
         route('account', 'routes/settings-account.tsx'),
+        route('account/email', 'routes/settings-account-email.tsx'),
+        route(
+          'account/email/:requestId',
+          'routes/settings-account-email-verify.tsx',
+        ),
         route('subscription', 'routes/settings-subscription.tsx'),
         route('support', 'routes/settings-support.tsx'),
       ]),

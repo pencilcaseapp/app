@@ -179,6 +179,21 @@ refreshed, a `set-cookie` header context that `root.tsx`'s loader commits;
 setting the non-optional `userSessionContext`. Loaders read the user from
 `context.get(...)`, never by re-parsing the request.
 
+**Changing the e-mail — `app/services/email-change.ts`.** The address is
+the only credential, so it changes through a verified two-step flow
+stacked on the account section (`/doc/:id/settings/account/email`, then
+`…/email/:requestId`): `initEmailChange` refuses the current address and
+one another account has, rate limits on `email_change_requests` by user
+*and* by canonical target mailbox (three per fifteen minutes, so no
+account can flood an address), expires the user's earlier requests and
+sends the code to the new address; `verifyEmailChange` only accepts a
+request of the session's user, burns attempts like the sign-in OTP (five,
+then the request expires), checks the address is still free and only then
+writes `users.email`. Requests expire after fifteen minutes and the
+`clean-up-expired-email-change-requests` job deletes them a day later,
+like the OTPs. The success toast travels back to the account section
+through `SearchParamToast`.
+
 **Emails — `app/emails/`.** Transactional emails are React Email components.
 `app/services/email-templates.tsx` picks the template and subject,
 `app/services/email.ts` renders it to HTML *and* plain text and hands both to
