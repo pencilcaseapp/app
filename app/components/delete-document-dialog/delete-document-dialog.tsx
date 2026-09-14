@@ -33,22 +33,20 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
   open,
   onOpenChange,
 }) => {
-  // One fetcher per document, so a result never carries over to the
-  // next document the dialog opens for.
-  const fetcher = useFetcher<typeof deleteAction>({
-    key: `delete-document-${documentId}`,
-  });
-  const deletedId = fetcher.data?.id;
-  const closedForRef = useRef<string>(undefined);
+  const fetcher = useFetcher<typeof deleteAction>();
+  const previousStateRef = useRef(fetcher.state);
 
+  // Close once the submission comes back. The result itself is no signal:
+  // deleting a restored document again returns the very same id.
   useEffect(() => {
-    if (!deletedId || closedForRef.current === deletedId) {
-      return;
-    }
+    const submitted = previousStateRef.current === 'submitting'
+      && fetcher.state !== 'submitting';
+    previousStateRef.current = fetcher.state;
 
-    closedForRef.current = deletedId;
-    onOpenChange(false);
-  }, [deletedId, onOpenChange]);
+    if (submitted && fetcher.data?.id) {
+      onOpenChange(false);
+    }
+  }, [fetcher.state, fetcher.data, onOpenChange]);
 
   const description = (shared
     ? `“${documentTitle}” will be deleted for everyone it is shared with.`

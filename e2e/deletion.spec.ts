@@ -33,6 +33,11 @@ test('a deleted document moves to Deleted and back on restore', async ({
   await expect(userA.documentInAllDocs(heading)).toBeVisible();
   await expect(userA.deletedNotice).toBeHidden();
   await expect(userA.editor).toContainText(heading);
+
+  // Deleting the restored document again closes the dialog as before.
+  await userA.deleteDocument(heading);
+  await expect(userA.page.getByRole('dialog')).toBeHidden();
+  await expect(userA.deletedNotice).toBeVisible();
 });
 
 test('deleting a shared document unshares it', async ({ userA, userB }) => {

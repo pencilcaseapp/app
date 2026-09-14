@@ -108,6 +108,25 @@ describe('DeleteDocumentDialog', () => {
     });
   });
 
+  test('closes again when the same document is deleted again', async () => {
+    const user = userEvent.setup();
+    const action = vi.fn(async () => ({ ok: true, id: documentId }));
+    renderDialog({ action });
+
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await vi.waitFor(() => {
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+    });
+
+    // Restored in between, then deleted once more from the same dialog.
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+
+    await vi.waitFor(() => {
+      expect(onOpenChange).toHaveBeenCalledTimes(2);
+    });
+    expect(action).toHaveBeenCalledTimes(2);
+  });
+
   test('closes only once', async () => {
     const user = userEvent.setup();
     const { rerender, element } = renderDialog();
