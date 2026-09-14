@@ -5,7 +5,6 @@ import {
   NavLink,
   Outlet,
   useLocation,
-  useNavigate,
 } from 'react-router';
 import {
   DocumentTitleProvider,
@@ -34,12 +33,7 @@ import {
   EditedDocumentProvider,
   useEditedDocument,
 } from '~/contexts/edited-document';
-import {
-  useCallback,
-  useEffect,
-  useState,
-  type PropsWithChildren,
-} from 'react';
+import { useEffect, useState, type PropsWithChildren } from 'react';
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
 import { RestoreDocumentMenu } from '~/components/restore-document-menu/restore-document-menu';
 import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
@@ -72,6 +66,7 @@ export async function loader({ context }: Route.LoaderArgs) {
   const deletedNavigation = deletedDocumentList.map(doc => ({
     id: doc.id,
     label: doc.title ?? 'Untitled',
+    to: href('/doc/:id', { id: doc.id }),
   }));
 
   return {
@@ -118,7 +113,7 @@ type NavigationItemData = {
   shared: boolean;
   isOwner: boolean;
 };
-type DeletedItemData = { id: string; label: string };
+type DeletedItemData = { id: string; label: string; to: string };
 type DocumentToDelete = { id: string; label: string; shared: boolean };
 
 export interface EditorSidebarProps extends PropsWithChildren {
@@ -136,7 +131,6 @@ function EditorSidebar({
   children,
 }: EditorSidebarProps) {
   const location = useLocation();
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [activeDocumentTitle] = useDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
@@ -175,18 +169,6 @@ function EditorSidebar({
 
     moveToTop(href('/doc/:id', { id: editedDocumentId }));
   }, [editedDocumentId, moveToTop]);
-
-  // Deleting the open document closes its live connection, which the
-  // editor answers by revalidating into the not found page. Leave for the
-  // next document (in the server's order) before the request goes out.
-  const onDelete = useCallback((documentId: string) => {
-    if (documentMatch?.params.id !== documentId) {
-      return;
-    }
-
-    const next = navigation.find(item => item.id !== documentId);
-    void navigate(next ? next.to : href('/new'));
-  }, [documentMatch?.params.id, navigate, navigation]);
 
   return (
     <>
@@ -249,7 +231,6 @@ function EditorSidebar({
                     shared={documentToDelete.shared}
                     open={isDeleteDialogOpen}
                     onOpenChange={setIsDeleteDialogOpen}
-                    onDelete={onDelete}
                   />
                 )}
               </>
@@ -265,16 +246,23 @@ function EditorSidebar({
                       No deleted documents
                     </DocumentGroupEmpty>
                   )}
-                  {deletedNavigation.map(item => (
-                    // A deleted document cannot be opened, so the row is
-                    // not a link; restoring is its only action.
-                    <DocumentItem
-                      as="div"
-                      title={item.label}
-                      key={item.id}
-                      actionArea={<RestoreDocumentMenu documentId={item.id} />}
-                    />
-                  ))}
+                  {deletedNavigation.map((item) => {
+                    const isActive = item.to === location.pathname;
+                    const label = isActive ? activeDocumentTitle : item.label;
+
+                    return (
+                      <DocumentItem
+                        title={label}
+                        as={NavLink}
+                        to={item.to}
+                        key={item.to}
+                        onClick={closeOnNavigate}
+                        actionArea={(
+                          <RestoreDocumentMenu documentId={item.id} />
+                        )}
+                      />
+                    );
+                  })}
                 </DocumentGroup>
               </DocumentGroupRoot>
             ),

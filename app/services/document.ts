@@ -17,6 +17,8 @@ export interface OpenDocument {
   title: string | null;
   shared: boolean;
   isOwner: boolean;
+  /** A deleted document opens read-only, and only for its owner. */
+  deleted: boolean;
   /** True when this open connected the viewer as a new collaborator. */
   hasJoined: boolean;
 }
@@ -34,7 +36,7 @@ export async function openDocument(
 ): Promise<OpenDocumentResult> {
   const document = await getDocumentForViewer(documentId, userId);
 
-  if (!document || document.deletedAt) {
+  if (!document || isGone(document, userId)) {
     return [OpenDocumentError.NotFound];
   }
 
@@ -54,14 +56,30 @@ export async function openDocument(
     title: document.title,
     shared: document.shared,
     isOwner,
+    deleted: document.deletedAt !== null,
     hasJoined,
   }];
 }
 
-export async function canOpenDocument(documentId: string, userId?: string) {
+export interface LiveAccess {
+  readOnly: boolean;
+}
+
+/**
+ * The access a live connection gets: none, read-only for the owner of a
+ * deleted document, or full.
+ */
+export async function getLiveAccess(
+  documentId: string,
+  userId?: string,
+): Promise<LiveAccess | undefined> {
   const document = await getDocumentForViewer(documentId, userId);
 
-  return !!document && !document.deletedAt && hasAccess(document, userId);
+  if (!document || isGone(document, userId) || !hasAccess(document, userId)) {
+    return undefined;
+  }
+
+  return { readOnly: document.deletedAt !== null };
 }
 
 export enum ShareDocumentError {
@@ -155,10 +173,16 @@ export async function restoreDocument(
 interface DocumentAccess {
   userId: string;
   shared: boolean;
+  deletedAt: Date | null;
 }
 
 function isOwnedBy(document: DocumentAccess, viewerId?: string) {
   return !!viewerId && document.userId === viewerId;
+}
+
+/** A deleted document only still exists for its owner. */
+function isGone(document: DocumentAccess, viewerId?: string) {
+  return document.deletedAt !== null && !isOwnedBy(document, viewerId);
 }
 
 function hasAccess(document: DocumentAccess, viewerId?: string) {

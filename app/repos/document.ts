@@ -172,7 +172,7 @@ export interface SetDocumentSharedInput {
 /**
  * Flips the shared flag only when the document belongs to `ownerId`, so the
  * authorisation check does not need a query of its own. Returns `undefined`
- * when the document does not exist or is owned by somebody else.
+ * when the document does not exist, is deleted, or is owned by somebody else.
  */
 export async function setDocumentShared(input: SetDocumentSharedInput) {
   const { documentId, ownerId, shared } = input;
@@ -186,6 +186,7 @@ export async function setDocumentShared(input: SetDocumentSharedInput) {
     .where(and(
       eq(documents.id, documentId),
       eq(documents.userId, ownerId),
+      isNull(documents.deletedAt),
     ))
     .returning({
       id: documents.id,

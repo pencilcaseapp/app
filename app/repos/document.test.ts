@@ -126,6 +126,20 @@ describe('setDocumentShared', () => {
     expect(document?.shared).toBe(false);
   });
 
+  it('returns undefined for a deleted document', async () => {
+    const user = await createTestUser();
+    const fixture = await createDeletedDocument(user.id);
+
+    expect(await setDocumentShared({
+      documentId: fixture.id,
+      ownerId: user.id,
+      shared: true,
+    })).toBeUndefined();
+
+    const document = await getDocument(fixture.id);
+    expect(document?.shared).toBe(false);
+  });
+
   it('returns undefined for an invalid id', async () => {
     expect(await setDocumentShared({
       documentId: 'not-a-uuid',

@@ -19,8 +19,6 @@ export interface DeleteDocumentDialogProps {
   shared: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Called when the deletion is submitted, before the request goes out. */
-  onDelete?: (documentId: string) => void;
 }
 
 /*
@@ -34,7 +32,6 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
   shared,
   open,
   onOpenChange,
-  onDelete,
 }) => {
   // One fetcher per document, so a result never carries over to the
   // next document the dialog opens for.
@@ -67,7 +64,6 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
             <fetcher.Form
               method="post"
               action={href('/doc/:id/delete', { id: documentId })}
-              onSubmit={() => onDelete?.(documentId)}
               className="flex items-center justify-end gap-2"
             >
               <AuthenticityTokenInput />

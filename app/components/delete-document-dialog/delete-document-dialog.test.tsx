@@ -8,7 +8,6 @@ import { DeleteDocumentDialog } from './delete-document-dialog';
 
 const documentId = '11111111-1111-1111-1111-111111111111';
 const onOpenChange = vi.fn();
-const onDelete = vi.fn();
 
 function renderDialog({
   open = true,
@@ -30,7 +29,6 @@ function renderDialog({
             shared={shared}
             open={open}
             onOpenChange={onOpenChange}
-            onDelete={onDelete}
           />
         </AuthenticityTokenProvider>
       ),
@@ -88,7 +86,6 @@ describe('DeleteDocumentDialog', () => {
 
     expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything());
     expect(action).not.toHaveBeenCalled();
-    expect(onDelete).not.toHaveBeenCalled();
   });
 
   test('posts to the delete route and closes once it is done', async () => {
@@ -109,25 +106,6 @@ describe('DeleteDocumentDialog', () => {
     expect(await action.mock.results[0].value).toMatchObject({
       csrf: 'test-token',
     });
-  });
-
-  test('reports the submission before the request goes out', async () => {
-    const user = userEvent.setup();
-    let submittedBeforeAction = false;
-    const action = vi.fn(async () => {
-      submittedBeforeAction = onDelete.mock.calls.length === 1;
-
-      return { ok: true, id: documentId };
-    });
-    renderDialog({ action });
-
-    await user.click(screen.getByRole('button', { name: 'Delete' }));
-
-    await vi.waitFor(() => {
-      expect(action).toHaveBeenCalledTimes(1);
-    });
-    expect(onDelete).toHaveBeenCalledWith(documentId);
-    expect(submittedBeforeAction).toBe(true);
   });
 
   test('closes only once', async () => {

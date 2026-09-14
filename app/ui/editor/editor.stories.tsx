@@ -6,6 +6,7 @@ import {
 } from '~/test/fixtures/editor';
 import { SidebarProvider } from '../sidebar-context/sidebar-provider';
 import { PRESENCE_COLORS } from '~/constants/presence';
+import { Notification } from '../notification/notification';
 
 const meta = {
   title: 'Editor/Editor',
@@ -62,5 +63,22 @@ export const WithCollaboratorOverflow: Story = {
       { id: 'quokka', name: 'Quokka', color: PRESENCE_COLORS[14] },
     ],
     initialEditorState: JSON.stringify(initialEditorStateFixture),
+  },
+};
+
+/* A deleted document: read-only, without the formatting tools, and a
+   notification above the content saying so. */
+export const ReadOnly: Story = {
+  args: {
+    avatars: [],
+    editable: false,
+    initialEditorState: JSON.stringify(initialEditorStateFixture),
+    notification: (
+      <Notification
+        variant="warning"
+        title="This document has been deleted"
+        description="It is read-only and will be permanently deleted within 30 days. Restore it from Deleted in the sidebar to keep it."
+      />
+    ),
   },
 };

@@ -32,11 +32,16 @@ export class AppUser {
   }
 
   /**
-   * A document inside the sidebar's "Deleted" group, which is a plain row
-   * rather than a link. The group starts collapsed, see `openDeletedDocs`.
+   * A document link inside the sidebar's "Deleted" group. The group starts
+   * collapsed, see `openDeletedDocs`.
    */
   documentInDeleted(title: string): Locator {
-    return this.sidebarGroup('Deleted').getByText(title, { exact: true });
+    return this.sidebarGroup('Deleted').getByRole('link', { name: title });
+  }
+
+  /** The notice a deleted document shows above its read-only content. */
+  get deletedNotice(): Locator {
+    return this.page.getByText('This document has been deleted');
   }
 
   async openDeletedDocs(): Promise<void> {

@@ -2,9 +2,9 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  canOpenDocument,
   deleteDocument,
   DeleteDocumentError,
+  getLiveAccess,
   openDocument,
   OpenDocumentError,
   restoreDocument,
@@ -69,14 +69,31 @@ describe('openDocument', () => {
     expect(error).toBe(OpenDocumentError.NotFound);
   });
 
-  it('returns not found for a deleted document, even to its owner', async () => {
+  it('opens a deleted document for its owner, marked as deleted', async () => {
     getDocumentForViewerMock.mockResolvedValue(
       viewerDocument({ deletedAt: new Date() }),
     );
 
-    const [error] = await openDocument(documentFixture.id, userFixture.id);
+    const [error, document] = await openDocument(
+      documentFixture.id, userFixture.id,
+    );
 
-    expect(error).toBe(OpenDocumentError.NotFound);
+    expect(error).toBeNull();
+    expect(document).toMatchObject({ isOwner: true, deleted: true });
+  });
+
+  it('returns not found for a deleted document to anybody else', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      shared: true,
+      isCollaborator: true,
+      deletedAt: new Date(),
+    }));
+
+    expect((await openDocument(documentFixture.id, userFixture.id))[0])
+      .toBe(OpenDocumentError.NotFound);
+    expect((await openDocument(documentFixture.id))[0])
+      .toBe(OpenDocumentError.NotFound);
     expect(connectCollaboratorMock).not.toHaveBeenCalled();
   });
 
@@ -102,6 +119,7 @@ describe('openDocument', () => {
       title: documentFixture.title,
       shared: false,
       isOwner: true,
+      deleted: false,
       hasJoined: false,
     });
     expect(connectCollaboratorMock).not.toHaveBeenCalled();
@@ -248,28 +266,39 @@ describe('shareDocument', () => {
   });
 });
 
-describe('canOpenDocument', () => {
+describe('getLiveAccess', () => {
   it('rejects an unknown document', async () => {
     getDocumentForViewerMock.mockResolvedValue(undefined);
 
-    expect(await canOpenDocument(documentFixture.id, userFixture.id))
-      .toBe(false);
-  });
-
-  it('rejects a deleted document', async () => {
-    getDocumentForViewerMock.mockResolvedValue(
-      viewerDocument({ deletedAt: new Date() }),
-    );
-
-    expect(await canOpenDocument(documentFixture.id, userFixture.id))
-      .toBe(false);
+    expect(await getLiveAccess(documentFixture.id, userFixture.id))
+      .toBeUndefined();
   });
 
   it('lets the owner into a private document', async () => {
     getDocumentForViewerMock.mockResolvedValue(viewerDocument());
 
-    expect(await canOpenDocument(documentFixture.id, userFixture.id))
-      .toBe(true);
+    expect(await getLiveAccess(documentFixture.id, userFixture.id))
+      .toStrictEqual({ readOnly: false });
+  });
+
+  it('lets the owner into a deleted document read-only', async () => {
+    getDocumentForViewerMock.mockResolvedValue(
+      viewerDocument({ deletedAt: new Date() }),
+    );
+
+    expect(await getLiveAccess(documentFixture.id, userFixture.id))
+      .toStrictEqual({ readOnly: true });
+  });
+
+  it('rejects anybody else from a deleted document', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      shared: true,
+      deletedAt: new Date(),
+    }));
+
+    expect(await getLiveAccess(documentFixture.id, userFixture.id))
+      .toBeUndefined();
   });
 
   it('rejects a visitor of a private document', async () => {
@@ -277,8 +306,8 @@ describe('canOpenDocument', () => {
       viewerDocument({ userId: otherUserId }),
     );
 
-    expect(await canOpenDocument(documentFixture.id, userFixture.id))
-      .toBe(false);
+    expect(await getLiveAccess(documentFixture.id, userFixture.id))
+      .toBeUndefined();
   });
 
   it('lets an anonymous visitor into a shared document', async () => {
@@ -286,7 +315,8 @@ describe('canOpenDocument', () => {
       viewerDocument({ userId: otherUserId, shared: true }),
     );
 
-    expect(await canOpenDocument(documentFixture.id)).toBe(true);
+    expect(await getLiveAccess(documentFixture.id))
+      .toStrictEqual({ readOnly: false });
   });
 
   it('does not connect a collaborator', async () => {
@@ -294,7 +324,7 @@ describe('canOpenDocument', () => {
       viewerDocument({ userId: otherUserId, shared: true }),
     );
 
-    await canOpenDocument(documentFixture.id, userFixture.id);
+    await getLiveAccess(documentFixture.id, userFixture.id);
 
     expect(connectCollaboratorMock).not.toHaveBeenCalled();
   });

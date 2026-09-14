@@ -14,18 +14,24 @@ test('a deleted document moves to Deleted and back on restore', async ({
   await userA.openDeletedDocs();
   await expect(userA.documentInDeleted(heading)).toBeVisible();
 
-  // The open document was the deleted one, so the editor moved on.
-  await expect(userA.page).not.toHaveURL(url);
-  await userA.page.goto(url);
-  await expect(
-    userA.page.getByRole('heading', { name: 'Not Found' }),
-  ).toBeVisible();
+  // The document stays open, now read-only with the notice on top.
+  await expect(userA.page).toHaveURL(url);
+  await expect(userA.deletedNotice).toBeVisible();
+  await expect(userA.page.locator('[contenteditable="false"]'))
+    .toContainText(heading);
+
+  // It opens the same way from the Deleted group after a reload.
+  await userA.page.reload();
+  await expect(userA.deletedNotice).toBeVisible();
+  await userA.openDeletedDocs();
+  await userA.documentInDeleted(heading).click();
+  await expect(userA.deletedNotice).toBeVisible();
 
   await userA.restoreDocument(heading);
 
   await expect(userA.documentInDeleted(heading)).toBeHidden();
   await expect(userA.documentInAllDocs(heading)).toBeVisible();
-  await userA.documentInAllDocs(heading).click();
+  await expect(userA.deletedNotice).toBeHidden();
   await expect(userA.editor).toContainText(heading);
 });
 

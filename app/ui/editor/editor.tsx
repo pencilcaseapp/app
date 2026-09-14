@@ -20,6 +20,7 @@ import type { Collaborator } from '~/utils/presence';
 
 import './editor.css';
 import { EditorPluginAutoFocus } from './plugins/editor-plugin-auto-focus';
+import { EditorPluginEditable } from './plugins/editor-plugin-editable';
 
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
@@ -28,6 +29,10 @@ export interface EditorProps extends React.PropsWithChildren {
   avatars: Collaborator[];
   topbarLeft?: React.ReactNode;
   topbarRight?: React.ReactNode;
+  /** A read-only editor keeps the content and drops the formatting tools. */
+  editable?: boolean;
+  /** Shown between the topbar and the content. */
+  notification?: React.ReactNode;
 }
 
 export const Editor: React.FC<EditorProps> = ({
@@ -35,6 +40,8 @@ export const Editor: React.FC<EditorProps> = ({
   avatars,
   topbarLeft,
   topbarRight,
+  editable = true,
+  notification,
   children,
 }) => {
   /* Ticking a box is not editing: the check list plugin focuses the list item
@@ -45,6 +52,7 @@ export const Editor: React.FC<EditorProps> = ({
 
   const config = useMemo<EditorConfig>(() => ({
     editorState: initialEditorState ?? null,
+    editable,
     namespace: 'pencilCase',
     onError: console.log,
     nodes: [
@@ -59,18 +67,20 @@ export const Editor: React.FC<EditorProps> = ({
       HorizontalRuleNode,
     ],
     theme: editorTheme,
-  }), [initialEditorState]);
+  }), [initialEditorState, editable]);
 
   return (
     <div className="w-full relative">
       <LexicalComposer initialConfig={config}>
+        <EditorPluginEditable editable={editable} />
         <EditorPluginToolbar
           avatars={avatars}
           topbarLeft={topbarLeft}
           topbarRight={topbarRight}
+          editable={editable}
         />
-        <EditorPluginRichText />
-        <EditorPluginAutoFocus />
+        <EditorPluginRichText topArea={notification} />
+        {editable && <EditorPluginAutoFocus />}
         <CheckListPlugin disableTakeFocusOnClick={isTouchDevice} />
         <ListPlugin />
         <ClickableLinkPlugin newTab />

@@ -184,32 +184,6 @@ export const WithActionArea: Story = {
 };
 
 /**
- * A deleted document cannot be opened, so the sidebar renders it without a
- * link: `as="div"` keeps the row and its `actionArea`, which then offers to
- * restore the document.
- */
-export const WithoutLink: Story = {
-  render: () => (
-    <DocumentItem
-      as="div"
-      title="Le Cours Français (A.2.1)"
-      actionArea={(
-        <DropdownMenu>
-          <DropdownMenuTrigger iconTitle="Document options" />
-          <DropdownMenuPortal>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem as="button" onClick={action('restore')} icon="restore">
-                Restore
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenuPortal>
-        </DropdownMenu>
-      )}
-    />
-  ),
-};
-
-/**
  * Multiple `DocumentItem`s rendered as a list.
  */
 export const List: Story = {

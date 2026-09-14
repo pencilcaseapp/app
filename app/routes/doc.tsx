@@ -21,11 +21,16 @@ import { Button } from '~/ui/button/button';
 import { DocEmptyState } from '~/components/doc-empty-state/doc-empty-state';
 import { PageTitle } from '~/components/page-title/page-title';
 import { getUserPresenceIdentity } from '~/utils/presence';
+import { Notification } from '~/ui/notification/notification';
 
 enum DocumentError {
   NotFound,
   PermissionDenied,
 }
+
+const DELETED_DOCUMENT_DESCRIPTION = 'It is read-only and will be permanently'
+  + ' deleted within 30 days. Restore it from Deleted in the sidebar to keep'
+  + ' it.';
 
 const shareSchema = z.object({
   shared: z.boolean(),
@@ -81,6 +86,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     signInUrl: user ? null : getSignInUrl(documentUrl),
     isOwner: document.isOwner,
     shared: document.shared,
+    deleted: document.deleted,
     presence: user ? getUserPresenceIdentity(user) : null,
     shareUrl: new URL(documentUrl, request.url).toString(),
   };
@@ -147,23 +153,35 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
     );
   }
 
+  const deleted = loaderData.ok && loaderData.deleted;
+
   return (
     <>
       <PageTitle>{title}</PageTitle>
       <ClientOnly>
         <CollaborativeEditor
-          key={params.id}
+          // Deleting or restoring changes the access the live server grants,
+          // so the editor reconnects.
+          key={`${params.id}:${deleted}`}
           id={params.id}
           presence={loaderData.ok ? loaderData.presence : null}
           onTitleChange={setTitle}
           onFirstEdit={onFirstEdit}
           onAccessRevoked={onAccessRevoked}
+          editable={!deleted}
+          notification={deleted && (
+            <Notification
+              variant="warning"
+              title="This document has been deleted"
+              description={DELETED_DOCUMENT_DESCRIPTION}
+            />
+          )}
           topbarLeft={(
             <MenuOrSignInButton
               signInUrl={loaderData.ok ? loaderData.signInUrl : null}
             />
           )}
-          topbarRight={loaderData.ok && loaderData.isOwner
+          topbarRight={loaderData.ok && loaderData.isOwner && !deleted
             ? (
                 <SharePanel
                   documentId={params.id}
