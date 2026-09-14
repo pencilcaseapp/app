@@ -49,7 +49,7 @@ export const ResponsiveDialogTopbar: FC<ResponsiveDialogTopbarProps> = ({
               type="button"
               icon="chevronLeft"
               iconTitle={backLabel}
-              colorLight="secondary"
+              colorLight="transparent"
               onClick={onBack}
               className={iconButtonClasses}
             />
@@ -78,7 +78,7 @@ export const ResponsiveDialogTopbar: FC<ResponsiveDialogTopbarProps> = ({
             type="button"
             icon="close"
             iconTitle={closeLabel}
-            colorLight="secondary"
+            colorLight="transparent"
             className={iconButtonClasses}
           />
         )}

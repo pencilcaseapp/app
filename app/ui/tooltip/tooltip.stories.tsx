@@ -34,7 +34,7 @@ export const Primary: Story = {
   ],
   args: {
     align: 'center',
-    children: <Button colorLight="secondary" icon="h1" aria-label="Heading 1" />,
+    children: <Button colorLight="transparent" icon="h1" aria-label="Heading 1" />,
     tooltip: 'Heading 1',
   },
 };

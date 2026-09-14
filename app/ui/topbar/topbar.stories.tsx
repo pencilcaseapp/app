@@ -36,7 +36,7 @@ export const BasicExample: Story = {
     </>
   ),
   args: {
-    left: (<Button colorLight="secondary" icon="sidebar" />),
+    left: (<Button colorLight="transparent" icon="sidebar" />),
     center: (
       <>
         {/* TODO: replace it with Toolbar UI + ToggleGroup UI */}
@@ -64,7 +64,7 @@ export const BasicExample: Story = {
       </>
     ),
     right: (
-      <Button icon="share" colorLight="primary">
+      <Button icon="share" colorLight="grey-900">
         Share
       </Button>
     ),
@@ -81,7 +81,7 @@ export const SwapAreasExample: Story = {
       <>
         <Topbar
           left={
-            !isSwapped ? (<Button colorLight="secondary" className="text-pca-grey-400! dark:text-pca-grey-600!" icon="close" />) : (<Button colorLight="secondary" icon="sidebar" />)
+            !isSwapped ? (<Button colorLight="transparent" className="text-pca-grey-400! dark:text-pca-grey-600!" icon="close" />) : (<Button colorLight="transparent" icon="sidebar" />)
 
           }
           center={
@@ -112,7 +112,7 @@ export const SwapAreasExample: Story = {
           }
           right={isSwapped
             ? (
-                <Button icon="share" colorLight="primary">
+                <Button icon="share" colorLight="grey-900">
                   Share
                 </Button>
               )

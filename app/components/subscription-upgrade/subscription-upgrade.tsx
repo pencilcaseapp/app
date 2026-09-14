@@ -32,8 +32,8 @@ export const SubscriptionUpgrade: FC = () => {
         <Button
           type="submit"
           isLoading={navigation.state !== 'idle'}
-          colorLight="upgrade"
-          colorDark="upgrade"
+          colorLight="yellow-500"
+          colorDark="yellow-500"
           className="w-full"
         >
           Upgrade to Pro

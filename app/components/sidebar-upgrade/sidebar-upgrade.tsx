@@ -42,7 +42,7 @@ export const SidebarUpgrade: React.FC<SidebarUpgradeProps> = ({
         // sidebar instead of replacing it.
         preventScrollReset
         onClick={isMobile ? undefined : closeOnNavigate}
-        colorLight="upgrade"
+        colorLight="yellow-500"
       >
         Upgrade to Pro
       </Button>

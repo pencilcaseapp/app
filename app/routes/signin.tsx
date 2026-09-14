@@ -104,8 +104,8 @@ export default function SignIn({ loaderData }: Route.ComponentProps) {
       </form.AppField>
 
       <form.SubmitButton
-        colorLight="primary"
-        colorDark="upgrade"
+        colorLight="grey-900"
+        colorDark="yellow-500"
         className="mb-10 w-full"
       >
         {commonCopies.actions.continue}

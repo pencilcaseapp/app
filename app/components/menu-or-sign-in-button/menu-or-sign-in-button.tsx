@@ -15,8 +15,8 @@ export const MenuOrSignInButton: React.FC<MenuOrSignInButtonProps>
         <Button
           as={Link}
           to={signInUrl}
-          colorLight="upgrade"
-          colorDark="upgrade"
+          colorLight="yellow-500"
+          colorDark="yellow-500"
         >
           Sign In
         </Button>

@@ -19,6 +19,8 @@ export const BadgeExample: Story = {
       <Badge variant="success">Status Badge</Badge>
       <Badge variant="warning">Status Badge</Badge>
       <Badge variant="danger">Status Badge</Badge>
+      <Badge variant="neutral">Status Badge</Badge>
+      <Badge variant="dark">Status Badge</Badge>
     </div>
   ),
 };

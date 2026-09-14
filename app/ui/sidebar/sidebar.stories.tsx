@@ -92,8 +92,8 @@ export const Default: Story = {
         <Topbar
           left={(
             <Button
-              colorLight="secondary"
-              colorDark="secondary"
+              colorLight="transparent"
+              colorDark="transparent"
               icon="sidebar"
               iconTitle={isSidebarOpen ? 'Close navigation' : 'Open navigation'}
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}

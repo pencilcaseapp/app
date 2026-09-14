@@ -45,7 +45,7 @@ export const Default: Story = {
     <div className="flex min-h-dvh items-center justify-center">
       <Drawer {...args}>
         <BaseDrawer.Trigger
-          render={<Button colorLight="primary">Open drawer</Button>}
+          render={<Button colorLight="grey-900">Open drawer</Button>}
         />
         <DrawerContent>
           <DrawerContentInner>
@@ -83,7 +83,7 @@ export const Controlled: Story = {
 
     return (
       <div className="flex min-h-dvh items-center justify-center">
-        <Button colorLight="primary" onClick={() => setOpen(true)}>
+        <Button colorLight="grey-900" onClick={() => setOpen(true)}>
           Open drawer
         </Button>
         <Drawer {...args} open={open} onOpenChange={setOpen}>
@@ -109,7 +109,7 @@ export const Controlled: Story = {
                 magna aliquyam erat, sed diam voluptua. At vero eos et
                 accusam
               </BaseDrawer.Description>
-              <BaseDrawer.Close render={<Button colorLight="primary">Close</Button>} />
+              <BaseDrawer.Close render={<Button colorLight="grey-900">Close</Button>} />
             </DrawerContentInner>
           </DrawerContent>
         </Drawer>
@@ -124,7 +124,7 @@ export const WithTopAndFooterAreas: Story = {
 
     return (
       <div className="flex min-h-dvh items-center justify-center">
-        <Button colorLight="primary" onClick={() => setOpen(true)}>
+        <Button colorLight="grey-900" onClick={() => setOpen(true)}>
           Open drawer
         </Button>
         <Drawer {...args} open={open} onOpenChange={setOpen}>
@@ -139,7 +139,7 @@ export const WithTopAndFooterAreas: Story = {
               )}
               footerArea={(
                 <div className="flex justify-between items-center">
-                  <BaseDrawer.Close render={<Button colorLight="secondary" className="mr-2">Cancel</Button>} />
+                  <BaseDrawer.Close render={<Button colorLight="transparent" className="mr-2">Cancel</Button>} />
                   <Button>Save</Button>
                 </div>
               )}
@@ -160,7 +160,7 @@ export const FullHeight: Story = {
     <div className="flex min-h-dvh items-center justify-center">
       <Drawer {...args}>
         <BaseDrawer.Trigger
-          render={<Button colorLight="primary">Open drawer</Button>}
+          render={<Button colorLight="grey-900">Open drawer</Button>}
         />
         <DrawerContent isFullHeight>
           <DrawerContentInner>

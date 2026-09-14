@@ -88,7 +88,7 @@ export default function SettingsAccountRoute({
         <form.AppForm>
           <div className="flex items-center justify-end gap-2">
             <ResponsiveDialogClose
-              render={<Button colorLight="secondary">Cancel</Button>}
+              render={<Button colorLight="transparent">Cancel</Button>}
             />
             <ControlledSubmitButton>Save</ControlledSubmitButton>
           </div>

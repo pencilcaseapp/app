@@ -38,9 +38,9 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
           footerArea={(
             <div className="flex items-center justify-end gap-2">
               <ResponsiveDialogClose
-                render={<Button colorLight="secondary">Cancel</Button>}
+                render={<Button colorLight="transparent">Cancel</Button>}
               />
-              <Button colorLight="danger" onClick={onConfirm}>
+              <Button colorLight="red-500" onClick={onConfirm}>
                 Delete
               </Button>
             </div>

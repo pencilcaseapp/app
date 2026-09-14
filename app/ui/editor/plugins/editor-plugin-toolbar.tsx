@@ -145,7 +145,7 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
       <Topbar
         ref={topbarRef}
         hasSolidBackground={isVirtualKeyboardOpen}
-        left={!isVirtualKeyboardOpen ? topbarLeft : <Button colorLight="secondary" icon="close" className="text-pca-grey-400!" iconTitle="close" />}
+        left={!isVirtualKeyboardOpen ? topbarLeft : <Button colorLight="transparent" icon="close" className="text-pca-grey-400!" iconTitle="close" />}
         right={!isVirtualKeyboardOpen && (
           <>
             {avatars.length > 0 && (

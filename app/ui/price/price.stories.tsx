@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Price } from './price';
 
 /**
- * A price with its billing period, e.g. on the pricing table.
+ * A price with its billing period, e.g. on the pricing card.
  *
  * The `background` prop picks the color set for the surface the
  * price sits on: the yellow pricing card (which stays yellow in both
