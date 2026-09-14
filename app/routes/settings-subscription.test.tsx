@@ -16,9 +16,15 @@ import { renderRoute } from '~/utils/testing';
 import { action, loader } from './settings-subscription';
 import type { Route } from './+types/settings-subscription';
 
+const getDocumentListMock = vi.fn().mockResolvedValue([]);
 const getSubscriptionOverviewMock = vi.fn();
 const startProCheckoutMock = vi.fn();
 const completeProCheckoutMock = vi.fn();
+
+vi.mock('~/repos/document', () => ({
+  getDocumentList: (...args: unknown[]) => getDocumentListMock(...args),
+}));
+
 vi.mock('~/services/subscription', async (importOriginal) => {
   const actual
     = await importOriginal<typeof import('~/services/subscription')>();
@@ -40,6 +46,12 @@ const subscriber: User = {
   hasSubscription: true,
   creemCustomerId: 'cust_123',
 };
+
+const activeSubscription = {
+  kind: 'subscribed',
+  status: 'active',
+  currentPeriodEnd: new Date('2026-07-06T00:00:00Z'),
+} as SubscriptionOverview;
 
 function contextFor(user: User) {
   const context = new RouterContextProvider();
@@ -64,49 +76,82 @@ async function renderSubscription(
 
 afterEach(() => {
   vi.clearAllMocks();
+  getDocumentListMock.mockResolvedValue([]);
 });
 
 describe('page', () => {
-  test('offers the upgrade to a user without the pro features',
+  test('compares the free plan against pro for a free user', async () => {
+    getDocumentListMock.mockResolvedValue([{}, {}]);
+
+    await renderSubscription(userFixture, { kind: 'none' });
+
+    expect(await screen.findByText('You’ve used 2 of your 3 free docs.'))
+      .toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Upgrade to Pro' }))
+      .toBeEnabled();
+    expect(screen.getByRole('rowheader', { name: 'Docs' }))
+      .toBeInTheDocument();
+    expect(screen.getAllByTitle('Not included')).toHaveLength(2);
+    // The badge renders once per breakpoint slot, both inside the free
+    // card: the pro card carries none.
+    const badges = screen.getAllByText('Current');
+    expect(badges).toHaveLength(2);
+    for (const badge of badges) {
+      expect(badge.closest('.bg-pca-white')).toBeInTheDocument();
+    }
+    expect(screen.queryByRole('link', { name: 'Manage subscription' }))
+      .not.toBeInTheDocument();
+  });
+
+  test('tells a free user at the limit that all docs are in use',
     async () => {
+      getDocumentListMock.mockResolvedValue([{}, {}, {}]);
+
       await renderSubscription(userFixture, { kind: 'none' });
 
-      expect(
-        await screen.findByRole('button', { name: 'Upgrade to Pro' }),
-      ).toBeInTheDocument();
-      expect(screen.queryByRole('link', { name: 'Manage Subscription' }))
-        .not.toBeInTheDocument();
+      expect(await screen.findByText('You’ve used all 3 of your free docs.'))
+        .toBeInTheDocument();
     });
 
   test('shows the running subscription with the customer portal',
     async () => {
-      await renderSubscription(subscriber, {
-        kind: 'subscribed',
-        status: 'active',
-        currentPeriodEnd: new Date('2026-07-06T00:00:00Z'),
-      } as SubscriptionOverview);
+      await renderSubscription(subscriber, activeSubscription);
 
-      expect(await screen.findByText('Active')).toBeInTheDocument();
+      expect(await screen.findByText('You’re on Pencil Case Pro.'))
+        .toBeInTheDocument();
       expect(screen.getByText(/^Renews at: .*2026$/)).toBeInTheDocument();
+      for (const badge of screen.getAllByText('Current')) {
+        expect(badge.closest('.bg-pca-yellow-500')).toBeInTheDocument();
+      }
 
       const portal = screen.getByRole('link', {
-        name: 'Manage Subscription',
+        name: 'Manage subscription',
       });
       expect(portal).toHaveAttribute('href', href('/billing-portal'));
       expect(portal).toHaveAttribute('target', '_blank');
       expect(screen.queryByRole('button', { name: 'Upgrade to Pro' }))
         .not.toBeInTheDocument();
+      expect(getDocumentListMock).not.toHaveBeenCalled();
     });
 
   test('shows a cancelled subscription until it runs out', async () => {
     await renderSubscription(subscriber, {
-      kind: 'subscribed',
+      ...activeSubscription,
       status: 'scheduled_cancel',
-      currentPeriodEnd: new Date('2026-07-06T00:00:00Z'),
     } as SubscriptionOverview);
 
-    expect(await screen.findByText('Cancelled')).toBeInTheDocument();
-    expect(screen.getByText(/^Active until: .*2026$/)).toBeInTheDocument();
+    expect(await screen.findByText(/^Cancelled\. Active until: .*2026$/))
+      .toBeInTheDocument();
+  });
+
+  test('asks for a new payment method after a failed payment', async () => {
+    await renderSubscription(subscriber, {
+      ...activeSubscription,
+      status: 'past_due',
+    } as SubscriptionOverview);
+
+    expect(await screen.findByText(/^Payment failed\. Update your payment/))
+      .toBeInTheDocument();
   });
 
   test('shows complimentary pro to an invited friend', async () => {
@@ -115,15 +160,22 @@ describe('page', () => {
       { kind: 'complimentary' },
     );
 
-    expect(await screen.findByText('Active')).toBeInTheDocument();
-    expect(screen.getByText('On the house. Enjoy!')).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Manage Subscription' }))
+    expect(await screen.findByText('On the house. Enjoy!'))
+      .toBeInTheDocument();
+    expect(screen.getByText('You already have all pro features.'))
+      .toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Manage subscription' }))
+      .not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Upgrade to Pro' }))
       .not.toBeInTheDocument();
   });
 });
 
 describe('loader', () => {
-  function callLoader(searchParams: Record<string, string>) {
+  function callLoader(
+    searchParams: Record<string, string>,
+    user = userFixture,
+  ) {
     const search = new URLSearchParams(searchParams).toString();
     const request = new Request(
       `http://localhost:3000${subscriptionUrl}?${search}`,
@@ -134,9 +186,22 @@ describe('loader', () => {
       url: new URL(request.url),
       pattern: '/doc/:id/settings/subscription',
       params: { id: DOC_ID },
-      context: contextFor(userFixture),
+      context: contextFor(user),
     } as Route.LoaderArgs);
   }
+
+  test('counts the docs of a free user', async () => {
+    getSubscriptionOverviewMock.mockResolvedValue({ kind: 'none' });
+    getDocumentListMock.mockResolvedValue([{}, {}]);
+
+    const data = await callLoader({});
+
+    expect(data).toMatchObject({
+      overview: { kind: 'none' },
+      documentCount: 2,
+    });
+    expect(getDocumentListMock).toHaveBeenCalledWith(userFixture.id);
+  });
 
   test('confirms the checkout Creem sends the user back from',
     async () => {

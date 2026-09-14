@@ -38,11 +38,13 @@ test('upgrading to pro through the Creem checkout', async ({ userA }) => {
   expect(page.url()).toContain(`${documentUrl}/settings/subscription`);
   await expect(page.getByText('Welcome to Pro! Your subscription is active.'))
     .toBeVisible();
-  await expect(page.getByText('Active', { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'You’re on Pencil Case Pro.' }),
+  ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Upgrade to Pro' }))
     .not.toBeVisible();
 
-  const manage = page.getByRole('link', { name: 'Manage Subscription' });
+  const manage = page.getByRole('link', { name: 'Manage subscription' });
   await expect(manage).toBeVisible();
 
   const popupPromise = page.waitForEvent('popup');
