@@ -23,14 +23,4 @@ export const PRO_PLAN = {
   name: 'Pro',
   price: '25 €',
   period: 'renews yearly',
-  features: [
-    'Hosted in the EU',
-    'Enjoy Simplicity',
-    'Fully web based (No Apps)',
-    'Works on Mobile',
-    'Markdown Support',
-    'Document Management',
-    'Collaboration',
-    'Open-Source Development',
-  ],
 };

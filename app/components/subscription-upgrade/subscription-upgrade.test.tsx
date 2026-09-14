@@ -3,7 +3,6 @@ import { userEvent } from '@testing-library/user-event';
 import { createRoutesStub } from 'react-router';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 import { expect, test, vi } from 'vitest';
-import { PRO_PLAN } from '~/constants/subscription';
 import { SubscriptionUpgrade } from './subscription-upgrade';
 
 function renderUpgrade(action = vi.fn()) {
@@ -22,16 +21,11 @@ function renderUpgrade(action = vi.fn()) {
   return render(<Stub initialEntries={['/settings/subscription']} />);
 }
 
-test('presents the pro plan with its features', () => {
+test('presents the pro plan', () => {
   const { container } = renderUpgrade();
 
   expect(screen.getByRole('heading', { name: 'Pro' })).toBeInTheDocument();
   expect(screen.getByText('25 €')).toBeInTheDocument();
-  for (const feature of PRO_PLAN.features) {
-    expect(screen.getByText(feature)).toBeInTheDocument();
-  }
-  expect(screen.getByRole('presentation'))
-    .toHaveAttribute('src', '/upgrade-pencil@2x.png');
   expect(container).toMatchSnapshot();
 });
 

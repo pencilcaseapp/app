@@ -74,7 +74,6 @@ describe('page', () => {
       expect(
         await screen.findByRole('button', { name: 'Upgrade to Pro' }),
       ).toBeInTheDocument();
-      expect(screen.getByText('Hosted in the EU')).toBeInTheDocument();
       expect(screen.queryByRole('link', { name: 'Manage Subscription' }))
         .not.toBeInTheDocument();
     });
