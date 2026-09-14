@@ -1,6 +1,7 @@
 import { validate as isUuid } from 'uuid';
 import { z } from 'zod';
 import { getConfig } from '~/config';
+import { SubscriptionStatus } from '~/constants/subscription';
 import {
   getWebhookEvent,
   markWebhookEventProcessed,
@@ -8,8 +9,8 @@ import {
 } from '~/repos/creem-webhook-event';
 import {
   getSubscriptionByCreemId,
+  getSubscriptionWithStatus,
   hasSubscriptionWithStatus,
-  SubscriptionStatus,
   upsertSubscription,
 } from '~/repos/subscription';
 import {
@@ -62,6 +63,42 @@ export async function redeemInviteCode(user: User, code: string) {
   }
 
   await updateUser(user.id, { hasSubscription: true });
+}
+
+export type SubscriptionOverview
+  = | { kind: 'none' }
+    | { kind: 'complimentary' }
+    | {
+      kind: 'subscribed';
+      status: SubscriptionStatus;
+      currentPeriodEnd: Date | null;
+    };
+
+/**
+ * What the subscription settings show: the upgrade offer, the paid
+ * subscription behind the pro features, or — pro features without a
+ * subscription to show for them — the free pro of an invited friend.
+ */
+export async function getSubscriptionOverview(
+  user: User,
+): Promise<SubscriptionOverview> {
+  if (!user.hasSubscription) {
+    return { kind: 'none' };
+  }
+
+  const subscription
+    = await getSubscriptionWithStatus(user.id, ACCESS_GRANTING_STATUSES);
+
+  if (!subscription) {
+    return { kind: 'complimentary' };
+  }
+
+  return {
+    kind: 'subscribed',
+    // The query only returns one of the statuses of the enum.
+    status: subscription.status as SubscriptionStatus,
+    currentPeriodEnd: subscription.currentPeriodEnd,
+  };
 }
 
 export enum StartProCheckoutError {

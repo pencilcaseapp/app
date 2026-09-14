@@ -63,9 +63,10 @@ expected to be gone).
 ## The Creem checkout
 
 `e2e/subscription.spec.ts` drives Creem's real test-mode checkout:
-upgrade, pay with the always-succeeding test card on their hosted
-page, follow the signed redirect back, see pro switched on and the
-customer portal open. That buys real end-to-end confidence at the
+open the subscription settings from the sidebar, upgrade, pay with the
+always-succeeding test card on their hosted page, follow the signed
+redirect back into the settings, see pro switched on and the customer
+portal open. That buys real end-to-end confidence at the
 price of depending on Creem being up and their checkout page keeping
 its shape — the card-form locators in the spec are the one place to
 adjust when it changes.

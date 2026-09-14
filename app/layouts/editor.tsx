@@ -131,6 +131,9 @@ function EditorSidebar({
   const settingsUrl = documentMatch?.params.id
     ? href(settingsPath, { id: documentMatch.params.id })
     : null;
+  const upgradeUrl = documentMatch?.params.id
+    ? href('/doc/:id/settings/subscription', { id: documentMatch.params.id })
+    : href('/upgrade');
 
   useEffect(() => {
     if (!editedDocumentId) {
@@ -224,6 +227,7 @@ function EditorSidebar({
               <SidebarUpgrade
                 documentCount={navigation.length}
                 documentLimit={FREE_DOCUMENT_LIMIT}
+                to={upgradeUrl}
               />
             )}
             {bottomNavigation?.map(item => (

@@ -21,21 +21,31 @@ test('upgrading to pro through the Creem checkout', async ({ userA }) => {
   );
   test.setTimeout(180_000);
 
-  await userA.page.goto('/upgrade');
-  await userA.page.getByRole('button', { name: 'Upgrade' }).click();
+  const { page } = userA;
+  const documentUrl = await userA.createDocument();
 
-  await userA.page.waitForURL('**creem.io/**', { timeout: 30_000 });
-  await payWithTestCard(userA.page);
+  // The sidebar opens the subscription settings over the document.
+  await page.getByRole('link', { name: 'Upgrade to Pro' }).click();
+  await expect(page).toHaveURL(`${documentUrl}/settings/subscription`);
+  await page.getByRole('button', { name: 'Upgrade to Pro' }).click();
 
-  await userA.page.waitForURL('**/upgrade/callback**', { timeout: 90_000 });
-  await expect(userA.page.getByText('You are all set!')).toBeVisible();
+  await page.waitForURL('**creem.io/**', { timeout: 30_000 });
+  await payWithTestCard(page);
 
-  await userA.page.goto('/upgrade');
-  const manage = userA.page
-    .getByRole('link', { name: 'Manage subscription' });
+  // Creem sends the user back to the same settings over the same
+  // document, where the signed parameters are confirmed and dropped.
+  await page.waitForURL('**/settings/subscription**', { timeout: 90_000 });
+  expect(page.url()).toContain(`${documentUrl}/settings/subscription`);
+  await expect(page.getByText('Welcome to Pro! Your subscription is active.'))
+    .toBeVisible();
+  await expect(page.getByText('Active', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Upgrade to Pro' }))
+    .not.toBeVisible();
+
+  const manage = page.getByRole('link', { name: 'Manage Subscription' });
   await expect(manage).toBeVisible();
 
-  const popupPromise = userA.page.waitForEvent('popup');
+  const popupPromise = page.waitForEvent('popup');
   await manage.click();
   const popup = await popupPromise;
   await popup.waitForURL('**creem.io/**', { timeout: 30_000 });

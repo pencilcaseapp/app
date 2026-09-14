@@ -6,6 +6,7 @@ import {
   CompleteProCheckoutError,
   getBillingPortalUrl,
   GetBillingPortalUrlError,
+  getSubscriptionOverview,
   handleCreemWebhook,
   HandleCreemWebhookError,
   redeemInviteCode,
@@ -26,6 +27,7 @@ vi.mock('~/repos/user', () => ({
 
 const upsertSubscriptionMock = vi.fn();
 const getSubscriptionByCreemIdMock = vi.fn();
+const getSubscriptionWithStatusMock = vi.fn();
 const hasSubscriptionWithStatusMock = vi.fn();
 vi.mock('~/repos/subscription', async (importOriginal) => {
   const actual
@@ -36,6 +38,8 @@ vi.mock('~/repos/subscription', async (importOriginal) => {
       (...args: unknown[]) => upsertSubscriptionMock(...args),
     getSubscriptionByCreemId:
       (...args: unknown[]) => getSubscriptionByCreemIdMock(...args),
+    getSubscriptionWithStatus:
+      (...args: unknown[]) => getSubscriptionWithStatusMock(...args),
     hasSubscriptionWithStatus:
       (...args: unknown[]) => hasSubscriptionWithStatusMock(...args),
   };
@@ -149,6 +153,47 @@ describe('redeemInviteCode', () => {
 
     expect(updateUserMock).not.toHaveBeenCalled();
   });
+});
+
+describe('getSubscriptionOverview', () => {
+  it('offers the upgrade to a user without the pro features', async () => {
+    const overview = await getSubscriptionOverview(userFixture);
+
+    expect(overview).toStrictEqual({ kind: 'none' });
+    expect(getSubscriptionWithStatusMock).not.toHaveBeenCalled();
+  });
+
+  it('describes the subscription granting the pro features', async () => {
+    getSubscriptionWithStatusMock.mockResolvedValue({
+      status: 'scheduled_cancel',
+      currentPeriodEnd: new Date('2026-07-06T00:00:00Z'),
+    });
+
+    const overview = await getSubscriptionOverview(
+      { ...userFixture, hasSubscription: true },
+    );
+
+    expect(overview).toStrictEqual({
+      kind: 'subscribed',
+      status: 'scheduled_cancel',
+      currentPeriodEnd: new Date('2026-07-06T00:00:00Z'),
+    });
+    expect(getSubscriptionWithStatusMock).toHaveBeenCalledWith(
+      userFixture.id,
+      ['active', 'trialing', 'past_due', 'scheduled_cancel'],
+    );
+  });
+
+  it('reports pro features without a subscription behind them',
+    async () => {
+      getSubscriptionWithStatusMock.mockResolvedValue(undefined);
+
+      const overview = await getSubscriptionOverview(
+        { ...userFixture, hasSubscription: true },
+      );
+
+      expect(overview).toStrictEqual({ kind: 'complimentary' });
+    });
 });
 
 describe('startProCheckout', () => {

@@ -1,0 +1,63 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`presents the pro plan 1`] = `
+<div>
+  <div
+    class="flex flex-col"
+  >
+    <div
+      class="flex flex-col pb-4"
+    >
+      <span
+        class="antialiased font-inter text-xs font-normal text-pca-grey-900 dark:text-white"
+      >
+        Pencil Case
+      </span>
+      <div
+        class="flex items-center justify-between gap-3"
+      >
+        <h3
+          class="font-inter text-[28px] font-bold antialiased text-pca-grey-900 dark:text-pca-white"
+        >
+          Pro
+        </h3>
+      </div>
+      <p
+        class="mt-1"
+      >
+        <span
+          class="antialiased font-inter text-base font-normal text-pca-grey-900 dark:text-white"
+        >
+          25 €
+        </span>
+        <span
+          class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white"
+        >
+           / renews yearly
+        </span>
+      </p>
+    </div>
+    <form
+      action="/settings/subscription"
+      data-discover="true"
+      method="post"
+    >
+      <input
+        name="csrf"
+        type="hidden"
+        value="test-token"
+      />
+      <button
+        class="relative overflow-hidden active:scale-[0.96] motion-reduce:active:scale-100 flex items-center justify-center gap-2 rounded-xl px-4 py-2 lg:px-3 flex-row transition-[background-color,color,box-shadow,scale] duration-150 ease-out motion-reduce:transition-none h-11 lg:h-9 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500 bg-pca-yellow-500 text-pca-grey-900 hover:bg-pca-yellow-700 active:bg-pca-yellow-700 dark:bg-pca-yellow-500 dark:text-pca-grey-900 dark:hover:bg-pca-yellow-700 dark:active:bg-pca-yellow-700 w-full"
+        type="submit"
+      >
+        <span
+          class="antialiased font-inter text-sm text-pca-grey-900 dark:text-white font-medium text-inherit! leading-none"
+        >
+          Upgrade to Pro
+        </span>
+      </button>
+    </form>
+  </div>
+</div>
+`;

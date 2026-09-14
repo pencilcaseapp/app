@@ -147,10 +147,15 @@ and every instance closes the connections it holds; the publisher closes its
 own straight away, and the echo of its own message is a no-op.
 
 **Subscriptions — `app/services/subscription.ts`, `docs/subscriptions.md`.**
-The pro subscription is sold through Creem (merchant of record):
-`/upgrade` starts their hosted checkout, `/upgrade/callback` verifies the
-signed redirect, `/webhooks/creem` keeps the `subscriptions` table in
-sync (events recorded in `creem_webhook_events` for idempotency), and
+The pro subscription is sold through Creem (merchant of record): the
+subscription section of the settings dialog
+(`/doc/:id/settings/subscription`) shows the upgrade offer or the
+running subscription; its action starts their hosted checkout with
+the section's own URL as the success URL and its loader verifies the
+signed redirect Creem comes back with, `/upgrade` redirects into the
+section over the latest document (emails link there),
+`/webhooks/creem` keeps the `subscriptions` table in sync (events
+recorded in `creem_webhook_events` for idempotency), and
 `/billing-portal` opens Creem's self-service portal. Access control is
 only ever `users.has_subscription`, recomputed from the stored statuses
 on every sync. `app/services/creem.ts` wraps the official `creem` SDK;
