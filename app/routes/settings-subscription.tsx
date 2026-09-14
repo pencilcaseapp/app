@@ -62,7 +62,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
           kind: overview.kind,
           status: overview.status,
           periodEnd: overview.currentPeriodEnd
-            ? formatDate(overview.currentPeriodEnd)
+            ? formatDate(overview.currentPeriodEnd, request)
             : null,
         }
       : overview,

@@ -87,7 +87,7 @@ describe('page', () => {
       } as SubscriptionOverview);
 
       expect(await screen.findByText('Active')).toBeInTheDocument();
-      expect(screen.getByText('Renews at: 06.07.2026')).toBeInTheDocument();
+      expect(screen.getByText(/^Renews at: .*2026$/)).toBeInTheDocument();
 
       const portal = screen.getByRole('link', {
         name: 'Manage Subscription',
@@ -106,7 +106,7 @@ describe('page', () => {
     } as SubscriptionOverview);
 
     expect(await screen.findByText('Cancelled')).toBeInTheDocument();
-    expect(screen.getByText('Active until: 06.07.2026')).toBeInTheDocument();
+    expect(screen.getByText(/^Active until: .*2026$/)).toBeInTheDocument();
   });
 
   test('shows complimentary pro to an invited friend', async () => {
