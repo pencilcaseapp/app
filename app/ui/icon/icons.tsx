@@ -29,6 +29,8 @@ export type IconName
     | 'danger'
     | 'warning'
     | 'account'
+    | 'users'
+    | 'globe'
     | 'euro'
     | 'help'
     | 'logout'
@@ -306,6 +308,24 @@ export const icons: {
   'account': (
     <path
       d="M5.3163 19.4384C5.92462 18.0052 7.34492 17 9 17H15C16.6551 17 18.0754 18.0052 18.6837 19.4384M16 9.5C16 11.7091 14.2091 13.5 12 13.5C9.79086 13.5 8 11.7091 8 9.5C8 7.29086 9.79086 5.5 12 5.5C14.2091 5.5 16 7.29086 16 9.5ZM22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'users': (
+    <path
+      d="M13 7.5A4.25 4.25 0 1 1 4.5 7.5A4.25 4.25 0 1 1 13 7.5ZM2.25 20.75A6.5 5.5 0 0 1 15.25 20.75M14.65 3.29A4.25 4.25 0 1 1 14.65 11.71M21.75 20.75A6.5 5.5 0 0 0 16.48 15.35"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'globe': (
+    <path
+      d="M22 12A10 10 0 1 1 2 12A10 10 0 1 1 22 12ZM2 12H22M12 2C14.5 4.6 15.75 8 15.75 12C15.75 16 14.5 19.4 12 22C9.5 19.4 8.25 16 8.25 12C8.25 8 9.5 4.6 12 2Z"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
