@@ -46,10 +46,8 @@ test('restores the document for the signed in user', async () => {
 
   const result = await callAction();
 
-  expect(restoreDocumentMock).toHaveBeenCalledWith({
-    documentId: documentFixture.id,
-    userId: userFixture.id,
-  });
+  expect(restoreDocumentMock)
+    .toHaveBeenCalledWith(documentFixture.id, userFixture.id);
   expect(result).toStrictEqual({ ok: true, id: documentFixture.id });
 });
 

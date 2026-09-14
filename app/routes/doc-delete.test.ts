@@ -46,10 +46,8 @@ test('deletes the document for the signed in user', async () => {
 
   const result = await callAction();
 
-  expect(deleteDocumentMock).toHaveBeenCalledWith({
-    documentId: documentFixture.id,
-    userId: userFixture.id,
-  });
+  expect(deleteDocumentMock)
+    .toHaveBeenCalledWith(documentFixture.id, userFixture.id);
   expect(result).toStrictEqual({ ok: true, id: documentFixture.id });
 });
 

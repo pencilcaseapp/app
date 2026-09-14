@@ -307,17 +307,14 @@ describe('deleteDocument', () => {
       deletedAt: new Date(),
     });
 
-    const [error, result] = await deleteDocument({
-      documentId: documentFixture.id,
-      userId: userFixture.id,
-    });
+    const [error, result] = await deleteDocument(
+      documentFixture.id, userFixture.id,
+    );
 
     expect(error).toBeNull();
     expect(result).toStrictEqual({ id: documentFixture.id });
-    expect(softDeleteDocumentMock).toHaveBeenCalledWith({
-      documentId: documentFixture.id,
-      ownerId: userFixture.id,
-    });
+    expect(softDeleteDocumentMock)
+      .toHaveBeenCalledWith(documentFixture.id, userFixture.id);
   });
 
   it('drops the collaborators and closes every connection', async () => {
@@ -326,10 +323,7 @@ describe('deleteDocument', () => {
       deletedAt: new Date(),
     });
 
-    await deleteDocument({
-      documentId: documentFixture.id,
-      userId: userFixture.id,
-    });
+    await deleteDocument(documentFixture.id, userFixture.id);
 
     expect(removeCollaboratorsForDocumentMock)
       .toHaveBeenCalledWith(documentFixture.id);
@@ -341,10 +335,7 @@ describe('deleteDocument', () => {
   it('denies somebody who does not own the document', async () => {
     softDeleteDocumentMock.mockResolvedValue(undefined);
 
-    const [error] = await deleteDocument({
-      documentId: documentFixture.id,
-      userId: otherUserId,
-    });
+    const [error] = await deleteDocument(documentFixture.id, otherUserId);
 
     expect(error).toBe(DeleteDocumentError.PermissionDenied);
     expect(removeCollaboratorsForDocumentMock).not.toHaveBeenCalled();
@@ -359,26 +350,20 @@ describe('restoreDocument', () => {
       deletedAt: null,
     });
 
-    const [error, result] = await restoreDocument({
-      documentId: documentFixture.id,
-      userId: userFixture.id,
-    });
+    const [error, result] = await restoreDocument(
+      documentFixture.id, userFixture.id,
+    );
 
     expect(error).toBeNull();
     expect(result).toStrictEqual({ id: documentFixture.id });
-    expect(restoreDocumentRowMock).toHaveBeenCalledWith({
-      documentId: documentFixture.id,
-      ownerId: userFixture.id,
-    });
+    expect(restoreDocumentRowMock)
+      .toHaveBeenCalledWith(documentFixture.id, userFixture.id);
   });
 
   it('denies somebody who does not own the document', async () => {
     restoreDocumentRowMock.mockResolvedValue(undefined);
 
-    const [error] = await restoreDocument({
-      documentId: documentFixture.id,
-      userId: otherUserId,
-    });
+    const [error] = await restoreDocument(documentFixture.id, otherUserId);
 
     expect(error).toBe(DeleteDocumentError.PermissionDenied);
   });

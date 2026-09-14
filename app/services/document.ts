@@ -113,11 +113,6 @@ export enum DeleteDocumentError {
 export type DeleteDocumentResult
   = [DeleteDocumentError] | [null, { id: string }];
 
-export interface OwnedDocumentInput {
-  documentId: string;
-  userId: string;
-}
-
 /**
  * Soft deletes a document. Only the owner may delete, collaborators are
  * rejected by the owner-scoped update. Deleting also unshares: the
@@ -125,13 +120,10 @@ export interface OwnedDocumentInput {
  * document is gone for everybody at once.
  */
 export async function deleteDocument(
-  input: OwnedDocumentInput,
+  documentId: string,
+  userId: string,
 ): Promise<DeleteDocumentResult> {
-  const { documentId, userId } = input;
-  const document = await softDeleteDocument({
-    documentId,
-    ownerId: userId,
-  });
+  const document = await softDeleteDocument(documentId, userId);
 
   if (!document) {
     return [DeleteDocumentError.PermissionDenied];
@@ -148,13 +140,10 @@ export async function deleteDocument(
  * sharing it again is a separate, deliberate step.
  */
 export async function restoreDocument(
-  input: OwnedDocumentInput,
+  documentId: string,
+  userId: string,
 ): Promise<DeleteDocumentResult> {
-  const { documentId, userId } = input;
-  const document = await restoreDocumentRow({
-    documentId,
-    ownerId: userId,
-  });
+  const document = await restoreDocumentRow(documentId, userId);
 
   if (!document) {
     return [DeleteDocumentError.PermissionDenied];

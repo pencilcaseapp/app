@@ -229,10 +229,7 @@ describe('softDeleteDocument', () => {
     const user = await createTestUser();
     const fixture = await createSharedDocument(user.id);
 
-    const deleted = await softDeleteDocument({
-      documentId: fixture.id,
-      ownerId: user.id,
-    });
+    const deleted = await softDeleteDocument(fixture.id, user.id);
 
     expect(deleted).toStrictEqual({
       id: fixture.id,
@@ -249,10 +246,7 @@ describe('softDeleteDocument', () => {
     const other = await createTestUser();
     const fixture = await createSharedDocument(owner.id);
 
-    expect(await softDeleteDocument({
-      documentId: fixture.id,
-      ownerId: other.id,
-    })).toBeUndefined();
+    expect(await softDeleteDocument(fixture.id, other.id)).toBeUndefined();
 
     const document = await getDocument(fixture.id);
     expect(document?.deletedAt).toBeNull();
@@ -260,10 +254,7 @@ describe('softDeleteDocument', () => {
   });
 
   it('returns undefined for an invalid id', async () => {
-    expect(await softDeleteDocument({
-      documentId: 'not-a-uuid',
-      ownerId: 'not-a-uuid',
-    })).toBeUndefined();
+    expect(await softDeleteDocument('not-a-uuid', 'not-a-uuid')).toBeUndefined();
   });
 });
 
@@ -272,10 +263,7 @@ describe('restoreDocument', () => {
     const user = await createTestUser();
     const fixture = await createDeletedDocument(user.id);
 
-    const restored = await restoreDocument({
-      documentId: fixture.id,
-      ownerId: user.id,
-    });
+    const restored = await restoreDocument(fixture.id, user.id);
 
     expect(restored).toStrictEqual({ id: fixture.id, deletedAt: null });
 
@@ -289,20 +277,14 @@ describe('restoreDocument', () => {
     const other = await createTestUser();
     const fixture = await createDeletedDocument(owner.id);
 
-    expect(await restoreDocument({
-      documentId: fixture.id,
-      ownerId: other.id,
-    })).toBeUndefined();
+    expect(await restoreDocument(fixture.id, other.id)).toBeUndefined();
 
     const document = await getDocument(fixture.id);
     expect(document?.deletedAt).toBeInstanceOf(Date);
   });
 
   it('returns undefined for an invalid id', async () => {
-    expect(await restoreDocument({
-      documentId: 'not-a-uuid',
-      ownerId: 'not-a-uuid',
-    })).toBeUndefined();
+    expect(await restoreDocument('not-a-uuid', 'not-a-uuid')).toBeUndefined();
   });
 });
 

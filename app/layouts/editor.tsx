@@ -4,11 +4,9 @@ import {
   matchPath,
   NavLink,
   Outlet,
-  useFetcher,
   useLocation,
   useNavigate,
 } from 'react-router';
-import { useAuthenticityToken } from 'remix-utils/csrf/react';
 import {
   DocumentTitleProvider,
   useDocumentTitle,
@@ -43,6 +41,7 @@ import {
   type PropsWithChildren,
 } from 'react';
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
+import { RestoreDocumentMenu } from '~/components/restore-document-menu/restore-document-menu';
 import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { useIsMobile } from '~/hooks/use-is-mobile';
@@ -316,30 +315,5 @@ function EditorSidebar({
         {children}
       </Sidebar>
     </>
-  );
-}
-
-function RestoreDocumentMenu({ documentId }: { documentId: string }) {
-  const fetcher = useFetcher();
-  const csrfToken = useAuthenticityToken();
-
-  const restore = () => {
-    void fetcher.submit(
-      { csrf: csrfToken },
-      { method: 'post', action: href('/doc/:id/restore', { id: documentId }) },
-    );
-  };
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger iconTitle="Item options" />
-      <DropdownMenuPortal>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem as="button" onClick={restore} icon="restore">
-            Restore
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenuPortal>
-    </DropdownMenu>
   );
 }

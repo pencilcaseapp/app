@@ -24,10 +24,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
     throw data('Bad Request', { status: 400 });
   }
 
-  const [error, result] = await deleteDocument({
-    documentId: params.id,
-    userId: user.id,
-  });
+  const [error, result] = await deleteDocument(params.id, user.id);
 
   if (error !== null) {
     throw data('Forbidden', { status: 403 });

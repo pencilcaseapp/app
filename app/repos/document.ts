@@ -194,19 +194,12 @@ export async function setDocumentShared(input: SetDocumentSharedInput) {
   return document;
 }
 
-export interface OwnedDocumentInput {
-  documentId: string;
-  ownerId: string;
-}
-
 /**
  * Marks the document deleted and turns sharing off in the same update.
  * Scoped to the owner like `setDocumentShared`; returns `undefined` when
  * the document does not exist or belongs to somebody else.
  */
-export async function softDeleteDocument(input: OwnedDocumentInput) {
-  const { documentId, ownerId } = input;
-
+export async function softDeleteDocument(documentId: string, ownerId: string) {
   if (!isUuid(documentId) || !isUuid(ownerId)) {
     return undefined;
   }
@@ -229,9 +222,7 @@ export async function softDeleteDocument(input: OwnedDocumentInput) {
  * Undoes the soft deletion. Sharing stays off — the owner has to share the
  * document again on purpose.
  */
-export async function restoreDocument(input: OwnedDocumentInput) {
-  const { documentId, ownerId } = input;
-
+export async function restoreDocument(documentId: string, ownerId: string) {
   if (!isUuid(documentId) || !isUuid(ownerId)) {
     return undefined;
   }
