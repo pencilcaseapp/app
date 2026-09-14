@@ -28,9 +28,8 @@ enum DocumentError {
   PermissionDenied,
 }
 
-const DELETED_DOCUMENT_DESCRIPTION = 'It is read-only and will be permanently'
-  + ' deleted within 30 days. Restore it from Deleted in the sidebar to keep'
-  + ' it.';
+const DELETED_DOCUMENT_NOTICE
+  = 'This document is deleted and will be removed for good in 30 days.';
 
 const shareSchema = z.object({
   shared: z.boolean(),
@@ -172,8 +171,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
           notification={deleted && (
             <Notification
               variant="warning"
-              title="This document has been deleted"
-              description={DELETED_DOCUMENT_DESCRIPTION}
+              title={DELETED_DOCUMENT_NOTICE}
             />
           )}
           topbarLeft={(

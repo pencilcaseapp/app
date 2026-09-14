@@ -41,7 +41,7 @@ export class AppUser {
 
   /** The notice a deleted document shows above its read-only content. */
   get deletedNotice(): Locator {
-    return this.page.getByText('This document has been deleted');
+    return this.page.getByText('This document is deleted');
   }
 
   async openDeletedDocs(): Promise<void> {

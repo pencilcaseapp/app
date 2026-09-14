@@ -141,7 +141,7 @@ test('opens a deleted document read-only with a notice', async () => {
 
   const { findByText, queryByRole, container } = await renderDoc(context);
 
-  expect(await findByText('This document has been deleted'))
+  expect(await findByText('This document is deleted and will be removed for good in 30 days.'))
     .toBeInTheDocument();
   expect(queryByRole('button', { name: 'Share' })).not.toBeInTheDocument();
   await vi.waitFor(() => {

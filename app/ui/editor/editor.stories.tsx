@@ -67,7 +67,7 @@ export const WithCollaboratorOverflow: Story = {
 };
 
 /* A deleted document: read-only, without the formatting tools, and a
-   notification above the content saying so. */
+   one-line notification above the content saying so. */
 export const ReadOnly: Story = {
   args: {
     avatars: [],
@@ -76,8 +76,7 @@ export const ReadOnly: Story = {
     notification: (
       <Notification
         variant="warning"
-        title="This document has been deleted"
-        description="It is read-only and will be permanently deleted within 30 days. Restore it from Deleted in the sidebar to keep it."
+        title="This document is deleted and will be removed for good in 30 days."
       />
     ),
   },
