@@ -7,6 +7,7 @@ import {
 import { SidebarProvider } from '../sidebar-context/sidebar-provider';
 import { PRESENCE_COLORS } from '~/constants/presence';
 import { Notification } from '../notification/notification';
+import { DELETED_DOCUMENT_RETENTION_DAYS } from '~/constants/document';
 
 const meta = {
   title: 'Editor/Editor',
@@ -76,7 +77,8 @@ export const ReadOnly: Story = {
     notification: (
       <Notification
         variant="warning"
-        title="This document is deleted and will be removed for good in 30 days."
+        title={'This document is deleted and will be removed for good in'
+          + ` ${DELETED_DOCUMENT_RETENTION_DAYS} days.`}
       />
     ),
   },

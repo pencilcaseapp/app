@@ -28,10 +28,13 @@ export async function createSharedDocument(userId: string) {
   return document;
 }
 
-export async function createDeletedDocument(userId: string) {
+export async function createDeletedDocument(
+  userId: string,
+  deletedAt: Date = faker.date.recent(),
+) {
   const [document] = await db.insert(documents).values({
     title: faker.lorem.sentence({ min: 3, max: 10 }),
-    deletedAt: faker.date.recent(),
+    deletedAt,
     userId: userId ?? null,
   }).returning();
 

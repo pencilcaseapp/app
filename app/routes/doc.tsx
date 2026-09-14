@@ -23,14 +23,15 @@ import { DocEmptyState } from '~/components/doc-empty-state/doc-empty-state';
 import { PageTitle } from '~/components/page-title/page-title';
 import { getUserPresenceIdentity } from '~/utils/presence';
 import { Notification } from '~/ui/notification/notification';
+import { DELETED_DOCUMENT_RETENTION_DAYS } from '~/constants/document';
 
 enum DocumentError {
   NotFound,
   PermissionDenied,
 }
 
-const DELETED_DOCUMENT_NOTICE
-  = 'This document is deleted and will be removed for good in 30 days.';
+const DELETED_DOCUMENT_NOTICE = 'This document is deleted and will be'
+  + ` removed for good in ${DELETED_DOCUMENT_RETENTION_DAYS} days.`;
 
 const shareSchema = z.object({
   shared: z.boolean(),

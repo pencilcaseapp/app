@@ -1,6 +1,7 @@
 import { useEffect, useRef, type FC } from 'react';
 import { href, useFetcher } from 'react-router';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
+import { DELETED_DOCUMENT_RETENTION_DAYS } from '~/constants/document';
 import type { action as deleteAction } from '~/routes/doc-delete';
 import { Button } from '~/ui/button/button';
 import {
@@ -51,8 +52,8 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
   const description = (shared
     ? `“${documentTitle}” will be deleted for everyone it is shared with.`
     : `“${documentTitle}” will be moved to Deleted.`)
-  + ' You can restore it from Deleted for 30 days, after that it is'
-  + ' permanently deleted.';
+  + ` You can restore it from Deleted for ${DELETED_DOCUMENT_RETENTION_DAYS}`
+  + ' days, after that it is permanently deleted.';
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>

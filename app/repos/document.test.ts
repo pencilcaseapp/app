@@ -7,6 +7,7 @@ import {
   getDocumentForViewer,
   getDocumentList,
   getDocumentTitle,
+  purgeDocumentsDeletedBefore,
   removeCollaboratorsForDocument,
   restoreDocument,
   setDocumentShared,
@@ -451,5 +452,45 @@ describe('getDocumentForViewer', () => {
     expect(await getDocumentForViewer('not-a-uuid')).toBeUndefined();
     expect(await getDocumentForViewer(crypto.randomUUID()))
       .toBeUndefined();
+  });
+});
+
+describe('purgeDocumentsDeletedBefore', () => {
+  const days = 24 * 60 * 60 * 1000;
+
+  it('hard deletes documents deleted before the given date', async () => {
+    const user = await createTestUser();
+    const old = await createDeletedDocument(
+      user.id, new Date(Date.now() - 40 * days),
+    );
+    const recent = await createDeletedDocument(
+      user.id, new Date(Date.now() - 10 * days),
+    );
+    const live = await createDocumentWithTitle(user.id);
+
+    const deletedCount = await purgeDocumentsDeletedBefore(
+      new Date(Date.now() - 30 * days),
+    );
+
+    expect(deletedCount).toBeGreaterThanOrEqual(1);
+    expect(await getDocument(old.id)).toBeUndefined();
+    expect(await getDocument(recent.id)).toBeDefined();
+    expect(await getDocument(live.id)).toBeDefined();
+  });
+
+  it('clears leftover collaborators along with the document', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const old = await createDeletedDocument(
+      owner.id, new Date(Date.now() - 40 * days),
+    );
+    await connectDocumentCollaborator(old.id, collaborator.id);
+
+    await purgeDocumentsDeletedBefore(new Date(Date.now() - 30 * days));
+
+    expect(await getDocument(old.id)).toBeUndefined();
+    expect(await db.query.documentCollaborators.findMany({
+      where: { documentId: old.id },
+    })).toHaveLength(0);
   });
 });

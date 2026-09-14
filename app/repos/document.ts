@@ -3,8 +3,10 @@ import {
   desc,
   eq,
   exists,
+  inArray,
   isNotNull,
   isNull,
+  lt,
   or,
   sql,
   type InferSelectModel,
@@ -243,6 +245,43 @@ export async function restoreDocument(documentId: string, ownerId: string) {
     });
 
   return document;
+}
+
+const PURGE_BATCH_SIZE = 1000;
+
+/**
+ * Hard deletes documents that were soft deleted before the given date, in
+ * batches so a backlog never turns into one long statement. Deleting drops
+ * the collaborators already; clearing them again here keeps the foreign
+ * key satisfied whatever state a row is in.
+ */
+export async function purgeDocumentsDeletedBefore(before: Date) {
+  let deletedCount = 0;
+
+  while (true) {
+    const batch = await db
+      .select({ id: documents.id })
+      .from(documents)
+      .where(lt(documents.deletedAt, before))
+      .limit(PURGE_BATCH_SIZE);
+    const ids = batch.map(document => document.id);
+
+    if (ids.length === 0) {
+      return deletedCount;
+    }
+
+    await db.transaction(async (tx) => {
+      await tx.delete(documentCollaborators)
+        .where(inArray(documentCollaborators.documentId, ids));
+      await tx.delete(documents).where(inArray(documents.id, ids));
+    });
+
+    deletedCount += ids.length;
+
+    if (ids.length < PURGE_BATCH_SIZE) {
+      return deletedCount;
+    }
+  }
 }
 
 export interface ConnectCollaboratorInput {
