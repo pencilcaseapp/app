@@ -48,13 +48,30 @@ describe('useStableOrder', () => {
     expect(keysOf(result)).toEqual(['a', 'c']);
   });
 
-  it('should not remember items that came back', () => {
+  it('should place an item that came back below its server neighbour', () => {
     const { result, rerender } = renderStableOrder(items('a', 'b', 'c'));
 
     rerender({ list: items('a', 'c') });
     rerender({ list: items('a', 'b', 'c') });
 
-    expect(keysOf(result)).toEqual(['b', 'a', 'c']);
+    expect(keysOf(result)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('should slot a new item in below its server neighbour', () => {
+    const { result, rerender } = renderStableOrder(items('a', 'b', 'c'));
+
+    rerender({ list: items('c', 'x', 'b', 'a') });
+
+    expect(keysOf(result)).toEqual(['a', 'b', 'c', 'x']);
+  });
+
+  it('should slot a new item in below a moved neighbour', () => {
+    const { result, rerender } = renderStableOrder(items('a', 'b', 'c'));
+
+    act(() => result.current[1]('c'));
+    rerender({ list: items('a', 'b', 'x', 'c') });
+
+    expect(keysOf(result)).toEqual(['c', 'a', 'b', 'x']);
   });
 
   it('should return the latest version of a known item', () => {

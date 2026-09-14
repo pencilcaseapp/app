@@ -66,6 +66,7 @@ export async function loader({ context }: Route.LoaderArgs) {
     id: doc.id,
     label: doc.title ?? 'Untitled',
     to: href('/doc/:id', { id: doc.id }),
+    shared: doc.shared,
     isOwner: doc.userId === user?.id,
   }));
   const deletedNavigation = deletedDocumentList.map(doc => ({
@@ -114,9 +115,11 @@ type NavigationItemData = {
   id: string;
   label: string;
   to: string;
+  shared: boolean;
   isOwner: boolean;
 };
 type DeletedItemData = { id: string; label: string };
+type DocumentToDelete = { id: string; label: string; shared: boolean };
 
 export interface EditorSidebarProps extends PropsWithChildren {
   navigation: NavigationItemData[];
@@ -145,7 +148,7 @@ function EditorSidebar({
   // The document stays set while the dialog animates out, so its
   // title does not vanish from the copy mid-close.
   const [documentToDelete, setDocumentToDelete]
-    = useState<DeletedItemData>();
+    = useState<DocumentToDelete>();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   // Settings lives under the open document, so the entry only exists
   // while one is open (the only editor page — `/new` always redirects).
@@ -173,13 +176,17 @@ function EditorSidebar({
     moveToTop(href('/doc/:id', { id: editedDocumentId }));
   }, [editedDocumentId, moveToTop]);
 
-  // Deleting the open document would leave the editor on a not found
-  // page; the startpage picks the next document (or creates one).
-  const onDeleted = useCallback((documentId: string) => {
-    if (documentMatch?.params.id === documentId) {
-      void navigate(href('/'));
+  // Deleting the open document closes its live connection, which the
+  // editor answers by revalidating into the not found page. Leave for the
+  // next document (in the server's order) before the request goes out.
+  const onDelete = useCallback((documentId: string) => {
+    if (documentMatch?.params.id !== documentId) {
+      return;
     }
-  }, [documentMatch?.params.id, navigate]);
+
+    const next = navigation.find(item => item.id !== documentId);
+    void navigate(next ? next.to : href('/new'));
+  }, [documentMatch?.params.id, navigate, navigation]);
 
   return (
     <>
@@ -215,6 +222,7 @@ function EditorSidebar({
                                       setDocumentToDelete({
                                         id: item.id,
                                         label,
+                                        shared: item.shared,
                                       });
                                       setIsDeleteDialogOpen(true);
                                     }}
@@ -238,9 +246,10 @@ function EditorSidebar({
                   <DeleteDocumentDialog
                     documentId={documentToDelete.id}
                     documentTitle={documentToDelete.label}
+                    shared={documentToDelete.shared}
                     open={isDeleteDialogOpen}
                     onOpenChange={setIsDeleteDialogOpen}
-                    onDeleted={onDeleted}
+                    onDelete={onDelete}
                   />
                 )}
               </>

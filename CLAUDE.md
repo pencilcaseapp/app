@@ -240,14 +240,18 @@ edited, and a restored document lands back where it was in the navigation. The s
 `/doc/:id/delete` (from `DeleteDocumentDialog`'s fetcher form) and
 `/doc/:id/restore` (the row menu of the Deleted group, whose rows are
 `DocumentItem`s without a link). Deleting the open document navigates to
-`/`, which picks the next one. Nothing purges deleted rows yet.
+the next one (or `/new`) as the form submits: the live server closes the
+document's connections and the editor would otherwise revalidate into the
+not found page first. Nothing purges deleted rows yet.
 
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader
 order would reshuffle the navigation on each revalidation. `useStableOrder`
 (`app/hooks/use-stable-order.ts`) therefore freezes the order for as long as the
 layout stays mounted — items still come from the loader (titles stay fresh),
-only their positions are remembered; unseen items go to the front. Its
+only their positions are remembered; an unseen item slots in below the item
+the server lists above it, so a new document goes to the front and a restored
+one returns to its place. Its
 `moveToTop` applies a one-off move, which is how the document you start editing
 catches up: `useFirstLocalEdit` reports the first Y.Doc update that does not
 originate from the Hocuspocus provider, and `EditedDocumentProvider`
