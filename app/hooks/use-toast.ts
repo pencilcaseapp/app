@@ -1,5 +1,5 @@
 import { Toast } from '@base-ui/react/toast';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router';
 import { SearchParamToast } from '~/constants/search-params';
 
@@ -15,7 +15,23 @@ export const useToast = () => {
   const infoMessage = searchParams.get(SearchParamToast.ToastInfo);
   const dangerMessage = searchParams.get(SearchParamToast.ToastDanger);
 
+  /**
+   * React Router hydrates the app in `StrictMode`, which runs the effect
+   * twice, so the messages it emitted are remembered: only a message that
+   * changed is a new toast.
+   */
+  const emittedRef = useRef<string | null>(null);
+
   useEffect(() => {
+    const messages
+      = JSON.stringify([successMessage, infoMessage, dangerMessage]);
+
+    if (emittedRef.current === messages) {
+      return;
+    }
+
+    emittedRef.current = messages;
+
     if (successMessage) {
       add({ type: 'success', title: decodeURIComponent(successMessage) });
     }

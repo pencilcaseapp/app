@@ -1,11 +1,15 @@
 import { act, render, screen } from '@testing-library/react';
+import { StrictMode } from 'react';
 import { createRoutesStub } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { SearchParamToast } from '~/constants/search-params';
 import { ToastProvider } from '~/ui/toast/toast-provider';
 import { useToast } from './use-toast';
 
-const renderUseToast = async (searchParams: Record<string, string>) => {
+const renderUseToast = async (
+  searchParams: Record<string, string>,
+  { strict = false } = {},
+) => {
   const Stub = createRoutesStub([
     {
       path: '/',
@@ -17,11 +21,15 @@ const renderUseToast = async (searchParams: Record<string, string>) => {
   ]);
   const query = new URLSearchParams(searchParams).toString();
 
-  const result = render(
+  const tree = (
     <ToastProvider>
       <Stub initialEntries={[`/?${query}`]} />
-    </ToastProvider>,
+    </ToastProvider>
   );
+
+  const result = render(strict
+    ? <StrictMode>{tree}</StrictMode>
+    : tree);
 
   await act(async () => {});
 
@@ -54,6 +62,15 @@ describe('useToast', () => {
     });
 
     expect(screen.getByText('Hello — world')).toBeInTheDocument();
+  });
+
+  it('should emit one toast when the effect runs twice', async () => {
+    await renderUseToast(
+      { [SearchParamToast.ToastSuccess]: 'Saved' },
+      { strict: true },
+    );
+
+    expect(screen.getAllByRole('dialog')).toHaveLength(1);
   });
 
   it('should emit one toast per search param', async () => {
