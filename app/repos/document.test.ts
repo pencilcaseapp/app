@@ -112,6 +112,35 @@ describe('setDocumentShared', () => {
     expect(unshared?.shared).toBe(false);
   });
 
+  it('does not count as an edit', async () => {
+    const user = await createTestUser();
+    const fixture = await createDocumentWithTitle(user.id);
+
+    await setDocumentShared({
+      documentId: fixture.id,
+      ownerId: user.id,
+      shared: true,
+    });
+
+    const document = await getDocument(fixture.id);
+    expect(document?.updatedAt).toStrictEqual(fixture.updatedAt);
+  });
+
+  it('keeps the document in its place in the navigation', async () => {
+    const user = await createTestUser();
+    const older = await createDocumentWithTitle(user.id);
+    const newer = await createDocumentWithTitle(user.id);
+
+    await setDocumentShared({
+      documentId: older.id,
+      ownerId: user.id,
+      shared: true,
+    });
+
+    expect((await getDocumentList(user.id)).map(item => item.id))
+      .toStrictEqual([newer.id, older.id]);
+  });
+
   it('returns undefined for somebody who is not the owner', async () => {
     const owner = await createTestUser();
     const other = await createTestUser();

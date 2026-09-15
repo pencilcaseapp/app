@@ -175,6 +175,8 @@ export interface SetDocumentSharedInput {
  * Flips the shared flag only when the document belongs to `ownerId`, so the
  * authorisation check does not need a query of its own. Returns `undefined`
  * when the document does not exist, is deleted, or is owned by somebody else.
+ * Like the soft deletion this leaves `updatedAt` alone: sharing is not an
+ * edit and should not move the document in the navigation.
  */
 export async function setDocumentShared(input: SetDocumentSharedInput) {
   const { documentId, ownerId, shared } = input;
@@ -184,7 +186,7 @@ export async function setDocumentShared(input: SetDocumentSharedInput) {
   }
 
   const [document] = await db.update(documents)
-    .set({ shared, updatedAt: sql`NOW()` })
+    .set({ shared })
     .where(and(
       eq(documents.id, documentId),
       eq(documents.userId, ownerId),
