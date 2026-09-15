@@ -536,7 +536,7 @@ exports[`Icon Component > should render with icon name 22`] = `
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
+      d="M2.65 5.2V10.3H7.75M4.78 14.55A7.65 7.65 0 1 0 6.59 6.59L2.65 10.3"
       stroke="currentColor"
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -547,6 +547,29 @@ exports[`Icon Component > should render with icon name 22`] = `
 `;
 
 exports[`Icon Component > should render with icon name 23`] = `
+<div>
+  <svg
+    aria-hidden="true"
+    class=""
+    fill="transparent"
+    focusable="false"
+    height="24"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.5"
+    />
+  </svg>
+</div>
+`;
+
+exports[`Icon Component > should render with icon name 24`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -576,7 +599,7 @@ exports[`Icon Component > should render with icon name 23`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 24`] = `
+exports[`Icon Component > should render with icon name 25`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -599,7 +622,7 @@ exports[`Icon Component > should render with icon name 24`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 25`] = `
+exports[`Icon Component > should render with icon name 26`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -622,7 +645,7 @@ exports[`Icon Component > should render with icon name 25`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 26`] = `
+exports[`Icon Component > should render with icon name 27`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -645,7 +668,7 @@ exports[`Icon Component > should render with icon name 26`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 27`] = `
+exports[`Icon Component > should render with icon name 28`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -668,7 +691,7 @@ exports[`Icon Component > should render with icon name 27`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 28`] = `
+exports[`Icon Component > should render with icon name 29`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -691,7 +714,7 @@ exports[`Icon Component > should render with icon name 28`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 29`] = `
+exports[`Icon Component > should render with icon name 30`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -714,7 +737,7 @@ exports[`Icon Component > should render with icon name 29`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 30`] = `
+exports[`Icon Component > should render with icon name 31`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -737,7 +760,7 @@ exports[`Icon Component > should render with icon name 30`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 31`] = `
+exports[`Icon Component > should render with icon name 32`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -760,7 +783,7 @@ exports[`Icon Component > should render with icon name 31`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 32`] = `
+exports[`Icon Component > should render with icon name 33`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -783,7 +806,7 @@ exports[`Icon Component > should render with icon name 32`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 33`] = `
+exports[`Icon Component > should render with icon name 34`] = `
 <div>
   <svg
     aria-hidden="true"
@@ -806,7 +829,7 @@ exports[`Icon Component > should render with icon name 33`] = `
 </div>
 `;
 
-exports[`Icon Component > should render with icon name 34`] = `
+exports[`Icon Component > should render with icon name 35`] = `
 <div>
   <svg
     aria-hidden="true"

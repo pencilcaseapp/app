@@ -44,12 +44,14 @@ function renderDoc(context: RouterContextProvider) {
 function openedDocument(overrides?: Partial<{
   isOwner: boolean;
   shared: boolean;
+  deleted: boolean;
   hasJoined: boolean;
 }>) {
   return [null, {
     title: documentFixture.title,
     shared: false,
     isOwner: true,
+    deleted: false,
     hasJoined: false,
     ...overrides,
   }];
@@ -130,4 +132,20 @@ test('lets an anonymous visitor read a shared document', async () => {
     .toHaveBeenCalledWith(documentFixture.id, undefined);
   expect(queryByText('Permission Denied')).not.toBeInTheDocument();
   expect(redirectMock).not.toHaveBeenCalled();
+});
+
+test('opens a deleted document read-only with a notice', async () => {
+  const context = new RouterContextProvider();
+  context.set(optionalUserSessionContext, userFixture);
+  openDocumentMock.mockResolvedValue(openedDocument({ deleted: true }));
+
+  const { findByText, queryByRole, container } = await renderDoc(context);
+
+  expect(await findByText('This document is deleted and will be removed for good in 30 days.'))
+    .toBeInTheDocument();
+  expect(queryByRole('button', { name: 'Share' })).not.toBeInTheDocument();
+  await vi.waitFor(() => {
+    expect(container.querySelector('[contenteditable="false"]'))
+      .toBeInTheDocument();
+  });
 });

@@ -13,6 +13,8 @@ import {
  */
 const apiToken = process.env.E2E_API_TOKEN ?? 'e2e-t0k3n';
 
+type SidebarGroup = 'All Docs' | 'Deleted';
+
 /**
  * One signed in user driving one browser context, wrapping the flows the
  * specs share so a test reads as the scenario it covers.
@@ -26,10 +28,92 @@ export class AppUser {
 
   /** A document link inside the sidebar's "All Docs" group. */
   documentInAllDocs(title: string): Locator {
+    return this.sidebarGroup('All Docs').getByRole('link', { name: title });
+  }
+
+  /**
+   * A document link inside the sidebar's "Deleted" group. The group starts
+   * collapsed, see `openDeletedDocs`.
+   */
+  documentInDeleted(title: string): Locator {
+    return this.sidebarGroup('Deleted').getByRole('link', { name: title });
+  }
+
+  /** The notice a deleted document shows above its read-only content. */
+  get deletedNotice(): Locator {
+    return this.page.getByText('This document is deleted');
+  }
+
+  async openDeletedDocs(): Promise<void> {
+    const trigger = this.page.getByRole('button', { name: 'Deleted' });
+
+    if (await trigger.getAttribute('data-state') !== 'open') {
+      await trigger.click();
+    }
+  }
+
+  /** Deletes the document through its row menu and the confirmation. */
+  async deleteDocument(title: string): Promise<void> {
+    await this.openDocumentMenu('All Docs', title);
+    await this.page.getByRole('menuitem', { name: 'Delete' }).click();
+
+    const dialog = this.page.getByRole('dialog');
+    await expect(dialog).toContainText(`“${title}” will be`);
+
+    const deleted = this.waitForPost('/delete');
+    await dialog.getByRole('button', { name: 'Delete' }).click();
+    expect((await deleted).ok()).toBeTruthy();
+  }
+
+  /** Restores the document from the "Deleted" group's row menu. */
+  async restoreDocument(title: string): Promise<void> {
+    await this.openDeletedDocs();
+    await this.openDocumentMenu('Deleted', title);
+
+    const restored = this.waitForPost('/restore');
+    await this.page.getByRole('menuitem', { name: 'Restore' }).click();
+    expect((await restored).ok()).toBeTruthy();
+  }
+
+  /** The options button of a document's row, which shows on hover. */
+  documentMenuTrigger(group: SidebarGroup, title: string): Locator {
+    return this.documentRow(group, title)
+      .getByRole('button', { name: 'Item options' });
+  }
+
+  private sidebarGroup(name: SidebarGroup): Locator {
     return this.page
       .locator('li')
-      .filter({ has: this.page.getByRole('button', { name: 'All Docs' }) })
-      .getByRole('link', { name: title });
+      .filter({ has: this.page.getByRole('button', { name, exact: true }) });
+  }
+
+  /**
+   * The row wrapping a document's title together with its menu: the
+   * innermost `div` of the group holding both, which comes last in
+   * document order.
+   */
+  private documentRow(group: SidebarGroup, title: string): Locator {
+    return this.sidebarGroup(group)
+      .locator('div')
+      .filter({ has: this.page.getByText(title, { exact: true }) })
+      .filter({ has: this.page.getByRole('button', { name: 'Item options' }) })
+      .last();
+  }
+
+  private async openDocumentMenu(
+    group: SidebarGroup,
+    title: string,
+  ): Promise<void> {
+    await this.sidebarGroup(group).getByText(title, { exact: true }).hover();
+    await this.documentMenuTrigger(group, title).click();
+  }
+
+  /** Fetcher submissions post to the route's `.data` URL. */
+  private waitForPost(routeSegment: string) {
+    return this.page.waitForResponse(response =>
+      response.request().method() === 'POST'
+      && new URL(response.url()).pathname.includes(routeSegment),
+    );
   }
 
   /**

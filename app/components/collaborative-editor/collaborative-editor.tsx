@@ -44,6 +44,8 @@ export interface CollaborativeEditorProps {
   onAccessRevoked?: () => void;
   topbarLeft?: React.ReactNode;
   topbarRight?: React.ReactNode;
+  editable?: boolean;
+  notification?: React.ReactNode;
 }
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
@@ -55,6 +57,8 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     onAccessRevoked,
     topbarLeft,
     topbarRight,
+    editable,
+    notification,
   }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
@@ -130,6 +134,8 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
           avatars={collaborators}
           topbarLeft={topbarLeft}
           topbarRight={topbarRight}
+          editable={editable}
+          notification={notification}
         >
           <CollaborationPlugin
             id={id}

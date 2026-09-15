@@ -6,7 +6,7 @@ import {
 } from '@hocuspocus/server';
 import { Database } from '@hocuspocus/extension-database';
 import { getDocument, updateDocument } from '~/repos/document';
-import { canOpenDocument } from '~/services/document';
+import { getLiveAccess } from '~/services/document';
 import { getAuthUserByCookie } from '~/services/auth';
 import {
   ForbiddenError,
@@ -46,12 +46,16 @@ extensions.push(new Database({
 
 const hocuspocus = new Hocuspocus({
   name: config.instanceId,
-  onConnect: async ({ documentName, requestHeaders }) => {
+  onConnect: async ({ documentName, requestHeaders, connectionConfig }) => {
     const user = await getAuthUserByCookie(requestHeaders.get('cookie'));
+    const access = await getLiveAccess(documentName, user?.id);
 
-    if (!await canOpenDocument(documentName, user?.id)) {
+    if (!access) {
       throw new ForbiddenError();
     }
+
+    // A read-only connection still receives updates; its own are dropped.
+    connectionConfig.readOnly = access.readOnly;
 
     return { userId: user?.id };
   },

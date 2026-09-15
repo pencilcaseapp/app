@@ -133,12 +133,16 @@ with backoff.
 
 **Live authorisation — `app/live/connections.ts`.** The upgrade request never
 passes through the route middleware, so `onConnect` resolves the session from
-the cookie itself (`getAuthUserByCookie`) and asks `canOpenDocument`; throwing
+the cookie itself (`getAuthUserByCookie`) and asks `getLiveAccess`; throwing
 there rejects that one document, not the whole socket, which is shared between
 all documents a client has open. Unsharing calls `closeDocumentConnections`,
 which closes the live connections of everybody but the owner, so access is
 revoked immediately instead of at the next request. The client turns that into
-the permission denied screen via `useAccessRevoked` → `revalidate()`. The two
+the permission denied screen via `useAccessRevoked` → `revalidate()`; the
+hook also drops the provider from the shared socket right there, without
+the close `detach` would send, because the server queues a close for a
+connection it no longer has as the first message of the next connection to
+that document — and closes that one with it. The two
 sides find each other through `globalThis`: `server.ts` and the routes are
 separate bundles in prod, so importing the instance would give each of them
 their own. Closing is per process, and the Redis extension does not propagate
@@ -147,10 +151,15 @@ and every instance closes the connections it holds; the publisher closes its
 own straight away, and the echo of its own message is a no-op.
 
 **Subscriptions — `app/services/subscription.ts`, `docs/subscriptions.md`.**
-The pro subscription is sold through Creem (merchant of record):
-`/upgrade` starts their hosted checkout, `/upgrade/callback` verifies the
-signed redirect, `/webhooks/creem` keeps the `subscriptions` table in
-sync (events recorded in `creem_webhook_events` for idempotency), and
+The pro subscription is sold through Creem (merchant of record): the
+subscription section of the settings dialog
+(`/doc/:id/settings/subscription`) shows the upgrade offer or the
+running subscription; its action starts their hosted checkout with
+the section's own URL as the success URL and its loader verifies the
+signed redirect Creem comes back with, `/upgrade` redirects into the
+section over the latest document (emails link there),
+`/webhooks/creem` keeps the `subscriptions` table in sync (events
+recorded in `creem_webhook_events` for idempotency), and
 `/billing-portal` opens Creem's self-service portal. Access control is
 only ever `users.has_subscription`, recomputed from the stored statuses
 on every sync. `app/services/creem.ts` wraps the official `creem` SDK;
@@ -169,6 +178,23 @@ refreshed, a `set-cookie` header context that `root.tsx`'s loader commits;
 `authMiddleware` is opted into per route and redirects to `/signin?returnUrl=…`,
 setting the non-optional `userSessionContext`. Loaders read the user from
 `context.get(...)`, never by re-parsing the request.
+
+**Changing the e-mail — `app/services/email-change.ts`.** The address is
+the only credential, so it changes through a verified two-step flow
+stacked on the account section (`/doc/:id/settings/account/email`, then
+`…/email/:requestId`): `initEmailChange` refuses the current address and
+one another account has, rate limits on `email_change_requests` by user
+*and* by canonical target mailbox (three per fifteen minutes, so no
+account can flood an address), expires the user's earlier requests and
+sends the code to the new address; `verifyEmailChange` only accepts a
+request of the session's user, burns attempts like the sign-in OTP (five,
+then the request expires), checks the address is still free and only then
+writes `users.email`; the route then calls `signOutOtherSessions`, so
+whoever could sign in through the old mailbox loses their sessions while
+the one doing the change keeps theirs. Requests expire after fifteen minutes and the
+`clean-up-expired-email-change-requests` job deletes them a day later,
+like the OTPs. The success toast travels back to the account section
+through `SearchParamToast`.
 
 **Emails — `app/emails/`.** Transactional emails are React Email components.
 `app/services/email-templates.tsx` picks the template and subject,
@@ -224,12 +250,38 @@ screen, so
 `useCursorNameBounds` measures the tags it drew and nudges them sideways with
 a `transform` — the only property those rules leave alone.
 
+**Deletion — `app/services/document.ts`.** Documents are soft deleted:
+`deleteDocument` stamps `documents.deleted_at` and turns sharing off in the
+same owner-scoped update (`softDeleteDocument`), then drops the
+collaborators and closes every live connection, so the document vanishes
+for everybody else at once. A deleted document is not found for anyone but
+its owner, who can still open it read-only: `openDocument` reports it as
+`deleted`, the doc route then shows a notice above the content and drops
+the share panel, and `getLiveAccess` hands the live server a read-only
+connection (Hocuspocus drops that connection's own updates). Deleting or
+restoring changes the editor's `key`, so it reconnects with the new access,
+and both close the document's connections server side, which
+`useAccessRevoked` answers by letting go of the provider on the spot (see
+its comment for why the unmount must not send a close of its own).
+`restoreDocument` clears the stamp but leaves sharing off — the owner shares
+again on purpose, and `setDocumentShared` refuses a deleted document.
+Neither delete nor restore touches `updatedAt`: nothing was edited, and a
+restored document lands back where it was in the navigation. The sidebar
+posts to the resource routes `/doc/:id/delete` (from
+`DeleteDocumentDialog`'s fetcher form) and `/doc/:id/restore` (the row
+menu of the Deleted group, whose rows link to the read-only view). The
+`purge-deleted-documents` job hard deletes rows past
+`DELETED_DOCUMENT_RETENTION_DAYS` (`app/constants/document.ts`, also the
+number the dialog and the notice quote) every night.
+
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader
 order would reshuffle the navigation on each revalidation. `useStableOrder`
 (`app/hooks/use-stable-order.ts`) therefore freezes the order for as long as the
 layout stays mounted — items still come from the loader (titles stay fresh),
-only their positions are remembered; unseen items go to the front. Its
+only their positions are remembered; an unseen item slots in below the item
+the server lists above it, so a new document goes to the front and a restored
+one returns to its place. Its
 `moveToTop` applies a one-off move, which is how the document you start editing
 catches up: `useFirstLocalEdit` reports the first Y.Doc update that does not
 originate from the Hocuspocus provider, and `EditedDocumentProvider`

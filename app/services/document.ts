@@ -2,7 +2,9 @@ import {
   connectCollaborator,
   getDocumentForViewer,
   removeCollaboratorsForDocument,
+  restoreDocument as restoreDocumentRow,
   setDocumentShared,
+  softDeleteDocument,
 } from '~/repos/document';
 import { closeDocumentConnections } from '~/live/connections';
 
@@ -15,6 +17,8 @@ export interface OpenDocument {
   title: string | null;
   shared: boolean;
   isOwner: boolean;
+  /** A deleted document opens read-only, and only for its owner. */
+  deleted: boolean;
   /** True when this open connected the viewer as a new collaborator. */
   hasJoined: boolean;
 }
@@ -32,7 +36,7 @@ export async function openDocument(
 ): Promise<OpenDocumentResult> {
   const document = await getDocumentForViewer(documentId, userId);
 
-  if (!document) {
+  if (!document || isGone(document, userId)) {
     return [OpenDocumentError.NotFound];
   }
 
@@ -52,14 +56,30 @@ export async function openDocument(
     title: document.title,
     shared: document.shared,
     isOwner,
+    deleted: document.deletedAt !== null,
     hasJoined,
   }];
 }
 
-export async function canOpenDocument(documentId: string, userId?: string) {
+export interface LiveAccess {
+  readOnly: boolean;
+}
+
+/**
+ * The access a live connection gets: none, read-only for the owner of a
+ * deleted document, or full.
+ */
+export async function getLiveAccess(
+  documentId: string,
+  userId?: string,
+): Promise<LiveAccess | undefined> {
   const document = await getDocumentForViewer(documentId, userId);
 
-  return !!document && hasAccess(document, userId);
+  if (!document || isGone(document, userId) || !hasAccess(document, userId)) {
+    return undefined;
+  }
+
+  return { readOnly: document.deletedAt !== null };
 }
 
 export enum ShareDocumentError {
@@ -104,13 +124,69 @@ export async function shareDocument(
   return [null, { shared: document.shared }];
 }
 
+export enum DeleteDocumentError {
+  PermissionDenied,
+}
+
+export type DeleteDocumentResult
+  = [DeleteDocumentError] | [null, { id: string }];
+
+/**
+ * Soft deletes a document. Only the owner may delete, collaborators are
+ * rejected by the owner-scoped update. Deleting also unshares: the
+ * collaborators are dropped and every live connection is closed, so the
+ * document is gone for everybody at once.
+ */
+export async function deleteDocument(
+  documentId: string,
+  userId: string,
+): Promise<DeleteDocumentResult> {
+  const document = await softDeleteDocument(documentId, userId);
+
+  if (!document) {
+    return [DeleteDocumentError.PermissionDenied];
+  }
+
+  await removeCollaboratorsForDocument(document.id);
+  closeDocumentConnections({ documentId: document.id });
+
+  return [null, { id: document.id }];
+}
+
+/**
+ * Undoes a soft deletion for the owner. The document comes back private;
+ * sharing it again is a separate, deliberate step. The owner's read-only
+ * connections are closed like on delete, so the editor reconnects with
+ * full access the same way in both directions.
+ */
+export async function restoreDocument(
+  documentId: string,
+  userId: string,
+): Promise<DeleteDocumentResult> {
+  const document = await restoreDocumentRow(documentId, userId);
+
+  if (!document) {
+    return [DeleteDocumentError.PermissionDenied];
+  }
+
+  closeDocumentConnections({ documentId: document.id });
+
+  return [null, { id: document.id }];
+}
+
 interface DocumentAccess {
   userId: string;
   shared: boolean;
+  deletedAt: Date | null;
 }
 
 function isOwnedBy(document: DocumentAccess, viewerId?: string) {
   return !!viewerId && document.userId === viewerId;
+}
+
+/** A deleted document only still exists for its owner. */
+function isGone(document: DocumentAccess, viewerId?: string) {
+  return document.deletedAt !== null && !isOwnedBy(document, viewerId);
 }
 
 function hasAccess(document: DocumentAccess, viewerId?: string) {

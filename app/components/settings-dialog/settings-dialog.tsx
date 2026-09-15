@@ -57,6 +57,13 @@ export interface SettingsDialogContentInnerProps extends PropsWithChildren {
   section: SettingsSection | null;
   /** The section's actions, pinned below the content. */
   footerArea?: ReactNode;
+  /** Replaces the section's title, for a page stacked on the section. */
+  title?: string;
+  /**
+   * Where the back button leads. A page stacked on a section always has
+   * one, whichever layout it renders in.
+   */
+  backTo?: string;
 }
 
 // The active section gets the yellow surface of the active document row
@@ -76,33 +83,37 @@ const sideNavigationItemClasses = classNames(
  * topbar's back button returns to, from `lg` the section navigation
  * sits in the dialog's side area. The side area and the back button
  * only render for a section, so their navigation can rely on `..`
- * being the settings route.
+ * being the settings route; a page stacked on a section (`backTo`)
+ * brings its own title and destination instead.
  */
 export const SettingsDialogContentInner: FC<
   SettingsDialogContentInnerProps
 > = ({
   section,
   footerArea,
+  title: pageTitle,
+  backTo,
   children,
 }) => {
   const navigate = useNavigate();
   const hasSideNavigation = useMedia(SETTINGS_SIDE_NAVIGATION_QUERY, false);
 
-  const title = section === null
+  const title = pageTitle ?? (section === null
     ? 'Settings'
-    : settingsSections.find(({ id }) => id === section)?.title;
+    : settingsSections.find(({ id }) => id === section)?.title);
+
+  let onBack: (() => void) | undefined;
+  if (backTo) {
+    onBack = () => void navigate(backTo, { preventScrollReset: true });
+  }
+  else if (!hasSideNavigation && section !== null) {
+    onBack = () => void navigate('..', { preventScrollReset: true });
+  }
 
   return (
     <ResponsiveDialogContentInner
       topArea={(
-        <ResponsiveDialogTopbar
-          title={title}
-          onBack={
-            !hasSideNavigation && section !== null
-              ? () => void navigate('..', { preventScrollReset: true })
-              : undefined
-          }
-        />
+        <ResponsiveDialogTopbar title={title} onBack={onBack} />
       )}
       sideArea={hasSideNavigation && section !== null
         ? (

@@ -10,5 +10,6 @@ export const documentFixture: Document = {
   shared: false,
   createdAt: faker.date.past(),
   updatedAt: faker.date.past(),
+  deletedAt: null,
   userId: faker.string.uuid(),
 };
