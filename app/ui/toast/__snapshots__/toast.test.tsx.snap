@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Toast > variant 'danger' — matches snapshot 1`] = `
+exports[`Toast > variant danger — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_l_"
   aria-modal="false"
@@ -42,7 +42,7 @@ exports[`Toast > variant 'danger' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Toast > variant 'info' — matches snapshot 1`] = `
+exports[`Toast > variant info — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_f_"
   aria-modal="false"
@@ -84,7 +84,7 @@ exports[`Toast > variant 'info' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Toast > variant 'success' — matches snapshot 1`] = `
+exports[`Toast > variant success — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_h_"
   aria-modal="false"
@@ -126,7 +126,7 @@ exports[`Toast > variant 'success' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Toast > variant 'warning' — matches snapshot 1`] = `
+exports[`Toast > variant warning — matches snapshot 1`] = `
 <div
   aria-labelledby="_r_j_"
   aria-modal="false"

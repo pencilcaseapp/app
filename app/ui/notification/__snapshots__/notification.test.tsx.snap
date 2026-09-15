@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Notification > variant 'danger' — matches snapshot 1`] = `
+exports[`Notification > variant danger — matches snapshot 1`] = `
 <div>
   <div
     aria-live="polite"
@@ -43,7 +43,7 @@ exports[`Notification > variant 'danger' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Notification > variant 'info' — matches snapshot 1`] = `
+exports[`Notification > variant info — matches snapshot 1`] = `
 <div>
   <div
     aria-live="polite"
@@ -86,7 +86,7 @@ exports[`Notification > variant 'info' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Notification > variant 'success' — matches snapshot 1`] = `
+exports[`Notification > variant success — matches snapshot 1`] = `
 <div>
   <div
     aria-live="polite"
@@ -129,7 +129,7 @@ exports[`Notification > variant 'success' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Notification > variant 'warning' — matches snapshot 1`] = `
+exports[`Notification > variant warning — matches snapshot 1`] = `
 <div>
   <div
     aria-live="polite"
