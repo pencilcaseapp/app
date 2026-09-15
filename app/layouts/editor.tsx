@@ -8,7 +8,7 @@ import {
 } from 'react-router';
 import {
   DocumentTitleProvider,
-  useDocumentTitle,
+  useActiveDocumentTitle,
 } from '~/contexts/document-title';
 import { SocketClientProvider } from '~/contexts/socket-client';
 import { DocumentGroup } from '~/ui/document-group/document-group';
@@ -29,11 +29,17 @@ import { optionalUserSessionContext } from '~/contexts/user-session';
 import { getDeletedDocumentList, getDocumentList } from '~/repos/document';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { useStableOrder } from '~/hooks/use-stable-order';
+import { useLiveTitles } from '~/hooks/use-live-titles';
 import {
   EditedDocumentProvider,
   useEditedDocument,
 } from '~/contexts/edited-document';
-import { useEffect, useState, type PropsWithChildren } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type PropsWithChildren,
+} from 'react';
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
 import { RestoreDocumentMenu } from '~/components/restore-document-menu/restore-document-menu';
 import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
@@ -123,6 +129,8 @@ export interface EditorSidebarProps extends PropsWithChildren {
 }
 
 const getNavigationKey = (item: NavigationItemData) => item.to;
+const getItemId = (item: { id: string }) => item.id;
+const getItemLabel = (item: { label: string }) => item.label;
 
 function EditorSidebar({
   navigation,
@@ -132,12 +140,25 @@ function EditorSidebar({
 }: EditorSidebarProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
-  const [activeDocumentTitle] = useDocumentTitle();
+  const activeDocument = useActiveDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
   const { editedDocumentId } = useEditedDocument();
   const [stableNavigation, moveToTop] = useStableOrder(
     navigation,
     getNavigationKey,
+  );
+  const allItems = useMemo(
+    () => [...navigation, ...deletedNavigation],
+    [navigation, deletedNavigation],
+  );
+  // The editor's title for a document runs ahead of the one the loader
+  // lists until the live server has stored it, so the list keeps showing
+  // the editor's until then — for the open document and the one just left.
+  const liveTitles = useLiveTitles(
+    allItems,
+    getItemId,
+    getItemLabel,
+    activeDocument,
   );
   // The document stays set while the dialog animates out, so its
   // title does not vanish from the copy mid-close.
@@ -186,8 +207,7 @@ function EditorSidebar({
                       </DocumentGroupEmpty>
                     )}
                     {stableNavigation.map((item) => {
-                      const isActive = item.to === location.pathname;
-                      const label = isActive ? activeDocumentTitle : item.label;
+                      const label = liveTitles.get(item.id) ?? item.label;
 
                       return (
                         <DocumentItem
@@ -252,8 +272,7 @@ function EditorSidebar({
                     </DocumentGroupEmpty>
                   )}
                   {deletedNavigation.map((item) => {
-                    const isActive = item.to === location.pathname;
-                    const label = isActive ? activeDocumentTitle : item.label;
+                    const label = liveTitles.get(item.id) ?? item.label;
 
                     return (
                       <DocumentItem
