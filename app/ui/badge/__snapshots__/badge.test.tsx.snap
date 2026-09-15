@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Badge > variant 'danger' — matches snapshot 1`] = `
+exports[`Badge > variant danger — matches snapshot 1`] = `
 <div>
   <span
     class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-red-300"
@@ -14,7 +14,7 @@ exports[`Badge > variant 'danger' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Badge > variant 'dark' — matches snapshot 1`] = `
+exports[`Badge > variant dark — matches snapshot 1`] = `
 <div>
   <span
     class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-grey-900"
@@ -28,7 +28,7 @@ exports[`Badge > variant 'dark' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Badge > variant 'info' — matches snapshot 1`] = `
+exports[`Badge > variant info — matches snapshot 1`] = `
 <div>
   <span
     class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-blue-300"
@@ -42,7 +42,7 @@ exports[`Badge > variant 'info' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Badge > variant 'neutral' — matches snapshot 1`] = `
+exports[`Badge > variant neutral — matches snapshot 1`] = `
 <div>
   <span
     class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-grey-200 dark:bg-pca-grey-800"
@@ -56,7 +56,7 @@ exports[`Badge > variant 'neutral' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Badge > variant 'success' — matches snapshot 1`] = `
+exports[`Badge > variant success — matches snapshot 1`] = `
 <div>
   <span
     class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-green-300"
@@ -70,7 +70,7 @@ exports[`Badge > variant 'success' — matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Badge > variant 'warning' — matches snapshot 1`] = `
+exports[`Badge > variant warning — matches snapshot 1`] = `
 <div>
   <span
     class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-orange-300"
