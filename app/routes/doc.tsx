@@ -120,7 +120,10 @@ export async function action({ request, params, context }: Route.ActionArgs) {
 }
 
 export default function ({ params, loaderData }: Route.ComponentProps) {
-  const [title, setTitle] = useDocumentTitle(loaderData.ok ? loaderData.documentTitle : '');
+  const [title, setTitle] = useDocumentTitle(
+    params.id,
+    loaderData.ok ? loaderData.documentTitle : '',
+  );
   const { reportDocumentEdit } = useEditedDocument();
   const { revalidate } = useRevalidator();
   const onFirstEdit = useCallback(

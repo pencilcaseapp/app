@@ -102,8 +102,13 @@ with a title extracted from the Y.Doc (`extractTitleFromYDoc`). The document
 title is therefore derived from the first heading of the editor content, not
 edited directly — client side the same extraction runs through
 `useExtractDocumentTitle` and the `DocumentTitleProvider` context so the sidebar
-and `<title>` stay live. `app/utils/headless.ts` uses a headless Lexical editor
-to produce valid Yjs updates on the server.
+and `<title>` stay live. The store sits behind Hocuspocus' debounce while the
+sidebar loader re-runs on every navigation, so the list would show a document
+retitled a moment ago with its old title as soon as another one is opened:
+`useLiveTitles` (`app/hooks/use-live-titles.ts`) keeps the title the editor
+reported for a document until the loader lists a label other than the one it
+listed when the title was reported. `app/utils/headless.ts` uses a headless
+Lexical editor to produce valid Yjs updates on the server.
 
 **Scaling out — `app/live/redis.ts`, `docs/scaling.md`.** A Y.Doc lives in the
 process that loaded it, so every instance past the first needs
