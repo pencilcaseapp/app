@@ -265,8 +265,9 @@ and both close the document's connections server side, which
 its comment for why the unmount must not send a close of its own).
 `restoreDocument` clears the stamp but leaves sharing off — the owner shares
 again on purpose, and `setDocumentShared` refuses a deleted document.
-Neither delete nor restore touches `updatedAt`: nothing was edited, and a
-restored document lands back where it was in the navigation. The sidebar
+Neither delete nor restore touches `updatedAt`, and neither does sharing or
+unsharing: nothing was edited, so a restored document lands back where it
+was in the navigation and sharing one leaves it where it is. The sidebar
 posts to the resource routes `/doc/:id/delete` (from
 `DeleteDocumentDialog`'s fetcher form) and `/doc/:id/restore` (the row
 menu of the Deleted group, whose rows link to the read-only view). The
