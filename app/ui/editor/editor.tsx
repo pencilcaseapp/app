@@ -1,5 +1,4 @@
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { ClickableLinkPlugin } from '@lexical/react/LexicalClickableLinkPlugin';
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
@@ -9,7 +8,6 @@ import { CodeHighlightNode, CodeNode } from '@lexical/code-core';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { HorizontalRuleNode } from '@lexical/extension';
 import { useMemo, type ComponentProps } from 'react';
-import { useMedia } from 'react-use';
 import { EditorPluginMarkdown } from './plugins/editor-plugin-markdown';
 import { EditorPluginAutoLink } from './plugins/editor-plugin-auto-link';
 import { EditorPluginCodePrism } from './plugins/editor-plugin-code-prism';
@@ -21,6 +19,7 @@ import type { Collaborator } from '~/utils/presence';
 import './editor.css';
 import { EditorPluginAutoFocus } from './plugins/editor-plugin-auto-focus';
 import { EditorPluginEditable } from './plugins/editor-plugin-editable';
+import { EditorPluginCheckList } from './plugins/editor-plugin-check-list';
 
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
@@ -44,12 +43,6 @@ export const Editor: React.FC<EditorProps> = ({
   notification,
   children,
 }) => {
-  /* Ticking a box is not editing: the check list plugin focuses the list item
-     it toggled, and a focused item inside the contenteditable is what opens
-     the virtual keyboard. Keep the focus where it was on touch devices, where
-     that keyboard covers half the document nobody asked to edit. */
-  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
-
   const config = useMemo<EditorConfig>(() => ({
     editorState: initialEditorState ?? null,
     editable,
@@ -81,7 +74,7 @@ export const Editor: React.FC<EditorProps> = ({
         />
         <EditorPluginRichText topArea={notification} />
         {editable && <EditorPluginAutoFocus />}
-        <CheckListPlugin disableTakeFocusOnClick={isTouchDevice} />
+        <EditorPluginCheckList />
         <ListPlugin />
         <ClickableLinkPlugin newTab />
         <TabIndentationPlugin maxIndent={3} />
