@@ -81,6 +81,28 @@ describe('PricingCard', () => {
     expect(screen.getAllByText('Current')).toHaveLength(1);
   });
 
+  it('tilts the yellow card unless told otherwise', () => {
+    const { container, rerender } = render(<PricingCard {...props} />);
+    expect(container.firstChild).toHaveClass('-rotate-1');
+
+    rerender(<PricingCard {...props} tilted={false} />);
+    expect(container.firstChild).not.toHaveClass('-rotate-1');
+
+    rerender(<PricingCard {...props} background="white" tilted />);
+    expect(container.firstChild).toHaveClass('-rotate-1');
+  });
+
+  it('greys out a disabled card', () => {
+    const { container } = render(
+      <PricingCard {...props} background="white" size="compact" disabled />,
+    );
+
+    expect(container.firstChild).toHaveAttribute('aria-disabled', 'true');
+    expect(container.firstChild).toHaveClass('opacity-60', 'bg-pca-grey-100');
+    expect(container.firstChild).not.toHaveClass('bg-pca-white');
+    expect(container).toMatchSnapshot();
+  });
+
   it('renders the compact card without a feature list', () => {
     const { container } = render(
       <PricingCard
