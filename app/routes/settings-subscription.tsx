@@ -113,30 +113,36 @@ export async function action({ request, params, context }: Route.ActionArgs) {
 /*
  * The subscription section: the upgrade offer, or the subscription
  * behind the pro features once there is one. Each view's action sits
- * in the dialog's footer, pinned below the plans.
+ * in the dialog's footer; complimentary pro has no Creem customer to
+ * manage, and so no footer.
  */
 export default function SettingsSubscriptionRoute({
   loaderData: { overview, hasBillingAccount, documentCount },
 }: Route.ComponentProps) {
+  if (overview.kind === 'none') {
+    return (
+      <SettingsDialogContentInner
+        section="subscription"
+        footerArea={<SubscriptionUpgradeFooter />}
+      >
+        <SubscriptionUpgrade documentCount={documentCount} />
+      </SettingsDialogContentInner>
+    );
+  }
+
   return (
     <SettingsDialogContentInner
       section="subscription"
-      footerArea={overview.kind === 'none'
-        ? <SubscriptionUpgradeFooter />
-        : <CurrentSubscriptionFooter hasBillingAccount={hasBillingAccount} />}
+      footerArea={hasBillingAccount && <CurrentSubscriptionFooter />}
     >
-      {overview.kind === 'none'
-        ? <SubscriptionUpgrade documentCount={documentCount} />
-        : (
-            <CurrentSubscription
-              status={overview.kind === 'subscribed'
-                ? overview.status
-                : 'complimentary'}
-              periodEnd={overview.kind === 'subscribed'
-                ? overview.periodEnd
-                : null}
-            />
-          )}
+      <CurrentSubscription
+        status={overview.kind === 'subscribed'
+          ? overview.status
+          : 'complimentary'}
+        periodEnd={overview.kind === 'subscribed'
+          ? overview.periodEnd
+          : null}
+      />
     </SettingsDialogContentInner>
   );
 }

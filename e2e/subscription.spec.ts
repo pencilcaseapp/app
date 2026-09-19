@@ -41,6 +41,7 @@ test('upgrading to pro through the Creem checkout', async ({ userA }) => {
   await expect(
     page.getByRole('heading', { name: 'You’re on Pencil Case Pro.' }),
   ).toBeVisible();
+  await expect(page.getByText('Active', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Upgrade to Pro' }))
     .not.toBeVisible();
 

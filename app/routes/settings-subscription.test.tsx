@@ -89,14 +89,10 @@ describe('page', () => {
       .toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Upgrade to Pro' }))
       .toBeEnabled();
+    expect(screen.getByText('Secure checkout by Creem.')).toBeInTheDocument();
     expect(screen.getByRole('rowheader', { name: 'Docs' }))
       .toBeInTheDocument();
-    expect(screen.getAllByTitle('Not included')).toHaveLength(2);
-    // The badge renders once per breakpoint slot, both inside the free
-    // card: the pro card carries none.
-    const badges = screen.getAllByText('Current');
-    expect(badges).toHaveLength(2);
-    for (const badge of badges) {
+    for (const badge of screen.getAllByText('Current')) {
       expect(badge.closest('.bg-pca-white')).toBeInTheDocument();
     }
     expect(screen.queryByRole('link', { name: 'Manage subscription' }))
@@ -119,10 +115,15 @@ describe('page', () => {
 
       expect(await screen.findByText('You’re on Pencil Case Pro.'))
         .toBeInTheDocument();
-      expect(screen.getByText(/^Renews at: .*2026$/)).toBeInTheDocument();
+      expect(screen.getByText('Active')).toBeInTheDocument();
+      expect(screen.getByRole('rowheader', { name: 'Renews at' }))
+        .toBeInTheDocument();
+      expect(screen.getByText(/2026$/)).toBeInTheDocument();
       for (const badge of screen.getAllByText('Current')) {
         expect(badge.closest('.bg-pca-yellow-500')).toBeInTheDocument();
       }
+      expect(screen.queryByRole('rowheader', { name: 'Docs' }))
+        .not.toBeInTheDocument();
 
       const portal = screen.getByRole('link', {
         name: 'Manage subscription',
@@ -140,7 +141,8 @@ describe('page', () => {
       status: 'scheduled_cancel',
     } as SubscriptionOverview);
 
-    expect(await screen.findByText(/^Cancelled\. Active until: .*2026$/))
+    expect(await screen.findByText('Cancelled')).toBeInTheDocument();
+    expect(screen.getByRole('rowheader', { name: 'Active until' }))
       .toBeInTheDocument();
   });
 
@@ -150,7 +152,8 @@ describe('page', () => {
       status: 'past_due',
     } as SubscriptionOverview);
 
-    expect(await screen.findByText(/^Payment failed\. Update your payment/))
+    expect(await screen.findByText('Payment failed')).toBeInTheDocument();
+    expect(screen.getByText(/^Update your payment method/))
       .toBeInTheDocument();
   });
 
@@ -162,8 +165,7 @@ describe('page', () => {
 
     expect(await screen.findByText('On the house. Enjoy!'))
       .toBeInTheDocument();
-    expect(screen.getByText('You already have all pro features.'))
-      .toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Manage subscription' }))
       .not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Upgrade to Pro' }))

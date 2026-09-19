@@ -35,6 +35,8 @@ test('compares the free plan against pro', () => {
     expect(badge.closest('.bg-pca-white')).toBeInTheDocument();
   }
   expect(screen.getByText('Secure checkout by Creem.')).toBeInTheDocument();
+  expect(screen.getByRole('rowheader', { name: 'Docs' })).toBeInTheDocument();
+  expect(screen.getAllByTitle('Not included')).toHaveLength(2);
   expect(screen.getByRole('button', { name: 'Upgrade to Pro' }))
     .toBeEnabled();
   expect(container).toMatchSnapshot();
