@@ -1,5 +1,6 @@
 import {
   and,
+  count,
   desc,
   eq,
   exists,
@@ -149,6 +150,26 @@ export async function getDeletedDocumentList(userId: string) {
       isNotNull(documents.deletedAt),
     ))
     .orderBy(desc(documents.deletedAt));
+}
+
+/**
+ * How many documents the user created themselves, deleted ones left out.
+ * The free plan's usage meter counts these, so a shared document somebody
+ * else owns does not eat into the allowance.
+ */
+export async function countOwnedDocuments(userId: string) {
+  if (!isUuid(userId)) {
+    return 0;
+  }
+
+  const [row] = await db.select({ count: count() })
+    .from(documents)
+    .where(and(
+      eq(documents.userId, userId),
+      isNull(documents.deletedAt),
+    ));
+
+  return row?.count ?? 0;
 }
 
 export async function updateDocument(

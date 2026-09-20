@@ -26,7 +26,11 @@ import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import { Sidebar } from '~/ui/sidebar/sidebar';
 import type { Route } from './+types/editor';
 import { optionalUserSessionContext } from '~/contexts/user-session';
-import { getDeletedDocumentList, getDocumentList } from '~/repos/document';
+import {
+  countOwnedDocuments,
+  getDeletedDocumentList,
+  getDocumentList,
+} from '~/repos/document';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { useStableOrder } from '~/hooks/use-stable-order';
 import { useLiveTitles } from '~/hooks/use-live-titles';
@@ -56,12 +60,16 @@ const bottomNavigation = [
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
-  const [documentList, deletedDocumentList] = user
+  // The navigation also lists the documents shared with the user, which
+  // none of their free allowance is spent on, so the usage meter counts
+  // the ones they created themselves instead of the entries.
+  const [documentList, deletedDocumentList, ownedDocumentCount] = user
     ? await Promise.all([
         getDocumentList(user.id),
         getDeletedDocumentList(user.id),
+        countOwnedDocuments(user.id),
       ])
-    : [[], []];
+    : [[], [], 0];
   const navigation = documentList.map(doc => ({
     id: doc.id,
     label: doc.title ?? 'Untitled',
@@ -79,6 +87,7 @@ export async function loader({ context }: Route.LoaderArgs) {
     user,
     navigation,
     deletedNavigation,
+    ownedDocumentCount,
   };
 }
 
@@ -87,6 +96,7 @@ export default function LayoutEditor({
     user,
     navigation,
     deletedNavigation,
+    ownedDocumentCount,
   },
 }: Route.ComponentProps) {
   return (
@@ -99,6 +109,7 @@ export default function LayoutEditor({
                   <EditorSidebar
                     navigation={navigation}
                     deletedNavigation={deletedNavigation}
+                    ownedDocumentCount={ownedDocumentCount}
                     showUpgrade={!user.hasSubscription}
                   >
                     <Outlet />
@@ -125,6 +136,8 @@ type DocumentToDelete = { id: string; label: string; shared: boolean };
 export interface EditorSidebarProps extends PropsWithChildren {
   navigation: NavigationItemData[];
   deletedNavigation: DeletedItemData[];
+  /** Documents the user created themselves, what the meter shows. */
+  ownedDocumentCount: number;
   showUpgrade?: boolean;
 }
 
@@ -135,6 +148,7 @@ const getItemLabel = (item: { label: string }) => item.label;
 function EditorSidebar({
   navigation,
   deletedNavigation,
+  ownedDocumentCount,
   showUpgrade,
   children,
 }: EditorSidebarProps) {
@@ -299,7 +313,7 @@ function EditorSidebar({
           <>
             {showUpgrade && (
               <SidebarUpgrade
-                documentCount={navigation.length}
+                documentCount={ownedDocumentCount}
                 documentLimit={FREE_DOCUMENT_LIMIT}
                 to={upgradeUrl}
               />

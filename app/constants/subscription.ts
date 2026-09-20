@@ -1,4 +1,4 @@
-export const FREE_DOCUMENT_LIMIT = 3;
+export const FREE_DOCUMENT_LIMIT = 5;
 
 /**
  * The statuses Creem moves a subscription through. The `status` column
