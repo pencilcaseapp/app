@@ -72,6 +72,14 @@ export const ANONYMOUS_NAMES = [
  */
 export const MAX_PRESENCE_NAME_LENGTH = 40;
 
+/**
+ * How long a tab that went to the background is still counted as somebody
+ * being in the document. Long enough to check another tab and come back
+ * without blinking out of everybody else's avatars, short enough that a tab
+ * left open behind an inbox stops claiming the person is there.
+ */
+export const PRESENCE_HIDDEN_GRACE_MS = 120_000;
+
 export const GUEST_ID_STORAGE_KEY = 'pca-guest-id';
 
 export const MAX_VISIBLE_COLLABORATORS = 3;

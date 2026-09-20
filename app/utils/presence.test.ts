@@ -107,7 +107,7 @@ describe('getRemoteCollaborators', () => {
     clientId,
     name: presenceId,
     color: '#2563EB',
-    awarenessData: { presenceId },
+    awarenessData: { presenceId, isActive: true },
     ...over,
   });
 
@@ -155,6 +155,35 @@ describe('getRemoteCollaborators', () => {
     expect(getRemoteCollaborators(withoutPresenceId, 1)).toEqual([
       { id: 'Otter', name: 'Otter', color: '#DC2626' },
     ]);
+  });
+
+  it('should leave out a tab that is not in front of its person', () => {
+    const hidden = [
+      state(2, 'grace', {
+        awarenessData: { presenceId: 'grace', isActive: false },
+      }),
+      state(3, 'alan'),
+    ];
+
+    expect(getRemoteCollaborators(hidden, 1).map(c => c.id)).toEqual(['alan']);
+  });
+
+  it('should keep somebody with one tab in front of them', () => {
+    const secondTab = [
+      state(2, 'grace', {
+        awarenessData: { presenceId: 'grace', isActive: false },
+      }),
+      state(3, 'grace'),
+    ];
+
+    expect(getRemoteCollaborators(secondTab, 1).map(c => c.id))
+      .toEqual(['grace']);
+  });
+
+  it('should keep a client that does not report its activity', () => {
+    const older = [{ clientId: 2, name: 'Otter', color: '#DC2626' }];
+
+    expect(getRemoteCollaborators(older, 1)).toHaveLength(1);
   });
 
   it('should skip connections that have no identity yet', () => {

@@ -237,9 +237,30 @@ the list holds one entry per person rather than per connection: the local
 connection is dropped by client id and the remaining ones are deduplicated by
 presence id, which keeps your own second tab out without merging two guests who
 happened to draw the same animal. Pass that object to `CollaborationPlugin` as
-a stable reference — it is one of the plugin's effect dependencies. Colours
-come from `PRESENCE_COLORS`, all of which clear 4.5:1 against the white initial
-and 3:1 against either page background. Awareness is written by the other
+a stable reference — it is one of the plugin's effect dependencies.
+`awarenessData` also carries `isActive`, which is what keeps the avatars from
+standing for an open socket: awareness has a heartbeat of its own (a state
+not renewed within 30 seconds is dropped), but a tab left behind another one
+keeps sending it, so a ping cannot tell the two apart. `usePresenceActivity`
+(`app/hooks/use-presence-activity.ts`) therefore publishes what the browser
+knows through the Page Visibility API — whether the document is the page in
+front of the person — and `getRemoteCollaborators` leaves out the connections
+that say it is not: the list is the people on the document, not the tabs
+pointed at it. A tab that goes to the background is held for
+`PRESENCE_HIDDEN_GRACE_MS` before it drops, so checking another tab and coming
+back does not blink somebody out of everybody else's avatars, while the tab
+left open behind an inbox runs the grace out. Visibility is deliberately the
+only signal: it says the tab is in front, not that somebody is in front of the
+tab, so a laptop left open on a document still counts as present until it is
+put to sleep. Interaction (a pointer or a keystroke) is what would close that
+gap, at the price of dropping whoever reads without touching anything. It writes into
+the same `awarenessData` object rather than a new one, because Lexical
+rewrites that field from its prop on every cursor update and would drop a
+replacement; `setAwarenessField` is only there to broadcast the change in
+between. Somebody with a second tab stays listed for as long as one of them is
+in front of them, and a connection that does not report activity at all counts
+as there. Colours come from `PRESENCE_COLORS`, all of which clear 4.5:1
+against the white initial and 3:1 against either page background. Awareness is written by the other
 clients, so `getRemoteCollaborators` treats it as untrusted input: names are
 clamped to `MAX_PRESENCE_NAME_LENGTH` (Lexical draws the cursor label
 `nowrap`, so an unbounded one stripes across the document) and anything

@@ -48,7 +48,7 @@ describe('useCollaborators', () => {
         clientId: 2,
         name: 'Grace',
         color: '#DB2777',
-        awarenessData: { presenceId: 'grace' },
+        awarenessData: { presenceId: 'grace', isActive: true },
       },
     ]);
 
@@ -68,6 +68,23 @@ describe('useCollaborators', () => {
       { clientId: LOCAL_CLIENT_ID, name: 'Ada', color: '#2563EB' },
     ]);
 
+    expect(result.current).toEqual([]);
+  });
+
+  it('should drop somebody who leaves the page they had open', () => {
+    const { provider, changeAwareness } = createProvider();
+    const { result } = renderHook(() => useCollaborators(provider));
+    const grace = (isActive: boolean) => ({
+      clientId: 2,
+      name: 'Grace',
+      color: '#DB2777',
+      awarenessData: { presenceId: 'grace', isActive },
+    });
+
+    changeAwareness([grace(true)]);
+    expect(result.current).toHaveLength(1);
+
+    changeAwareness([grace(false)]);
     expect(result.current).toEqual([]);
   });
 
