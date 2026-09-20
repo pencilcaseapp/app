@@ -126,6 +126,8 @@ describe('initEmailChange', () => {
     expect(sendEmailChangeCodeMock).toHaveBeenCalledWith({
       to: { email: 'new@example.com' },
       code: code.toString(),
+      requestId: emailChangeRequestFixture.id,
+      userId: user.id,
     });
   });
 

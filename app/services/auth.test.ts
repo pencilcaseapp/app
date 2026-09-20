@@ -68,6 +68,7 @@ vi.mock('node:crypto', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  createOtpMock.mockResolvedValue(otpFixture);
 });
 
 const validSessionCookie
@@ -150,6 +151,8 @@ describe('initMagicCode', () => {
           email: 'test@example.com',
         },
         code: code.toString(),
+        otpId: otpFixture.id,
+        userId: otpFixture.userId,
       });
     });
   });

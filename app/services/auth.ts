@@ -56,6 +56,8 @@ export async function initMagicCode(
       email: to,
     },
     code,
+    otpId: otp.id,
+    userId: otp.userId ?? undefined,
   });
 
   return [null, { otp }];
