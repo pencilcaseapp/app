@@ -41,36 +41,6 @@ describe('StackedAvatars', () => {
     consoleError.mockRestore();
   });
 
-  test('marks an away collaborator inline', () => {
-    render(
-      <StackedAvatars avatars={[
-        { name: 'Alice', color: '#E74C3C' },
-        { name: 'Bob', color: '#3498DB', isActive: false },
-      ]}
-      />,
-    );
-
-    expect(screen.getByLabelText('Alice')).toBeInTheDocument();
-    expect(screen.getByLabelText('Bob (away)')).toBeInTheDocument();
-  });
-
-  test('marks an away collaborator in the overflow menu', async () => {
-    const user = userEvent.setup();
-    render(
-      <StackedAvatars
-        avatars={[...avatars.slice(0, 6), {
-          name: 'Grace',
-          color: '#E67E22',
-          isActive: false,
-        }]}
-      />,
-    );
-
-    await user.click(screen.getByText('+').closest('button')!);
-
-    expect(screen.getByText('Grace (away)')).toBeInTheDocument();
-  });
-
   test('renders all avatars inline when there is no overflow', () => {
     render(<StackedAvatars avatars={avatars.slice(0, 3)} />);
 

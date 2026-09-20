@@ -52,9 +52,8 @@ describe('useCollaborators', () => {
       },
     ]);
 
-    expect(result.current).toEqual([
-      { id: 'grace', name: 'Grace', color: '#DB2777', isActive: true },
-    ]);
+    expect(result.current)
+      .toEqual([{ id: 'grace', name: 'Grace', color: '#DB2777' }]);
   });
 
   it('should report somebody leaving', () => {
@@ -72,7 +71,7 @@ describe('useCollaborators', () => {
     expect(result.current).toEqual([]);
   });
 
-  it('should follow somebody leaving the page they had open', () => {
+  it('should drop somebody who leaves the page they had open', () => {
     const { provider, changeAwareness } = createProvider();
     const { result } = renderHook(() => useCollaborators(provider));
     const grace = (isActive: boolean) => ({
@@ -83,10 +82,10 @@ describe('useCollaborators', () => {
     });
 
     changeAwareness([grace(true)]);
-    expect(result.current[0].isActive).toBe(true);
+    expect(result.current).toHaveLength(1);
 
     changeAwareness([grace(false)]);
-    expect(result.current[0].isActive).toBe(false);
+    expect(result.current).toEqual([]);
   });
 
   it('should stop listening when unmounted', () => {

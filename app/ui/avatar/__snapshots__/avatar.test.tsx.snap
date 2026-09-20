@@ -1,26 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`away > matches snapshot 1`] = `
-<div>
-  <button
-    class="flex items-center group flex-row gap-3 focus:outline-hidden focus:ring-2 focus:ring-pca-grey-300 rounded-full focus:z-50"
-    data-state="closed"
-  >
-    <abbr
-      aria-label="Alice (away)"
-      class="flex shrink-0 items-center justify-center rounded-full no-underline relative border grayscale h-[28px] w-[28px] border-pca-white text-pca-white dark:border-pca-grey-900"
-      style="background-color: #E74C3C;"
-    >
-      <span
-        class="antialiased font-inter text-xs text-pca-grey-900 dark:text-white font-medium text-inherit!"
-      >
-        A
-      </span>
-    </abbr>
-  </button>
-</div>
-`;
-
 exports[`custom color > matches snapshot 1`] = `
 <div>
   <button

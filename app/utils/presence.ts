@@ -5,19 +5,11 @@ import {
   PRESENCE_COLORS,
 } from '~/constants/presence';
 
-export interface PresenceIdentity {
+export interface Collaborator {
   /** The person behind the connection: a user id, or a guest id. */
   id: string;
   name: string;
   color: string;
-}
-
-export interface Collaborator extends PresenceIdentity {
-  /**
-   * Whether they are actually on the document right now, rather than merely
-   * connected to it. See `usePresenceActivity`.
-   */
-  isActive: boolean;
 }
 
 /**
@@ -69,7 +61,7 @@ export function getAnonymousName(key: string): string {
   return pick(ANONYMOUS_NAMES, `name:${key}`);
 }
 
-export function getUserPresenceIdentity(user: PresenceUser): PresenceIdentity {
+export function getUserPresenceIdentity(user: PresenceUser): Collaborator {
   return {
     id: user.id,
     name: user.name?.trim() || user.email,
@@ -77,9 +69,7 @@ export function getUserPresenceIdentity(user: PresenceUser): PresenceIdentity {
   };
 }
 
-export function getGuestPresenceIdentity(
-  guestId: string,
-): PresenceIdentity {
+export function getGuestPresenceIdentity(guestId: string): Collaborator {
   return {
     id: guestId,
     name: getAnonymousName(guestId),
@@ -114,7 +104,7 @@ function toPresenceColor(color: unknown, key: string): string {
 
 /**
  * A client that does not publish its activity at all is taken at face value
- * and shown as active, which is what every connection looked like before we
+ * and counted as there, which is what every connection looked like before we
  * measured it.
  */
 function isActiveConnection(awarenessData: { isActive?: unknown } | undefined) {
@@ -131,8 +121,9 @@ function isActiveConnection(awarenessData: { isActive?: unknown } | undefined) {
  * guests who happen to draw the same animal are still two collaborators. The
  * name is the fallback for a connection that predates the presence id.
  *
- * Somebody is active as soon as one of their connections is: the tab they are
- * reading in speaks for the two they left behind.
+ * A connection whose page is not in front of its person is left out, so the
+ * list is the people on the document rather than the tabs pointed at it. The
+ * tab somebody is reading in speaks for the two they left behind.
  */
 export function getRemoteCollaborators(
   states: StatesArray,
@@ -143,7 +134,11 @@ export function getRemoteCollaborators(
   for (const state of states) {
     const { clientId, name, color, awarenessData } = state;
 
-    if (clientId === localClientId || typeof name !== 'string') {
+    if (
+      clientId === localClientId
+      || typeof name !== 'string'
+      || !isActiveConnection(awarenessData)
+    ) {
       continue;
     }
 
@@ -155,19 +150,14 @@ export function getRemoteCollaborators(
 
     const presenceId = awarenessData?.presenceId;
     const id = typeof presenceId === 'string' ? presenceId : displayName;
-    const existing = collaborators.get(id);
 
-    if (existing) {
-      existing.isActive ||= isActiveConnection(awarenessData);
-      continue;
+    if (!collaborators.has(id)) {
+      collaborators.set(id, {
+        id,
+        name: displayName,
+        color: toPresenceColor(color, id),
+      });
     }
-
-    collaborators.set(id, {
-      id,
-      name: displayName,
-      color: toPresenceColor(color, id),
-      isActive: isActiveConnection(awarenessData),
-    });
   }
 
   return [...collaborators.values()];

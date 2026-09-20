@@ -239,19 +239,20 @@ presence id, which keeps your own second tab out without merging two guests who
 happened to draw the same animal. Pass that object to `CollaborationPlugin` as
 a stable reference — it is one of the plugin's effect dependencies.
 `awarenessData` also carries `isActive`, which is what keeps the avatars from
-standing for an open socket: a tab left behind another one holds its
-connection for as long as the browser lets it, so `usePresenceActivity`
-(`app/hooks/use-presence-activity.ts`) publishes whether the page is visible
-and has been touched within `PRESENCE_IDLE_TIMEOUT_MS`, and the avatar of
-somebody who is not goes grey and reads `(away)`. It writes into the same
-`awarenessData` object rather than a new one, because Lexical rewrites that
-field from its prop on every cursor update and would drop a replacement;
-`setAwarenessField` is only there to broadcast the change in between. Somebody
-is active as soon as one of their connections is, and a connection that does
-not report activity at all counts as active. Colours come from
-`PRESENCE_COLORS`, all of which clear 4.5:1 against the white initial and 3:1
-against either page background; an away avatar is greyscaled rather than
-faded, which leaves that contrast where it was. Awareness is written by the other
+standing for an open socket: awareness has a heartbeat of its own (a state
+not renewed within 30 seconds is dropped), but a tab left behind another one
+keeps sending it, so a ping cannot tell the two apart. `usePresenceActivity`
+(`app/hooks/use-presence-activity.ts`) therefore publishes whether the page is
+visible and has been touched within `PRESENCE_IDLE_TIMEOUT_MS`, and
+`getRemoteCollaborators` leaves out the connections that say it is not — the
+list is the people on the document, not the tabs pointed at it. It writes into
+the same `awarenessData` object rather than a new one, because Lexical
+rewrites that field from its prop on every cursor update and would drop a
+replacement; `setAwarenessField` is only there to broadcast the change in
+between. Somebody with a second tab stays listed for as long as one of them is
+in front of them, and a connection that does not report activity at all counts
+as there. Colours come from `PRESENCE_COLORS`, all of which clear 4.5:1
+against the white initial and 3:1 against either page background. Awareness is written by the other
 clients, so `getRemoteCollaborators` treats it as untrusted input: names are
 clamped to `MAX_PRESENCE_NAME_LENGTH` (Lexical draws the cursor label
 `nowrap`, so an unbounded one stripes across the document) and anything

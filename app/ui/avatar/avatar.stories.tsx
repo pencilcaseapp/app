@@ -37,15 +37,6 @@ export const large: Story = {
   },
 };
 
-/** Connected, but the document is not the page in front of them. */
-export const Away: Story = {
-  args: {
-    name: 'Pency Pencilton',
-    color: '#2563EB',
-    isActive: false,
-  },
-};
-
 export const CustomColors: Story = {
   render: () => (
     <div className="flex items-center -space-x-1.5">

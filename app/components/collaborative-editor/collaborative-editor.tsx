@@ -20,8 +20,8 @@ import { createPortal } from 'react-dom';
 import { getGuestId } from '~/utils/guest-id';
 import {
   getGuestPresenceIdentity,
+  type Collaborator,
   type PresenceAwarenessData,
-  type PresenceIdentity,
 } from '~/utils/presence';
 import { usePresenceActivity } from '~/hooks/use-presence-activity';
 
@@ -39,7 +39,7 @@ const syncCursorPositionsFn: SyncCursorPositionsFn = (binding, provider) => {
 
 export interface CollaborativeEditorProps {
   id: string;
-  presence: PresenceIdentity | null;
+  presence: Collaborator | null;
   onTitleChange?: (title: string | null) => void;
   onFirstEdit?: () => void;
   onAccessRevoked?: () => void;

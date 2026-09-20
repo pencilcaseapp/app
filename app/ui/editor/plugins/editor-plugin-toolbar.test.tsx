@@ -40,10 +40,10 @@ function renderToolbar(avatars: Collaborator[] = []) {
 }
 
 const collaborators: Collaborator[] = [
-  { id: 'caroline', name: 'Caroline', color: '#2563EB', isActive: true },
-  { id: 'harold', name: 'Harold', color: '#C2410C', isActive: true },
-  { id: 'alfred', name: 'Alfred', color: '#7C3AED', isActive: true },
-  { id: 'otter', name: 'Otter', color: '#15803D', isActive: true },
+  { id: 'caroline', name: 'Caroline', color: '#2563EB' },
+  { id: 'harold', name: 'Harold', color: '#C2410C' },
+  { id: 'alfred', name: 'Alfred', color: '#7C3AED' },
+  { id: 'otter', name: 'Otter', color: '#15803D' },
 ];
 
 describe('EditorPluginToolbar', () => {

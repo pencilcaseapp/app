@@ -10,13 +10,6 @@ export type AvatarProps<C extends React.ElementType>
       name: string;
       size?: 'small' | 'large';
       color?: string;
-      /**
-       * Somebody who is connected but not on the page right now is drawn in
-       * grey, and says so in its label. Greyscale rather than a lower
-       * opacity: it leaves the luminance of the colour alone, so the initial
-       * keeps the contrast the palette was picked for.
-       */
-      isActive?: boolean;
       className?: string;
     }
   >;
@@ -30,18 +23,16 @@ export const Avatar = <C extends React.ElementType = 'button'>({
   name,
   color,
   size = 'small',
-  isActive = true,
   className,
   ref,
   ...props
 }: AvatarProps<C>) => {
   const avatarSizeSmall = size === 'small' && 'h-[28px] w-[28px]';
   const avatarSizeLarge = size === 'large' && 'h-[40px] w-[40px]';
-  const label = isActive ? name : `${name} (away)`;
 
   const Component = as ?? 'button';
   return (
-    <Tooltip tooltip={label}>
+    <Tooltip tooltip={name}>
       <Component
         {...props}
         ref={ref}
@@ -52,10 +43,9 @@ export const Avatar = <C extends React.ElementType = 'button'>({
       >
 
         <abbr
-          aria-label={label}
+          aria-label={name}
           className={classNames(
             'flex shrink-0 items-center justify-center rounded-full no-underline relative border',
-            !isActive && 'grayscale',
             !color && 'bg-pca-yellow-500 text-pca-grey-900 border border-pca-grey-800',
             avatarSizeSmall,
             avatarSizeLarge,
