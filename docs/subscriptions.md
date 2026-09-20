@@ -81,6 +81,26 @@ stored, then `metadata.userId`, then the `creem_customer_id` linked to
 a user. An event nobody matches is logged, recorded and acknowledged —
 Creem retrying it forever would not make a user appear.
 
+### The address Creem has
+
+Creem keeps its own copy of the address on the customer, and that is
+the one its invoices and its portal magic links go to. So when a user
+changes their address through the account settings,
+`verifyEmailChange` hands the new one to `syncCreemCustomerEmail`,
+which `PATCH`es the Creem customer.
+
+It is deliberately best effort. The address has already changed on our
+side by then — it is the credential, and holding the change hostage to
+Creem being up would be worse than the two copies drifting. Creem
+answers `409` when another of its customers already holds the address,
+which nothing the user can do would fix. Either way the failure is only
+logged: nothing downstream reads Creem's copy, because every event is
+resolved through the `creem_customer_id`, never through the email.
+
+A user without a `creem_customer_id` has no Creem customer to update,
+and the checkout creates one with whatever address the account has at
+that point.
+
 ## Webhook events
 
 | Event | State | Email |

@@ -87,6 +87,18 @@ export async function createBillingPortalSession(customerId: string) {
 }
 
 /**
+ * Moves the Creem customer to the address the account now uses, so the
+ * receipts and the billing portal keep reaching the user. Creem refuses
+ * an address another of its customers already holds.
+ */
+export async function updateCustomerEmail(input: {
+  customerId: string;
+  email: string;
+}) {
+  await creem.customers.update(input);
+}
+
+/**
  * Creem signs the redirect back from the checkout with a SHA-256 over the
  * query parameters joined as `key=value|…|salt={apiKey}` — in the order
  * they appear in the URL, skipping the signature itself and empty values.
