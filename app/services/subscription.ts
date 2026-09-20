@@ -26,6 +26,7 @@ import {
   creemSubscriptionSchema,
   creemWebhookEventSchema,
   getSubscription,
+  updateCustomerEmail,
   verifyRedirectSignature,
   verifyWebhookSignature,
   type CreemSubscription,
@@ -203,6 +204,30 @@ export async function getBillingPortalUrl(
   catch (error) {
     console.error('Creating a Creem portal session failed', error);
     return [GetBillingPortalUrlError.PortalFailed];
+  }
+}
+
+/**
+ * Mirrors a changed account address onto the Creem customer behind it, so
+ * the invoices and the billing portal keep reaching the user. Best
+ * effort: the address has already changed here by the time this runs, and
+ * a rejection from Creem — the same address on another of their customers
+ * — is nothing the user could act on. The link to the account is the
+ * customer id, so the webhooks find their way either way.
+ */
+export async function syncCreemCustomerEmail(user: User) {
+  if (!user.creemCustomerId) {
+    return;
+  }
+
+  try {
+    await updateCustomerEmail({
+      customerId: user.creemCustomerId,
+      email: user.email,
+    });
+  }
+  catch (error) {
+    console.error('Updating the email of the Creem customer failed', error);
   }
 }
 

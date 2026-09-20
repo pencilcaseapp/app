@@ -47,6 +47,12 @@ vi.mock('./email-templates', () => ({
   sendEmailChangeCode: (...args: unknown[]) => sendEmailChangeCodeMock(...args),
 }));
 
+const syncCreemCustomerEmailMock = vi.fn();
+vi.mock('./subscription', () => ({
+  syncCreemCustomerEmail:
+    (...args: unknown[]) => syncCreemCustomerEmailMock(...args),
+}));
+
 const code = 123456;
 vi.mock('node:crypto', () => ({
   randomInt: vi.fn(() => code),
@@ -213,4 +219,20 @@ describe('verifyEmailChange', () => {
       expect(updateUserMock)
         .toHaveBeenCalledWith(user.id, { email: 'new@example.com' });
     });
+
+  it('hands the new address to Creem', async () => {
+    await verifyEmailChange(user, request.id, '123456');
+
+    expect(syncCreemCustomerEmailMock)
+      .toHaveBeenCalledWith({ ...user, email: 'new@example.com' });
+  });
+
+  it('leaves Creem alone when the code is wrong', async () => {
+    recordFailedEmailChangeRequestAttemptMock
+      .mockResolvedValueOnce({ ...request, attempts: 1 });
+
+    await verifyEmailChange(user, request.id, '000000');
+
+    expect(syncCreemCustomerEmailMock).not.toHaveBeenCalled();
+  });
 });

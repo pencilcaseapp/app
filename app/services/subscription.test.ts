@@ -12,6 +12,7 @@ import {
   redeemInviteCode,
   startProCheckout,
   StartProCheckoutError,
+  syncCreemCustomerEmail,
 } from './subscription';
 import { userFixture } from '~/test/fixtures/user';
 
@@ -58,6 +59,7 @@ vi.mock('~/repos/creem-webhook-event', () => ({
 const createCheckoutSessionMock = vi.fn();
 const getSubscriptionMock = vi.fn();
 const createBillingPortalSessionMock = vi.fn();
+const updateCustomerEmailMock = vi.fn();
 const verifyRedirectSignatureMock = vi.fn();
 const verifyWebhookSignatureMock = vi.fn();
 vi.mock('./creem', async (importOriginal) => {
@@ -69,6 +71,8 @@ vi.mock('./creem', async (importOriginal) => {
     getSubscription: (...args: unknown[]) => getSubscriptionMock(...args),
     createBillingPortalSession:
       (...args: unknown[]) => createBillingPortalSessionMock(...args),
+    updateCustomerEmail:
+      (...args: unknown[]) => updateCustomerEmailMock(...args),
     verifyRedirectSignature:
       (...args: unknown[]) => verifyRedirectSignatureMock(...args),
     verifyWebhookSignature:
@@ -641,6 +645,43 @@ describe('getBillingPortalUrl', () => {
     expect(error).toBe(GetBillingPortalUrlError.PortalFailed);
     expect(log).toHaveBeenCalledWith(
       'Creating a Creem portal session failed',
+      expect.any(Error),
+    );
+  });
+});
+
+describe('syncCreemCustomerEmail', () => {
+  it('does nothing for a user without a Creem customer', async () => {
+    await syncCreemCustomerEmail(userFixture);
+
+    expect(updateCustomerEmailMock).not.toHaveBeenCalled();
+  });
+
+  it('moves the Creem customer to the new address', async () => {
+    await syncCreemCustomerEmail({
+      ...userFixture,
+      email: 'new@example.com',
+      creemCustomerId: 'cust_123',
+    });
+
+    expect(updateCustomerEmailMock).toHaveBeenCalledWith({
+      customerId: 'cust_123',
+      email: 'new@example.com',
+    });
+  });
+
+  it('logs a rejection instead of failing the address change', async () => {
+    const log = silenceLog('error');
+    updateCustomerEmailMock.mockRejectedValue(new Error('taken'));
+
+    await expect(syncCreemCustomerEmail({
+      ...userFixture,
+      email: 'new@example.com',
+      creemCustomerId: 'cust_123',
+    })).resolves.toBeUndefined();
+
+    expect(log).toHaveBeenCalledWith(
+      'Updating the email of the Creem customer failed',
       expect.any(Error),
     );
   });

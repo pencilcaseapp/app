@@ -13,6 +13,7 @@ import {
 import { getUserByEmail, updateUser, type User } from '~/repos/user';
 import { getCanonicalEmail, normalizeEmail } from '~/utils/email';
 import { sendEmailChangeCode } from './email-templates';
+import { syncCreemCustomerEmail } from './subscription';
 
 /**
  * Like the sign-in OTP: a wrong code burns one of these and the last one
@@ -123,6 +124,9 @@ export async function verifyEmailChange(
   }
 
   const updatedUser = await updateUser(user.id, { email: request.email });
+
+  // The merchant of record bills and writes to the address it has.
+  await syncCreemCustomerEmail(updatedUser);
 
   return [null, { user: updatedUser }];
 }

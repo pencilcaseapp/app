@@ -5,6 +5,7 @@ import {
   createCheckoutSession,
   createBillingPortalSession,
   getSubscription,
+  updateCustomerEmail,
   verifyRedirectSignature,
   verifyWebhookSignature,
 } from './creem';
@@ -160,6 +161,48 @@ describe('createBillingPortalSession', () => {
     const request = sentRequest();
     expect(request.url).toBe('https://creem.invalid/v1/customers/billing');
     expect(await request.json()).toStrictEqual({ customer_id: 'cust_123' });
+  });
+});
+
+describe('updateCustomerEmail', () => {
+  function customerResponse() {
+    return {
+      id: 'cust_123',
+      object: 'customer',
+      email: 'new@example.com',
+      name: null,
+      country: 'DE',
+      created_at: '2026-08-01T00:00:00.000Z',
+      updated_at: '2026-09-01T00:00:00.000Z',
+      mode: 'test',
+    };
+  }
+
+  it('patches the customer with the new address', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(customerResponse()));
+
+    await updateCustomerEmail({
+      customerId: 'cust_123',
+      email: 'new@example.com',
+    });
+
+    const request = sentRequest();
+    expect(request.method).toBe('PATCH');
+    expect(request.url).toBe('https://creem.invalid/v1/customers');
+    expect(request.headers.get('x-api-key')).toBe('creem_test_apikey');
+    expect(await request.json()).toStrictEqual({
+      customer_id: 'cust_123',
+      email: 'new@example.com',
+    });
+  });
+
+  it('throws when Creem rejects the address', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ message: 'taken' }, 409));
+
+    await expect(updateCustomerEmail({
+      customerId: 'cust_123',
+      email: 'new@example.com',
+    })).rejects.toThrow();
   });
 });
 
