@@ -126,3 +126,31 @@ export const documentCollaborators = pgTable('document_collaborators', {
   index('document_collaborators_user_id_idx').on(table.userId),
   index('document_collaborators_document_id_idx').on(table.documentId),
 ]);
+
+/*
+ * One row per e-mail the app has tried to send, keyed by the idempotency
+ * key of the send so the same e-mail is never sent twice — the key also
+ * rides along to Lettermint, which rejects the duplicate on its side.
+ * See app/constants/email.ts for how the keys are built.
+ */
+export const emailLogs = pgTable('email_logs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  idempotencyKey: text('idempotency_key').notNull(),
+  template: text('template').notNull(),
+  email: text('email').notNull(),
+  subject: text('subject').notNull(),
+  status: text('status').notNull(),
+  // Lettermint's id for the message, the join key for anything that later
+  // wants to ask the provider what became of it.
+  providerMessageId: text('provider_message_id'),
+  error: text('error'),
+  sentAt: timestamp('sent_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  userId: uuid('user_id').references(() => users.id),
+}, table => [
+  uniqueIndex('email_logs_idempotency_key_idx').on(table.idempotencyKey),
+  index('email_logs_user_id_idx').on(table.userId),
+  index('email_logs_email_idx').on(table.email),
+  index('email_logs_created_at_idx').on(table.createdAt),
+]);

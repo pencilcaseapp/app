@@ -73,6 +73,8 @@ export async function initEmailChange(
       email,
     },
     code,
+    requestId: request.id,
+    userId: user.id,
   });
 
   return [null, { request }];

@@ -2,7 +2,12 @@ import { render } from 'react-email';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { emailChangeCodeEmailSubject } from '~/emails/templates/email-change-code';
 import { otpCodeEmailSubject } from '~/emails/templates/otp-code';
-import { sendEmailChangeCode, sendEmailMagicCode } from './email-templates';
+import { EmailTemplate } from '~/constants/email';
+import {
+  sendEmailChangeCode,
+  sendEmailMagicCode,
+  sendEmailSubscriptionPaymentFailed,
+} from './email-templates';
 
 const sendEMailMock = vi.fn();
 vi.mock('./email', () => ({
@@ -21,6 +26,8 @@ describe('sendEmailMagicCode', () => {
         name: 'Test User',
       },
       code: '123456',
+      otpId: 'otp-id',
+      userId: 'user-id',
     });
 
     expect(sendEMailMock).toHaveBeenCalledWith({
@@ -30,6 +37,9 @@ describe('sendEmailMagicCode', () => {
       },
       subject: otpCodeEmailSubject('123456'),
       email: expect.anything(),
+      template: EmailTemplate.OtpCode,
+      idempotencyScope: 'otp-id',
+      userId: 'user-id',
     });
 
     const [{ email }] = sendEMailMock.mock.calls[0];
@@ -44,6 +54,8 @@ describe('sendEmailChangeCode', () => {
         email: 'new@example.com',
       },
       code: '654321',
+      requestId: 'request-id',
+      userId: 'user-id',
     });
 
     expect(sendEMailMock).toHaveBeenCalledWith({
@@ -52,9 +64,29 @@ describe('sendEmailChangeCode', () => {
       },
       subject: emailChangeCodeEmailSubject('654321'),
       email: expect.anything(),
+      template: EmailTemplate.EmailChangeCode,
+      idempotencyScope: 'request-id',
+      userId: 'user-id',
     });
 
     const [{ email }] = sendEMailMock.mock.calls[0];
     expect(await render(email, { plainText: true })).toContain('654321');
+  });
+});
+
+describe('sendEmailSubscriptionPaymentFailed', () => {
+  it('scopes the key to the billing period, so one failed payment is one '
+    + 'e-mail however often Creem retries it', async () => {
+    await sendEmailSubscriptionPaymentFailed({
+      to: { email: 'test@example.com' },
+      subscriptionId: 'sub_123',
+      billingPeriod: '2026-08-01T00:00:00.000Z',
+      userId: 'user-id',
+    });
+
+    expect(sendEMailMock).toHaveBeenCalledWith(expect.objectContaining({
+      template: EmailTemplate.SubscriptionPaymentFailed,
+      idempotencyScope: 'sub_123:2026-08-01T00:00:00.000Z',
+    }));
   });
 });

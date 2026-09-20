@@ -281,13 +281,21 @@ export async function handleCreemWebhook(
     }
   }
 
-  await processWebhookEvent(event.data.eventType, event.data.object);
+  await processWebhookEvent(
+    event.data.eventType,
+    event.data.object,
+    event.data.id,
+  );
   await markWebhookEventProcessed(event.data.id);
 
   return [null];
 }
 
-async function processWebhookEvent(eventType: string, object: unknown) {
+async function processWebhookEvent(
+  eventType: string,
+  object: unknown,
+  eventId: string,
+) {
   if (eventType === 'checkout.completed') {
     const checkout = creemCheckoutSchema.parse(object);
 
@@ -311,12 +319,18 @@ async function processWebhookEvent(eventType: string, object: unknown) {
     if (eventType === 'subscription.past_due') {
       await sendEmailSubscriptionPaymentFailed({
         to: emailData(synced.user),
+        subscriptionId: creemSubscription.id,
+        billingPeriod:
+          creemSubscription.current_period_start_date ?? eventId,
+        userId: synced.user.id,
       });
     }
 
     if (eventType === 'subscription.canceled') {
       await sendEmailSubscriptionCanceled({
         to: emailData(synced.user),
+        subscriptionId: creemSubscription.id,
+        userId: synced.user.id,
       });
     }
 
@@ -393,7 +407,11 @@ async function syncCreemSubscription(creemSubscription: CreemSubscription) {
     && ACCESS_GRANTING_STATUSES
       .includes(creemSubscription.status as SubscriptionStatus)
   ) {
-    await sendEmailSubscriptionStarted({ to: emailData(user) });
+    await sendEmailSubscriptionStarted({
+      to: emailData(user),
+      subscriptionId: creemSubscription.id,
+      userId: user.id,
+    });
   }
 
   return { user };

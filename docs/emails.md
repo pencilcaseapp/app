@@ -15,6 +15,83 @@ the server renders templates with it. Do not reach for `@react-email/components`
 or the individual `@react-email/<component>` packages: React Email v6 folded them
 into `react-email` and npm now warns that they are deprecated.
 
+## The e-mail log
+
+Every send goes through `sendEmail`, and every send writes a row to
+`email_logs` — there is no second path to Lettermint. The row is keyed by the
+idempotency key of that e-mail, which is what stops the same e-mail going out
+twice.
+
+The key is `<template>:<scope>`, built by `emailIdempotencyKey` in
+`app/constants/email.ts`. The template half comes from the `EmailTemplate`
+enum, so two templates can never collide on the same scope; the scope half is
+the id of whatever caused the send:
+
+| Template | Scope | Why |
+| --- | --- | --- |
+| `otp-code` | the `otps` row id | A code the user asked for again is a new row, so it sends; a retry of the same code does not. |
+| `email-change-code` | the `email_change_requests` row id | Same shape as the OTP. |
+| `subscription-started` | the Creem subscription id | Happens once in the life of a subscription. |
+| `subscription-canceled` | the Creem subscription id | Same. |
+| `subscription-payment-failed` | the subscription id and the start of the billing period | Creem retries a failed payment several times inside one period and sends `subscription.past_due` for each attempt. One warning per period is what the user wants. |
+
+`current_period_start_date` is nullable on Creem's side, so the payment-failed
+scope falls back to the Creem event id. That dedupes redeliveries of that one
+event and nothing more, which is the right way round to be wrong: a second
+warning is noise, a warning that never arrives is a lost customer.
+
+`sendEmail` claims the key in one statement before it calls the provider
+(`claimEmailLog`), so two processes racing on the same key cannot both send.
+A claim that comes back empty means the key is taken and the send is dropped.
+The same key also goes to Lettermint through `idempotencyKey()`, which covers
+the gap the table cannot: a request that reached them but whose answer we never
+recorded.
+
+A row ends up in one of four states. `sent` carries Lettermint's
+`provider_message_id`; `skipped` records the sends we deliberately do not make
+(no API token, a test address) so the log stays a complete account of what the
+app decided; `failed` carries the error. **`failed` is the only state a key can
+be claimed out of** — a send that never reached the provider has to be
+retryable, everything else is final.
+
+There is no clean-up job for the table, unlike `otps` and
+`email_change_requests`. Deleting a row frees its key, and the subscription
+scopes are keyed to things that live as long as the account does — dropping a
+`subscription-started` row two years on would let that e-mail go out a second
+time. If the table ever needs trimming, trim it by template rather than by age
+alone: the code scopes are safe to delete once their own row is gone, the
+subscription ones are not.
+
+## Delivery tracking
+
+Lettermint can push `message.delivered`, `message.hard_bounced`,
+`message.spam_complaint` and friends to a webhook. We do not consume them, on
+purpose.
+
+Nothing in the app would act on a delivery event today. The log exists to stop
+duplicates, and it answers "did we send this" from the row it already has —
+"did it arrive" is a different question that no code path currently asks. A
+webhook is not free either: a route, signature verification, an event table for
+redeliveries the way `creem_webhook_events` works, and a provider whose events
+arrive out of order. That is the Creem webhook's worth of machinery for a column
+nobody reads.
+
+The two things that would change the answer:
+
+- **Suppressing sends to addresses that bounce.** The address is the only
+  credential here, so an account whose mailbox hard-bounces cannot sign in at
+  all. Knowing that would let the sign-in screen say so instead of showing "code
+  sent" forever. Lettermint keeps its own suppression list, so the first version
+  of this is a read of their API, not a webhook.
+- **Support wanting to answer "did my code arrive".** Lettermint's dashboard
+  answers it today, and `messages.events(messageId)` answers it on demand for
+  any row in the log.
+
+We paid the one cost that makes either cheap later: `email_logs` stores
+`provider_message_id`, which is the join key an event would need. Adding the
+webhook is then a route plus a status column, not a migration of everything
+sent before it.
+
 ## Layout
 
 ```
@@ -149,6 +226,8 @@ clients that ignore those metas still land somewhere sane.
 
 ## Adding a template
 
+0. Add the template to the `EmailTemplate` enum in `app/constants/email.ts`
+   and decide what its idempotency scope is — see **The e-mail log** above.
 1. Add `app/emails/templates/<name>.tsx`. Compose it from `ui/`, wrap it in
    `Layout`, and export the component **and** a default export — the preview
    server needs the default.
@@ -157,6 +236,8 @@ clients that ignore those metas still land somewhere sane.
    depends on the payload. Keeping it next to the copy means the two are
    reviewed together.
 4. Add a `sendEmail<Name>()` function to `app/services/email-templates.tsx`.
+   It takes whatever the scope is built from and hands `sendEmail` the
+   `template` and the `idempotencyScope`.
 5. Test it with `render()` from `react-email`: assertions for the behaviour that
    matters, plus the two snapshots described below.
 

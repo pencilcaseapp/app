@@ -333,6 +333,8 @@ describe('completeProCheckout', () => {
     });
     expect(sendEmailSubscriptionStartedMock).toHaveBeenCalledWith({
       to: { email: userFixture.email, name: userFixture.name ?? undefined },
+      subscriptionId: 'sub_123',
+      userId: userFixture.id,
     });
   });
 });
@@ -462,6 +464,8 @@ describe('handleCreemWebhook', () => {
     );
     expect(sendEmailSubscriptionCanceledMock).toHaveBeenCalledWith({
       to: { email: userFixture.email, name: userFixture.name ?? undefined },
+      subscriptionId: 'sub_123',
+      userId: userFixture.id,
     });
   });
 
@@ -483,7 +487,12 @@ describe('handleCreemWebhook', () => {
       userFixture.id,
       expect.objectContaining({ hasSubscription: true }),
     );
-    expect(sendEmailSubscriptionPaymentFailedMock).toHaveBeenCalled();
+    expect(sendEmailSubscriptionPaymentFailedMock).toHaveBeenCalledWith({
+      to: { email: userFixture.email, name: userFixture.name ?? undefined },
+      subscriptionId: 'sub_123',
+      billingPeriod: '2026-08-01T00:00:00.000Z',
+      userId: userFixture.id,
+    });
   });
 
   it('stores the subscription delivered with checkout.completed',
