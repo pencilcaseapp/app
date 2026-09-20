@@ -242,14 +242,18 @@ a stable reference — it is one of the plugin's effect dependencies.
 standing for an open socket: awareness has a heartbeat of its own (a state
 not renewed within 30 seconds is dropped), but a tab left behind another one
 keeps sending it, so a ping cannot tell the two apart. `usePresenceActivity`
-(`app/hooks/use-presence-activity.ts`) therefore publishes whether anything
-has happened to the page within `PRESENCE_IDLE_TIMEOUT_MS` — an interaction,
-or coming back to the tab — and `getRemoteCollaborators` leaves out the
-connections that say nothing has: the list is the people on the document, not
-the tabs pointed at it. Hiding the tab starts that countdown rather than
-ending it, so a glance at another tab does not make somebody blink out of
-everybody else's avatars; nothing can happen to a page nobody is looking at,
-so the countdown runs out on its own from there. It writes into
+(`app/hooks/use-presence-activity.ts`) therefore publishes what the browser
+knows through the Page Visibility API — whether the document is the page in
+front of the person — and `getRemoteCollaborators` leaves out the connections
+that say it is not: the list is the people on the document, not the tabs
+pointed at it. A tab that goes to the background is held for
+`PRESENCE_HIDDEN_GRACE_MS` before it drops, so checking another tab and coming
+back does not blink somebody out of everybody else's avatars, while the tab
+left open behind an inbox runs the grace out. Visibility is deliberately the
+only signal: it says the tab is in front, not that somebody is in front of the
+tab, so a laptop left open on a document still counts as present until it is
+put to sleep. Interaction (a pointer or a keystroke) is what would close that
+gap, at the price of dropping whoever reads without touching anything. It writes into
 the same `awarenessData` object rather than a new one, because Lexical
 rewrites that field from its prop on every cursor update and would drop a
 replacement; `setAwarenessField` is only there to broadcast the change in

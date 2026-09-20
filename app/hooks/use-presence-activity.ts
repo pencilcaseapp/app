@@ -1,23 +1,14 @@
 import { useEffect, useState } from 'react';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
-import { PRESENCE_IDLE_TIMEOUT_MS } from '~/constants/presence';
+import { PRESENCE_HIDDEN_GRACE_MS } from '~/constants/presence';
 import type { PresenceAwarenessData } from '~/utils/presence';
 
-const ACTIVITY_EVENTS = [
-  'pointermove',
-  'pointerdown',
-  'keydown',
-  'wheel',
-  'touchstart',
-];
-
 /**
- * Whether the person is on the document: something has happened within
- * `PRESENCE_IDLE_TIMEOUT_MS`, where something is either touching the page or
- * leaving it for another tab. Hiding the tab therefore starts the countdown
- * rather than ending it — a glance at another tab keeps you in the document,
- * a tab left behind one drops out of it. Nothing can happen to a page nobody
- * is looking at, so the countdown runs out on its own from there.
+ * Whether the document is the page in front of the person, which the browser
+ * answers itself through the Page Visibility API. A tab that goes to the
+ * background is held for `PRESENCE_HIDDEN_GRACE_MS` first, so a glance at
+ * another tab does not blink somebody out of everybody else's avatars, while
+ * the tab left open behind an inbox runs the grace out and drops.
  */
 function useIsActive(): boolean {
   const [isActive, setIsActive] = useState(true);
@@ -25,32 +16,30 @@ function useIsActive(): boolean {
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
 
-    const countdown = () => {
+    const holdThenDrop = () => {
+      timeout = setTimeout(() => setIsActive(false), PRESENCE_HIDDEN_GRACE_MS);
+    };
+
+    const onVisibilityChange = () => {
       clearTimeout(timeout);
-      timeout = setTimeout(() => setIsActive(false), PRESENCE_IDLE_TIMEOUT_MS);
+
+      if (document.hidden) {
+        holdThenDrop();
+      }
+      else {
+        setIsActive(true);
+      }
     };
 
-    const onActivity = () => {
-      countdown();
-      setIsActive(true);
-    };
-
-    countdown();
-
-    for (const event of ACTIVITY_EVENTS) {
-      window.addEventListener(event, onActivity, { passive: true });
+    if (document.hidden) {
+      holdThenDrop();
     }
 
-    document.addEventListener('visibilitychange', onActivity);
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       clearTimeout(timeout);
-
-      for (const event of ACTIVITY_EVENTS) {
-        window.removeEventListener(event, onActivity);
-      }
-
-      document.removeEventListener('visibilitychange', onActivity);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, []);
 

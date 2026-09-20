@@ -73,13 +73,12 @@ export const ANONYMOUS_NAMES = [
 export const MAX_PRESENCE_NAME_LENGTH = 40;
 
 /**
- * How long nothing can happen to the page before the others stop being told
- * the person is there — no interaction, and no coming back to the tab. Long
- * enough to read a paragraph, or to glance at another tab, without dropping
- * out of the document; short enough that a tab somebody left open behind
- * their inbox stops claiming they are in it.
+ * How long a tab that went to the background is still counted as somebody
+ * being in the document. Long enough to check another tab and come back
+ * without blinking out of everybody else's avatars, short enough that a tab
+ * left open behind an inbox stops claiming the person is there.
  */
-export const PRESENCE_IDLE_TIMEOUT_MS = 120_000;
+export const PRESENCE_HIDDEN_GRACE_MS = 120_000;
 
 export const GUEST_ID_STORAGE_KEY = 'pca-guest-id';
 

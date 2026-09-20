@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
-import { PRESENCE_IDLE_TIMEOUT_MS } from '~/constants/presence';
+import { PRESENCE_HIDDEN_GRACE_MS } from '~/constants/presence';
 import type { PresenceAwarenessData } from '~/utils/presence';
 import { usePresenceActivity } from './use-presence-activity';
 
@@ -14,8 +14,8 @@ function createProvider() {
   };
 }
 
-function hideTab() {
-  vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+function setHidden(hidden: boolean) {
+  vi.spyOn(document, 'hidden', 'get').mockReturnValue(hidden);
 
   act(() => {
     document.dispatchEvent(new Event('visibilitychange'));
@@ -41,7 +41,7 @@ describe('usePresenceActivity', () => {
     vi.restoreAllMocks();
   });
 
-  it('should publish somebody on the page as active', () => {
+  it('should publish the page in front of somebody as active', () => {
     const { provider, setAwarenessField } = createProvider();
 
     renderHook(() => usePresenceActivity(provider, awarenessData));
@@ -51,24 +51,11 @@ describe('usePresenceActivity', () => {
       .toHaveBeenCalledWith('awarenessData', awarenessData);
   });
 
-  it('should go away after the timeout with nothing happening', () => {
+  it('should keep a tab that stays in front, untouched', () => {
     const { provider } = createProvider();
     renderHook(() => usePresenceActivity(provider, awarenessData));
 
-    wait(PRESENCE_IDLE_TIMEOUT_MS);
-
-    expect(awarenessData.isActive).toBe(false);
-  });
-
-  it('should stay while the page is being used', () => {
-    const { provider } = createProvider();
-    renderHook(() => usePresenceActivity(provider, awarenessData));
-
-    wait(PRESENCE_IDLE_TIMEOUT_MS - 1);
-    act(() => {
-      window.dispatchEvent(new Event('keydown'));
-    });
-    wait(PRESENCE_IDLE_TIMEOUT_MS - 1);
+    wait(PRESENCE_HIDDEN_GRACE_MS * 10);
 
     expect(awarenessData.isActive).toBe(true);
   });
@@ -77,42 +64,61 @@ describe('usePresenceActivity', () => {
     const { provider } = createProvider();
     renderHook(() => usePresenceActivity(provider, awarenessData));
 
-    wait(PRESENCE_IDLE_TIMEOUT_MS - 1);
-    hideTab();
-    wait(PRESENCE_IDLE_TIMEOUT_MS - 1);
+    setHidden(true);
+    wait(PRESENCE_HIDDEN_GRACE_MS - 1);
 
     expect(awarenessData.isActive).toBe(true);
   });
 
-  it('should drop a tab hidden for the whole timeout', () => {
+  it('should drop a tab hidden for the whole grace', () => {
     const { provider } = createProvider();
     renderHook(() => usePresenceActivity(provider, awarenessData));
 
-    hideTab();
-    wait(PRESENCE_IDLE_TIMEOUT_MS);
+    setHidden(true);
+    wait(PRESENCE_HIDDEN_GRACE_MS);
 
     expect(awarenessData.isActive).toBe(false);
   });
 
-  it('should come back when the tab is opened again', () => {
+  it('should keep somebody who comes back within the grace', () => {
     const { provider } = createProvider();
     renderHook(() => usePresenceActivity(provider, awarenessData));
 
-    hideTab();
-    wait(PRESENCE_IDLE_TIMEOUT_MS);
-    act(() => {
-      vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
-      document.dispatchEvent(new Event('visibilitychange'));
-    });
+    setHidden(true);
+    wait(PRESENCE_HIDDEN_GRACE_MS - 1);
+    setHidden(false);
+    wait(PRESENCE_HIDDEN_GRACE_MS * 10);
 
     expect(awarenessData.isActive).toBe(true);
+  });
+
+  it('should bring back somebody who opens the tab again', () => {
+    const { provider } = createProvider();
+    renderHook(() => usePresenceActivity(provider, awarenessData));
+
+    setHidden(true);
+    wait(PRESENCE_HIDDEN_GRACE_MS);
+    setHidden(false);
+
+    expect(awarenessData.isActive).toBe(true);
+  });
+
+  it('should start on the grace for a page that loads hidden', () => {
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+    const { provider } = createProvider();
+
+    renderHook(() => usePresenceActivity(provider, awarenessData));
+    wait(PRESENCE_HIDDEN_GRACE_MS);
+
+    expect(awarenessData.isActive).toBe(false);
   });
 
   it('should keep the object Lexical holds rather than replace it', () => {
     const { provider, setAwarenessField } = createProvider();
     renderHook(() => usePresenceActivity(provider, awarenessData));
 
-    wait(PRESENCE_IDLE_TIMEOUT_MS);
+    setHidden(true);
+    wait(PRESENCE_HIDDEN_GRACE_MS);
 
     expect(setAwarenessField.mock.calls.map(([, value]) => value))
       .toEqual([awarenessData, awarenessData]);
@@ -124,9 +130,10 @@ describe('usePresenceActivity', () => {
       () => usePresenceActivity(provider, awarenessData),
     );
 
+    setHidden(true);
     unmount();
     setAwarenessField.mockClear();
-    wait(PRESENCE_IDLE_TIMEOUT_MS);
+    wait(PRESENCE_HIDDEN_GRACE_MS);
 
     expect(setAwarenessField).not.toHaveBeenCalled();
   });
