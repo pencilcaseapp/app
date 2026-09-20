@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   connectCollaborator,
+  countOwnedDocuments,
   createDocument,
   getDeletedDocumentList,
   getDocument,
@@ -274,6 +275,46 @@ describe('getDeletedDocumentList', () => {
 
   it('returns an empty list for an invalid id', async () => {
     expect(await getDeletedDocumentList('not-a-uuid')).toStrictEqual([]);
+  });
+});
+
+describe('countOwnedDocuments', () => {
+  it('counts the documents the user created', async () => {
+    const user = await createTestUser();
+    await createDocumentWithTitle(user.id);
+    await createDocumentWithTitle(user.id);
+
+    expect(await countOwnedDocuments(user.id)).toBe(2);
+  });
+
+  it('leaves out documents shared with the user', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    await createDocumentWithTitle(collaborator.id);
+    const shared = await createSharedDocument(owner.id);
+    await connectDocumentCollaborator(shared.id, collaborator.id);
+
+    expect(await countOwnedDocuments(collaborator.id)).toBe(1);
+  });
+
+  it('leaves out deleted documents', async () => {
+    const user = await createTestUser();
+    await createDocumentWithTitle(user.id);
+    await createDeletedDocument(user.id);
+
+    expect(await countOwnedDocuments(user.id)).toBe(1);
+  });
+
+  it('counts a document the user owns and shared once', async () => {
+    const user = await createTestUser();
+    const document = await createSharedDocument(user.id);
+    await connectDocumentCollaborator(document.id, user.id);
+
+    expect(await countOwnedDocuments(user.id)).toBe(1);
+  });
+
+  it('returns zero for an invalid id', async () => {
+    expect(await countOwnedDocuments('not-a-uuid')).toBe(0);
   });
 });
 
