@@ -242,10 +242,14 @@ a stable reference — it is one of the plugin's effect dependencies.
 standing for an open socket: awareness has a heartbeat of its own (a state
 not renewed within 30 seconds is dropped), but a tab left behind another one
 keeps sending it, so a ping cannot tell the two apart. `usePresenceActivity`
-(`app/hooks/use-presence-activity.ts`) therefore publishes whether the page is
-visible and has been touched within `PRESENCE_IDLE_TIMEOUT_MS`, and
-`getRemoteCollaborators` leaves out the connections that say it is not — the
-list is the people on the document, not the tabs pointed at it. It writes into
+(`app/hooks/use-presence-activity.ts`) therefore publishes whether anything
+has happened to the page within `PRESENCE_IDLE_TIMEOUT_MS` — an interaction,
+or coming back to the tab — and `getRemoteCollaborators` leaves out the
+connections that say nothing has: the list is the people on the document, not
+the tabs pointed at it. Hiding the tab starts that countdown rather than
+ending it, so a glance at another tab does not make somebody blink out of
+everybody else's avatars; nothing can happen to a page nobody is looking at,
+so the countdown runs out on its own from there. It writes into
 the same `awarenessData` object rather than a new one, because Lexical
 rewrites that field from its prop on every cursor update and would drop a
 replacement; `setAwarenessField` is only there to broadcast the change in

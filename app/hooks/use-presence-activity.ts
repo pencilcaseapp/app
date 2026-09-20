@@ -1,25 +1,60 @@
 import { useEffect, useState } from 'react';
-import { useIdle } from 'react-use';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { PRESENCE_IDLE_TIMEOUT_MS } from '~/constants/presence';
 import type { PresenceAwarenessData } from '~/utils/presence';
 
+const ACTIVITY_EVENTS = [
+  'pointermove',
+  'pointerdown',
+  'keydown',
+  'wheel',
+  'touchstart',
+];
+
 /**
- * Whether the page is the one in front of the person, rather than a tab
- * sitting behind the one they are reading.
+ * Whether the person is on the document: something has happened within
+ * `PRESENCE_IDLE_TIMEOUT_MS`, where something is either touching the page or
+ * leaving it for another tab. Hiding the tab therefore starts the countdown
+ * rather than ending it — a glance at another tab keeps you in the document,
+ * a tab left behind one drops out of it. Nothing can happen to a page nobody
+ * is looking at, so the countdown runs out on its own from there.
  */
-function useIsPageVisible(): boolean {
-  const [isVisible, setIsVisible] = useState(() => !document.hidden);
+function useIsActive(): boolean {
+  const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
-    const listener = () => setIsVisible(!document.hidden);
+    let timeout: ReturnType<typeof setTimeout>;
 
-    document.addEventListener('visibilitychange', listener);
+    const countdown = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => setIsActive(false), PRESENCE_IDLE_TIMEOUT_MS);
+    };
 
-    return () => document.removeEventListener('visibilitychange', listener);
+    const onActivity = () => {
+      countdown();
+      setIsActive(true);
+    };
+
+    countdown();
+
+    for (const event of ACTIVITY_EVENTS) {
+      window.addEventListener(event, onActivity, { passive: true });
+    }
+
+    document.addEventListener('visibilitychange', onActivity);
+
+    return () => {
+      clearTimeout(timeout);
+
+      for (const event of ACTIVITY_EVENTS) {
+        window.removeEventListener(event, onActivity);
+      }
+
+      document.removeEventListener('visibilitychange', onActivity);
+    };
   }, []);
 
-  return isVisible;
+  return isActive;
 }
 
 /**
@@ -27,10 +62,6 @@ function useIsPageVisible(): boolean {
  * the avatars stand for somebody who is there rather than for an open socket:
  * a tab left open in the background holds its connection for as long as the
  * browser lets it, and used to keep its owner in everybody else's list.
- *
- * Being active is the page being visible and having been touched within
- * `PRESENCE_IDLE_TIMEOUT_MS` — hiding the tab is answered at once, going
- * quiet in front of it after the timeout.
  *
  * It rides along in `awarenessData` because that is the one field Lexical
  * carries through the awareness updates it makes for its cursors. Lexical
@@ -43,9 +74,7 @@ export function usePresenceActivity(
   provider: HocuspocusProvider,
   awarenessData: PresenceAwarenessData,
 ): void {
-  const isVisible = useIsPageVisible();
-  const isIdle = useIdle(PRESENCE_IDLE_TIMEOUT_MS);
-  const isActive = isVisible && !isIdle;
+  const isActive = useIsActive();
 
   useEffect(() => {
     awarenessData.isActive = isActive;

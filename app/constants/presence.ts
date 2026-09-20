@@ -73,10 +73,11 @@ export const ANONYMOUS_NAMES = [
 export const MAX_PRESENCE_NAME_LENGTH = 40;
 
 /**
- * How long a collaborator can go without touching the page before the others
- * stop being told they are there. Long enough to read a paragraph without
- * flickering away, short enough that a tab somebody left open behind their
- * inbox does not keep claiming they are in the document.
+ * How long nothing can happen to the page before the others stop being told
+ * the person is there — no interaction, and no coming back to the tab. Long
+ * enough to read a paragraph, or to glance at another tab, without dropping
+ * out of the document; short enough that a tab somebody left open behind
+ * their inbox stops claiming they are in it.
  */
 export const PRESENCE_IDLE_TIMEOUT_MS = 120_000;
 
