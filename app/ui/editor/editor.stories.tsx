@@ -46,9 +46,9 @@ export const Empty: Story = {
 export const WithCollaborators: Story = {
   args: {
     avatars: [
-      { id: 'caroline', name: 'Caroline', color: PRESENCE_COLORS[9] },
-      { id: 'harold', name: 'Harold', color: PRESENCE_COLORS[1] },
-      { id: 'alfred', name: 'Alfred', color: PRESENCE_COLORS[11] },
+      { id: 'caroline', name: 'Caroline', color: PRESENCE_COLORS[9], isActive: true },
+      { id: 'harold', name: 'Harold', color: PRESENCE_COLORS[1], isActive: true },
+      { id: 'alfred', name: 'Alfred', color: PRESENCE_COLORS[11], isActive: true },
     ],
     initialEditorState: JSON.stringify(initialEditorStateFixture),
   },
@@ -57,11 +57,11 @@ export const WithCollaborators: Story = {
 export const WithCollaboratorOverflow: Story = {
   args: {
     avatars: [
-      { id: 'caroline', name: 'Caroline', color: PRESENCE_COLORS[9] },
-      { id: 'harold', name: 'Harold', color: PRESENCE_COLORS[1] },
-      { id: 'alfred', name: 'Alfred', color: PRESENCE_COLORS[11] },
-      { id: 'otter', name: 'Otter', color: PRESENCE_COLORS[5] },
-      { id: 'quokka', name: 'Quokka', color: PRESENCE_COLORS[14] },
+      { id: 'caroline', name: 'Caroline', color: PRESENCE_COLORS[9], isActive: true },
+      { id: 'harold', name: 'Harold', color: PRESENCE_COLORS[1], isActive: true },
+      { id: 'alfred', name: 'Alfred', color: PRESENCE_COLORS[11], isActive: true },
+      { id: 'otter', name: 'Otter', color: PRESENCE_COLORS[5], isActive: true },
+      { id: 'quokka', name: 'Quokka', color: PRESENCE_COLORS[14], isActive: true },
     ],
     initialEditorState: JSON.stringify(initialEditorStateFixture),
   },

@@ -107,7 +107,7 @@ describe('getRemoteCollaborators', () => {
     clientId,
     name: presenceId,
     color: '#2563EB',
-    awarenessData: { presenceId },
+    awarenessData: { presenceId, isActive: true },
     ...over,
   });
 
@@ -141,8 +141,8 @@ describe('getRemoteCollaborators', () => {
     ];
 
     expect(getRemoteCollaborators(sameName, 1)).toEqual([
-      { id: 'guest-a', name: 'Otter', color: '#DC2626' },
-      { id: 'guest-b', name: 'Otter', color: '#0F766E' },
+      { id: 'guest-a', name: 'Otter', color: '#DC2626', isActive: true },
+      { id: 'guest-b', name: 'Otter', color: '#0F766E', isActive: true },
     ]);
   });
 
@@ -153,8 +153,36 @@ describe('getRemoteCollaborators', () => {
     ];
 
     expect(getRemoteCollaborators(withoutPresenceId, 1)).toEqual([
-      { id: 'Otter', name: 'Otter', color: '#DC2626' },
+      { id: 'Otter', name: 'Otter', color: '#DC2626', isActive: true },
     ]);
+  });
+
+  it('should report somebody whose page is not in front of them as away',
+    () => {
+      const hidden = [
+        state(2, 'grace', {
+          awarenessData: { presenceId: 'grace', isActive: false },
+        }),
+      ];
+
+      expect(getRemoteCollaborators(hidden, 1)[0].isActive).toBe(false);
+    });
+
+  it('should keep somebody active when one of their tabs is', () => {
+    const secondTab = [
+      state(2, 'grace', {
+        awarenessData: { presenceId: 'grace', isActive: false },
+      }),
+      state(3, 'grace'),
+    ];
+
+    expect(getRemoteCollaborators(secondTab, 1)[0].isActive).toBe(true);
+  });
+
+  it('should take a client that does not report its activity as active', () => {
+    const older = [{ clientId: 2, name: 'Otter', color: '#DC2626' }];
+
+    expect(getRemoteCollaborators(older, 1)[0].isActive).toBe(true);
   });
 
   it('should skip connections that have no identity yet', () => {

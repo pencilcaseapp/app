@@ -33,6 +33,7 @@ export const StackedAvatars: React.FC<StackedAvatarsProps> = ({
                       tabIndex={-1}
                       name={avatar.name}
                       color={avatar.color}
+                      isActive={avatar.isActive}
                     />
                   ))}
                   {overflowCount > 0 && (
@@ -50,9 +51,16 @@ export const StackedAvatars: React.FC<StackedAvatarsProps> = ({
                   {avatars.map(avatar => (
                     <DropdownMenuItem key={avatar.id ?? avatar.name} as="div" className="cursor-default pointer-events-none">
                       <div className="flex justify-start items-center gap-0.5">
-                        <Avatar name={avatar.name} color={avatar.color} size="small" />
+                        <Avatar
+                          name={avatar.name}
+                          color={avatar.color}
+                          isActive={avatar.isActive}
+                          size="small"
+                        />
                         <Typography variant="bodyTiny" className="ml-2">
-                          {avatar.name}
+                          {avatar.isActive === false
+                            ? `${avatar.name} (away)`
+                            : avatar.name}
                         </Typography>
                       </div>
                     </DropdownMenuItem>
@@ -68,6 +76,7 @@ export const StackedAvatars: React.FC<StackedAvatarsProps> = ({
                   key={avatar.id ?? avatar.name}
                   name={avatar.name}
                   color={avatar.color}
+                  isActive={avatar.isActive}
                   size="small"
                 />
               ))}

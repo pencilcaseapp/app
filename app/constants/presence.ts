@@ -72,6 +72,14 @@ export const ANONYMOUS_NAMES = [
  */
 export const MAX_PRESENCE_NAME_LENGTH = 40;
 
+/**
+ * How long a collaborator can go without touching the page before the others
+ * stop being told they are there. Long enough to read a paragraph without
+ * flickering away, short enough that a tab somebody left open behind their
+ * inbox does not keep claiming they are in the document.
+ */
+export const PRESENCE_IDLE_TIMEOUT_MS = 120_000;
+
 export const GUEST_ID_STORAGE_KEY = 'pca-guest-id';
 
 export const MAX_VISIBLE_COLLABORATORS = 3;

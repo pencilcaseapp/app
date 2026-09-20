@@ -42,6 +42,17 @@ export const SingleAvatar: Story = {
   },
 };
 
+/** Somebody whose tab is open but not in front of them. */
+export const WithAway: Story = {
+  args: {
+    avatars: [
+      { name: 'Alice', color: 'oklch(63.7% 0.237 25.331)' },
+      { name: 'Bob', color: 'oklch(72.3% 0.219 149.579)', isActive: false },
+      { name: 'Charlie', color: 'oklch(60.6% 0.25 292.717)', isActive: false },
+    ],
+  },
+};
+
 export const CustomMaxVisible: Story = {
   args: {
     avatars: [

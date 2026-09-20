@@ -32,6 +32,22 @@ describe('custom color', () => {
   });
 });
 
+describe('away', () => {
+  test('matches snapshot', () => {
+    const { container } = render(
+      <Avatar name="Alice" color="#E74C3C" isActive={false} />,
+    );
+
+    expect(container).toMatchSnapshot();
+  });
+
+  test('says so in the label', () => {
+    render(<Avatar name="Alice" color="#E74C3C" isActive={false} />);
+
+    expect(screen.getByLabelText('Alice (away)')).toBeInTheDocument();
+  });
+});
+
 describe('initials', () => {
   test('renders first character of name', () => {
     render(<Avatar name="Pency Pencilton" />);

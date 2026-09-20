@@ -20,9 +20,10 @@ import { createPortal } from 'react-dom';
 import { getGuestId } from '~/utils/guest-id';
 import {
   getGuestPresenceIdentity,
-  type Collaborator,
   type PresenceAwarenessData,
+  type PresenceIdentity,
 } from '~/utils/presence';
+import { usePresenceActivity } from '~/hooks/use-presence-activity';
 
 /**
  * Draw the remote selections with the browser's own highlights rather than
@@ -38,7 +39,7 @@ const syncCursorPositionsFn: SyncCursorPositionsFn = (binding, provider) => {
 
 export interface CollaborativeEditorProps {
   id: string;
-  presence: Collaborator | null;
+  presence: PresenceIdentity | null;
   onTitleChange?: (title: string | null) => void;
   onFirstEdit?: () => void;
   onAccessRevoked?: () => void;
@@ -73,7 +74,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     // Lexical re-runs its awareness effects whenever this changes identity,
     // so it has to stay the same object for as long as the editor is open.
     const awarenessData = useMemo<PresenceAwarenessData>(
-      () => ({ presenceId: identity.id }),
+      () => ({ presenceId: identity.id, isActive: true }),
       [identity.id],
     );
     const [doc] = useState(() => new Y.Doc());
@@ -88,6 +89,8 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     }));
 
     const collaborators = useCollaborators(provider);
+
+    usePresenceActivity(provider, awarenessData);
 
     useCursorNameBounds(ref);
     useFirstLocalEdit(doc, provider, onFirstEdit);

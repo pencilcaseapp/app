@@ -5,11 +5,19 @@ import {
   PRESENCE_COLORS,
 } from '~/constants/presence';
 
-export interface Collaborator {
+export interface PresenceIdentity {
   /** The person behind the connection: a user id, or a guest id. */
   id: string;
   name: string;
   color: string;
+}
+
+export interface Collaborator extends PresenceIdentity {
+  /**
+   * Whether they are actually on the document right now, rather than merely
+   * connected to it. See `usePresenceActivity`.
+   */
+  isActive: boolean;
 }
 
 /**
@@ -19,6 +27,12 @@ export interface Collaborator {
  */
 export interface PresenceAwarenessData {
   presenceId: string;
+  /**
+   * Whether this connection's page is in front of the person and being used.
+   * An open socket only means the tab exists, which is why it is published
+   * separately.
+   */
+  isActive: boolean;
 }
 
 export interface PresenceUser {
@@ -55,7 +69,7 @@ export function getAnonymousName(key: string): string {
   return pick(ANONYMOUS_NAMES, `name:${key}`);
 }
 
-export function getUserPresenceIdentity(user: PresenceUser): Collaborator {
+export function getUserPresenceIdentity(user: PresenceUser): PresenceIdentity {
   return {
     id: user.id,
     name: user.name?.trim() || user.email,
@@ -63,7 +77,9 @@ export function getUserPresenceIdentity(user: PresenceUser): Collaborator {
   };
 }
 
-export function getGuestPresenceIdentity(guestId: string): Collaborator {
+export function getGuestPresenceIdentity(
+  guestId: string,
+): PresenceIdentity {
   return {
     id: guestId,
     name: getAnonymousName(guestId),
@@ -97,6 +113,15 @@ function toPresenceColor(color: unknown, key: string): string {
 }
 
 /**
+ * A client that does not publish its activity at all is taken at face value
+ * and shown as active, which is what every connection looked like before we
+ * measured it.
+ */
+function isActiveConnection(awarenessData: { isActive?: unknown } | undefined) {
+  return awarenessData?.isActive !== false;
+}
+
+/**
  * The other people in the document, read from the awareness states the
  * Hocuspocus server broadcasts. Lexical writes `name` and `color` there for
  * the remote cursors, which is the same identity the avatars show.
@@ -105,6 +130,9 @@ function toPresenceColor(color: unknown, key: string): string {
  * show up twice. That is keyed on the presence id rather than the name: two
  * guests who happen to draw the same animal are still two collaborators. The
  * name is the fallback for a connection that predates the presence id.
+ *
+ * Somebody is active as soon as one of their connections is: the tab they are
+ * reading in speaks for the two they left behind.
  */
 export function getRemoteCollaborators(
   states: StatesArray,
@@ -127,14 +155,19 @@ export function getRemoteCollaborators(
 
     const presenceId = awarenessData?.presenceId;
     const id = typeof presenceId === 'string' ? presenceId : displayName;
+    const existing = collaborators.get(id);
 
-    if (!collaborators.has(id)) {
-      collaborators.set(id, {
-        id,
-        name: displayName,
-        color: toPresenceColor(color, id),
-      });
+    if (existing) {
+      existing.isActive ||= isActiveConnection(awarenessData);
+      continue;
     }
+
+    collaborators.set(id, {
+      id,
+      name: displayName,
+      color: toPresenceColor(color, id),
+      isActive: isActiveConnection(awarenessData),
+    });
   }
 
   return [...collaborators.values()];
