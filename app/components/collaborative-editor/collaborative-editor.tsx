@@ -23,7 +23,6 @@ import {
   type Collaborator,
   type PresenceAwarenessData,
 } from '~/utils/presence';
-import { usePresenceActivity } from '~/hooks/use-presence-activity';
 
 /**
  * Draw the remote selections with the browser's own highlights rather than
@@ -74,7 +73,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     // Lexical re-runs its awareness effects whenever this changes identity,
     // so it has to stay the same object for as long as the editor is open.
     const awarenessData = useMemo<PresenceAwarenessData>(
-      () => ({ presenceId: identity.id, isActive: true }),
+      () => ({ presenceId: identity.id }),
       [identity.id],
     );
     const [doc] = useState(() => new Y.Doc());
@@ -89,8 +88,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     }));
 
     const collaborators = useCollaborators(provider);
-
-    usePresenceActivity(provider, awarenessData);
 
     useCursorNameBounds(ref);
     useFirstLocalEdit(doc, provider, onFirstEdit);
