@@ -191,7 +191,8 @@ export class AppUser {
       .getByRole('button', { name: 'Share', exact: true })
       .click();
 
-    const toggle = this.page.getByRole('switch', { name: 'Share document' });
+    const toggle = this.page
+      .getByRole('switch', { name: 'Anyone with the link' });
     await expect(toggle).toBeChecked({ checked: !shared });
 
     const documentId = this.page.url().split('/').pop() ?? '';
