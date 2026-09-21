@@ -34,11 +34,21 @@ the id of whatever caused the send:
 | `subscription-started` | the Creem subscription id | Happens once in the life of a subscription. |
 | `subscription-canceled` | the Creem subscription id | Same. |
 | `subscription-payment-failed` | the subscription id and the start of the billing period | Creem retries a failed payment several times inside one period and sends `subscription.past_due` for each attempt. One warning per period is what the user wants. |
+| `document-invite` | the id of the invite | An invite sent again is another invite, so it goes out; a retried send of the same one does not. |
 
 `current_period_start_date` is nullable on Creem's side, so the payment-failed
 scope falls back to the Creem event id. That dedupes redeliveries of that one
 event and nothing more, which is the right way round to be wrong: a second
 warning is noise, a warning that never arrives is a lost customer.
+
+The invite scope is the one that is not an id we already had. An invite is
+not a code: the link in it is the access, and it does not expire, so a
+second copy of the same invite is noise. But an invite that never arrives
+costs a collaborator, so a re-invite the owner deliberately sent has to
+send — which is why the scope is the invite and not the pair of document
+and address. `sendEmailDocumentInvite` therefore takes an `inviteId`, and
+whatever records invites owns what that is, exactly as the `otps` row id
+is what lets a resent code through.
 
 `sendEmail` claims the key in one statement before it calls the provider
 (`claimEmailLog`), so two processes racing on the same key cannot both send.
@@ -280,3 +290,39 @@ load bearing.
 
 On the receiving end the input needs `autocomplete="one-time-code"`.
 `app/ui/one-time-password-field` already sets it.
+
+## Inviting somebody to a document
+
+`document-invite` is the e-mail behind sharing a document by address. There
+is no acceptance step and no invite screen: the link in the e-mail is the
+document URL, and opening it is what accepting means. `openDocument`
+(`app/services/document.ts`) connects a signed-in viewer of a shared
+document as a collaborator the first time they open it, so the document
+appears in their navigation from then on.
+
+The copy asks the recipient to sign in with the address the invite was
+sent to, and says a code goes to that same mailbox — the whole sign-in is
+one click from the e-mail they are already reading. Three things follow:
+
+- **Signing in is what the copy promises, and nothing enforces it yet.** A
+  shared document opens for a signed-out visitor as things stand: only an
+  unshared one sends them to sign in (`app/routes/doc.tsx`, the
+  `PermissionDenied` branch). So the invite flow is what has to require the
+  invited address, otherwise the e-mail claims a gate that is not there.
+  Until then the line reads as the instruction it is, and following it is
+  what puts the document in their navigation rather than leaving them an
+  anonymous visitor.
+- **What the recipient may do is the document's link access when they
+  open it**, which the e-mail deliberately does not spell out: it would be
+  a promise the owner can change a minute later. Turning the link off, or
+  back to viewing, simply changes what they find; the e-mail is not a
+  second grant that has to be revoked separately.
+- **The document must be shared for the invite to be worth anything.**
+  Whatever sends the invite is what has to make sure of that, the same way
+  the panel's Copy link button is disabled until then.
+
+The subject names the sharer and the document — `Alex shared "Trip to the
+Alps" with you` — because an invite is recognised by who sent it, and an
+unrecognised one gets deleted. A document with no heading yet has no title,
+so both the subject and the body fall back to `Untitled`, the same word the
+navigation shows.

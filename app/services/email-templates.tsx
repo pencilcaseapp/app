@@ -1,6 +1,10 @@
 import { href } from 'react-router';
 import { getConfig } from '~/config';
 import {
+  DocumentInviteEmail,
+  documentInviteEmailSubject,
+} from '~/emails/templates/document-invite';
+import {
   EmailChangeCodeEmail,
   emailChangeCodeEmailSubject,
 } from '~/emails/templates/email-change-code';
@@ -115,5 +119,45 @@ export async function sendEmailSubscriptionCanceled(input: {
     template: EmailTemplate.SubscriptionCanceled,
     idempotencyScope: subscriptionId,
     userId,
+  });
+}
+
+/**
+ * Invites somebody to a document. The link in the e-mail is the access and
+ * there is no acceptance step, so what the recipient may do with it is
+ * whatever the document's link access allows when they open it.
+ * `inviterId` goes on the log row because the recipient need not have an
+ * account yet, and the invite is the inviter's doing.
+ */
+export async function sendEmailDocumentInvite(input: {
+  to: EmailData;
+  inviteId: string;
+  documentId: string;
+  documentTitle: string | null;
+  inviterName: string;
+  inviterId: string;
+}) {
+  const {
+    to,
+    inviteId,
+    documentId,
+    documentTitle,
+    inviterName,
+    inviterId,
+  } = input;
+
+  await sendEmail({
+    to,
+    subject: documentInviteEmailSubject({ inviterName, documentTitle }),
+    email: (
+      <DocumentInviteEmail
+        inviterName={inviterName}
+        documentTitle={documentTitle}
+        documentUrl={`${config.appUrl}${href('/doc/:id', { id: documentId })}`}
+      />
+    ),
+    template: EmailTemplate.DocumentInvite,
+    idempotencyScope: inviteId,
+    userId: inviterId,
   });
 }

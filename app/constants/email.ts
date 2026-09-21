@@ -9,6 +9,7 @@ export enum EmailTemplate {
   SubscriptionStarted = 'subscription-started',
   SubscriptionPaymentFailed = 'subscription-payment-failed',
   SubscriptionCanceled = 'subscription-canceled',
+  DocumentInvite = 'document-invite',
 }
 
 /**
@@ -43,6 +44,9 @@ export enum EmailLogStatus {
  *   One e-mail per period is what we want; when Creem gives us no period
  *   the event id stands in, which dedupes redeliveries of that one event
  *   rather than suppressing every later failure.
+ * - `document-invite` uses the id of the invite. An invite the owner sent
+ *   again is another invite and goes out; a retried send of the same one
+ *   does not, the same way round as the codes above.
  */
 export function emailIdempotencyKey(template: EmailTemplate, scope: string) {
   return `${template}:${scope}`;
