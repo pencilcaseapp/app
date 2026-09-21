@@ -158,7 +158,11 @@ const InvitedPersonRow: FC<{
             </ChoiceTrigger>
           </DropdownMenuTrigger>
           <DropdownMenuPortal>
-            <DropdownMenuContent align="end" variant="solid">
+            <DropdownMenuContent
+              align="end"
+              variant="solid"
+              className="min-w-48!"
+            >
               {(Object.keys(ACCESS_LABELS) as DocumentAccess[]).map(value => (
                 <DropdownMenuItem
                   key={value}
