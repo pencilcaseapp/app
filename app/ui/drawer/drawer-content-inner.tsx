@@ -15,6 +15,8 @@ export type DrawerContentInnerProps = {
   reservedFooterHeight?: number;
   /** Replaces the default padding of the scrollable content area. */
   contentClassName?: string;
+  /** Horizontal padding of the topbar and the footer area. */
+  gutterClassName?: string;
 } & PropsWithChildren;
 
 /*
@@ -34,7 +36,8 @@ export const DrawerContentInner: FC<DrawerContentInnerProps>
     topArea,
     footerArea,
     reservedFooterHeight = 56,
-    contentClassName = 'px-4 pt-4 pb-6',
+    gutterClassName = 'px-5',
+    contentClassName = `${gutterClassName} pt-4 pb-6`,
   }) => {
     const contentRef = useRef<HTMLDivElement>(null);
 
@@ -48,11 +51,11 @@ export const DrawerContentInner: FC<DrawerContentInnerProps>
         className={classNames(
           'flex min-h-0 grow flex-col',
           footerArea === undefined
-          && 'pb-[calc(env(safe-area-inset-bottom,0px)+var(--bleed))]',
+          && 'pb-[calc(var(--safe-area-bottom)+var(--bleed))]',
         )}
       >
         {topArea && (
-          <div className={classNames('px-4 transition-opacity duration-300', nestedFadeClassName)}>
+          <div className={classNames(gutterClassName, 'transition-opacity duration-300', nestedFadeClassName)}>
             {topArea}
           </div>
         )}
@@ -66,11 +69,13 @@ export const DrawerContentInner: FC<DrawerContentInnerProps>
             style={{
               '--footer-reserved-height':
                 `calc(${reservedFooterHeight}px`
-                + ' + env(safe-area-inset-bottom, 0px) + var(--bleed))',
+                + ' + var(--safe-area-bottom) + var(--bleed))',
             } as CSSProperties}
             className={classNames('relative min-h-(--footer-reserved-height) shrink-0 transition-[min-height,opacity] duration-260 ease-[cubic-bezier(0.32,0.72,0,1)] focus-within:min-h-[calc(var(--footer-reserved-height)+var(--drawer-keyboard-inset,0px))] motion-reduce:transition-none', nestedFadeClassName)}
           >
-            <div className="absolute right-0 bottom-0 left-0 z-1 bg-white px-4 pt-2.5 pb-[calc(10px+env(safe-area-inset-bottom,0px)+var(--bleed))] transition-[bottom,padding-bottom] duration-260 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[bottom,padding-bottom] focus-within:fixed focus-within:z-3 focus-within:bottom-0 focus-within:pb-[calc(0.625rem+env(safe-area-inset-bottom,0px)+var(--bleed)+var(--drawer-keyboard-inset,0px))] focus-within:transform-[translate3d(0,0,0)] motion-reduce:transition-none  dark:bg-pca-grey-900">
+            {/* The keyboard covers the bottom edge of the screen while it
+                is up, so the footer above it drops the safe area again. */}
+            <div className={classNames(gutterClassName, 'absolute right-0 bottom-0 left-0 z-1 bg-white pt-2.5 pb-[calc(0.625rem+var(--safe-area-bottom)+var(--bleed))] transition-[bottom,padding-bottom] duration-260 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[bottom,padding-bottom] focus-within:fixed focus-within:z-3 focus-within:bottom-0 focus-within:pb-[calc(0.625rem+env(safe-area-inset-bottom,0px)+var(--bleed)+var(--drawer-keyboard-inset,0px))] focus-within:transform-[translate3d(0,0,0)] motion-reduce:transition-none  dark:bg-pca-grey-900')}>
               {footerArea}
             </div>
           </div>
