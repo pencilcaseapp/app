@@ -9,8 +9,12 @@ import { DropdownMenuItem } from './dropdown-menu-item';
 import { DropdownMenuSeparator } from './dropdown-menu-separator';
 
 function renderDropdownMenu(
-  { items, defaultOpen }:
-  { items?: React.ReactNode; defaultOpen?: boolean } = {},
+  { items, defaultOpen, variant }:
+  {
+    items?: React.ReactNode;
+    defaultOpen?: boolean;
+    variant?: 'glass' | 'solid';
+  } = {},
 ) {
   const defaultItems = (
     <>
@@ -25,7 +29,7 @@ function renderDropdownMenu(
     <DropdownMenu defaultOpen={defaultOpen}>
       <DropdownMenuTrigger />
       <DropdownMenuPortal>
-        <DropdownMenuContent hideWhenDetached={false}>
+        <DropdownMenuContent hideWhenDetached={false} variant={variant}>
           {items ?? defaultItems}
         </DropdownMenuContent>
       </DropdownMenuPortal>
@@ -159,6 +163,40 @@ describe('DropdownMenu', () => {
 
     const items = screen.getAllByRole('menuitem');
     expect(items.length).toBe(3);
+  });
+
+  test('renders the glassy surface by default', async () => {
+    const user = userEvent.setup();
+    renderDropdownMenu();
+
+    await user.click(screen.getByRole('button'));
+
+    expect(screen.getByRole('menu')).toHaveClass('glass-surface');
+  });
+
+  test('renders a solid surface for the solid variant', async () => {
+    const user = userEvent.setup();
+    renderDropdownMenu({ variant: 'solid' });
+
+    await user.click(screen.getByRole('button'));
+    const menu = screen.getByRole('menu');
+
+    expect(menu).not.toHaveClass('glass-surface');
+    expect(menu).toHaveClass('bg-pca-white');
+    expect(menu).toHaveClass('dark:bg-pca-grey-800');
+    expect(menu).toHaveClass('border');
+  });
+
+  test('passes the solid variant down to items and separators', async () => {
+    const user = userEvent.setup();
+    renderDropdownMenu({ variant: 'solid' });
+
+    await user.click(screen.getByRole('button'));
+
+    expect(screen.getByRole('menuitem', { name: 'Edit' }))
+      .toHaveClass('hover:bg-pca-grey-200!');
+    expect(screen.getByRole('separator'))
+      .toHaveClass('bg-pca-grey-200!');
   });
 
   test('closes menu on Escape', async () => {
