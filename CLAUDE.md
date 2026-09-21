@@ -321,7 +321,14 @@ tokens (`bg-pca-grey-900`, `text-pca-white`, …), never raw Tailwind palette
 colors. Components take explicit `colorLight`/`colorDark`, `textColorLight`/
 `textColorDark` props and emit both light and `dark:` classes rather than
 relying on a runtime theme. Polymorphism goes through the `as` prop and
-`PolymorphicComponentPropWithRef`.
+`PolymorphicComponentPropWithRef`. A new component with real mechanics behind
+it — an overlay, a menu, a form control with its own focus and keyboard
+handling — is built on Base UI (`@base-ui/react`), which owns the behaviour
+while `app/ui/` owns the look; the dialog, drawer, select, switch, meter and
+toast already are. The `@radix-ui/*` packages still under the dropdown menu,
+tooltip, separator, accordion and sidebar portal are what we reached for
+before and are not the choice for anything new — leave them where they are
+rather than migrating them.
 
 **Animation.** Keyframes and their `--animate-*` tokens live in the `@theme`
 block in `app/app.css` and are used through Tailwind (`animate-row-shift`,
