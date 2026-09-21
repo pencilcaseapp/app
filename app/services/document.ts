@@ -65,7 +65,7 @@ export async function openDocument(
     hasJoined = true;
   }
 
-  if (viewer && document.collaborator && !document.collaborator.userId) {
+  if (viewer && isPendingInvite(document.collaborator)) {
     await acceptInvite({
       collaboratorId: document.collaborator.id,
       userId: viewer.id,
@@ -261,6 +261,13 @@ function isOwnedBy(document: DocumentAccessInfo, viewer?: DocumentViewer) {
 /** A deleted document only still exists for its owner. */
 function isGone(document: DocumentAccessInfo, viewer?: DocumentViewer) {
   return document.deletedAt !== null && !isOwnedBy(document, viewer);
+}
+
+/** An invite the viewer has not opened the document on yet. */
+function isPendingInvite(
+  collaborator: DocumentForViewer['collaborator'],
+): collaborator is NonNullable<DocumentForViewer['collaborator']> {
+  return !!collaborator?.email && collaborator.acceptedAt === null;
 }
 
 /** The viewer was invited by e-mail, whether or not they accepted yet. */

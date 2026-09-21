@@ -84,20 +84,22 @@ beforeEach(() => {
 });
 
 describe('listInvitedCollaborators', () => {
-  it('marks an invite pending until it has an account', async () => {
+  it('marks an invite pending until it was accepted', async () => {
     getInvitedCollaboratorsMock.mockResolvedValue([
       {
         id: collaboratorId,
         userId: otherUserId,
         email: 'ada@example.com',
         access: 'edit',
+        acceptedAt: new Date(),
         name: 'Ada',
       },
       {
         id: inviteId,
-        userId: null,
+        userId: otherUserId,
         email: 'grace@example.com',
         access: 'view',
+        acceptedAt: null,
         name: null,
       },
     ]);

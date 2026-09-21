@@ -98,6 +98,7 @@ export async function getDocumentForViewer(
       userId: documentCollaborators.userId,
       email: documentCollaborators.email,
       access: documentCollaborators.access,
+      acceptedAt: documentCollaborators.acceptedAt,
     },
   })
     .from(documents)
@@ -128,6 +129,7 @@ export async function getInvitedCollaborators(documentId: string) {
     userId: documentCollaborators.userId,
     email: sql<string>`${documentCollaborators.email}`,
     access: sql<DocumentAccess>`${documentCollaborators.access}`,
+    acceptedAt: documentCollaborators.acceptedAt,
     name: users.name,
   })
     .from(documentCollaborators)
@@ -498,9 +500,10 @@ export interface AcceptInviteInput {
 }
 
 /**
- * Ties an invite to the account that opened the document with the invited
- * address. A connection the same account made through the link in the
- * meantime goes, so the pair of document and user stays unique.
+ * Stamps an invite accepted and ties it to the account that opened the
+ * document with the invited address. A connection the same account made
+ * through the link in the meantime goes, so the pair of document and user
+ * stays unique.
  */
 export async function acceptInvite(input: AcceptInviteInput) {
   const { collaboratorId, userId } = input;
@@ -511,7 +514,11 @@ export async function acceptInvite(input: AcceptInviteInput) {
 
   return db.transaction(async (tx) => {
     const invite = await tx.query.documentCollaborators.findFirst({
-      where: { id: collaboratorId, userId: { isNull: true } },
+      where: {
+        id: collaboratorId,
+        email: { isNotNull: true },
+        acceptedAt: { isNull: true },
+      },
       columns: { documentId: true },
     });
 
@@ -527,7 +534,7 @@ export async function acceptInvite(input: AcceptInviteInput) {
       ));
 
     const [collaborator] = await tx.update(documentCollaborators)
-      .set({ userId, updatedAt: sql`NOW()` })
+      .set({ userId, acceptedAt: sql`NOW()`, updatedAt: sql`NOW()` })
       .where(eq(documentCollaborators.id, collaboratorId))
       .returning();
 

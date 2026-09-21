@@ -31,7 +31,7 @@ export async function listInvitedCollaborators(
     name: collaborator.name,
     email: collaborator.email,
     access: collaborator.access,
-    pending: collaborator.userId === null,
+    pending: collaborator.acceptedAt === null,
   }));
 }
 

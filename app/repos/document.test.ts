@@ -649,7 +649,7 @@ describe('getDocumentForViewer', () => {
     const invitee = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, invitee.email, 'view',
+      fixture.id, invitee.email, { access: 'view' },
     );
 
     expect(await getDocumentForViewer(fixture.id, viewerOf(invitee)))
@@ -669,7 +669,7 @@ describe('getDocumentForViewer', () => {
     const impostor = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     await inviteDocumentCollaborator(
-      fixture.id, invitee.email, 'edit', invitee.id,
+      fixture.id, invitee.email, { userId: invitee.id, accepted: true },
     );
 
     expect(await getDocumentForViewer(fixture.id, {
@@ -687,7 +687,7 @@ describe('getDocumentForViewer', () => {
       userId: collaborator.id,
     });
     const invite = await inviteDocumentCollaborator(
-      fixture.id, collaborator.email, 'edit',
+      fixture.id, collaborator.email,
     );
 
     expect(await getDocumentForViewer(fixture.id, viewerOf(collaborator)))
@@ -714,17 +714,17 @@ describe('getDocumentForViewer', () => {
 });
 
 describe('getInvitedCollaborators', () => {
-  it('lists the invites oldest first with the name of those who accepted', async () => {
+  it('lists the invites oldest first with when they were accepted', async () => {
     const owner = await createTestUser();
     const accepted = await createTestUser();
     const linked = await createTestUser();
     const fixture = await createSharedDocument(owner.id);
     await connectCollaborator({ documentId: fixture.id, userId: linked.id });
     const first = await inviteDocumentCollaborator(
-      fixture.id, accepted.email, 'edit', accepted.id,
+      fixture.id, accepted.email, { userId: accepted.id, accepted: true },
     );
     const second = await inviteDocumentCollaborator(
-      fixture.id, 'pending@example.com', 'view',
+      fixture.id, 'pending@example.com', { access: 'view' },
     );
 
     expect(await getInvitedCollaborators(fixture.id)).toStrictEqual([
@@ -733,6 +733,7 @@ describe('getInvitedCollaborators', () => {
         userId: accepted.id,
         email: accepted.email,
         access: 'edit',
+        acceptedAt: first.acceptedAt,
         name: accepted.name,
       },
       {
@@ -740,9 +741,11 @@ describe('getInvitedCollaborators', () => {
         userId: null,
         email: 'pending@example.com',
         access: 'view',
+        acceptedAt: null,
         name: null,
       },
     ]);
+    expect(first.acceptedAt).toBeInstanceOf(Date);
   });
 
   it('returns an empty list for an invalid id', async () => {
@@ -827,7 +830,7 @@ describe('inviteCollaborator', () => {
     const invitee = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     await inviteDocumentCollaborator(
-      fixture.id, 'old-address@example.com', 'edit', invitee.id,
+      fixture.id, 'old-address@example.com', { userId: invitee.id },
     );
 
     expect(await inviteCollaborator({
@@ -848,7 +851,7 @@ describe('inviteCollaborator', () => {
 });
 
 describe('acceptInvite', () => {
-  it('ties the invite to the account', async () => {
+  it('ties the invite to the account and stamps when', async () => {
     const owner = await createTestUser();
     const invitee = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
@@ -860,6 +863,23 @@ describe('acceptInvite', () => {
     });
 
     expect(accepted).toMatchObject({ id: invite.id, userId: invitee.id });
+    expect(accepted?.acceptedAt).toBeInstanceOf(Date);
+  });
+
+  it('accepts an invite already tied to the account', async () => {
+    const owner = await createTestUser();
+    const invitee = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const invite = await inviteDocumentCollaborator(
+      fixture.id, invitee.email, { userId: invitee.id },
+    );
+
+    const accepted = await acceptInvite({
+      collaboratorId: invite.id,
+      userId: invitee.id,
+    });
+
+    expect(accepted?.acceptedAt).toBeInstanceOf(Date);
   });
 
   it('drops a connection the account made through the link', async () => {
@@ -884,7 +904,7 @@ describe('acceptInvite', () => {
     const other = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, invitee.email, 'edit', invitee.id,
+      fixture.id, invitee.email, { userId: invitee.id, accepted: true },
     );
 
     expect(await acceptInvite({
@@ -906,7 +926,7 @@ describe('setCollaboratorAccess', () => {
     const owner = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, 'invited@example.com', 'view',
+      fixture.id, 'invited@example.com', { access: 'view' },
     );
 
     expect(await setCollaboratorAccess({
@@ -922,7 +942,7 @@ describe('setCollaboratorAccess', () => {
     const other = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, 'invited@example.com', 'view',
+      fixture.id, 'invited@example.com', { access: 'view' },
     );
 
     expect(await setCollaboratorAccess({
@@ -966,7 +986,7 @@ describe('removeCollaborator', () => {
     const invitee = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, invitee.email, 'edit', invitee.id,
+      fixture.id, invitee.email, { userId: invitee.id, accepted: true },
     );
 
     expect(await removeCollaborator({

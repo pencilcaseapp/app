@@ -300,9 +300,9 @@ document-invite.ts`), and the e-mail's idempotency scope is that row's
 id. There is no invite screen: the link in the e-mail is the document
 URL, and opening it while signed in with the invited address is what
 accepting means — `openDocument` (`app/services/document.ts`) finds the
-pending invite by the address and ties it to the account, so the document
-appears in their navigation from then on and the "Invited" badge in the
-share panel goes.
+pending invite by the account or the address, ties it to the account and
+stamps `accepted_at`, so the document appears in their navigation from
+then on and the "Invited" badge in the share panel goes.
 
 The copy asks the recipient to sign in with the address the invite was
 sent to, and says a code goes to that same mailbox — the whole sign-in is

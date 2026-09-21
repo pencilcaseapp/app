@@ -137,6 +137,7 @@ export const documentCollaborators = pgTable('document_collaborators', {
   userId: uuid('user_id').references(() => users.id),
   email: text('email'),
   access: text('access').$type<DocumentAccess>(),
+  acceptedAt: timestamp('accepted_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, table => [
@@ -153,6 +154,10 @@ export const documentCollaborators = pgTable('document_collaborators', {
   check(
     'document_collaborators_invite_access_check',
     sql`(${table.email} IS NULL) = (${table.access} IS NULL)`,
+  ),
+  check(
+    'document_collaborators_accepted_invite_check',
+    sql`${table.acceptedAt} IS NULL OR (${table.email} IS NOT NULL AND ${table.userId} IS NOT NULL)`,
   ),
 ]);
 

@@ -58,17 +58,26 @@ export async function connectDocumentCollaborator(
  * An invite by e-mail. Without `userId` it is still pending; with one it
  * was accepted by that account.
  */
+export interface InviteDocumentCollaboratorOptions {
+  access?: DocumentAccess;
+  /** The account the address belongs to, linked but not yet accepted. */
+  userId?: string;
+  /** Stamps the invite accepted by `userId`. */
+  accepted?: boolean;
+}
+
 export async function inviteDocumentCollaborator(
   documentId: string,
   email: string,
-  access: DocumentAccess = 'edit',
-  userId?: string,
+  options: InviteDocumentCollaboratorOptions = {},
 ) {
+  const { access = 'edit', userId, accepted = false } = options;
   const [collaborator] = await db.insert(documentCollaborators).values({
     documentId,
     email,
     access,
     userId,
+    acceptedAt: accepted ? new Date() : null,
   }).returning();
 
   return collaborator;

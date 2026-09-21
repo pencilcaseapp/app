@@ -264,10 +264,12 @@ a `transform` — the only property those rules leave alone.
 panel's invite form (`app/components/share-panel/invite-form.tsx`, the
 paid plan only) posts to the doc route's action, which is why the link
 switch posts to `/doc/:id/share` instead. An invite is a
-`document_collaborators` row with `email` and `access` and no `user_id`
-until the invited address opens the document, which `openDocument`
-treats as accepting (`acceptInvite`); a row with only a `user_id` is
-somebody who came in through the link and is not listed in the panel.
+`document_collaborators` row with `email` and `access`, linked to the
+`user_id` the address belongs to as soon as there is one, and pending
+(the "Invited" badge) until `accepted_at` is stamped, which
+`openDocument` does when the invited address opens the document
+(`acceptInvite`); a row with only a `user_id` is somebody who came in
+through the link and is not listed in the panel.
 An invited person gets the access the owner set for them whatever the
 link allows; everybody else needs the link. Changing or removing that
 access (`/doc/:id/collaborators/:collaboratorId/access` and `/remove`,

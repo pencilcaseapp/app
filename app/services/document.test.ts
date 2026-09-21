@@ -54,6 +54,7 @@ type Collaborator = {
   userId: string | null;
   email: string | null;
   access: DocumentLinkAccess | null;
+  acceptedAt: Date | null;
 };
 
 function viewerDocument(overrides?: Partial<{
@@ -77,19 +78,32 @@ function viewerDocument(overrides?: Partial<{
 
 /** The viewer's row for a connection made through the link. */
 function linkCollaborator(): Collaborator {
-  return { id: collaboratorId, userId: viewer.id, email: null, access: null };
+  return {
+    id: collaboratorId,
+    userId: viewer.id,
+    email: null,
+    access: null,
+    acceptedAt: null,
+  };
 }
 
-/** The viewer's invite, pending until `accepted`. */
+/**
+ * The viewer's invite, pending until `accepted`; `linked` when the
+ * address had an account at the time of the invite.
+ */
 function invite(
   access: DocumentLinkAccess,
-  { accepted = false } = {},
+  { accepted = false, linked = false }: {
+    accepted?: boolean;
+    linked?: boolean;
+  } = {},
 ): Collaborator {
   return {
     id: collaboratorId,
-    userId: accepted ? viewer.id : null,
+    userId: linked || accepted ? viewer.id : null,
     email: viewer.email,
     access,
+    acceptedAt: accepted ? new Date() : null,
   };
 }
 
@@ -272,6 +286,21 @@ describe('openDocument', () => {
       userId: viewer.id,
     });
     expect(connectCollaboratorMock).not.toHaveBeenCalled();
+  });
+
+  it('accepts an invite already tied to the account', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      collaborator: invite('edit', { linked: true }),
+    }));
+
+    const [, document] = await openDocument(documentFixture.id, viewer);
+
+    expect(document?.hasJoined).toBe(true);
+    expect(acceptInviteMock).toHaveBeenCalledWith({
+      collaboratorId,
+      userId: viewer.id,
+    });
   });
 
   it('opens an accepted invite without joining again', async () => {
