@@ -29,7 +29,7 @@ test('compares the free plan against pro', () => {
   const { container } = renderUpgrade(2);
 
   expect(screen.getByRole('heading', {
-    name: 'You’ve used 2 of your 3 free docs.',
+    name: 'You’ve used 2 of your 5 free docs.',
   })).toBeInTheDocument();
   for (const badge of screen.getAllByText('Current')) {
     expect(badge.closest('.bg-pca-white')).toBeInTheDocument();
@@ -43,10 +43,10 @@ test('compares the free plan against pro', () => {
 });
 
 test('tells a user at the limit that all docs are in use', () => {
-  renderUpgrade(3);
+  renderUpgrade(5);
 
   expect(screen.getByRole('heading', {
-    name: 'You’ve used all 3 of your free docs.',
+    name: 'You’ve used all 5 of your free docs.',
   })).toBeInTheDocument();
 });
 

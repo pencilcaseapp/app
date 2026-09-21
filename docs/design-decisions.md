@@ -10,8 +10,8 @@ the same discussion does not happen twice.
   dialog footer. Below the cards a free user gets the two-column
   feature matrix; a subscriber has nothing left to compare and gets
   the subscription itself instead, as rows in the matrix's language.
-- Headline: "You’ve used 2 of your 3 free docs." (all/over the limit:
-  "You’ve used all 3 of your free docs."; subscribed: "You’re on Pencil
+- Headline: "You’ve used 2 of your 5 free docs." (all/over the limit:
+  "You’ve used all 5 of your free docs."; subscribed: "You’re on Pencil
   Case Pro."). A free user also gets the subheadline "Unlimited docs,
   and you decide who gets in." — one line in the dialog and the drawer.
 - Illustration above the headline: `flying-docs` free, `pencil-and-doc`
@@ -77,4 +77,3 @@ the same discussion does not happen twice.
   - Fine print in the footer next to the button ("Secure checkout by
     Creem.", "Billing lives in the Creem portal."): the hint belongs to
     the cards, and the billing line repeated the button.
-- Open: `FREE_DOCUMENT_LIMIT` is 3 in code; the product may give 5.

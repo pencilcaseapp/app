@@ -85,7 +85,7 @@ describe('page', () => {
 
     await renderSubscription(userFixture, { kind: 'none' });
 
-    expect(await screen.findByText('You’ve used 2 of your 3 free docs.'))
+    expect(await screen.findByText('You’ve used 2 of your 5 free docs.'))
       .toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Upgrade to Pro' }))
       .toBeEnabled();
@@ -101,11 +101,11 @@ describe('page', () => {
 
   test('tells a free user at the limit that all docs are in use',
     async () => {
-      getDocumentListMock.mockResolvedValue([{}, {}, {}]);
+      getDocumentListMock.mockResolvedValue([{}, {}, {}, {}, {}]);
 
       await renderSubscription(userFixture, { kind: 'none' });
 
-      expect(await screen.findByText('You’ve used all 3 of your free docs.'))
+      expect(await screen.findByText('You’ve used all 5 of your free docs.'))
         .toBeInTheDocument();
     });
 
