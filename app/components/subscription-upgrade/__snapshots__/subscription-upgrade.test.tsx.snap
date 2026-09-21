@@ -24,7 +24,7 @@ exports[`compares the free plan against pro 1`] = `
       <h3
         class="antialiased font-inter text-xl sm:text-2xl font-bold text-pca-grey-900 dark:text-white text-center text-balance"
       >
-        You’ve used 2 of your 3 free docs.
+        You’ve used 2 of your 5 free docs.
       </h3>
       <p
         class="antialiased font-inter text-sm font-normal text-pca-grey-600 dark:text-pca-grey-400 text-center mt-1.5"
@@ -186,7 +186,7 @@ exports[`compares the free plan against pro 1`] = `
             <span
               class="antialiased font-inter text-sm text-pca-grey-600 dark:text-pca-grey-400 font-medium tabular-nums"
             >
-              3
+              5
             </span>
           </td>
           <td
