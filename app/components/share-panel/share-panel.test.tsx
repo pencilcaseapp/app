@@ -190,7 +190,6 @@ describe('SharePanel', () => {
     renderSharePanel({ shared: false });
 
     expect(screen.getByRole('switch')).not.toBeChecked();
-    expect(screen.getByRole('button', { name: 'Copy link' })).toBeDisabled();
     expect(
       screen.getByText('Right now only you can open it'),
     ).toBeInTheDocument();
@@ -201,11 +200,16 @@ describe('SharePanel', () => {
 
     expect(screen.getByRole('switch')).toBeChecked();
     expect(
-      screen.getByRole('button', { name: 'Copy link' }),
-    ).not.toBeDisabled();
-    expect(
       screen.getByText('No sign-in needed to open it'),
     ).toBeInTheDocument();
+  });
+
+  test('keeps the copy button enabled while the link is off', () => {
+    renderSharePanel({ shared: false });
+
+    expect(
+      screen.getByRole('button', { name: 'Copy link' }),
+    ).not.toBeDisabled();
   });
 
   test('lists the owner under the people with access', () => {

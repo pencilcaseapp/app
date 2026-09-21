@@ -85,6 +85,8 @@ export const SharePanel: React.FC<SharePanelProps> = ({
     );
   };
 
+  // The link is always worth handing on: invited people open it whatever
+  // the switch says, and the owner can flip the switch afterwards.
   const linkButton = isMobile && canShare
     ? (
         <ShareLinkButton
@@ -92,7 +94,6 @@ export const SharePanel: React.FC<SharePanelProps> = ({
           colorLight="grey-900"
           link={shareUrl}
           label="Share link"
-          disabled={!isShared}
         />
       )
     : (
@@ -102,7 +103,6 @@ export const SharePanel: React.FC<SharePanelProps> = ({
           link={shareUrl}
           label="Copy link"
           copiedLabel="Link copied!"
-          disabled={!isShared}
         />
       );
 
