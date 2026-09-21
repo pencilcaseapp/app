@@ -95,6 +95,49 @@ export const WithSurroundingContent: Story = {
   ),
 };
 
+/**
+ * The `solid` variant swaps the frosted surface for an opaque background and a
+ * hairline border, so the menu stays legible over busy or coloured content
+ * where the backdrop blur would otherwise show through.
+ */
+export const SolidVariant: Story = {
+  render: () => (
+    <MemoryRouter>
+      <div className="max-w-lg space-y-4 p-6">
+        <Typography variant="heading2">Document settings</Typography>
+        <Typography variant="bodySmall">
+          Configure sharing, permissions, and other options for this document.
+          Use the menu below to access available actions.
+        </Typography>
+        <div className="flex items-center justify-between rounded-xl bg-pca-grey-100 dark:bg-pca-grey-800 p-4">
+          <Typography variant="bodySmall">Actions</Typography>
+          <DropdownMenu>
+            <DropdownMenuTrigger iconTitle="Document Settings" />
+            <DropdownMenuPortal>
+              <DropdownMenuContent align="end" variant="solid">
+                <DropdownMenuItem as="button" onClick={action('clicked')} icon="share">
+                  Share
+                </DropdownMenuItem>
+                <DropdownMenuItem icon="space">
+                  Move to folder
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem color="danger" as="button">
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenuPortal>
+          </DropdownMenu>
+        </div>
+        <Typography variant="bodySmall">
+          Changes are saved automatically.
+          Deleted documents cannot be recovered.
+        </Typography>
+      </div>
+    </MemoryRouter>
+  ),
+};
+
 export const WithCustomTrigger: Story = {
   render: () => (
     <MemoryRouter>

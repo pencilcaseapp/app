@@ -7,6 +7,8 @@ import { Typography } from '../typography/typography';
 import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import type { IconName } from '../icon/icons';
 import { Icon } from '../icon/icon';
+import type { DropdownMenuVariant } from './dropdown-menu-variant-context';
+import { useDropdownMenuVariant } from './dropdown-menu-variant-context';
 
 export type DropdownMenuItemProps = RadixDropdownMenuItemProps
   & PropsWithChildren & {
@@ -15,6 +17,11 @@ export type DropdownMenuItemProps = RadixDropdownMenuItemProps
     isLoading?: boolean;
     icon?: IconName;
   };
+
+const variantClasses: Record<DropdownMenuVariant, string> = {
+  glass: 'hover:bg-pca-grey-300/15! dark:hover:bg-pca-grey-800/80! focus:bg-pca-grey-200/40 dark:focus:bg-pca-white/10',
+  solid: 'hover:bg-pca-grey-200! dark:hover:bg-pca-grey-700! focus:bg-pca-grey-200 dark:focus:bg-pca-grey-700',
+};
 
 export const DropdownMenuItem = <C extends React.ElementType = 'a'>({
   as,
@@ -26,6 +33,7 @@ export const DropdownMenuItem = <C extends React.ElementType = 'a'>({
   ...props
 }: PolymorphicComponentProp<C, DropdownMenuItemProps>) => {
   const Component = as ?? 'a';
+  const variant = useDropdownMenuVariant();
   const { disabled, onSelect, textValue, ...restProps } = props;
 
   const classes = classNames([
@@ -37,7 +45,8 @@ export const DropdownMenuItem = <C extends React.ElementType = 'a'>({
     <Item disabled={disabled} textValue={textValue} onSelect={onSelect} asChild>
       <Component
         className={classNames(
-          'relative w-full inline-flex items-center rounded-[10px] transition-colors hover:bg-pca-grey-300/15! dark:hover:bg-pca-grey-800/80! focus:outline-hidden focus:bg-pca-grey-200/40 dark:focus:bg-pca-white/10 px-2.5 py-1.5 duration-150 group',
+          'relative w-full inline-flex items-center rounded-[10px] transition-colors focus:outline-hidden px-2.5 py-1.5 duration-150 group',
+          variantClasses[variant],
           color === 'primary'
           && 'text-pca-grey-900 dark:text-pca-white',
           color === 'danger'
