@@ -110,7 +110,10 @@ export const Select = <Value extends string>({
         >
           <BaseSelect.Popup
             className={classNames(
-              'flex min-w-(--anchor-width) flex-col gap-0.5 rounded-2xl p-1.5 shadow-glass outline-0 transition-[scale,opacity] duration-150 ease-out data-ending-style:scale-[0.96] data-ending-style:opacity-0 data-starting-style:scale-[0.96] data-starting-style:opacity-0 motion-reduce:transition-none dark:shadow-glass-dark',
+              // 12rem is the width the design concept gives these menus. The
+              // anchor width keeps a popup under a wider trigger from coming
+              // out narrower than the trigger itself.
+              'flex min-w-[max(12rem,var(--anchor-width))] flex-col gap-0.5 rounded-2xl p-1.5 shadow-glass outline-0 transition-[scale,opacity] duration-150 ease-out data-ending-style:scale-[0.96] data-ending-style:opacity-0 data-starting-style:scale-[0.96] data-starting-style:opacity-0 motion-reduce:transition-none dark:shadow-glass-dark',
               menuSurfaceClasses[variant],
               // Same Safari backdrop-root problem the dropdown menu has: the
               // frosted surface leaves for the colour it resolves to.

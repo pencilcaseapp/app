@@ -95,6 +95,16 @@ describe('Select', () => {
       .toBeInTheDocument();
   });
 
+  test('gives the popup the min width from the design concept', async () => {
+    const user = userEvent.setup();
+    renderSelect();
+
+    await user.click(screen.getByRole('combobox'));
+
+    expect(screen.getByRole('listbox').parentElement)
+      .toHaveClass('min-w-[max(12rem,var(--anchor-width))]');
+  });
+
   test('renders a solid surface for the solid variant', async () => {
     const user = userEvent.setup();
     renderSelect({ variant: 'solid' });
