@@ -71,7 +71,13 @@ export const InviteForm: FC = () => {
               type="email"
               aria-label="Email address"
               placeholder="name@mail.com"
-              autoComplete="email"
+              // The address is somebody else's, so neither the browser
+              // nor a password manager should offer the owner's own.
+              autoComplete="off"
+              data-1p-ignore
+              data-lpignore="true"
+              data-bwignore
+              data-form-type="other"
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
