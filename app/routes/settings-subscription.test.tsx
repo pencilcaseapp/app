@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react';
 import { href, RouterContextProvider } from 'react-router';
 import { afterEach, describe, expect, test, vi } from 'vitest';
+import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import {
   optionalUserSessionContext,
   userSessionContext,
@@ -85,7 +86,9 @@ describe('page', () => {
 
     await renderSubscription(userFixture, { kind: 'none' });
 
-    expect(await screen.findByText('You’ve used 2 of your 3 free docs.'))
+    expect(await screen.findByText(
+      `You’ve used 2 of your ${FREE_DOCUMENT_LIMIT} free docs.`,
+    ))
       .toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Upgrade to Pro' }))
       .toBeEnabled();
@@ -101,12 +104,15 @@ describe('page', () => {
 
   test('tells a free user at the limit that all docs are in use',
     async () => {
-      getDocumentListMock.mockResolvedValue([{}, {}, {}]);
+      getDocumentListMock.mockResolvedValue(
+        Array.from({ length: FREE_DOCUMENT_LIMIT }, () => ({})),
+      );
 
       await renderSubscription(userFixture, { kind: 'none' });
 
-      expect(await screen.findByText('You’ve used all 3 of your free docs.'))
-        .toBeInTheDocument();
+      expect(await screen.findByText(
+        `You’ve used all ${FREE_DOCUMENT_LIMIT} of your free docs.`,
+      )).toBeInTheDocument();
     });
 
   test('shows the running subscription with the customer portal',
