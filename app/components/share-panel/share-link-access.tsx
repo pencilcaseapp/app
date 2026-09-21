@@ -37,7 +37,6 @@ export const ShareLinkAccess: FC<ShareLinkAccessProps> = ({
         <span
           className={classNames(
             'flex size-9 shrink-0 items-center justify-center rounded-full',
-            'transition-colors duration-150 motion-reduce:transition-none',
             isShared
               ? 'bg-pca-green-100 text-pca-green-900'
               : 'bg-pca-grey-200 text-pca-grey-700 dark:bg-pca-grey-800 dark:text-pca-grey-300',
