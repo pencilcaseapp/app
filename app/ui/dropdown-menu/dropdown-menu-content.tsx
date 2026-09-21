@@ -29,7 +29,6 @@ export const DropdownMenuContent: FC<DropdownMenuContentProps> = ({
         variant === 'glass' && 'data-[state=closed]:glass-surface-opaque',
         className,
       )}
-      alignOffset={10}
       sideOffset={4}
       {...radixDropdownMenuContentProps}
     >
