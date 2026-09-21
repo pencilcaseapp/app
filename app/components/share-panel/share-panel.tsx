@@ -1,4 +1,5 @@
-import { href, useFetcher } from 'react-router';
+import { useState } from 'react';
+import { href, Link, useFetcher } from 'react-router';
 import { useAuthenticityToken } from 'remix-utils/csrf/react';
 import {
   DEFAULT_DOCUMENT_LINK_ACCESS,
@@ -18,6 +19,7 @@ import {
 import { Separator } from '~/ui/separator/separator';
 import { ShareLinkButton } from '~/ui/share-link-button/share-link-button';
 import { SIDEBAR_DRAWER_MAX_HEIGHT } from '~/ui/sidebar/sidebar';
+import { UpgradeTeaser } from '~/ui/upgrade-teaser/upgrade-teaser';
 import type { PersonWithAccess } from './people-with-access';
 import { PeopleWithAccess } from './people-with-access';
 import { ShareLinkAccess } from './share-link-access';
@@ -31,6 +33,8 @@ export interface SharePanelProps {
   linkAccess: DocumentLinkAccess;
   shareUrl: string;
   owner: PersonWithAccess;
+  /** Offer the paid plan instead of the features behind it. */
+  showUpgrade?: boolean;
   defaultOpen?: boolean;
 }
 
@@ -40,8 +44,10 @@ export const SharePanel: React.FC<SharePanelProps> = ({
   linkAccess,
   shareUrl,
   owner,
+  showUpgrade,
   defaultOpen,
 }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen ?? false);
   const fetcher = useFetcher();
   const accessFetcher = useFetcher();
   const csrfToken = useAuthenticityToken();
@@ -98,7 +104,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
       );
 
   return (
-    <ResponsivePanel defaultOpen={defaultOpen}>
+    <ResponsivePanel open={isOpen} onOpenChange={setIsOpen}>
       <ResponsivePanelTrigger>
         {isMobile
           ? (
@@ -130,6 +136,20 @@ export const SharePanel: React.FC<SharePanelProps> = ({
         />
         <Separator />
         <PeopleWithAccess owner={owner} />
+        {showUpgrade && (
+          <UpgradeTeaser
+            as={Link}
+            to={href('/doc/:id/settings/subscription', { id: documentId })}
+            // The settings dialog opens over the document, which keeps
+            // its scroll position, and the panel it is opened from
+            // closes rather than staying behind the dialog.
+            preventScrollReset
+            onClick={() => setIsOpen(false)}
+            plan="Pro"
+            title="Invite people by email"
+            action="Upgrade"
+          />
+        )}
       </ResponsivePanelContent>
     </ResponsivePanel>
   );

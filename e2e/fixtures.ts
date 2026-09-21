@@ -210,7 +210,7 @@ export class AppUser {
     return this.page.getByRole('switch', { name: 'Anyone with the link' });
   }
 
-  private async openSharePanel(): Promise<Locator> {
+  async openSharePanel(): Promise<Locator> {
     await this.page
       .getByRole('button', { name: 'Share', exact: true })
       .click();

@@ -55,6 +55,10 @@ export const ResponsivePanelContent: FC<ResponsivePanelContentProps> = ({
           topArea={<PanelTitle title={title} />}
           footerArea={footerArea}
           reservedFooterHeight={reservedFooterHeight}
+          // The footer area already holds 10px above its button, so the
+          // content stops 2px short of it for the same 12px the dropdown
+          // variant puts there.
+          contentClassName="px-4 pt-4 pb-0.5"
         >
           <div className="flex flex-col gap-4">
             {children}
@@ -70,7 +74,9 @@ export const ResponsivePanelContent: FC<ResponsivePanelContentProps> = ({
         align="end"
         collisionPadding={12}
         className={classNames(
-          'max-h-(--radix-dropdown-menu-content-available-height) gap-0 p-3',
+          // The menu's own `gap-0.5` wins over a plain `gap-0`, and the
+          // panel spaces its parts itself.
+          'max-h-(--radix-dropdown-menu-content-available-height) gap-0! p-3',
           className,
         )}
       >

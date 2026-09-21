@@ -100,3 +100,20 @@ test('granting editing reaches the other user immediately', async ({
   await expect(userA.editor)
     .toContainText('Written by User B.', { timeout: 10_000 });
 });
+
+test('a free account is offered the upgrade over inviting', async ({
+  userA,
+}) => {
+  const documentUrl = await userA.createDocument();
+  await userA.openSharePanel();
+
+  await userA.page
+    .getByRole('link', { name: /Invite people by email/ })
+    .click();
+
+  await expect(userA.page).toHaveURL(`${documentUrl}/settings/subscription`);
+  // The panel gives way to the settings dialog it opens.
+  await expect(
+    userA.page.getByRole('switch', { name: 'Anyone with the link' }),
+  ).toBeHidden();
+});

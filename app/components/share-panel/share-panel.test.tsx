@@ -17,12 +17,14 @@ function renderSharePanel({
   shared = false,
   linkAccess = 'view' as DocumentLinkAccess,
   defaultOpen = true,
+  showUpgrade = false,
   action = async () => ({ ok: true }),
   linkAccessAction = async () => ({ ok: true }),
 }: {
   shared?: boolean;
   linkAccess?: DocumentLinkAccess;
   defaultOpen?: boolean;
+  showUpgrade?: boolean;
   action?: (args: ActionFunctionArgs) => unknown;
   linkAccessAction?: (args: ActionFunctionArgs) => unknown;
 } = {}) {
@@ -38,6 +40,7 @@ function renderSharePanel({
             linkAccess={linkAccess}
             shareUrl={shareUrl}
             owner={owner}
+            showUpgrade={showUpgrade}
             defaultOpen={defaultOpen}
           />
         </AuthenticityTokenProvider>
@@ -46,6 +49,10 @@ function renderSharePanel({
     {
       path: '/doc/:id/link-access',
       action: linkAccessAction,
+    },
+    {
+      path: '/doc/:id/settings/subscription',
+      Component: () => <p>Subscription settings</p>,
     },
   ]);
 
@@ -291,5 +298,36 @@ describe('SharePanel', () => {
     await user.click(toggle);
 
     await vi.waitFor(() => expect(toggle).toBeChecked());
+  });
+
+  test('offers the upgrade to an account without a subscription', () => {
+    renderSharePanel({ showUpgrade: true });
+
+    expect(
+      screen.getByRole('link', { name: /Invite people by email/ }),
+    ).toHaveAttribute('href', `/doc/${documentId}/settings/subscription`);
+  });
+
+  test('hides the upgrade offer from a subscriber', () => {
+    renderSharePanel({ showUpgrade: false });
+
+    expect(
+      screen.queryByRole('link', { name: /Invite people by email/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  test('closes the panel when the upgrade offer is opened', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    renderSharePanel({ showUpgrade: true });
+
+    await user.click(
+      screen.getByRole('link', { name: /Invite people by email/ }),
+    );
+
+    expect(await screen.findByText('Subscription settings'))
+      .toBeInTheDocument();
+    await vi.waitFor(() => expect(
+      screen.queryByText('Share document'),
+    ).not.toBeInTheDocument());
   });
 });
