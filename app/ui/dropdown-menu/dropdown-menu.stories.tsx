@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 import { DropdownMenu } from './dropdown-menu';
 import { DropdownMenuTrigger } from './dropdown-menu-trigger';
 import { DropdownMenuPortal } from './dropdown-menu-portal';
@@ -10,6 +11,7 @@ import { DropdownMenuSeparator } from './dropdown-menu-separator';
 import { Typography } from '../typography/typography';
 import { Avatar } from '../avatar/avatar';
 import { Icon } from '../icon/icon';
+import { ChoiceTrigger } from '../choice-trigger/choice-trigger';
 
 const meta: Meta<typeof DropdownMenu> = {
   title: 'Navigation/DropdownMenu',
@@ -200,4 +202,112 @@ export const WithTrailingContent: Story = {
       </div>
     </MemoryRouter>
   ),
+};
+
+const ROLE_LABEL = { view: 'Can view', edit: 'Can edit' } as const;
+
+type Role = keyof typeof ROLE_LABEL;
+
+type Person = {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  pending?: boolean;
+};
+
+const INVITED: Person[] = [
+  {
+    id: 'p1',
+    name: 'Alexandra Konstantinopoulou',
+    email: 'alexandra.konstantinopoulou@example-university.edu',
+    role: 'edit',
+  },
+  { id: 'p2', name: 'Jörg Müller', email: 'joerg@example.de', role: 'view', pending: true },
+  { id: 'p3', name: 'Sam Okafor', email: 'sam@okafor.studio', role: 'edit' },
+];
+
+/**
+ * The role beside an invited person is a menu rather than a select: picking
+ * one acts straight away, and the list also holds "Remove access", which is a
+ * command and could never be an option in a listbox.
+ *
+ * It shares `ChoiceTrigger` with the `Select`, so the chooser in the invite
+ * field and the one on a row are the same button. Pick a role or remove
+ * somebody and the list updates.
+ */
+export const PeopleWithAccess: Story = {
+  render: () => {
+    // eslint-disable-next-line @eslint-react/rules-of-hooks
+    const [people, setPeople] = useState(INVITED);
+
+    const setRole = (id: string, role: Role) => setPeople(current =>
+      current.map(person => (person.id === id ? { ...person, role } : person)),
+    );
+    const remove = (id: string) => setPeople(current =>
+      current.filter(person => person.id !== id),
+    );
+
+    return (
+      <MemoryRouter>
+        <div className="max-w-md space-y-3 p-6">
+          <Typography variant="bodyTiny" textColorLight="grey-700" textColorDark="grey-300">
+            People with access
+          </Typography>
+          <ul className="flex flex-col gap-1">
+            {people.map(person => (
+              <li key={person.id} className="flex min-h-11 items-center gap-3">
+                <Avatar name={person.name} as="div" />
+                <div className="flex min-w-0 grow flex-col">
+                  <Typography variant="bodySmall" className="truncate">
+                    {person.name}
+                    {person.pending ? ' · Invited' : ''}
+                  </Typography>
+                  <Typography variant="bodyTiny" className="truncate" textColorLight="grey-700" textColorDark="grey-300">
+                    {person.email}
+                  </Typography>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <ChoiceTrigger aria-label={`Access for ${person.name}`}>
+                      {ROLE_LABEL[person.role]}
+                    </ChoiceTrigger>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuContent align="end" variant="solid">
+                      {(Object.keys(ROLE_LABEL) as Role[]).map(role => (
+                        <DropdownMenuItem
+                          key={role}
+                          as="button"
+                          onSelect={() => setRole(person.id, role)}
+                          trailing={person.role === role
+                            ? <Icon icon="check" className="h-4 w-4" />
+                            : undefined}
+                        >
+                          {ROLE_LABEL[role]}
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        as="button"
+                        color="danger"
+                        onSelect={() => remove(person.id)}
+                      >
+                        Remove access
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenuPortal>
+                </DropdownMenu>
+              </li>
+            ))}
+          </ul>
+          {people.length === 0 && (
+            <Typography variant="bodySmall">
+              Nobody else has access to this document.
+            </Typography>
+          )}
+        </div>
+      </MemoryRouter>
+    );
+  },
 };

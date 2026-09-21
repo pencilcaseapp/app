@@ -1,6 +1,7 @@
 import { Select as BaseSelect } from '@base-ui/react/select';
 import classNames from 'classnames';
 import type { ReactNode } from 'react';
+import { ChoiceTrigger } from '../choice-trigger/choice-trigger';
 import { Icon } from '../icon/icon';
 import { Typography } from '../typography/typography';
 import type { MenuSurfaceVariant } from '../menu-surface/menu-surface';
@@ -86,20 +87,10 @@ export const Select = <Value extends string>({
       )}
       <BaseSelect.Trigger
         aria-label={ariaLabel}
-        className={classNames(
-          'inline-flex h-8 max-w-full shrink-0 cursor-pointer items-center gap-1 rounded-lg pl-2.5 pr-1.5 text-sm font-medium text-pca-grey-700 outline-0 transition-colors duration-150 dark:text-pca-grey-300',
-          'hover:bg-pca-grey-200 dark:hover:bg-pca-grey-800 data-popup-open:bg-pca-grey-200 dark:data-popup-open:bg-pca-grey-800',
-          'focus-visible:ring-2 ring-pca-blue-300',
-          'data-disabled:pointer-events-none data-disabled:opacity-30',
-          className,
-        )}
+        className={className}
+        render={<ChoiceTrigger />}
       >
-        <BaseSelect.Value className="truncate">
-          {placeholder}
-        </BaseSelect.Value>
-        <BaseSelect.Icon
-          render={<Icon icon="chevronDown" className="h-4 w-4 shrink-0" />}
-        />
+        <BaseSelect.Value>{placeholder}</BaseSelect.Value>
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
         <BaseSelect.Positioner
