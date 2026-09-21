@@ -4,15 +4,7 @@ import { Typography } from '../ui/typography/typography';
 
 const untitledDocument = 'Untitled';
 
-const previews = {
-  edit: 'Open it in pencil case and write along.',
-  view: 'Open it in pencil case and read along.',
-};
-
-const invitations = {
-  edit: 'You can write in it together, right in your browser.',
-  view: 'You can read along, right in your browser.',
-};
+const preview = 'Open it in pencil case by signing in with this address.';
 
 const signIn = 'Sign in with this email address to open it. We send a code '
   + 'to the same address, so there is no password to remember.';
@@ -27,8 +19,6 @@ export interface DocumentInviteEmailProps {
   inviterName: string;
   documentTitle: string | null;
   documentUrl: string;
-  /** Whether the link the invite carries allows editing. */
-  canEdit: boolean;
 }
 
 export function documentInviteEmailSubject(input: {
@@ -49,15 +39,13 @@ export function DocumentInviteEmail({
   inviterName,
   documentTitle,
   documentUrl,
-  canEdit,
 }: DocumentInviteEmailProps) {
-  const access = canEdit ? 'edit' : 'view';
   const title = documentTitle ?? untitledDocument;
   const opening = `${inviterName} shared the document "${title}" `
     + 'with you in pencil case.';
 
   return (
-    <Layout preview={previews[access]}>
+    <Layout preview={preview}>
       <Typography
         variant="heading2"
         as="h1"
@@ -70,9 +58,6 @@ export function DocumentInviteEmail({
       </Typography>
       <Typography variant="bodySmall" textAlign="center" className="mb-3">
         {opening}
-      </Typography>
-      <Typography variant="bodySmall" textAlign="center" className="mb-3">
-        {invitations[access]}
       </Typography>
       <Typography variant="bodySmall" textAlign="center" className="mb-6">
         {signIn}
@@ -91,7 +76,6 @@ DocumentInviteEmail.PreviewProps = {
   inviterName: 'Alex',
   documentTitle: 'Trip to the Alps',
   documentUrl: previewUrl,
-  canEdit: true,
 } satisfies DocumentInviteEmailProps;
 
 export default DocumentInviteEmail;

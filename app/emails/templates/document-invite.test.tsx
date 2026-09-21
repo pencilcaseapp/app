@@ -12,7 +12,6 @@ const props: DocumentInviteEmailProps = {
   inviterName: 'Alex',
   documentTitle: 'Trip to the Alps',
   documentUrl,
-  canEdit: true,
 };
 
 describe('documentInviteEmailSubject', () => {
@@ -46,25 +45,6 @@ describe('DocumentInviteEmail', () => {
     });
 
     expect(text).toContain('Alex shared the document "Trip to the Alps"');
-  });
-
-  it('offers writing when the link allows editing', async () => {
-    const text = await render(<DocumentInviteEmail {...props} />, {
-      plainText: true,
-    });
-
-    expect(text).toMatch(/write in it together/i);
-    expect(text).not.toMatch(/read along/i);
-  });
-
-  it('offers reading only when the link does not allow editing', async () => {
-    const text = await render(
-      <DocumentInviteEmail {...props} canEdit={false} />,
-      { plainText: true },
-    );
-
-    expect(text).toMatch(/read along/i);
-    expect(text).not.toMatch(/write in it together/i);
   });
 
   it('says which address to sign in with, since that is the account the '

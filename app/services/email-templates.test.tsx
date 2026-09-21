@@ -103,7 +103,6 @@ describe('sendEmailDocumentInvite', () => {
     documentTitle: 'Trip to the Alps',
     inviterName: 'Alex',
     inviterId: 'user-id',
-    linkAccess: 'edit' as const,
   };
 
   it('sends the invite template scoped to the invite, and logs it against '
@@ -130,13 +129,5 @@ describe('sendEmailDocumentInvite', () => {
     const [{ email }] = sendEMailMock.mock.calls[0];
     expect(await render(email, { plainText: true }))
       .toContain(`/doc/${invite.documentId}`);
-  });
-
-  it('offers reading only when the link only allows viewing', async () => {
-    await sendEmailDocumentInvite({ ...invite, linkAccess: 'view' });
-
-    const [{ email }] = sendEMailMock.mock.calls[0];
-    expect(await render(email, { plainText: true }))
-      .toMatch(/read along/i);
   });
 });

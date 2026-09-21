@@ -312,10 +312,11 @@ one click from the e-mail they are already reading. Three things follow:
   Until then the line reads as the instruction it is, and following it is
   what puts the document in their navigation rather than leaving them an
   anonymous visitor.
-- **What the recipient may do is the document's link access at the moment
-  the invite went out**, so the copy says which it was. Turning the link
-  off, or back to viewing, changes what they find when they open it; the
-  e-mail is not a second grant that has to be revoked separately.
+- **What the recipient may do is the document's link access when they
+  open it**, which the e-mail deliberately does not spell out: it would be
+  a promise the owner can change a minute later. Turning the link off, or
+  back to viewing, simply changes what they find; the e-mail is not a
+  second grant that has to be revoked separately.
 - **The document must be shared for the invite to be worth anything.**
   Whatever sends the invite is what has to make sure of that, the same way
   the panel's Copy link button is disabled until then.

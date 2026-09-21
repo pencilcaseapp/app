@@ -22,7 +22,6 @@ import {
   subscriptionStartedEmailSubject,
 } from '~/emails/templates/subscription-started';
 import { EmailTemplate } from '~/constants/email';
-import type { DocumentLinkAccess } from '~/constants/document';
 import { sendEmail, type EmailData } from './email';
 
 const config = getConfig();
@@ -124,9 +123,9 @@ export async function sendEmailSubscriptionCanceled(input: {
 }
 
 /**
- * Invites somebody to a document. The link in the e-mail is the access —
- * there is no acceptance step — so what the recipient may do with it is
- * whatever the document's link access allowed when the invite went out.
+ * Invites somebody to a document. The link in the e-mail is the access and
+ * there is no acceptance step, so what the recipient may do with it is
+ * whatever the document's link access allows when they open it.
  * `inviterId` goes on the log row because the recipient need not have an
  * account yet, and the invite is the inviter's doing.
  */
@@ -137,7 +136,6 @@ export async function sendEmailDocumentInvite(input: {
   documentTitle: string | null;
   inviterName: string;
   inviterId: string;
-  linkAccess: DocumentLinkAccess;
 }) {
   const {
     to,
@@ -146,7 +144,6 @@ export async function sendEmailDocumentInvite(input: {
     documentTitle,
     inviterName,
     inviterId,
-    linkAccess,
   } = input;
 
   await sendEmail({
@@ -157,7 +154,6 @@ export async function sendEmailDocumentInvite(input: {
         inviterName={inviterName}
         documentTitle={documentTitle}
         documentUrl={`${config.appUrl}${href('/doc/:id', { id: documentId })}`}
-        canEdit={linkAccess === 'edit'}
       />
     ),
     template: EmailTemplate.DocumentInvite,
