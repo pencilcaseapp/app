@@ -3,10 +3,12 @@ import {
   getDocumentForViewer,
   removeCollaboratorsForDocument,
   restoreDocument as restoreDocumentRow,
+  setDocumentLinkAccess,
   setDocumentShared,
   softDeleteDocument,
 } from '~/repos/document';
 import { closeDocumentConnections } from '~/live/connections';
+import type { DocumentLinkAccess } from '~/constants/document';
 
 export enum OpenDocumentError {
   NotFound,
@@ -16,6 +18,8 @@ export enum OpenDocumentError {
 export interface OpenDocument {
   title: string | null;
   shared: boolean;
+  /** What anyone with the link may do while the document is shared. */
+  linkAccess: DocumentLinkAccess;
   isOwner: boolean;
   /** A deleted document opens read-only, and only for its owner. */
   deleted: boolean;
@@ -55,6 +59,7 @@ export async function openDocument(
   return [null, {
     title: document.title,
     shared: document.shared,
+    linkAccess: document.linkAccess,
     isOwner,
     deleted: document.deletedAt !== null,
     hasJoined,
@@ -87,7 +92,8 @@ export enum ShareDocumentError {
 }
 
 export type ShareDocumentResult
-  = [ShareDocumentError] | [null, { shared: boolean }];
+  = [ShareDocumentError]
+    | [null, { shared: boolean; linkAccess: DocumentLinkAccess }];
 
 export interface ShareDocumentInput {
   documentId: string;
@@ -97,7 +103,8 @@ export interface ShareDocumentInput {
 
 /**
  * Shares or unshares a document. The update is scoped to the owner, so a
- * viewer who is not the owner is rejected without a separate lookup.
+ * viewer who is not the owner is rejected without a separate lookup. It also
+ * puts the link access back to viewing, so sharing always starts read-only.
  */
 export async function shareDocument(
   input: ShareDocumentInput,
@@ -121,7 +128,45 @@ export async function shareDocument(
     });
   }
 
-  return [null, { shared: document.shared }];
+  return [null, {
+    shared: document.shared,
+    linkAccess: document.linkAccess,
+  }];
+}
+
+export enum ChangeLinkAccessError {
+  PermissionDenied,
+}
+
+export type ChangeLinkAccessResult
+  = [ChangeLinkAccessError] | [null, { linkAccess: DocumentLinkAccess }];
+
+export interface ChangeLinkAccessInput {
+  documentId: string;
+  userId: string;
+  linkAccess: DocumentLinkAccess;
+}
+
+/**
+ * Changes what anyone with the link may do. Owner scoped like
+ * `shareDocument`, and refused for a document that is not shared: there is
+ * no link to give access to.
+ */
+export async function changeLinkAccess(
+  input: ChangeLinkAccessInput,
+): Promise<ChangeLinkAccessResult> {
+  const { documentId, userId, linkAccess } = input;
+  const document = await setDocumentLinkAccess({
+    documentId,
+    ownerId: userId,
+    linkAccess,
+  });
+
+  if (!document) {
+    return [ChangeLinkAccessError.PermissionDenied];
+  }
+
+  return [null, { linkAccess: document.linkAccess }];
 }
 
 export enum DeleteDocumentError {

@@ -2,6 +2,8 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  changeLinkAccess,
+  ChangeLinkAccessError,
   deleteDocument,
   DeleteDocumentError,
   getLiveAccess,
@@ -11,12 +13,14 @@ import {
   shareDocument,
   ShareDocumentError,
 } from './document';
+import type { DocumentLinkAccess } from '~/constants/document';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 
 const getDocumentForViewerMock = vi.fn();
 const connectCollaboratorMock = vi.fn();
 const setDocumentSharedMock = vi.fn();
+const setDocumentLinkAccessMock = vi.fn();
 const removeCollaboratorsForDocumentMock = vi.fn();
 const softDeleteDocumentMock = vi.fn();
 const restoreDocumentRowMock = vi.fn();
@@ -25,6 +29,8 @@ vi.mock('~/repos/document', () => ({
     getDocumentForViewerMock(...args),
   connectCollaborator: (...args: unknown[]) => connectCollaboratorMock(...args),
   setDocumentShared: (...args: unknown[]) => setDocumentSharedMock(...args),
+  setDocumentLinkAccess: (...args: unknown[]) =>
+    setDocumentLinkAccessMock(...args),
   removeCollaboratorsForDocument: (...args: unknown[]) =>
     removeCollaboratorsForDocumentMock(...args),
   softDeleteDocument: (...args: unknown[]) => softDeleteDocumentMock(...args),
@@ -41,6 +47,7 @@ const otherUserId = 'e6d9c8f1-0000-4000-8000-000000000000';
 
 function viewerDocument(overrides?: Partial<{
   shared: boolean;
+  linkAccess: DocumentLinkAccess;
   userId: string;
   deletedAt: Date | null;
   isCollaborator: boolean;
@@ -49,6 +56,7 @@ function viewerDocument(overrides?: Partial<{
     id: documentFixture.id,
     title: documentFixture.title,
     shared: false,
+    linkAccess: 'view' as DocumentLinkAccess,
     userId: userFixture.id,
     deletedAt: null,
     isCollaborator: false,
@@ -118,6 +126,7 @@ describe('openDocument', () => {
     expect(document).toStrictEqual({
       title: documentFixture.title,
       shared: false,
+      linkAccess: 'view',
       isOwner: true,
       deleted: false,
       hasJoined: false,
@@ -196,6 +205,7 @@ describe('shareDocument', () => {
     setDocumentSharedMock.mockResolvedValue({
       id: documentFixture.id,
       shared: true,
+      linkAccess: 'view',
     });
 
     const [error, result] = await shareDocument({
@@ -219,6 +229,7 @@ describe('shareDocument', () => {
     setDocumentSharedMock.mockResolvedValue({
       id: documentFixture.id,
       shared: false,
+      linkAccess: 'view',
     });
 
     const [error, result] = await shareDocument({
@@ -237,6 +248,7 @@ describe('shareDocument', () => {
     setDocumentSharedMock.mockResolvedValue({
       id: documentFixture.id,
       shared: false,
+      linkAccess: 'view',
     });
 
     await shareDocument({
@@ -263,6 +275,57 @@ describe('shareDocument', () => {
     expect(error).toBe(ShareDocumentError.PermissionDenied);
     expect(removeCollaboratorsForDocumentMock).not.toHaveBeenCalled();
     expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
+  });
+
+  it('reports the access the link starts with', async () => {
+    setDocumentSharedMock.mockResolvedValue({
+      id: documentFixture.id,
+      shared: true,
+      linkAccess: 'view',
+    });
+
+    const [, result] = await shareDocument({
+      documentId: documentFixture.id,
+      userId: userFixture.id,
+      shared: true,
+    });
+
+    expect(result?.linkAccess).toBe('view');
+  });
+});
+
+describe('changeLinkAccess', () => {
+  it('changes the access for the owner', async () => {
+    setDocumentLinkAccessMock.mockResolvedValue({
+      id: documentFixture.id,
+      linkAccess: 'edit',
+    });
+
+    const [error, result] = await changeLinkAccess({
+      documentId: documentFixture.id,
+      userId: userFixture.id,
+      linkAccess: 'edit',
+    });
+
+    expect(error).toBeNull();
+    expect(result?.linkAccess).toBe('edit');
+    expect(setDocumentLinkAccessMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      ownerId: userFixture.id,
+      linkAccess: 'edit',
+    });
+  });
+
+  it('denies somebody who does not own the document', async () => {
+    setDocumentLinkAccessMock.mockResolvedValue(undefined);
+
+    const [error] = await changeLinkAccess({
+      documentId: documentFixture.id,
+      userId: otherUserId,
+      linkAccess: 'edit',
+    });
+
+    expect(error).toBe(ChangeLinkAccessError.PermissionDenied);
   });
 });
 

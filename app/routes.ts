@@ -20,6 +20,7 @@ export default [
   ]),
   route('doc/:id/delete', 'routes/doc-delete.ts'),
   route('doc/:id/restore', 'routes/doc-restore.ts'),
+  route('doc/:id/link-access', 'routes/doc-link-access.ts'),
   layout('layouts/auth.tsx', [
     route('signin', 'routes/signin.tsx'),
     route('otp/:otpId', 'routes/otp.tsx'),

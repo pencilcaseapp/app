@@ -1,5 +1,9 @@
 import { sql } from 'drizzle-orm';
 import { pgTable, boolean, integer, timestamp, uuid, text, bytea, jsonb, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import {
+  DEFAULT_DOCUMENT_LINK_ACCESS,
+  type DocumentLinkAccess,
+} from '~/constants/document';
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -72,6 +76,10 @@ export const documents = pgTable('documents', {
   title: text('title'),
   content: bytea('content'),
   shared: boolean('shared').notNull().default(false),
+  linkAccess: text('link_access')
+    .$type<DocumentLinkAccess>()
+    .notNull()
+    .default(DEFAULT_DOCUMENT_LINK_ACCESS),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),

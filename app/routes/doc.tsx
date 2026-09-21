@@ -89,6 +89,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
       ? { name: user.name, email: user.email }
       : null,
     shared: document.shared,
+    linkAccess: document.linkAccess,
     deleted: document.deleted,
     presence: user ? getUserPresenceIdentity(user) : null,
     shareUrl: new URL(documentUrl, request.url).toString(),
@@ -193,6 +194,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
                 <SharePanel
                   documentId={params.id}
                   shared={loaderData.shared}
+                  linkAccess={loaderData.linkAccess}
                   shareUrl={loaderData.shareUrl}
                   owner={loaderData.owner}
                 />
