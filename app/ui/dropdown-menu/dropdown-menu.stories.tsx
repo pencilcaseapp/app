@@ -222,7 +222,13 @@ export const WithChoiceTrigger: Story = {
             </ChoiceTrigger>
           </DropdownMenuTrigger>
           <DropdownMenuPortal>
-            <DropdownMenuContent align="end" variant="solid">
+            {/* The default inset suits the icon button trigger; a
+                ChoiceTrigger wants the menu flush with its right edge. */}
+            <DropdownMenuContent
+              align="end"
+              alignOffset={0}
+              variant="solid"
+            >
               <DropdownMenuItem as="button" onSelect={action('selected')}>
                 Can view
               </DropdownMenuItem>
