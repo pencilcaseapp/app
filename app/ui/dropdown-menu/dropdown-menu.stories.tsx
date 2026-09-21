@@ -9,6 +9,8 @@ import { action } from 'storybook/actions';
 import { DropdownMenuSeparator } from './dropdown-menu-separator';
 import { Typography } from '../typography/typography';
 import { Avatar } from '../avatar/avatar';
+import { Icon } from '../icon/icon';
+import { ChoiceTrigger } from '../choice-trigger/choice-trigger';
 
 const meta: Meta<typeof DropdownMenu> = {
   title: 'Navigation/DropdownMenu',
@@ -157,6 +159,87 @@ export const WithCustomTrigger: Story = {
               <DropdownMenuSeparator />
               <DropdownMenuItem color="danger" as="button">
                 Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
+        </DropdownMenu>
+      </div>
+    </MemoryRouter>
+  ),
+};
+
+/**
+ * `trailing` pins content to the right hand side of an item — a check mark for
+ * the current choice, a keyboard shortcut, a count. The label keeps the space
+ * it does not use.
+ */
+export const WithTrailingContent: Story = {
+  render: () => (
+    <MemoryRouter>
+      <div className="flex items-center justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger iconTitle="Access" />
+          <DropdownMenuPortal>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                as="button"
+                onClick={action('clicked')}
+                trailing={<Icon icon="check" className="h-4 w-4" />}
+              >
+                Can view
+              </DropdownMenuItem>
+              <DropdownMenuItem as="button" onClick={action('clicked')}>
+                Can edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem color="danger" as="button">
+                Remove access
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
+        </DropdownMenu>
+      </div>
+    </MemoryRouter>
+  ),
+};
+
+/**
+ * The role beside an invited person is a menu rather than a select: picking
+ * one acts straight away, and the list also holds "Remove access", which is a
+ * command and could never be an option in a listbox.
+ *
+ * It opens from the same `ChoiceTrigger` the `Select` uses, so a chooser that
+ * acts and a chooser that sets a form value look alike.
+ */
+export const WithChoiceTrigger: Story = {
+  render: () => (
+    <MemoryRouter>
+      <div className="flex items-center justify-end p-6">
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <ChoiceTrigger aria-label="Access for Sam Okafor">
+              Can edit
+            </ChoiceTrigger>
+          </DropdownMenuTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuContent align="end" variant="solid">
+              <DropdownMenuItem as="button" onSelect={action('selected')}>
+                Can view
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                as="button"
+                onSelect={action('selected')}
+                trailing={<Icon icon="check" className="h-4 w-4" />}
+              >
+                Can edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                as="button"
+                color="danger"
+                onSelect={action('removed')}
+              >
+                Remove access
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenuPortal>
