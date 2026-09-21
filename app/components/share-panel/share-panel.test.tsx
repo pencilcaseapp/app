@@ -488,6 +488,42 @@ describe('SharePanel', () => {
       .toHaveValue('grace@example.com');
   });
 
+  test('starts the invite form over when the panel is reopened', async () => {
+    drawerPanel();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+
+    renderSharePanel({
+      action: async () => ({
+        values: { email: 'grace@example.com', access: 'edit' },
+        errors: [],
+        errorMap: {
+          onServer: {
+            fields: { email: { message: 'This address is invited already' } },
+          },
+        },
+      }),
+    });
+
+    await user.type(
+      screen.getByRole('textbox', { name: 'Email address' }),
+      'grace@example.com',
+    );
+    await user.click(screen.getByRole('button', { name: 'Invite' }));
+    expect(await screen.findByText('This address is invited already'))
+      .toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    await vi.waitFor(() => expect(
+      screen.queryByRole('textbox', { name: 'Email address' }),
+    ).not.toBeInTheDocument());
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+
+    expect(await screen.findByRole('textbox', { name: 'Email address' }))
+      .toHaveValue('');
+    expect(screen.queryByText('This address is invited already'))
+      .not.toBeInTheDocument();
+  });
+
   test('refuses an address that is not one before submitting', async () => {
     drawerPanel();
     const user = userEvent.setup({ pointerEventsCheck: 0 });

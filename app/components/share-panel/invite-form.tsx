@@ -1,4 +1,4 @@
-import { useEffect, type FC } from 'react';
+import { useEffect, useRef, type FC } from 'react';
 import { useActionData } from 'react-router';
 import { z } from 'zod';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
@@ -29,19 +29,16 @@ const ACCESS_ITEMS: { value: DocumentAccess; label: string }[] = [
 ];
 
 /*
- * The panel lets go of its content when it closes while the action data
- * outlives that, so a result that was handled once is remembered here
- * rather than in the form, which is gone by then.
- */
-const handledResults = new WeakSet<InviteFormResult>();
-
-/*
  * The address to invite with the access inside the field, and the button
  * that sends it. Posts to the document route, whose action answers with the
- * form state on a failure and with the invited address on success.
+ * form state on a failure and with the invited address on success. The
+ * panel lets go of the form when it closes while the action data outlives
+ * that, so the form starts over on reopening and only a result that
+ * arrives while it is open counts as one.
  */
 export const InviteForm: FC = () => {
   const actionData = useActionData() as InviteFormResult | undefined;
+  const mountActionDataRef = useRef(actionData);
   const emitToast = useEmitToast();
   const form = useAppForm({
     defaultValues: {
@@ -51,14 +48,13 @@ export const InviteForm: FC = () => {
     validators: {
       onBlur: inviteFormSchema,
     },
-  });
+  }, { freshOnMount: true });
 
   useEffect(() => {
-    if (!actionData?.ok || handledResults.has(actionData)) {
+    if (!actionData?.ok || actionData === mountActionDataRef.current) {
       return;
     }
 
-    handledResults.add(actionData);
     form.resetField('email');
     emitToast({
       type: 'success',
