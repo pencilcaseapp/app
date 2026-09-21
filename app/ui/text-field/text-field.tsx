@@ -24,7 +24,7 @@ export interface TextFieldProps
    input no longer fills the field on its own. The box cannot take focus or be
    `:disabled`, so it reacts to the input through `focusWithin` and carries the
    disabled colours itself. */
-const trailingInputClasses = 'min-w-0 grow bg-transparent p-3 text-sm font-inter text-pca-grey-900 dark:text-white outline-0 placeholder-pca-grey-400 dark:placeholder-pca-grey-500 disabled:text-pca-grey-400 dark:disabled:text-pca-grey-600 disabled:placeholder-pca-grey-300 dark:disabled:placeholder-pca-grey-800';
+const trailingInputClasses = 'h-full min-w-0 grow bg-transparent px-3 text-sm font-inter text-pca-grey-900 dark:text-white outline-0 placeholder-pca-grey-400 dark:placeholder-pca-grey-500 disabled:text-pca-grey-400 dark:disabled:text-pca-grey-600 disabled:placeholder-pca-grey-300 dark:disabled:placeholder-pca-grey-800';
 
 const trailingBoxDisabledClasses = 'pointer-events-none bg-pca-grey-100 dark:bg-pca-grey-800/30 border-pca-grey-200 dark:border-transparent';
 
@@ -46,7 +46,7 @@ export const TextField: React.FC<TextFieldProps> = ({ type = 'text', id, label, 
               focusWithin={true}
               aria-invalid={!!errorMessage}
               className={classNames(
-                'flex items-center gap-1.5 p-0 pr-1.5',
+                'flex h-11 items-center gap-1.5 pr-1.5',
                 disabled && trailingBoxDisabledClasses,
               )}
             >

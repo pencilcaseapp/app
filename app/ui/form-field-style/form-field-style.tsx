@@ -33,7 +33,11 @@ export const FormFieldStyle = <C extends React.ElementType = 'input'>
 
   const classes = classNames([
     // Base styles
-    'bg-white dark:bg-pca-grey-800/60 border border-pca-grey-900 dark:border-transparent transition-[color,background-color,border-color,box-shadow] duration-300 ease-in-out rounded-xl outline-0 p-3 text-sm font-inter text-pca-grey-900 dark:text-white',
+    'bg-white dark:bg-pca-grey-800/60 border border-pca-grey-900 dark:border-transparent transition-[color,background-color,border-color,box-shadow] duration-300 ease-in-out rounded-xl outline-0',
+    // A box around the real control owns no padding: the control inside it
+    // does, so the caret or unit beside it can sit against the border.
+    !focusWithin && 'p-3',
+    'text-sm font-inter text-pca-grey-900 dark:text-white',
     // Focus and hover styles
     focusWithin ? withinInteractionClasses : selfInteractionClasses,
     // Placeholder styles

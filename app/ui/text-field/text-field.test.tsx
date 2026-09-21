@@ -53,6 +53,19 @@ describe('TextField', () => {
     expect(input.parentElement).toContainElement(trailing);
   });
 
+  test('keeps the field 44px tall with trailing content', () => {
+    render(
+      <TextField
+        id="email"
+        label="Email"
+        trailing={<button type="button">Can edit</button>}
+      />,
+    );
+
+    // h-11 is 44px, the height the design gives these fields.
+    expect(screen.getByLabelText('Email').parentElement).toHaveClass('h-11');
+  });
+
   test('keeps the input bordered when there is no trailing content', () => {
     render(<TextField id="email" label="Email" />);
 
