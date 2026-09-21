@@ -91,6 +91,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     shared: document.shared,
     linkAccess: document.linkAccess,
     deleted: document.deleted,
+    readOnly: document.readOnly,
     presence: user ? getUserPresenceIdentity(user) : null,
     shareUrl: new URL(documentUrl, request.url).toString(),
   };
@@ -137,6 +138,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
     void revalidate();
   }, [revalidate]);
   const deleted = loaderData.ok && loaderData.deleted;
+  const readOnly = loaderData.ok && loaderData.readOnly;
   // Deleting the open document puts the notice above the content, out of
   // sight for a reader halfway down a long document.
   useScrollToTopOn(deleted);
@@ -169,15 +171,15 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
       <PageTitle>{title}</PageTitle>
       <ClientOnly>
         <CollaborativeEditor
-          // Deleting or restoring changes the access the live server grants,
-          // so the editor reconnects.
-          key={`${params.id}:${deleted}`}
+          // Deleting, restoring or a change of the link access changes what
+          // the live server grants, so the editor reconnects.
+          key={`${params.id}:${readOnly}`}
           id={params.id}
           presence={loaderData.ok ? loaderData.presence : null}
           onTitleChange={setTitle}
           onFirstEdit={onFirstEdit}
           onAccessRevoked={onAccessRevoked}
-          editable={!deleted}
+          editable={!readOnly}
           notification={deleted && (
             <Notification
               variant="warning"

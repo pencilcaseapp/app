@@ -129,9 +129,34 @@ describe('openDocument', () => {
       linkAccess: 'view',
       isOwner: true,
       deleted: false,
+      readOnly: false,
       hasJoined: false,
     });
     expect(connectCollaboratorMock).not.toHaveBeenCalled();
+  });
+
+  it('opens read-only for a visitor a link only lets read', async () => {
+    getDocumentForViewerMock.mockResolvedValue(
+      viewerDocument({ userId: otherUserId, shared: true }),
+    );
+
+    const [, document] = await openDocument(documentFixture.id);
+
+    expect(document?.readOnly).toBe(true);
+  });
+
+  it('opens editable for a visitor a link lets edit', async () => {
+    getDocumentForViewerMock.mockResolvedValue(
+      viewerDocument({
+        userId: otherUserId,
+        shared: true,
+        linkAccess: 'edit',
+      }),
+    );
+
+    const [, document] = await openDocument(documentFixture.id);
+
+    expect(document?.readOnly).toBe(false);
   });
 
   it('denies a visitor access to a private document', async () => {
@@ -316,6 +341,24 @@ describe('changeLinkAccess', () => {
     });
   });
 
+  it('sends everybody else back for the access they have now', async () => {
+    setDocumentLinkAccessMock.mockResolvedValue({
+      id: documentFixture.id,
+      linkAccess: 'view',
+    });
+
+    await changeLinkAccess({
+      documentId: documentFixture.id,
+      userId: userFixture.id,
+      linkAccess: 'view',
+    });
+
+    expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      keepUserId: userFixture.id,
+    });
+  });
+
   it('denies somebody who does not own the document', async () => {
     setDocumentLinkAccessMock.mockResolvedValue(undefined);
 
@@ -373,12 +416,32 @@ describe('getLiveAccess', () => {
       .toBeUndefined();
   });
 
-  it('lets an anonymous visitor into a shared document', async () => {
+  it('lets an anonymous visitor read a shared document', async () => {
     getDocumentForViewerMock.mockResolvedValue(
       viewerDocument({ userId: otherUserId, shared: true }),
     );
 
     expect(await getLiveAccess(documentFixture.id))
+      .toStrictEqual({ readOnly: true });
+  });
+
+  it('lets a visitor edit when the link allows it', async () => {
+    getDocumentForViewerMock.mockResolvedValue(
+      viewerDocument({
+        userId: otherUserId,
+        shared: true,
+        linkAccess: 'edit',
+      }),
+    );
+
+    expect(await getLiveAccess(documentFixture.id))
+      .toStrictEqual({ readOnly: false });
+  });
+
+  it('leaves the owner editing whatever the link allows', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument());
+
+    expect(await getLiveAccess(documentFixture.id, userFixture.id))
       .toStrictEqual({ readOnly: false });
   });
 

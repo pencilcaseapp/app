@@ -49,7 +49,7 @@ test('deleting a shared document unshares it', async ({ userA, userB }) => {
   const shareUrl = await userA.shareDocument();
 
   await userB.openDocument(shareUrl);
-  await expect(userB.editor).toContainText(heading);
+  await expect(userB.content).toContainText(heading);
 
   // The collaborator has no way to delete it.
   await userB.documentInAllDocs(heading).hover();
@@ -58,7 +58,7 @@ test('deleting a shared document unshares it', async ({ userA, userB }) => {
   await userA.deleteDocument(heading);
 
   // User B is disconnected and the document is gone for them.
-  await expect(userB.editor).toBeHidden({ timeout: 10_000 });
+  await expect(userB.content).toBeHidden({ timeout: 10_000 });
   await expect(userB.documentInAllDocs(heading)).toBeHidden();
   await userB.page.goto(shareUrl);
   await expect(

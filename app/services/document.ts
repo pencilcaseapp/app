@@ -23,6 +23,8 @@ export interface OpenDocument {
   isOwner: boolean;
   /** A deleted document opens read-only, and only for its owner. */
   deleted: boolean;
+  /** True when the viewer may read the document but not change it. */
+  readOnly: boolean;
   /** True when this open connected the viewer as a new collaborator. */
   hasJoined: boolean;
 }
@@ -62,6 +64,7 @@ export async function openDocument(
     linkAccess: document.linkAccess,
     isOwner,
     deleted: document.deletedAt !== null,
+    readOnly: isReadOnlyFor(document, userId),
     hasJoined,
   }];
 }
@@ -72,7 +75,7 @@ export interface LiveAccess {
 
 /**
  * The access a live connection gets: none, read-only for the owner of a
- * deleted document, or full.
+ * deleted document and for a link that only allows viewing, or full.
  */
 export async function getLiveAccess(
   documentId: string,
@@ -84,7 +87,7 @@ export async function getLiveAccess(
     return undefined;
   }
 
-  return { readOnly: document.deletedAt !== null };
+  return { readOnly: isReadOnlyFor(document, userId) };
 }
 
 export enum ShareDocumentError {
@@ -150,7 +153,9 @@ export interface ChangeLinkAccessInput {
 /**
  * Changes what anyone with the link may do. Owner scoped like
  * `shareDocument`, and refused for a document that is not shared: there is
- * no link to give access to.
+ * no link to give access to. Everybody else's live connections are closed so
+ * they reconnect with the access they have now instead of keeping the one
+ * they opened the document with.
  */
 export async function changeLinkAccess(
   input: ChangeLinkAccessInput,
@@ -165,6 +170,11 @@ export async function changeLinkAccess(
   if (!document) {
     return [ChangeLinkAccessError.PermissionDenied];
   }
+
+  closeDocumentConnections({
+    documentId: document.id,
+    keepUserId: userId,
+  });
 
   return [null, { linkAccess: document.linkAccess }];
 }
@@ -222,6 +232,7 @@ export async function restoreDocument(
 interface DocumentAccess {
   userId: string;
   shared: boolean;
+  linkAccess: DocumentLinkAccess;
   deletedAt: Date | null;
 }
 
@@ -236,4 +247,18 @@ function isGone(document: DocumentAccess, viewerId?: string) {
 
 function hasAccess(document: DocumentAccess, viewerId?: string) {
   return isOwnedBy(document, viewerId) || document.shared;
+}
+
+/**
+ * Everybody but the owner is here through the link, so the link access is
+ * what decides whether they may edit. A deleted document is read-only for
+ * the owner too. Both the loader and the live connection go through this,
+ * so the editor never invites an edit the live server would drop.
+ */
+function isReadOnlyFor(document: DocumentAccess, viewerId?: string) {
+  if (document.deletedAt !== null) {
+    return true;
+  }
+
+  return !isOwnedBy(document, viewerId) && document.linkAccess === 'view';
 }

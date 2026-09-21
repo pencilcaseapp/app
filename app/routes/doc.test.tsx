@@ -45,13 +45,19 @@ function openedDocument(overrides?: Partial<{
   isOwner: boolean;
   shared: boolean;
   deleted: boolean;
+  readOnly: boolean;
   hasJoined: boolean;
 }>) {
+  const deleted = overrides?.deleted ?? false;
+
   return [null, {
     title: documentFixture.title,
     shared: false,
+    linkAccess: 'view',
     isOwner: true,
-    deleted: false,
+    deleted,
+    // A deleted document opens read-only, the way the service reports it.
+    readOnly: deleted,
     hasJoined: false,
     ...overrides,
   }];
