@@ -1,6 +1,6 @@
 import { Item } from '@radix-ui/react-dropdown-menu';
 import type { DropdownMenuItemProps as RadixDropdownMenuItemProps } from '@radix-ui/react-dropdown-menu';
-import type { PropsWithChildren } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 import classNames from 'classnames';
 import type { PolymorphicComponentProp } from '../polymorphic-types/polymorphic-types';
 import { Typography } from '../typography/typography';
@@ -16,6 +16,11 @@ export type DropdownMenuItemProps = RadixDropdownMenuItemProps
     className?: string;
     isLoading?: boolean;
     icon?: IconName;
+    /**
+     * Content pinned to the right hand side of the item — a check mark, a
+     * shortcut, a count. The label keeps the space it does not use.
+     */
+    trailing?: ReactNode;
   };
 
 const variantClasses: Record<DropdownMenuVariant, string> = {
@@ -29,6 +34,7 @@ export const DropdownMenuItem = <C extends React.ElementType = 'a'>({
   className,
   isLoading,
   icon,
+  trailing,
   color = 'primary',
   ...props
 }: PolymorphicComponentProp<C, DropdownMenuItemProps>) => {
@@ -67,6 +73,12 @@ export const DropdownMenuItem = <C extends React.ElementType = 'a'>({
         >
           {children}
         </Typography>
+
+        {trailing && (
+          <div className={classNames('ml-2 shrink-0', isLoading && 'opacity-0')}>
+            {trailing}
+          </div>
+        )}
 
         {isLoading && <LoadingIndicator className="w-full inset-0 absolute" />}
       </Component>

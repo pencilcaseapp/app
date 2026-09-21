@@ -9,6 +9,7 @@ import { action } from 'storybook/actions';
 import { DropdownMenuSeparator } from './dropdown-menu-separator';
 import { Typography } from '../typography/typography';
 import { Avatar } from '../avatar/avatar';
+import { Icon } from '../icon/icon';
 
 const meta: Meta<typeof DropdownMenu> = {
   title: 'Navigation/DropdownMenu',
@@ -157,6 +158,41 @@ export const WithCustomTrigger: Story = {
               <DropdownMenuSeparator />
               <DropdownMenuItem color="danger" as="button">
                 Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
+        </DropdownMenu>
+      </div>
+    </MemoryRouter>
+  ),
+};
+
+/**
+ * `trailing` pins content to the right hand side of an item — a check mark for
+ * the current choice, a keyboard shortcut, a count. The label keeps the space
+ * it does not use.
+ */
+export const WithTrailingContent: Story = {
+  render: () => (
+    <MemoryRouter>
+      <div className="flex items-center justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger iconTitle="Access" />
+          <DropdownMenuPortal>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                as="button"
+                onClick={action('clicked')}
+                trailing={<Icon icon="check" className="h-4 w-4" />}
+              >
+                Can view
+              </DropdownMenuItem>
+              <DropdownMenuItem as="button" onClick={action('clicked')}>
+                Can edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem color="danger" as="button">
+                Remove access
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenuPortal>

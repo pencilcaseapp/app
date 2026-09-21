@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TextField } from './text-field';
 
 describe('TextField', () => {
@@ -33,5 +33,29 @@ describe('TextField', () => {
     );
 
     expect(container).toMatchSnapshot();
+  });
+
+  test('renders trailing content inside the field', () => {
+    render(
+      <TextField
+        id="email"
+        label="Email"
+        trailing={<button type="button">Can edit</button>}
+      />,
+    );
+
+    const input = screen.getByLabelText('Email');
+    const trailing = screen.getByRole('button', { name: 'Can edit' });
+
+    expect(trailing).toBeInTheDocument();
+    // The box around the input is what carries the field's border, so the
+    // trailing content sits inside it rather than after the field.
+    expect(input.parentElement).toContainElement(trailing);
+  });
+
+  test('keeps the input bordered when there is no trailing content', () => {
+    render(<TextField id="email" label="Email" />);
+
+    expect(screen.getByLabelText('Email')).toHaveClass('border');
   });
 });

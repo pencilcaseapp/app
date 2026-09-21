@@ -199,6 +199,23 @@ describe('DropdownMenu', () => {
       .toHaveClass('bg-pca-grey-200!');
   });
 
+  test('renders trailing content on a menu item', async () => {
+    const user = userEvent.setup();
+
+    renderDropdownMenu({
+      items: (
+        <DropdownMenuItem as="button" trailing={<span>⌘S</span>}>
+          Save
+        </DropdownMenuItem>
+      ),
+    });
+
+    await user.click(screen.getByRole('button'));
+    const item = screen.getByRole('menuitem', { name: 'Save ⌘S' });
+
+    expect(within(item).getByText('⌘S')).toBeInTheDocument();
+  });
+
   test('closes menu on Escape', async () => {
     const user = userEvent.setup();
     renderDropdownMenu();
