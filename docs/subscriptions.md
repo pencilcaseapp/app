@@ -11,14 +11,18 @@ on. Nothing about money lives in our code — only state.
 
 - **`/doc/:id/settings/subscription`** (signed in) is the subscription
   section of the settings dialog, over the document it was opened
-  from. Without the pro features it shows the upgrade offer — the pro
-  plan, its features and a single button; with them the running
-  subscription: its status as a badge (active, trial, cancelled but
-  paid until the period ends, payment failed), the renewal or end
-  date, and the "Manage Subscription" link into Creem's portal. A
-  user with `has_subscription` set but no subscription row behind it
-  — the pro features handed out for free through `/invite/:code` —
-  sees the plan marked active without a price or a portal link.
+  from. It opens with the free and the pro plan as two pricing cards
+  under a headline about the reader's own plan, the current one flat
+  and badged. Without the pro features the feature matrix follows and
+  the footer holds the upgrade button; with them the matrix makes way
+  for the subscription itself: its status as a badge (active, trial,
+  cancelled but paid until the period ends, payment failed) and the
+  renewal or end date as rows, a failed payment raised as a danger
+  notification above them, and the "Manage subscription" link into
+  Creem's portal in the footer. A user with `has_subscription` set but
+  no subscription row behind it — the pro features handed out for free
+  through `/invite/:code` — sees the plan active as on the house,
+  without a date or a portal link.
   `getSubscriptionOverview` in `app/services/subscription.ts` decides
   between the three.
 - The section's **action** creates a checkout session through

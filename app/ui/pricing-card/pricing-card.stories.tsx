@@ -133,3 +133,38 @@ export const CompactRow: Story = {
     </div>
   ),
 };
+
+/**
+ * The row once the reader is on pro: their plan sits flat with the
+ * badge, the plan they left behind is tilted and greyed out.
+ */
+export const CompactRowOnPro: Story = {
+  decorators: [
+    Story => (
+      <div className="w-md p-4">
+        <Story />
+      </div>
+    ),
+  ],
+  render: () => (
+    <div className="grid grid-cols-2 gap-3">
+      <PricingCard
+        plan="Pencil Case Free"
+        amount="0 €"
+        period="/ year"
+        background="white"
+        size="compact"
+        tilted
+        disabled
+      />
+      <PricingCard
+        plan="Pencil Case Pro"
+        amount="25 €"
+        period="/ year"
+        size="compact"
+        tilted={false}
+        badge={<Badge variant="dark">Current</Badge>}
+      />
+    </div>
+  ),
+};

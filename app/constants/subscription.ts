@@ -16,11 +16,3 @@ export enum SubscriptionStatus {
   Paused = 'paused',
   Incomplete = 'incomplete',
 }
-
-/** The pro plan as sold through Creem, the way the app describes it. */
-export const PRO_PLAN = {
-  product: 'Pencil Case',
-  name: 'Pro',
-  price: '25 €',
-  period: 'renews yearly',
-};

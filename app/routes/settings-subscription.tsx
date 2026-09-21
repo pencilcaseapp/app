@@ -5,12 +5,19 @@ import {
   type MiddlewareFunction,
 } from 'react-router';
 import { z } from 'zod';
-import { CurrentSubscription } from '~/components/current-subscription/current-subscription';
+import {
+  CurrentSubscription,
+  CurrentSubscriptionFooter,
+} from '~/components/current-subscription/current-subscription';
 import { SettingsDialogContentInner } from '~/components/settings-dialog/settings-dialog';
-import { SubscriptionUpgrade } from '~/components/subscription-upgrade/subscription-upgrade';
+import {
+  SubscriptionUpgrade,
+  SubscriptionUpgradeFooter,
+} from '~/components/subscription-upgrade/subscription-upgrade';
 import { SearchParamToast } from '~/constants/search-params';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
+import { getDocumentList } from '~/repos/document';
 import {
   completeProCheckout,
   getSubscriptionOverview,
@@ -55,6 +62,9 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
   }
 
   const overview = await getSubscriptionOverview(user);
+  const documents = overview.kind === 'none'
+    ? await getDocumentList(user.id)
+    : [];
 
   return {
     overview: overview.kind === 'subscribed'
@@ -67,6 +77,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
         }
       : overview,
     hasBillingAccount: !!user.creemCustomerId,
+    documentCount: documents.length,
   };
 }
 
@@ -101,26 +112,37 @@ export async function action({ request, params, context }: Route.ActionArgs) {
 
 /*
  * The subscription section: the upgrade offer, or the subscription
- * behind the pro features once there is one.
+ * behind the pro features once there is one. Each view's action sits
+ * in the dialog's footer; complimentary pro has no Creem customer to
+ * manage, and so no footer.
  */
 export default function SettingsSubscriptionRoute({
-  loaderData: { overview, hasBillingAccount },
+  loaderData: { overview, hasBillingAccount, documentCount },
 }: Route.ComponentProps) {
+  if (overview.kind === 'none') {
+    return (
+      <SettingsDialogContentInner
+        section="subscription"
+        footerArea={<SubscriptionUpgradeFooter />}
+      >
+        <SubscriptionUpgrade documentCount={documentCount} />
+      </SettingsDialogContentInner>
+    );
+  }
+
   return (
-    <SettingsDialogContentInner section="subscription">
-      {overview.kind === 'none'
-        ? <SubscriptionUpgrade />
-        : (
-            <CurrentSubscription
-              status={overview.kind === 'subscribed'
-                ? overview.status
-                : 'complimentary'}
-              periodEnd={overview.kind === 'subscribed'
-                ? overview.periodEnd
-                : null}
-              hasBillingAccount={hasBillingAccount}
-            />
-          )}
+    <SettingsDialogContentInner
+      section="subscription"
+      footerArea={hasBillingAccount && <CurrentSubscriptionFooter />}
+    >
+      <CurrentSubscription
+        status={overview.kind === 'subscribed'
+          ? overview.status
+          : 'complimentary'}
+        periodEnd={overview.kind === 'subscribed'
+          ? overview.periodEnd
+          : null}
+      />
     </SettingsDialogContentInner>
   );
 }

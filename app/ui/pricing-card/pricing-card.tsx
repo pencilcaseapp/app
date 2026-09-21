@@ -13,6 +13,10 @@ export interface PricingCardProps {
   period: string;
   background?: PriceBackground;
   size?: PricingCardSize;
+  /** The sticker tilt. Defaults to the yellow card's look. */
+  tilted?: boolean;
+  /** Greyed out, for a plan that no longer applies to the reader. */
+  disabled?: boolean;
   badge?: ReactNode;
   features?: string[];
   missingFeatures?: string[];
@@ -27,6 +31,8 @@ export const PricingCard: FC<PricingCardProps> = ({
   period,
   background = 'yellow',
   size = 'default',
+  tilted = background === 'yellow',
+  disabled = false,
   badge,
   features = [],
   missingFeatures = [],
@@ -44,19 +50,25 @@ export const PricingCard: FC<PricingCardProps> = ({
       className={classNames(
         'rounded-2xl text-left',
         compact ? 'p-3' : 'p-6',
-        onYellow && [
-          'bg-pca-yellow-500 border border-pca-grey-900',
+        onYellow && 'bg-pca-yellow-500 border border-pca-grey-900',
+        tilted && [
           '-rotate-1 transition-transform duration-150 ease-out',
           'has-[button:hover]:rotate-0',
           'motion-reduce:transition-none',
           'motion-reduce:has-[button:hover]:-rotate-1',
         ],
-        !onYellow && [
+        !onYellow && !disabled && [
           'border border-pca-grey-200 bg-pca-white',
           'dark:border-pca-grey-700 dark:bg-pca-grey-900',
         ],
+        !onYellow && disabled && [
+          'border border-pca-grey-200 bg-pca-grey-100',
+          'dark:border-transparent dark:bg-pca-grey-800/30',
+        ],
+        disabled && 'opacity-60',
         className,
       )}
+      aria-disabled={disabled || undefined}
     >
       {compact && (
         <div className="mb-2 flex h-6.5 items-center sm:hidden">{badge}</div>
