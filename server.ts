@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { type RequestHandler } from 'express';
 import compression from 'compression';
 import { createRequestHandler } from '@react-router/express';
 import { internalIpV4 } from 'internal-ip';
@@ -21,6 +21,25 @@ app.set('trust proxy', 1);
 
 let stopLiveServer = async () => {};
 
+/**
+ * Everything that serves files has had its turn by the time a request gets
+ * here, so a path that still looks like a file is one we do not have: an icon
+ * variant a client probes for, an asset of an older deployment, a scanner
+ * guessing at names. The router answers those by rendering the whole error
+ * document and logging a stack trace for each, so they get a bare 404 instead.
+ * Single fetch asks for its data under `.data`, the one dotted path that does
+ * belong to the router.
+ */
+const fileNotFound: RequestHandler = (request, response, next) => {
+  const fileName = request.path.slice(request.path.lastIndexOf('/') + 1);
+
+  if (!fileName.includes('.') || fileName.endsWith('.data')) {
+    return next();
+  }
+
+  response.status(404).end();
+};
+
 if (config.environment === 'prod') {
   const live = await import('~/live');
 
@@ -31,7 +50,15 @@ if (config.environment === 'prod') {
     '/assets',
     express.static('build/client/assets', { immutable: true, maxAge: '1y' }),
   );
+  // serve-static ignores every path with a dotted segment, so `.well-known` —
+  // which carries the Apple Pay domain association Creem's checkout needs —
+  // has to be mounted on its own. Vite serves it either way in development.
+  app.use(
+    '/.well-known',
+    express.static('build/client/.well-known', { maxAge: '1h' }),
+  );
   app.use(express.static('build/client', { maxAge: '1h' }));
+  app.use(fileNotFound);
   app.use(
     createRequestHandler({
       build: await import('./build/server/index.js' as string),
@@ -58,6 +85,7 @@ else {
   }
 
   app.use(viteDevServer.middlewares);
+  app.use(fileNotFound);
   app.use(
     createRequestHandler({
       // @ts-expect-error virtual module
