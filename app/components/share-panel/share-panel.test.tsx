@@ -3,6 +3,7 @@ import { userEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createRoutesStub, type ActionFunctionArgs } from 'react-router';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
+import type { DocumentLinkAccess } from '~/constants/document';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 import { SharePanel } from './share-panel';
 
@@ -14,12 +15,16 @@ const owner = { name: 'Ada Lovelace', email: 'ada@pencilcase.app' };
 
 function renderSharePanel({
   shared = false,
+  linkAccess = 'view' as DocumentLinkAccess,
   defaultOpen = true,
   action = async () => ({ ok: true }),
+  linkAccessAction = async () => ({ ok: true }),
 }: {
   shared?: boolean;
+  linkAccess?: DocumentLinkAccess;
   defaultOpen?: boolean;
   action?: (args: ActionFunctionArgs) => unknown;
+  linkAccessAction?: (args: ActionFunctionArgs) => unknown;
 } = {}) {
   const Stub = createRoutesStub([
     {
@@ -30,12 +35,17 @@ function renderSharePanel({
           <SharePanel
             documentId={documentId}
             shared={shared}
+            linkAccess={linkAccess}
             shareUrl={shareUrl}
             owner={owner}
             defaultOpen={defaultOpen}
           />
         </AuthenticityTokenProvider>
       ),
+    },
+    {
+      path: '/doc/:id/link-access',
+      action: linkAccessAction,
     },
   ]);
 
@@ -143,6 +153,7 @@ describe('SharePanel', () => {
             <SharePanel
               documentId={documentId}
               shared
+              linkAccess="view"
               shareUrl={shareUrl}
               owner={{ name: null, email: owner.email }}
               defaultOpen
@@ -198,6 +209,72 @@ describe('SharePanel', () => {
     await user.click(screen.getByRole('switch'));
 
     await vi.waitFor(() => expect(submittedShared).toBe('true'));
+  });
+
+  test('hides the link access while the document is private', () => {
+    renderSharePanel({ shared: false });
+
+    expect(
+      screen.queryByRole('combobox', { name: 'Link access' }),
+    ).not.toBeInTheDocument();
+  });
+
+  test('shows the access of a shared link', () => {
+    renderSharePanel({ shared: true, linkAccess: 'edit' });
+
+    expect(screen.getByRole('combobox', { name: 'Link access' }))
+      .toHaveTextContent('Can edit');
+  });
+
+  test('submits the chosen access to the link access action', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    let submitted: FormDataEntryValue | null = null;
+
+    renderSharePanel({
+      shared: true,
+      linkAccessAction: async ({ request }) => {
+        submitted = (await request.formData()).get('linkAccess');
+        return { ok: true };
+      },
+    });
+
+    await user.click(screen.getByRole('combobox', { name: 'Link access' }));
+    await user.click(screen.getByRole('option', { name: 'Can edit' }));
+
+    await vi.waitFor(() => expect(submitted).toBe('edit'));
+  });
+
+  test('optimistically shows the chosen access while submitting', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+
+    renderSharePanel({
+      shared: true,
+      linkAccessAction: () => new Promise(() => {}),
+    });
+
+    const select = screen.getByRole('combobox', { name: 'Link access' });
+
+    await user.click(select);
+    await user.click(screen.getByRole('option', { name: 'Can edit' }));
+
+    await vi.waitFor(() => expect(select).toHaveTextContent('Can edit'));
+  });
+
+  test('falls back to viewing while the link is turned on again', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+
+    renderSharePanel({
+      shared: false,
+      // What the link allowed the last time it was shared.
+      linkAccess: 'edit',
+      action: () => new Promise(() => {}),
+    });
+
+    await user.click(screen.getByRole('switch'));
+
+    await vi.waitFor(() => expect(
+      screen.getByLabelText('Link access'),
+    ).toHaveTextContent('Can view'));
   });
 
   test('optimistically checks the switch while submitting', async () => {

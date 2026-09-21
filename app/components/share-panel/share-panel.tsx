@@ -1,5 +1,9 @@
 import { href, useFetcher } from 'react-router';
 import { useAuthenticityToken } from 'remix-utils/csrf/react';
+import {
+  DEFAULT_DOCUMENT_LINK_ACCESS,
+  type DocumentLinkAccess,
+} from '~/constants/document';
 import { useCanShare } from '~/hooks/use-can-share';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 import { Button } from '~/ui/button/button';
@@ -24,6 +28,7 @@ const DRAWER_FOOTER_HEIGHT = 64;
 export interface SharePanelProps {
   documentId: string;
   shared: boolean;
+  linkAccess: DocumentLinkAccess;
   shareUrl: string;
   owner: PersonWithAccess;
   defaultOpen?: boolean;
@@ -32,23 +37,42 @@ export interface SharePanelProps {
 export const SharePanel: React.FC<SharePanelProps> = ({
   documentId,
   shared,
+  linkAccess,
   shareUrl,
   owner,
   defaultOpen,
 }) => {
   const fetcher = useFetcher();
+  const accessFetcher = useFetcher();
   const csrfToken = useAuthenticityToken();
   const isMobile = useIsMobile();
   const canShare = useCanShare();
 
-  const isShared = fetcher.formData
-    ? fetcher.formData.get('shared') === 'true'
-    : shared;
+  const sharing = fetcher.formData?.get('shared');
+  const isShared = sharing ? sharing === 'true' : shared;
+
+  // Sharing puts the access back to viewing server side, so a link being
+  // turned on shows that right away instead of what it allowed last time.
+  const currentLinkAccess = accessFetcher.formData
+    ? accessFetcher.formData.get('linkAccess') as DocumentLinkAccess
+    : sharing === 'true'
+      ? DEFAULT_DOCUMENT_LINK_ACCESS
+      : linkAccess;
 
   const handleToggle = (checked: boolean) => {
     fetcher.submit(
       { shared: String(checked), csrf: csrfToken },
       { method: 'post', action: href('/doc/:id', { id: documentId }) },
+    );
+  };
+
+  const handleLinkAccessChange = (next: DocumentLinkAccess) => {
+    accessFetcher.submit(
+      { linkAccess: next, csrf: csrfToken },
+      {
+        method: 'post',
+        action: href('/doc/:id/link-access', { id: documentId }),
+      },
     );
   };
 
@@ -98,7 +122,12 @@ export const SharePanel: React.FC<SharePanelProps> = ({
         reservedFooterHeight={DRAWER_FOOTER_HEIGHT}
         footerArea={linkButton}
       >
-        <ShareLinkAccess isShared={isShared} onSharedChange={handleToggle} />
+        <ShareLinkAccess
+          isShared={isShared}
+          onSharedChange={handleToggle}
+          linkAccess={currentLinkAccess}
+          onLinkAccessChange={handleLinkAccessChange}
+        />
         <Separator />
         <PeopleWithAccess owner={owner} />
       </ResponsivePanelContent>

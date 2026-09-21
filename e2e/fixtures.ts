@@ -26,6 +26,11 @@ export class AppUser {
     return this.page.locator('[contenteditable="true"]');
   }
 
+  /** The document's content, whether or not the viewer may change it. */
+  get content(): Locator {
+    return this.page.locator('[contenteditable]');
+  }
+
   /** A document link inside the sidebar's "All Docs" group. */
   documentInAllDocs(title: string): Locator {
     return this.sidebarGroup('All Docs').getByRole('link', { name: title });
@@ -140,7 +145,7 @@ export class AppUser {
    * not reliably end up in the heading the title is extracted from.
    */
   async waitForEditorSynced(): Promise<void> {
-    await expect(this.editor.locator('h1')).toBeVisible();
+    await expect(this.content.locator('h1')).toBeVisible();
   }
 
   /** Types into the editor, one block per line. */
@@ -182,17 +187,55 @@ export class AppUser {
   }
 
   /**
+   * Picks what anyone with the link may do. Like the switch the chooser
+   * changes optimistically, so this waits for the round trip before the
+   * other user is expected to notice.
+   */
+  async setLinkAccess(label: 'Can view' | 'Can edit'): Promise<void> {
+    await this.openSharePanel();
+
+    const select = this.page
+      .getByRole('combobox', { name: 'Link access' });
+    const saved = this.waitForPost('/link-access');
+
+    await select.click();
+    await this.page.getByRole('option', { name: label }).click();
+    expect((await saved).ok()).toBeTruthy();
+
+    await expect(select).toHaveText(label);
+    await this.closeSharePanel();
+  }
+
+  private sharingToggle(): Locator {
+    return this.page.getByRole('switch', { name: 'Anyone with the link' });
+  }
+
+  private async openSharePanel(): Promise<Locator> {
+    await this.page
+      .getByRole('button', { name: 'Share', exact: true })
+      .click();
+    await expect(this.sharingToggle()).toBeVisible();
+
+    return this.sharingToggle();
+  }
+
+  /**
+   * Closing runs an animation, and the panel's contents only leave when it
+   * is over — a flow that reopens the panel before then would find the old
+   * contents and lose them mid-click.
+   */
+  private async closeSharePanel(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+    await expect(this.sharingToggle()).toBeHidden();
+  }
+
+  /**
    * The switch flips optimistically, so this waits for the share action's
    * round trip — without it the link could be opened (or access expected
    * to be gone) before the server has committed the change.
    */
   private async setSharing(shared: boolean): Promise<void> {
-    await this.page
-      .getByRole('button', { name: 'Share', exact: true })
-      .click();
-
-    const toggle = this.page
-      .getByRole('switch', { name: 'Anyone with the link' });
+    const toggle = await this.openSharePanel();
     await expect(toggle).toBeChecked({ checked: !shared });
 
     const documentId = this.page.url().split('/').pop() ?? '';
@@ -204,7 +247,7 @@ export class AppUser {
     expect((await saved).ok()).toBeTruthy();
 
     await expect(toggle).toBeChecked({ checked: shared });
-    await this.page.keyboard.press('Escape');
+    await this.closeSharePanel();
   }
 }
 

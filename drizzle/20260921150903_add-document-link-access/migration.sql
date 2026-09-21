@@ -1,0 +1,1 @@
+ALTER TABLE "documents" ADD COLUMN "link_access" text DEFAULT 'view' NOT NULL;

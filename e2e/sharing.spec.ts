@@ -8,6 +8,7 @@ test('edits from an invited user reach the owner live', async ({
   await userA.typeLines(`Shared doc ${Date.now()}`, 'Written by User A.');
 
   const shareUrl = await userA.shareDocument();
+  await userA.setLinkAccess('Can edit');
 
   await userB.openDocument(shareUrl);
   await expect(userB.editor).toContainText('Written by User A.');
@@ -30,7 +31,7 @@ test('an invited user sees the shared document under All Docs', async ({
   const shareUrl = await userA.shareDocument();
 
   await userB.openDocument(shareUrl);
-  await expect(userB.editor).toContainText(heading);
+  await expect(userB.content).toContainText(heading);
 
   await expect(userB.documentInAllDocs(heading)).toBeVisible();
 });
@@ -47,7 +48,7 @@ test('unsharing revokes the access of the other user immediately', async ({
   const shareUrl = await userA.shareDocument();
 
   await userB.openDocument(shareUrl);
-  await expect(userB.editor).toContainText(heading);
+  await expect(userB.content).toContainText(heading);
 
   await userA.unshareDocument();
 
@@ -56,5 +57,46 @@ test('unsharing revokes the access of the other user immediately', async ({
   await expect(
     userB.page.getByRole('heading', { name: 'Permission Denied' }),
   ).toBeVisible({ timeout: 10_000 });
+  await expect(userB.content).toBeHidden();
+});
+
+test('a link that only allows viewing opens read-only', async ({
+  userA,
+  userB,
+}) => {
+  await userA.createDocument();
+
+  const heading = `Read-only doc ${Date.now()}`;
+  await userA.typeLines(heading);
+
+  const shareUrl = await userA.shareDocument();
+
+  await userB.openDocument(shareUrl);
+  await expect(userB.content).toContainText(heading);
   await expect(userB.editor).toBeHidden();
+});
+
+test('granting editing reaches the other user immediately', async ({
+  userA,
+  userB,
+}) => {
+  await userA.createDocument();
+
+  const heading = `Upgraded doc ${Date.now()}`;
+  await userA.typeLines(heading);
+
+  const shareUrl = await userA.shareDocument();
+
+  await userB.openDocument(shareUrl);
+  await expect(userB.editor).toBeHidden();
+
+  await userA.setLinkAccess('Can edit');
+
+  // No reload: the live server closes User B's connection and the client
+  // revalidates into an editor that may write.
+  await expect(userB.editor).toBeVisible({ timeout: 10_000 });
+
+  await userB.appendLinesAfter(heading, 'Written by User B.');
+  await expect(userA.editor)
+    .toContainText('Written by User B.', { timeout: 10_000 });
 });

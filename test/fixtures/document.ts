@@ -8,6 +8,7 @@ export const documentFixture: Document = {
   title: faker.lorem.words(3),
   content: null,
   shared: false,
+  linkAccess: 'view',
   createdAt: faker.date.past(),
   updatedAt: faker.date.past(),
   deletedAt: null,

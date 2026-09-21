@@ -13,6 +13,10 @@ import {
   type InferSelectModel,
 } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
+import {
+  DEFAULT_DOCUMENT_LINK_ACCESS,
+  type DocumentLinkAccess,
+} from '~/constants/document';
 import { db } from '~/db';
 import { documentCollaborators, documents } from '~/db/schema';
 
@@ -72,6 +76,7 @@ export async function getDocumentForViewer(id: string, viewerId?: string) {
     id: documents.id,
     title: documents.title,
     shared: documents.shared,
+    linkAccess: documents.linkAccess,
     userId: documents.userId,
     deletedAt: documents.deletedAt,
     isCollaborator: sql<boolean>`${collaborates}`,
@@ -196,8 +201,10 @@ export interface SetDocumentSharedInput {
  * Flips the shared flag only when the document belongs to `ownerId`, so the
  * authorisation check does not need a query of its own. Returns `undefined`
  * when the document does not exist, is deleted, or is owned by somebody else.
- * Like the soft deletion this leaves `updatedAt` alone: sharing is not an
- * edit and should not move the document in the navigation.
+ * Sharing resets the link access, so a link turned on again never hands out
+ * editing because it did the last time. Like the soft deletion this leaves
+ * `updatedAt` alone: sharing is not an edit and should not move the document
+ * in the navigation.
  */
 export async function setDocumentShared(input: SetDocumentSharedInput) {
   const { documentId, ownerId, shared } = input;
@@ -207,7 +214,7 @@ export async function setDocumentShared(input: SetDocumentSharedInput) {
   }
 
   const [document] = await db.update(documents)
-    .set({ shared })
+    .set({ shared, linkAccess: DEFAULT_DOCUMENT_LINK_ACCESS })
     .where(and(
       eq(documents.id, documentId),
       eq(documents.userId, ownerId),
@@ -216,6 +223,43 @@ export async function setDocumentShared(input: SetDocumentSharedInput) {
     .returning({
       id: documents.id,
       shared: documents.shared,
+      linkAccess: documents.linkAccess,
+    });
+
+  return document;
+}
+
+export interface SetDocumentLinkAccessInput {
+  documentId: string;
+  ownerId: string;
+  linkAccess: DocumentLinkAccess;
+}
+
+/**
+ * Changes what anyone with the link may do. Owner scoped like
+ * `setDocumentShared` and only for a document that is actually shared, and
+ * it leaves `updatedAt` alone for the same reason.
+ */
+export async function setDocumentLinkAccess(
+  input: SetDocumentLinkAccessInput,
+) {
+  const { documentId, ownerId, linkAccess } = input;
+
+  if (!isUuid(documentId) || !isUuid(ownerId)) {
+    return undefined;
+  }
+
+  const [document] = await db.update(documents)
+    .set({ linkAccess })
+    .where(and(
+      eq(documents.id, documentId),
+      eq(documents.userId, ownerId),
+      eq(documents.shared, true),
+      isNull(documents.deletedAt),
+    ))
+    .returning({
+      id: documents.id,
+      linkAccess: documents.linkAccess,
     });
 
   return document;
