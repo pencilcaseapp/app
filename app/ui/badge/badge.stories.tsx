@@ -24,3 +24,16 @@ export const BadgeExample: Story = {
     </div>
   ),
 };
+
+export const SmallBadgeExample: Story = {
+  render: () => (
+    <div className="flex flex-col items-start gap-3">
+      <Badge size="small">Invited</Badge>
+      <Badge size="small" variant="success">Invited</Badge>
+      <Badge size="small" variant="warning">Invited</Badge>
+      <Badge size="small" variant="danger">Invited</Badge>
+      <Badge size="small" variant="neutral">Invited</Badge>
+      <Badge size="small" variant="dark">Invited</Badge>
+    </div>
+  ),
+};
