@@ -102,7 +102,14 @@ export const ShareLinkAccess: FC<ShareLinkAccessProps> = ({
             value={linkAccess}
             onValueChange={onLinkAccessChange}
             variant="solid"
-            className="-mr-1.5"
+            /*
+             * Pulls the trigger's own padding out so the chevron lines up
+             * with the switch above. The panel's scroll area insets its
+             * content by the same 4px to keep focus rings out of the
+             * overflow, and taking more than that back scrolls the panel
+             * sideways.
+             */
+            className="-mr-1"
           />
         </div>
       )}
