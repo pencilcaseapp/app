@@ -8,9 +8,14 @@ import { Typography, type TypographyProps } from '../typography/typography';
 export type BadgeVariant
   = 'info' | 'success' | 'warning' | 'danger' | 'neutral' | 'dark';
 
+/** `small` is the tighter pill the share panel puts next to a name,
+ * where the badge sits inline with the text rather than on its own. */
+export type BadgeSize = 'default' | 'small';
+
 export type BadgeProps = PropsWithChildren<{
   className?: string;
   variant?: BadgeVariant;
+  size?: BadgeSize;
 }>;
 
 type TextColor = NonNullable<TypographyProps['textColorLight']>;
@@ -29,6 +34,7 @@ const textColorMapping: {
 export const Badge: FC<BadgeProps> = ({
   className,
   variant = 'info',
+  size = 'default',
   children,
 }) => {
   const textColor = textColorMapping[variant];
@@ -36,7 +42,9 @@ export const Badge: FC<BadgeProps> = ({
   return (
     <span
       className={classNames([
-        'inline-flex items-center justify-center rounded-full px-3 py-1',
+        'inline-flex items-center justify-center rounded-full',
+        size === 'default' && 'px-3 py-1',
+        size === 'small' && 'px-2',
         variant === 'info' && 'bg-pca-blue-300',
         variant === 'success' && 'bg-pca-green-300',
         variant === 'warning' && 'bg-pca-orange-300',

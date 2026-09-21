@@ -29,4 +29,17 @@ describe('Badge', () => {
 
     expect(container).toMatchSnapshot();
   });
+
+  it('size small — drops the vertical padding', () => {
+    const { container } = render(<Badge size="small">Invited</Badge>);
+
+    expect(container.firstChild).toHaveClass('px-2');
+    expect(container.firstChild).not.toHaveClass('py-1');
+  });
+
+  it('size small — matches snapshot', () => {
+    const { container } = render(<Badge size="small">Invited</Badge>);
+
+    expect(container).toMatchSnapshot();
+  });
 });

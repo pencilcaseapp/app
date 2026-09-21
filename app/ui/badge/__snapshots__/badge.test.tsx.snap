@@ -1,5 +1,19 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`Badge > size small — matches snapshot 1`] = `
+<div>
+  <span
+    class="inline-flex items-center justify-center rounded-full px-2 bg-pca-blue-300"
+  >
+    <span
+      class="antialiased font-inter text-xs text-pca-blue-900 dark:text-pca-blue-900 font-semibold leading-[18px] tracking-[0.02em]"
+    >
+      Invited
+    </span>
+  </span>
+</div>
+`;
+
 exports[`Badge > variant danger — matches snapshot 1`] = `
 <div>
   <span
