@@ -67,6 +67,15 @@ describe('DocumentInviteEmail', () => {
     expect(text).not.toMatch(/write in it together/i);
   });
 
+  it('says which address to sign in with, since that is the account the '
+    + 'document is shared with', async () => {
+    const text = await render(<DocumentInviteEmail {...props} />, {
+      plainText: true,
+    });
+
+    expect(text).toMatch(/sign in with this email address/i);
+  });
+
   it('falls back to Untitled in the body as well', async () => {
     const text = await render(
       <DocumentInviteEmail {...props} documentTitle={null} />,

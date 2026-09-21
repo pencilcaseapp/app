@@ -298,13 +298,20 @@ is no acceptance step and no invite screen: the link in the e-mail is the
 document URL, and opening it is what accepting means. `openDocument`
 (`app/services/document.ts`) connects a signed-in viewer of a shared
 document as a collaborator the first time they open it, so the document
-appears in their navigation from then on, and a signed-out recipient meets
-the normal sign-in detour with the document as the return URL.
+appears in their navigation from then on.
 
-That makes the e-mail as powerful as the link it carries, and no more —
-which is the same bargain the Copy link button already makes. Two things
-follow from it:
+The copy asks the recipient to sign in with the address the invite was
+sent to, and says a code goes to that same mailbox — the whole sign-in is
+one click from the e-mail they are already reading. Three things follow:
 
+- **Signing in is what the copy promises, and nothing enforces it yet.** A
+  shared document opens for a signed-out visitor as things stand: only an
+  unshared one sends them to sign in (`app/routes/doc.tsx`, the
+  `PermissionDenied` branch). So the invite flow is what has to require the
+  invited address, otherwise the e-mail claims a gate that is not there.
+  Until then the line reads as the instruction it is, and following it is
+  what puts the document in their navigation rather than leaving them an
+  anonymous visitor.
 - **What the recipient may do is the document's link access at the moment
   the invite went out**, so the copy says which it was. Turning the link
   off, or back to viewing, changes what they find when they open it; the

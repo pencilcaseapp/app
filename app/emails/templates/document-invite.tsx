@@ -10,9 +10,12 @@ const previews = {
 };
 
 const invitations = {
-  edit: 'You can open it and write in it together, right in your browser.',
-  view: 'You can open it and read along, right in your browser.',
+  edit: 'You can write in it together, right in your browser.',
+  view: 'You can read along, right in your browser.',
 };
+
+const signIn = 'Sign in with this email address to open it. We send a code '
+  + 'to the same address, so there is no password to remember.';
 
 const closing = 'The link opens this one document and nothing else. If you '
   + 'were not expecting it, you can ignore this email.';
@@ -68,8 +71,11 @@ export function DocumentInviteEmail({
       <Typography variant="bodySmall" textAlign="center" className="mb-3">
         {opening}
       </Typography>
-      <Typography variant="bodySmall" textAlign="center" className="mb-6">
+      <Typography variant="bodySmall" textAlign="center" className="mb-3">
         {invitations[access]}
+      </Typography>
+      <Typography variant="bodySmall" textAlign="center" className="mb-6">
+        {signIn}
       </Typography>
       <LinkButton href={documentUrl} className="mb-6">
         Open the document
