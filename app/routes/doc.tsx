@@ -88,6 +88,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     owner: user && document.isOwner
       ? { name: user.name, email: user.email }
       : null,
+    hasSubscription: user?.hasSubscription ?? false,
     shared: document.shared,
     linkAccess: document.linkAccess,
     deleted: document.deleted,
@@ -199,6 +200,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
                   linkAccess={loaderData.linkAccess}
                   shareUrl={loaderData.shareUrl}
                   owner={loaderData.owner}
+                  showUpgrade={!loaderData.hasSubscription}
                 />
               )
             : null}
