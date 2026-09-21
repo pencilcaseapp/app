@@ -1,21 +1,31 @@
 import { href, useFetcher } from 'react-router';
-import { useMedia } from 'react-use';
 import { useAuthenticityToken } from 'remix-utils/csrf/react';
 import { useCanShare } from '~/hooks/use-can-share';
+import { useIsMobile } from '~/hooks/use-is-mobile';
 import { Button } from '~/ui/button/button';
 import { CopyLinkButton } from '~/ui/copy-link-button/copy-link-button';
-import { DropdownMenu } from '~/ui/dropdown-menu/dropdown-menu';
-import { DropdownMenuContent } from '~/ui/dropdown-menu/dropdown-menu-content';
-import { DropdownMenuPortal } from '~/ui/dropdown-menu/dropdown-menu-portal';
-import { DropdownMenuTrigger } from '~/ui/dropdown-menu/dropdown-menu-trigger';
+import {
+  ResponsivePanel,
+  ResponsivePanelTrigger,
+} from '~/ui/responsive-panel/responsive-panel';
+import {
+  ResponsivePanelContent,
+} from '~/ui/responsive-panel/responsive-panel-content';
+import { Separator } from '~/ui/separator/separator';
 import { ShareLinkButton } from '~/ui/share-link-button/share-link-button';
-import { Switch } from '~/ui/switch/switch';
-import { Typography } from '~/ui/typography/typography';
+import { SIDEBAR_DRAWER_MAX_HEIGHT } from '~/ui/sidebar/sidebar';
+import type { PersonWithAccess } from './people-with-access';
+import { PeopleWithAccess } from './people-with-access';
+import { ShareLinkAccess } from './share-link-access';
+
+// The link button plus the padding the drawer's footer area puts around it.
+const DRAWER_FOOTER_HEIGHT = 64;
 
 export interface SharePanelProps {
   documentId: string;
   shared: boolean;
   shareUrl: string;
+  owner: PersonWithAccess;
   defaultOpen?: boolean;
 }
 
@@ -23,11 +33,12 @@ export const SharePanel: React.FC<SharePanelProps> = ({
   documentId,
   shared,
   shareUrl,
+  owner,
   defaultOpen,
 }) => {
   const fetcher = useFetcher();
   const csrfToken = useAuthenticityToken();
-  const isMobile = useMedia('(max-width: 640px)', false);
+  const isMobile = useIsMobile();
   const canShare = useCanShare();
 
   const isShared = fetcher.formData
@@ -41,9 +52,30 @@ export const SharePanel: React.FC<SharePanelProps> = ({
     );
   };
 
+  const linkButton = isMobile && canShare
+    ? (
+        <ShareLinkButton
+          className="w-full"
+          colorLight="grey-900"
+          link={shareUrl}
+          label="Share link"
+          disabled={!isShared}
+        />
+      )
+    : (
+        <CopyLinkButton
+          className="w-full"
+          colorLight="grey-900"
+          link={shareUrl}
+          label="Copy link"
+          copiedLabel="Link copied!"
+          disabled={!isShared}
+        />
+      );
+
   return (
-    <DropdownMenu defaultOpen={defaultOpen}>
-      <DropdownMenuTrigger>
+    <ResponsivePanel defaultOpen={defaultOpen}>
+      <ResponsivePanelTrigger>
         {isMobile
           ? (
               <Button
@@ -58,56 +90,18 @@ export const SharePanel: React.FC<SharePanelProps> = ({
                 Share
               </Button>
             )}
-      </DropdownMenuTrigger>
-      <DropdownMenuPortal>
-        <DropdownMenuContent align="end" className="w-75 gap-1 p-3">
-          <Typography
-            variant="bodySmall"
-            fontWeight="semibold"
-            textColorLight="grey-900"
-            textColorDark="white"
-            className="pb-1"
-          >
-            Share document
-          </Typography>
-          <div className="flex items-start gap-4 pb-8">
-            <Typography
-              variant="bodyTiny"
-              textColorLight="black"
-              textColorDark="white"
-              className="flex-1"
-            >
-              Anyone with the link can view and edit this document.
-            </Typography>
-            <Switch
-              id="document-sharing"
-              aria-label="Share document"
-              checked={isShared}
-              onCheckedChange={handleToggle}
-            />
-          </div>
-          {isMobile && canShare
-            ? (
-                <ShareLinkButton
-                  className="w-full"
-                  colorLight="grey-900"
-                  link={shareUrl}
-                  label="Share link"
-                  disabled={!isShared}
-                />
-              )
-            : (
-                <CopyLinkButton
-                  className="w-full"
-                  colorLight="grey-900"
-                  link={shareUrl}
-                  label="Copy link"
-                  copiedLabel="Link copied!"
-                  disabled={!isShared}
-                />
-              )}
-        </DropdownMenuContent>
-      </DropdownMenuPortal>
-    </DropdownMenu>
+      </ResponsivePanelTrigger>
+      <ResponsivePanelContent
+        title="Share document"
+        className="w-95 max-w-[calc(100vw-1.5rem)]"
+        maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
+        reservedFooterHeight={DRAWER_FOOTER_HEIGHT}
+        footerArea={linkButton}
+      >
+        <ShareLinkAccess isShared={isShared} onSharedChange={handleToggle} />
+        <Separator />
+        <PeopleWithAccess owner={owner} />
+      </ResponsivePanelContent>
+    </ResponsivePanel>
   );
 };

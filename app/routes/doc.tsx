@@ -85,7 +85,9 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     ok: true as const,
     documentTitle: document.title,
     signInUrl: user ? null : getSignInUrl(documentUrl),
-    isOwner: document.isOwner,
+    owner: user && document.isOwner
+      ? { name: user.name, email: user.email }
+      : null,
     shared: document.shared,
     deleted: document.deleted,
     presence: user ? getUserPresenceIdentity(user) : null,
@@ -186,12 +188,13 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
               signInUrl={loaderData.ok ? loaderData.signInUrl : null}
             />
           )}
-          topbarRight={loaderData.ok && loaderData.isOwner && !deleted
+          topbarRight={loaderData.ok && loaderData.owner && !deleted
             ? (
                 <SharePanel
                   documentId={params.id}
                   shared={loaderData.shared}
                   shareUrl={loaderData.shareUrl}
+                  owner={loaderData.owner}
                 />
               )
             : null}

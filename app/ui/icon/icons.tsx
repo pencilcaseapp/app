@@ -34,7 +34,9 @@ export type IconName
     | 'help'
     | 'logout'
     | 'mail'
-    | 'externalLink';
+    | 'externalLink'
+    | 'globe'
+    | 'lock';
 
 export const icons: {
   [index in IconName]: React.ReactElement<SVGPathElement>;
@@ -361,6 +363,24 @@ export const icons: {
   'chevronDown': (
     <path
       d="M6 9L12 15L18 9"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'globe': (
+    <path
+      d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM2 12H22M12 2C14.5 4.7 16 8.2 16 12C16 15.8 14.5 19.3 12 22M12 2C9.5 4.7 8 8.2 8 12C8 15.8 9.5 19.3 12 22"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'lock': (
+    <path
+      d="M7.5 10.5V8C7.5 5.51472 9.51472 3.5 12 3.5C14.4853 3.5 16.5 5.51472 16.5 8V10.5M6.5 10.5H17.5C18.0523 10.5 18.5 10.9477 18.5 11.5V19.5C18.5 20.0523 18.0523 20.5 17.5 20.5H6.5C5.94772 20.5 5.5 20.0523 5.5 19.5V11.5C5.5 10.9477 5.94772 10.5 6.5 10.5ZM12 14.5V16.5"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
