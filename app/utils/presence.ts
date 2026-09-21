@@ -19,12 +19,6 @@ export interface Collaborator {
  */
 export interface PresenceAwarenessData {
   presenceId: string;
-  /**
-   * Whether this connection's page is in front of the person and being used.
-   * An open socket only means the tab exists, which is why it is published
-   * separately.
-   */
-  isActive: boolean;
 }
 
 export interface PresenceUser {
@@ -103,15 +97,6 @@ function toPresenceColor(color: unknown, key: string): string {
 }
 
 /**
- * A client that does not publish its activity at all is taken at face value
- * and counted as there, which is what every connection looked like before we
- * measured it.
- */
-function isActiveConnection(awarenessData: { isActive?: unknown } | undefined) {
-  return awarenessData?.isActive !== false;
-}
-
-/**
  * The other people in the document, read from the awareness states the
  * Hocuspocus server broadcasts. Lexical writes `name` and `color` there for
  * the remote cursors, which is the same identity the avatars show.
@@ -120,10 +105,6 @@ function isActiveConnection(awarenessData: { isActive?: unknown } | undefined) {
  * show up twice. That is keyed on the presence id rather than the name: two
  * guests who happen to draw the same animal are still two collaborators. The
  * name is the fallback for a connection that predates the presence id.
- *
- * A connection whose page is not in front of its person is left out, so the
- * list is the people on the document rather than the tabs pointed at it. The
- * tab somebody is reading in speaks for the two they left behind.
  */
 export function getRemoteCollaborators(
   states: StatesArray,
@@ -134,11 +115,7 @@ export function getRemoteCollaborators(
   for (const state of states) {
     const { clientId, name, color, awarenessData } = state;
 
-    if (
-      clientId === localClientId
-      || typeof name !== 'string'
-      || !isActiveConnection(awarenessData)
-    ) {
+    if (clientId === localClientId || typeof name !== 'string') {
       continue;
     }
 
