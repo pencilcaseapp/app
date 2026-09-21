@@ -205,6 +205,25 @@ describe('DrawerContentInner', () => {
     ).toBe('calc(96px + env(safe-area-inset-bottom, 0px) + var(--bleed))');
   });
 
+  test('fades the content into the topbar and the footer', () => {
+    renderDrawer({
+      defaultOpen: true,
+      innerProps: {
+        topArea: <span>Top area content</span>,
+        footerArea: <button type="button">Save</button>,
+        children: <p>Body content</p>,
+      },
+    });
+
+    // The edges dissolve in place of the lines that used to be drawn here.
+    expect(screen.getByText('Body content').parentElement)
+      .toHaveClass('scroll-edge-fade');
+    expect(screen.getByText('Top area content').parentElement)
+      .not.toHaveClass('border-b');
+    expect(screen.getByRole('button', { name: 'Save' }).parentElement)
+      .not.toHaveClass('border-t');
+  });
+
   test('pads the bottom itself when there is no footer', () => {
     renderDrawer({
       defaultOpen: true,
