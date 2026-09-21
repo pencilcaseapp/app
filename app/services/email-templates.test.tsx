@@ -1,10 +1,14 @@
 import { render } from 'react-email';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
+import {
+  documentInviteEmailSubject,
+} from '~/emails/templates/document-invite';
 import { emailChangeCodeEmailSubject } from '~/emails/templates/email-change-code';
 import { otpCodeEmailSubject } from '~/emails/templates/otp-code';
 import { EmailTemplate } from '~/constants/email';
 import {
   sendEmailChangeCode,
+  sendEmailDocumentInvite,
   sendEmailMagicCode,
   sendEmailSubscriptionPaymentFailed,
 } from './email-templates';
@@ -88,5 +92,51 @@ describe('sendEmailSubscriptionPaymentFailed', () => {
       template: EmailTemplate.SubscriptionPaymentFailed,
       idempotencyScope: 'sub_123:2026-08-01T00:00:00.000Z',
     }));
+  });
+});
+
+describe('sendEmailDocumentInvite', () => {
+  const invite = {
+    to: { email: 'friend@example.com' },
+    inviteId: 'invite-id',
+    documentId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+    documentTitle: 'Trip to the Alps',
+    inviterName: 'Alex',
+    inviterId: 'user-id',
+    linkAccess: 'edit' as const,
+  };
+
+  it('sends the invite template scoped to the invite, and logs it against '
+    + 'the inviter rather than a recipient who may have no account',
+  async () => {
+    await sendEmailDocumentInvite(invite);
+
+    expect(sendEMailMock).toHaveBeenCalledWith({
+      to: { email: 'friend@example.com' },
+      subject: documentInviteEmailSubject({
+        inviterName: 'Alex',
+        documentTitle: 'Trip to the Alps',
+      }),
+      email: expect.anything(),
+      template: EmailTemplate.DocumentInvite,
+      idempotencyScope: 'invite-id',
+      userId: 'user-id',
+    });
+  });
+
+  it('links to the document the invite is for', async () => {
+    await sendEmailDocumentInvite(invite);
+
+    const [{ email }] = sendEMailMock.mock.calls[0];
+    expect(await render(email, { plainText: true }))
+      .toContain(`/doc/${invite.documentId}`);
+  });
+
+  it('offers reading only when the link only allows viewing', async () => {
+    await sendEmailDocumentInvite({ ...invite, linkAccess: 'view' });
+
+    const [{ email }] = sendEMailMock.mock.calls[0];
+    expect(await render(email, { plainText: true }))
+      .toMatch(/read along/i);
   });
 });
