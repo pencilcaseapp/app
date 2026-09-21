@@ -40,7 +40,17 @@ export const ResponsivePanelContent: FC<ResponsivePanelContentProps> = ({
 
   if (isDrawer) {
     return (
-      <DrawerContent maxHeight={maxHeight}>
+      <DrawerContent
+        maxHeight={maxHeight}
+        /*
+         * The panel opens from the page chrome, which renders inside the
+         * sidebar's drawer root, so Base UI counts this drawer as nested
+         * and leaves the backdrop to the drawer behind it. That one is
+         * closed whenever the panel can be reached, so there is no
+         * backdrop to inherit and this drawer draws its own.
+         */
+        drawerBackdropProps={{ forceRender: true }}
+      >
         <DrawerContentInner
           topArea={<PanelTitle title={title} />}
           footerArea={footerArea}

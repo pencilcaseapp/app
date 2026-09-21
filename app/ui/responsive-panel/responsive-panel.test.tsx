@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 import { Button } from '../button/button';
+import { Drawer } from '../drawer/drawer';
 import { ResponsivePanel, ResponsivePanelTrigger } from './responsive-panel';
 import { ResponsivePanelContent } from './responsive-panel-content';
 import type { ResponsivePanelContentProps } from './responsive-panel-content';
@@ -121,6 +122,29 @@ describe('ResponsivePanel', () => {
       await user.click(screen.getByRole('button', { name: 'Close' }));
 
       expect(screen.queryByText('Panel content')).not.toBeInTheDocument();
+    });
+
+    /*
+     * The panel's trigger sits in the page chrome, which renders inside
+     * the sidebar's drawer root, so Base UI counts the sheet as nested
+     * and would leave the backdrop to the drawer behind it.
+     */
+    test('draws a backdrop even when nested in another drawer', () => {
+      render(
+        <Drawer>
+          <ResponsivePanel defaultOpen>
+            <ResponsivePanelTrigger>
+              <Button type="button">Share</Button>
+            </ResponsivePanelTrigger>
+            <ResponsivePanelContent title="Share document">
+              <p>Panel content</p>
+            </ResponsivePanelContent>
+          </ResponsivePanel>
+        </Drawer>,
+      );
+
+      // The backdrop is the only element carrying the dimming fill.
+      expect(document.querySelector('.bg-pca-grey-700')).not.toBeNull();
     });
 
     test('caps the sheet at the given max height', () => {
