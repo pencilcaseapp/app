@@ -44,6 +44,7 @@ export const Sidebar: FC<SidebarProps> = ({
         <DrawerContent isFullHeight maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}>
           <DrawerContentInner
             reservedFooterHeight={reservedFooterHeight}
+            gutterClassName="px-3"
             contentClassName="px-3 pb-6"
             footerArea={bottomArea && (
               <div className="flex flex-col gap-1.5">

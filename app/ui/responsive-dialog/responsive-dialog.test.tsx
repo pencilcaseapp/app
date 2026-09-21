@@ -207,7 +207,7 @@ describe('ResponsiveDialog', () => {
       expect(
         footer?.style.getPropertyValue('--footer-reserved-height'),
       ).toBe(
-        'calc(96px + env(safe-area-inset-bottom, 0px) + var(--bleed))',
+        'calc(96px + var(--safe-area-bottom) + var(--bleed))',
       );
     });
   });

@@ -202,7 +202,7 @@ describe('DrawerContentInner', () => {
 
     expect(
       footer?.style.getPropertyValue('--footer-reserved-height'),
-    ).toBe('calc(96px + env(safe-area-inset-bottom, 0px) + var(--bleed))');
+    ).toBe('calc(96px + var(--safe-area-bottom) + var(--bleed))');
   });
 
   test('fades the content into the topbar and the footer', () => {
@@ -231,6 +231,25 @@ describe('DrawerContentInner', () => {
     });
 
     expect(screen.getByText('Body content').parentElement?.parentElement)
-      .toHaveClass('pb-[calc(env(safe-area-inset-bottom,0px)+var(--bleed))]');
+      .toHaveClass('pb-[calc(var(--safe-area-bottom)+var(--bleed))]');
+  });
+
+  test('keeps the topbar, the content and the footer on one gutter', () => {
+    renderDrawer({
+      defaultOpen: true,
+      innerProps: {
+        gutterClassName: 'px-3',
+        topArea: <span>Top area content</span>,
+        footerArea: <button type="button">Save</button>,
+        children: <p>Body content</p>,
+      },
+    });
+
+    expect(screen.getByText('Top area content').parentElement)
+      .toHaveClass('px-3');
+    expect(screen.getByText('Body content').parentElement)
+      .toHaveClass('px-3');
+    expect(screen.getByRole('button', { name: 'Save' }).parentElement)
+      .toHaveClass('px-3');
   });
 });

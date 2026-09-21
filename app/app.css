@@ -325,6 +325,23 @@ body {
   }
 }
 
+/* The gap anything sitting on the bottom edge of the screen keeps clear.
+   In a browser tab that is whatever the toolbar below already reserves.
+   The installed app has no toolbar and draws right through the home
+   indicator on an iPhone, and the inset iOS would report for it stays at
+   zero while the viewport is not `viewport-fit=cover`, so the floor below
+   stands in for it: with the 0.625rem a pinned footer pads itself with,
+   it adds up to the 34px strip iOS keeps free. */
+:root {
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (display-mode: standalone) {
+  :root {
+    --safe-area-bottom: max(env(safe-area-inset-bottom, 0px), 1.5rem);
+  }
+}
+
 /* A scroll area whose content dissolves into whatever sits above and below
    it, in place of a hairline drawn between them. `useScrollEdgeFade` keeps
    the two variables in step with the scroll position, so an edge only fades
