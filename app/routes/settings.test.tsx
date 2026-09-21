@@ -23,6 +23,13 @@ vi.mock('~/services/document', async (importOriginal) => {
   };
 });
 
+vi.mock('~/services/document-invite', async (importOriginal) => {
+  return {
+    ...await importOriginal<typeof import('~/services/document-invite')>(),
+    listInvitedCollaborators: vi.fn().mockResolvedValue([]),
+  };
+});
+
 const setIsSidebarOpenMock = vi.fn();
 
 vi.mock('~/ui/sidebar-context/use-sidebar-context', () => ({

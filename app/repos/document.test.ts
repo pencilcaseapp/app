@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  acceptInvite,
   connectCollaborator,
   countOwnedDocuments,
   createDocument,
@@ -8,9 +9,13 @@ import {
   getDocumentForViewer,
   getDocumentList,
   getDocumentTitle,
+  getInvitedCollaborators,
+  inviteCollaborator,
   purgeDocumentsDeletedBefore,
-  removeCollaboratorsForDocument,
+  removeCollaborator,
+  removeLinkCollaborators,
   restoreDocument,
+  setCollaboratorAccess,
   setDocumentLinkAccess,
   setDocumentShared,
   softDeleteDocument,
@@ -23,8 +28,13 @@ import {
   createDocumentWithTitle,
   createEmptyDocument,
   createSharedDocument,
+  inviteDocumentCollaborator,
 } from '~/test/data-factories/document';
 import { createTestUser } from '~/test/data-factories/user';
+
+function viewerOf(user: { id: string; email: string }) {
+  return { id: user.id, email: user.email };
+}
 
 describe('createDocument', () => {
   it('creates an empty document', async () => {
@@ -546,8 +556,8 @@ describe('connectCollaborator', () => {
   });
 });
 
-describe('removeCollaboratorsForDocument', () => {
-  it('removes every collaborator connection for a document', async () => {
+describe('removeLinkCollaborators', () => {
+  it('removes the connections made through the link', async () => {
     const owner = await createTestUser();
     const collaboratorA = await createTestUser();
     const collaboratorB = await createTestUser();
@@ -562,7 +572,7 @@ describe('removeCollaboratorsForDocument', () => {
       userId: collaboratorB.id,
     });
 
-    await removeCollaboratorsForDocument(document.id);
+    await removeLinkCollaborators(document.id);
 
     const rows = await db.query.documentCollaborators.findMany({
       where: {
@@ -572,15 +582,42 @@ describe('removeCollaboratorsForDocument', () => {
 
     expect(rows).toHaveLength(0);
   });
+
+  it('keeps the people invited by e-mail', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const document = await createSharedDocument(owner.id);
+
+    await connectCollaborator({
+      documentId: document.id,
+      userId: collaborator.id,
+    });
+    const invite = await inviteDocumentCollaborator(
+      document.id, 'invited@example.com',
+    );
+
+    await removeLinkCollaborators(document.id);
+
+    const rows = await db.query.documentCollaborators.findMany({
+      where: { documentId: document.id },
+    });
+
+    expect(rows.map(row => row.id)).toStrictEqual([invite.id]);
+  });
+
+  it('does nothing for an invalid id', async () => {
+    await expect(removeLinkCollaborators('not-a-uuid'))
+      .resolves.toBeUndefined();
+  });
 });
 
 describe('getDocumentForViewer', () => {
-  it('returns the document with the collaborator status', async () => {
+  it('returns the document with the collaborator row of the viewer', async () => {
     const owner = await createTestUser();
     const collaborator = await createTestUser();
     const fixture = await createSharedDocument(owner.id);
 
-    expect(await getDocumentForViewer(fixture.id, collaborator.id))
+    expect(await getDocumentForViewer(fixture.id, viewerOf(collaborator)))
       .toStrictEqual({
         id: fixture.id,
         title: fixture.title,
@@ -588,32 +625,404 @@ describe('getDocumentForViewer', () => {
         linkAccess: 'view',
         userId: owner.id,
         deletedAt: null,
-        isCollaborator: false,
+        collaborator: null,
       });
 
-    await connectCollaborator({
+    const connection = await connectCollaborator({
       documentId: fixture.id,
       userId: collaborator.id,
     });
 
-    expect(await getDocumentForViewer(fixture.id, collaborator.id))
-      .toMatchObject({ isCollaborator: true });
+    expect(await getDocumentForViewer(fixture.id, viewerOf(collaborator)))
+      .toMatchObject({
+        collaborator: {
+          id: connection?.id,
+          userId: collaborator.id,
+          email: null,
+          access: null,
+        },
+      });
   });
 
-  it('reports no collaborator status without a viewer', async () => {
+  it('finds a pending invite by the address of the viewer', async () => {
+    const owner = await createTestUser();
+    const invitee = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const invite = await inviteDocumentCollaborator(
+      fixture.id, invitee.email, { access: 'view' },
+    );
+
+    expect(await getDocumentForViewer(fixture.id, viewerOf(invitee)))
+      .toMatchObject({
+        collaborator: {
+          id: invite.id,
+          userId: null,
+          email: invitee.email,
+          access: 'view',
+        },
+      });
+  });
+
+  it('does not hand out somebody else\'s accepted invite by address', async () => {
+    const owner = await createTestUser();
+    const invitee = await createTestUser();
+    const impostor = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    await inviteDocumentCollaborator(
+      fixture.id, invitee.email, { userId: invitee.id, accepted: true },
+    );
+
+    expect(await getDocumentForViewer(fixture.id, {
+      id: impostor.id,
+      email: invitee.email,
+    })).toMatchObject({ collaborator: null });
+  });
+
+  it('prefers the invite over a connection through the link', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const fixture = await createSharedDocument(owner.id);
+    await connectCollaborator({
+      documentId: fixture.id,
+      userId: collaborator.id,
+    });
+    const invite = await inviteDocumentCollaborator(
+      fixture.id, collaborator.email,
+    );
+
+    expect(await getDocumentForViewer(fixture.id, viewerOf(collaborator)))
+      .toMatchObject({ collaborator: { id: invite.id } });
+  });
+
+  it('reports no collaborator row without a viewer', async () => {
     const owner = await createTestUser();
     const fixture = await createSharedDocument(owner.id);
 
     expect(await getDocumentForViewer(fixture.id))
-      .toMatchObject({ isCollaborator: false });
-    expect(await getDocumentForViewer(fixture.id, 'not-a-uuid'))
-      .toMatchObject({ isCollaborator: false });
+      .toMatchObject({ collaborator: null });
+    expect(await getDocumentForViewer(fixture.id, {
+      id: 'not-a-uuid',
+      email: owner.email,
+    })).toMatchObject({ collaborator: null });
   });
 
   it('returns undefined for an unknown or invalid id', async () => {
     expect(await getDocumentForViewer('not-a-uuid')).toBeUndefined();
     expect(await getDocumentForViewer(crypto.randomUUID()))
       .toBeUndefined();
+  });
+});
+
+describe('getInvitedCollaborators', () => {
+  it('lists the invites oldest first with when they were accepted', async () => {
+    const owner = await createTestUser();
+    const accepted = await createTestUser();
+    const linked = await createTestUser();
+    const fixture = await createSharedDocument(owner.id);
+    await connectCollaborator({ documentId: fixture.id, userId: linked.id });
+    const first = await inviteDocumentCollaborator(
+      fixture.id, accepted.email, { userId: accepted.id, accepted: true },
+    );
+    const second = await inviteDocumentCollaborator(
+      fixture.id, 'pending@example.com', { access: 'view' },
+    );
+
+    expect(await getInvitedCollaborators(fixture.id)).toStrictEqual([
+      {
+        id: first.id,
+        userId: accepted.id,
+        email: accepted.email,
+        access: 'edit',
+        acceptedAt: first.acceptedAt,
+        name: accepted.name,
+      },
+      {
+        id: second.id,
+        userId: null,
+        email: 'pending@example.com',
+        access: 'view',
+        acceptedAt: null,
+        name: null,
+      },
+    ]);
+    expect(first.acceptedAt).toBeInstanceOf(Date);
+  });
+
+  it('returns an empty list for an invalid id', async () => {
+    expect(await getInvitedCollaborators('not-a-uuid')).toStrictEqual([]);
+  });
+});
+
+describe('inviteCollaborator', () => {
+  it('records a pending invite for an address without an account', async () => {
+    const owner = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+
+    const invite = await inviteCollaborator({
+      documentId: fixture.id,
+      email: 'new@example.com',
+      access: 'edit',
+    });
+
+    expect(invite).toMatchObject({
+      documentId: fixture.id,
+      email: 'new@example.com',
+      access: 'edit',
+      userId: null,
+    });
+  });
+
+  it('leaves the account unlinked until the invite is accepted', async () => {
+    const owner = await createTestUser();
+    const invitee = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+
+    const invite = await inviteCollaborator({
+      documentId: fixture.id,
+      email: invitee.email,
+      access: 'view',
+    });
+
+    expect(invite?.userId).toBeNull();
+  });
+
+  it('turns a connection through the link into the invite', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const fixture = await createSharedDocument(owner.id);
+    const connection = await connectCollaborator({
+      documentId: fixture.id,
+      userId: collaborator.id,
+    });
+
+    const invite = await inviteCollaborator({
+      documentId: fixture.id,
+      email: collaborator.email,
+      access: 'view',
+      userId: collaborator.id,
+    });
+
+    expect(invite).toMatchObject({
+      id: connection?.id,
+      userId: collaborator.id,
+      email: collaborator.email,
+      access: 'view',
+    });
+    expect(await db.query.documentCollaborators.findMany({
+      where: { documentId: fixture.id },
+    })).toHaveLength(1);
+  });
+
+  it('refuses an address that is invited already', async () => {
+    const owner = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    await inviteDocumentCollaborator(fixture.id, 'twice@example.com');
+
+    expect(await inviteCollaborator({
+      documentId: fixture.id,
+      email: 'twice@example.com',
+      access: 'edit',
+    })).toBeUndefined();
+  });
+
+  it('refuses a person who is invited already', async () => {
+    const owner = await createTestUser();
+    const invitee = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    await inviteDocumentCollaborator(
+      fixture.id, 'old-address@example.com', { userId: invitee.id },
+    );
+
+    expect(await inviteCollaborator({
+      documentId: fixture.id,
+      email: invitee.email,
+      access: 'edit',
+      userId: invitee.id,
+    })).toBeUndefined();
+  });
+
+  it('returns undefined for an invalid id', async () => {
+    expect(await inviteCollaborator({
+      documentId: 'not-a-uuid',
+      email: 'new@example.com',
+      access: 'edit',
+    })).toBeUndefined();
+  });
+});
+
+describe('acceptInvite', () => {
+  it('ties the invite to the account and stamps when', async () => {
+    const owner = await createTestUser();
+    const invitee = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const invite = await inviteDocumentCollaborator(fixture.id, invitee.email);
+
+    const accepted = await acceptInvite({
+      collaboratorId: invite.id,
+      userId: invitee.id,
+    });
+
+    expect(accepted).toMatchObject({ id: invite.id, userId: invitee.id });
+    expect(accepted?.acceptedAt).toBeInstanceOf(Date);
+  });
+
+  it('accepts an invite already tied to the account', async () => {
+    const owner = await createTestUser();
+    const invitee = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const invite = await inviteDocumentCollaborator(
+      fixture.id, invitee.email, { userId: invitee.id },
+    );
+
+    const accepted = await acceptInvite({
+      collaboratorId: invite.id,
+      userId: invitee.id,
+    });
+
+    expect(accepted?.acceptedAt).toBeInstanceOf(Date);
+  });
+
+  it('drops a connection the account made through the link', async () => {
+    const owner = await createTestUser();
+    const invitee = await createTestUser();
+    const fixture = await createSharedDocument(owner.id);
+    const invite = await inviteDocumentCollaborator(fixture.id, invitee.email);
+    await connectCollaborator({ documentId: fixture.id, userId: invitee.id });
+
+    await acceptInvite({ collaboratorId: invite.id, userId: invitee.id });
+
+    const rows = await db.query.documentCollaborators.findMany({
+      where: { documentId: fixture.id },
+    });
+
+    expect(rows.map(row => row.id)).toStrictEqual([invite.id]);
+  });
+
+  it('does not accept an invite twice', async () => {
+    const owner = await createTestUser();
+    const invitee = await createTestUser();
+    const other = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const invite = await inviteDocumentCollaborator(
+      fixture.id, invitee.email, { userId: invitee.id, accepted: true },
+    );
+
+    expect(await acceptInvite({
+      collaboratorId: invite.id,
+      userId: other.id,
+    })).toBeUndefined();
+  });
+
+  it('returns undefined for an invalid id', async () => {
+    expect(await acceptInvite({
+      collaboratorId: 'not-a-uuid',
+      userId: 'not-a-uuid',
+    })).toBeUndefined();
+  });
+});
+
+describe('setCollaboratorAccess', () => {
+  it('changes the access of an invite for the owner', async () => {
+    const owner = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const invite = await inviteDocumentCollaborator(
+      fixture.id, 'invited@example.com', { access: 'view' },
+    );
+
+    expect(await setCollaboratorAccess({
+      documentId: fixture.id,
+      ownerId: owner.id,
+      collaboratorId: invite.id,
+      access: 'edit',
+    })).toStrictEqual({ id: invite.id, userId: null, access: 'edit' });
+  });
+
+  it('refuses anybody but the owner', async () => {
+    const owner = await createTestUser();
+    const other = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const invite = await inviteDocumentCollaborator(
+      fixture.id, 'invited@example.com', { access: 'view' },
+    );
+
+    expect(await setCollaboratorAccess({
+      documentId: fixture.id,
+      ownerId: other.id,
+      collaboratorId: invite.id,
+      access: 'edit',
+    })).toBeUndefined();
+  });
+
+  it('refuses a connection made through the link', async () => {
+    const owner = await createTestUser();
+    const collaborator = await createTestUser();
+    const fixture = await createSharedDocument(owner.id);
+    const connection = await connectCollaborator({
+      documentId: fixture.id,
+      userId: collaborator.id,
+    });
+
+    expect(await setCollaboratorAccess({
+      documentId: fixture.id,
+      ownerId: owner.id,
+      collaboratorId: connection?.id ?? '',
+      access: 'edit',
+    })).toBeUndefined();
+  });
+
+  it('returns undefined for an invalid id', async () => {
+    expect(await setCollaboratorAccess({
+      documentId: 'not-a-uuid',
+      ownerId: 'not-a-uuid',
+      collaboratorId: 'not-a-uuid',
+      access: 'edit',
+    })).toBeUndefined();
+  });
+});
+
+describe('removeCollaborator', () => {
+  it('deletes the row for the owner', async () => {
+    const owner = await createTestUser();
+    const invitee = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const invite = await inviteDocumentCollaborator(
+      fixture.id, invitee.email, { userId: invitee.id, accepted: true },
+    );
+
+    expect(await removeCollaborator({
+      documentId: fixture.id,
+      ownerId: owner.id,
+      collaboratorId: invite.id,
+    })).toStrictEqual({ id: invite.id, userId: invitee.id });
+    expect(await db.query.documentCollaborators.findFirst({
+      where: { id: invite.id },
+    })).toBeUndefined();
+  });
+
+  it('refuses anybody but the owner', async () => {
+    const owner = await createTestUser();
+    const other = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const invite = await inviteDocumentCollaborator(
+      fixture.id, 'invited@example.com',
+    );
+
+    expect(await removeCollaborator({
+      documentId: fixture.id,
+      ownerId: other.id,
+      collaboratorId: invite.id,
+    })).toBeUndefined();
+    expect(await db.query.documentCollaborators.findFirst({
+      where: { id: invite.id },
+    })).toBeDefined();
+  });
+
+  it('returns undefined for an invalid id', async () => {
+    expect(await removeCollaborator({
+      documentId: 'not-a-uuid',
+      ownerId: 'not-a-uuid',
+      collaboratorId: 'not-a-uuid',
+    })).toBeUndefined();
   });
 });
 

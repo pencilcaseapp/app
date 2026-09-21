@@ -1,6 +1,7 @@
 import { db } from '~/db';
 import { faker } from '@faker-js/faker';
 import { documentCollaborators, documents } from '~/db/schema';
+import type { DocumentAccess } from '~/constants/document';
 
 export async function createEmptyDocument(userId: string) {
   const [document] = await db.insert(documents).values({
@@ -48,6 +49,35 @@ export async function connectDocumentCollaborator(
   const [collaborator] = await db.insert(documentCollaborators).values({
     documentId,
     userId,
+  }).returning();
+
+  return collaborator;
+}
+
+/**
+ * An invite by e-mail. Without `userId` it is still pending; with one it
+ * was accepted by that account.
+ */
+export interface InviteDocumentCollaboratorOptions {
+  access?: DocumentAccess;
+  /** The account the address belongs to, linked but not yet accepted. */
+  userId?: string;
+  /** Stamps the invite accepted by `userId`. */
+  accepted?: boolean;
+}
+
+export async function inviteDocumentCollaborator(
+  documentId: string,
+  email: string,
+  options: InviteDocumentCollaboratorOptions = {},
+) {
+  const { access = 'edit', userId, accepted = false } = options;
+  const [collaborator] = await db.insert(documentCollaborators).values({
+    documentId,
+    email,
+    access,
+    userId,
+    acceptedAt: accepted ? new Date() : null,
   }).returning();
 
   return collaborator;

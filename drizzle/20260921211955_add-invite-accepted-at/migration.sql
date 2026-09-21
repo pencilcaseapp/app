@@ -1,0 +1,2 @@
+ALTER TABLE "document_collaborators" ADD COLUMN "accepted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "document_collaborators" ADD CONSTRAINT "document_collaborators_accepted_invite_check" CHECK ("accepted_at" IS NULL OR ("email" IS NOT NULL AND "user_id" IS NOT NULL));

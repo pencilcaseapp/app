@@ -293,33 +293,35 @@ On the receiving end the input needs `autocomplete="one-time-code"`.
 
 ## Inviting somebody to a document
 
-`document-invite` is the e-mail behind sharing a document by address. There
-is no acceptance step and no invite screen: the link in the e-mail is the
-document URL, and opening it is what accepting means. `openDocument`
-(`app/services/document.ts`) connects a signed-in viewer of a shared
-document as a collaborator the first time they open it, so the document
-appears in their navigation from then on.
+`document-invite` is the e-mail behind sharing a document by address, a
+feature of the paid plan. The invite is a `document_collaborators` row
+with the address and the access the owner chose (`app/services/
+document-invite.ts`), and the e-mail's idempotency scope is that row's
+id. There is no invite screen: the link in the e-mail is the document
+URL, and opening it while signed in with the invited address is what
+accepting means — `openDocument` (`app/services/document.ts`) finds the
+pending invite by the account or the address, ties it to the account and
+stamps `accepted_at`, so the document appears in their navigation from
+then on and the "Invited" badge in the share panel goes.
 
 The copy asks the recipient to sign in with the address the invite was
 sent to, and says a code goes to that same mailbox — the whole sign-in is
 one click from the e-mail they are already reading. Three things follow:
 
-- **Signing in is what the copy promises, and nothing enforces it yet.** A
-  shared document opens for a signed-out visitor as things stand: only an
-  unshared one sends them to sign in (`app/routes/doc.tsx`, the
-  `PermissionDenied` branch). So the invite flow is what has to require the
-  invited address, otherwise the e-mail claims a gate that is not there.
-  Until then the line reads as the instruction it is, and following it is
-  what puts the document in their navigation rather than leaving them an
-  anonymous visitor.
-- **What the recipient may do is the document's link access when they
-  open it**, which the e-mail deliberately does not spell out: it would be
-  a promise the owner can change a minute later. Turning the link off, or
-  back to viewing, simply changes what they find; the e-mail is not a
-  second grant that has to be revoked separately.
-- **The document must be shared for the invite to be worth anything.**
-  Whatever sends the invite is what has to make sure of that, the same way
-  the panel's Copy link button is disabled until then.
+- **Signing in with the invited address is what gets them in.** A private
+  document sends a signed-out visitor to sign in (`app/routes/doc.tsx`,
+  the `PermissionDenied` branch), and a signed-in one is matched against
+  the invite by their address. Only when the link is on as well does the
+  document open without signing in — as it does for anybody with the
+  link.
+- **What the recipient may do is what the owner set for them**, which the
+  e-mail deliberately does not spell out: the owner can change it a
+  minute later from the share panel, and the change reaches them live.
+  Removing their access deletes the invite, so inviting the address again
+  is a new invite and a new e-mail.
+- **The document does not have to be shared.** An invite is the private
+  way in; the link is the public one, and turning it off leaves the
+  invited people where they are.
 
 The subject names the sharer and the document — `Alex shared "Trip to the
 Alps" with you` — because an invite is recognised by who sent it, and an

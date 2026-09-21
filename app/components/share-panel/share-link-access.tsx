@@ -18,6 +18,8 @@ export interface ShareLinkAccessProps {
   onSharedChange: (shared: boolean) => void;
   linkAccess: DocumentLinkAccess;
   onLinkAccessChange: (linkAccess: DocumentLinkAccess) => void;
+  /** Somebody besides the owner can open the document while it is private. */
+  hasInvitedPeople?: boolean;
 }
 
 /*
@@ -30,7 +32,12 @@ export const ShareLinkAccess: FC<ShareLinkAccessProps> = ({
   onSharedChange,
   linkAccess,
   onLinkAccessChange,
+  hasInvitedPeople,
 }) => {
+  const privateHint = hasInvitedPeople
+    ? 'Right now only invited people can open it'
+    : 'Right now only you can open it';
+
   return (
     <div>
       <div className="flex items-center gap-3">
@@ -64,9 +71,7 @@ export const ShareLinkAccess: FC<ShareLinkAccessProps> = ({
             textColorLight="grey-600"
             textColorDark="grey-400"
           >
-            {isShared
-              ? 'No sign-in needed to open it'
-              : 'Right now only you can open it'}
+            {isShared ? 'No sign-in needed to open it' : privateHint}
           </Typography>
         </label>
 

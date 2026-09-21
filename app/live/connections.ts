@@ -48,6 +48,9 @@ export class ForbiddenError extends Error {
 
 export interface CloseDocumentConnectionsInput {
   documentId: string;
+  /** Close only this user's connections, e.g. after their access changed. */
+  userId?: string;
+  /** Close everybody's connections but this user's. */
   keepUserId?: string;
 }
 
@@ -63,11 +66,17 @@ export function closeDocumentConnections(
 }
 
 function closeLocalConnections(input: CloseDocumentConnectionsInput) {
-  const { documentId, keepUserId } = input;
+  const { documentId, userId, keepUserId } = input;
   const document = globalForLive.liveServer?.documents.get(documentId);
 
   document?.connections.forEach((_clients, connection) => {
-    if (keepUserId && connection.context.userId === keepUserId) {
+    const connectionUserId = connection.context.userId;
+
+    if (keepUserId && connectionUserId === keepUserId) {
+      return;
+    }
+
+    if (userId && connectionUserId !== userId) {
       return;
     }
 

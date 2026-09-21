@@ -260,11 +260,32 @@ screen, so
 `useCursorNameBounds` measures the tags it drew and nudges them sideways with
 a `transform` — the only property those rules leave alone.
 
+**Inviting by e-mail — `app/services/document-invite.ts`.** The share
+panel's invite form (`app/components/share-panel/invite-form.tsx`, the
+paid plan only) posts to the doc route's action, which is why the link
+switch posts to `/doc/:id/share` instead. An invite is a
+`document_collaborators` row with `email` and `access`, linked to the
+`user_id` the address belongs to as soon as there is one, and pending
+(the "Invited" badge) until `accepted_at` is stamped, which
+`openDocument` does when the invited address opens the document
+(`acceptInvite`); a row with only a `user_id` is somebody who came in
+through the link and is not listed in the panel.
+An invited person gets the access the owner set for them whatever the
+link allows; everybody else needs the link. Changing or removing that
+access (`/doc/:id/collaborators/:collaboratorId/access` and `/remove`,
+hard delete) closes only that person's live connections through
+`closeDocumentConnections({ userId })`, and the doc route remounts the
+editor after every close the server made (`reconnects` in its `key`), so
+a person whose access changed reconnects with it — including when the
+loader's `readOnly` did not change, which would otherwise leave them
+detached. `docs/emails.md` covers the e-mail.
+
 **Deletion — `app/services/document.ts`.** Documents are soft deleted:
 `deleteDocument` stamps `documents.deleted_at` and turns sharing off in the
 same owner-scoped update (`softDeleteDocument`), then drops the
-collaborators and closes every live connection, so the document vanishes
-for everybody else at once. A deleted document is not found for anyone but
+collaborators who came in through the link and closes every live
+connection, so the document vanishes for everybody else at once; the
+people invited by e-mail keep their rows and come back with the document. A deleted document is not found for anyone but
 its owner, who can still open it read-only: `openDocument` reports it as
 `deleted`, the doc route then shows a notice above the content and drops
 the share panel, and `getLiveAccess` hands the live server a read-only

@@ -1,14 +1,19 @@
 import {
+  acceptInvite,
   connectCollaborator,
   getDocumentForViewer,
-  removeCollaboratorsForDocument,
+  removeLinkCollaborators,
   restoreDocument as restoreDocumentRow,
   setDocumentLinkAccess,
   setDocumentShared,
   softDeleteDocument,
+  type DocumentForViewer,
+  type DocumentViewer,
 } from '~/repos/document';
 import { closeDocumentConnections } from '~/live/connections';
 import type { DocumentLinkAccess } from '~/constants/document';
+
+export type { DocumentViewer } from '~/repos/document';
 
 export enum OpenDocumentError {
   NotFound,
@@ -34,27 +39,37 @@ export type OpenDocumentResult
 
 /**
  * Authorises a viewer for a document and connects them as a collaborator the
- * first time they open a shared one, so it appears in their navigation.
+ * first time they open a shared one, so it appears in their navigation. An
+ * invite is accepted the same way: opening the document while signed in
+ * with the invited address ties the invite to the account.
  */
 export async function openDocument(
   documentId: string,
-  userId?: string,
+  viewer?: DocumentViewer,
 ): Promise<OpenDocumentResult> {
-  const document = await getDocumentForViewer(documentId, userId);
+  const document = await getDocumentForViewer(documentId, viewer);
 
-  if (!document || isGone(document, userId)) {
+  if (!document || isGone(document, viewer)) {
     return [OpenDocumentError.NotFound];
   }
 
-  if (!hasAccess(document, userId)) {
+  if (!hasAccess(document, viewer)) {
     return [OpenDocumentError.PermissionDenied];
   }
 
-  const isOwner = isOwnedBy(document, userId);
+  const isOwner = isOwnedBy(document, viewer);
   let hasJoined = false;
 
-  if (userId && !isOwner && !document.isCollaborator) {
-    await connectCollaborator({ documentId: document.id, userId });
+  if (viewer && !isOwner && !document.collaborator) {
+    await connectCollaborator({ documentId: document.id, userId: viewer.id });
+    hasJoined = true;
+  }
+
+  if (viewer && isPendingInvite(document.collaborator)) {
+    await acceptInvite({
+      collaboratorId: document.collaborator.id,
+      userId: viewer.id,
+    });
     hasJoined = true;
   }
 
@@ -64,7 +79,7 @@ export async function openDocument(
     linkAccess: document.linkAccess,
     isOwner,
     deleted: document.deletedAt !== null,
-    readOnly: isReadOnlyFor(document, userId),
+    readOnly: isReadOnlyFor(document, viewer),
     hasJoined,
   }];
 }
@@ -75,19 +90,20 @@ export interface LiveAccess {
 
 /**
  * The access a live connection gets: none, read-only for the owner of a
- * deleted document and for a link that only allows viewing, or full.
+ * deleted document, for a link that only allows viewing and for an invite
+ * that does, or full.
  */
 export async function getLiveAccess(
   documentId: string,
-  userId?: string,
+  viewer?: DocumentViewer,
 ): Promise<LiveAccess | undefined> {
-  const document = await getDocumentForViewer(documentId, userId);
+  const document = await getDocumentForViewer(documentId, viewer);
 
-  if (!document || isGone(document, userId) || !hasAccess(document, userId)) {
+  if (!document || isGone(document, viewer) || !hasAccess(document, viewer)) {
     return undefined;
   }
 
-  return { readOnly: isReadOnlyFor(document, userId) };
+  return { readOnly: isReadOnlyFor(document, viewer) };
 }
 
 export enum ShareDocumentError {
@@ -108,6 +124,9 @@ export interface ShareDocumentInput {
  * Shares or unshares a document. The update is scoped to the owner, so a
  * viewer who is not the owner is rejected without a separate lookup. It also
  * puts the link access back to viewing, so sharing always starts read-only.
+ * Unsharing takes back what the link handed out and nothing else: the
+ * people invited by e-mail keep their access, and reconnect after the
+ * close like everybody else.
  */
 export async function shareDocument(
   input: ShareDocumentInput,
@@ -124,7 +143,7 @@ export async function shareDocument(
   }
 
   if (!shared) {
-    await removeCollaboratorsForDocument(document.id);
+    await removeLinkCollaborators(document.id);
     closeDocumentConnections({
       documentId: document.id,
       keepUserId: userId,
@@ -189,8 +208,9 @@ export type DeleteDocumentResult
 /**
  * Soft deletes a document. Only the owner may delete, collaborators are
  * rejected by the owner-scoped update. Deleting also unshares: the
- * collaborators are dropped and every live connection is closed, so the
- * document is gone for everybody at once.
+ * connections made through the link are dropped and every live connection
+ * is closed, so the document is gone for everybody at once. The invites
+ * stay, and come back with the document when it is restored.
  */
 export async function deleteDocument(
   documentId: string,
@@ -202,7 +222,7 @@ export async function deleteDocument(
     return [DeleteDocumentError.PermissionDenied];
   }
 
-  await removeCollaboratorsForDocument(document.id);
+  await removeLinkCollaborators(document.id);
   closeDocumentConnections({ documentId: document.id });
 
   return [null, { id: document.id }];
@@ -229,36 +249,55 @@ export async function restoreDocument(
   return [null, { id: document.id }];
 }
 
-interface DocumentAccess {
-  userId: string;
-  shared: boolean;
-  linkAccess: DocumentLinkAccess;
-  deletedAt: Date | null;
-}
+type DocumentAccessInfo = Pick<
+  DocumentForViewer,
+  'userId' | 'shared' | 'linkAccess' | 'deletedAt' | 'collaborator'
+>;
 
-function isOwnedBy(document: DocumentAccess, viewerId?: string) {
-  return !!viewerId && document.userId === viewerId;
+function isOwnedBy(document: DocumentAccessInfo, viewer?: DocumentViewer) {
+  return !!viewer && document.userId === viewer.id;
 }
 
 /** A deleted document only still exists for its owner. */
-function isGone(document: DocumentAccess, viewerId?: string) {
-  return document.deletedAt !== null && !isOwnedBy(document, viewerId);
+function isGone(document: DocumentAccessInfo, viewer?: DocumentViewer) {
+  return document.deletedAt !== null && !isOwnedBy(document, viewer);
 }
 
-function hasAccess(document: DocumentAccess, viewerId?: string) {
-  return isOwnedBy(document, viewerId) || document.shared;
+/** An invite the viewer has not opened the document on yet. */
+function isPendingInvite(
+  collaborator: DocumentForViewer['collaborator'],
+): collaborator is NonNullable<DocumentForViewer['collaborator']> {
+  return !!collaborator?.email && collaborator.acceptedAt === null;
+}
+
+/** The viewer was invited by e-mail, whether or not they accepted yet. */
+function isInvited(document: DocumentAccessInfo) {
+  return !!document.collaborator?.email;
+}
+
+function hasAccess(document: DocumentAccessInfo, viewer?: DocumentViewer) {
+  return isOwnedBy(document, viewer) || isInvited(document) || document.shared;
 }
 
 /**
- * Everybody but the owner is here through the link, so the link access is
- * what decides whether they may edit. A deleted document is read-only for
- * the owner too. Both the loader and the live connection go through this,
- * so the editor never invites an edit the live server would drop.
+ * An invited person may do what the owner set for them, and everybody else
+ * but the owner is here through the link, so the link access is what
+ * decides for them. A deleted document is read-only for the owner too.
+ * Both the loader and the live connection go through this, so the editor
+ * never invites an edit the live server would drop.
  */
-function isReadOnlyFor(document: DocumentAccess, viewerId?: string) {
+function isReadOnlyFor(document: DocumentAccessInfo, viewer?: DocumentViewer) {
   if (document.deletedAt !== null) {
     return true;
   }
 
-  return !isOwnedBy(document, viewerId) && document.linkAccess === 'view';
+  if (isOwnedBy(document, viewer)) {
+    return false;
+  }
+
+  if (isInvited(document)) {
+    return document.collaborator?.access === 'view';
+  }
+
+  return document.linkAccess === 'view';
 }

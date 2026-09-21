@@ -1,10 +1,11 @@
 import { createFormHook, type FormAsyncValidateOrFn, type FormOptions, type FormValidateOrFn } from '@tanstack/react-form';
 import { mergeForm, useTransform } from '@tanstack/react-form-remix';
-import { useId } from 'react';
+import { useId, useRef } from 'react';
 import { useActionData, useSubmit } from 'react-router';
 import { ControlledCheckbox } from '~/components/controlled-checkbox/controlled-checkbox';
 import { ControlledHiddenInput } from '~/components/controlled-hidden-input/controlled-hidden-input';
 import { ControlledOneTimePasswordField } from '~/components/controlled-one-time-password-field/controlled-one-time-password-field';
+import { ControlledSelect } from '~/components/controlled-select/controlled-select';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
 import { ControlledSwitch } from '~/components/controlled-switch/controlled-switch';
 import { ControlledTextField } from '~/components/controlled-text-field/controlled-text-field';
@@ -19,11 +20,22 @@ export const formHook = createFormHook({
     Switch: ControlledSwitch,
     OneTimePasswordField: ControlledOneTimePasswordField,
     HiddenInput: ControlledHiddenInput,
+    Select: ControlledSelect,
   },
   formComponents: {
     SubmitButton: ControlledSubmitButton,
   },
 });
+
+export interface AppFormOptions {
+  /**
+   * Leave the action data that is already there when the form mounts
+   * alone. A form that unmounts and comes back while its route stays, like
+   * one inside a panel, would otherwise come back with the values and
+   * errors of its last submission.
+   */
+  freshOnMount?: boolean;
+}
 
 export function useAppForm<
   TFormData,
@@ -52,16 +64,23 @@ export function useAppForm<
     TOnServer,
     FormMeta
   >,
+  options: AppFormOptions = {},
 ) {
   const actionData = useActionData();
+  const mountActionDataRef = useRef(actionData);
   const submit = useSubmit();
   const formId = useId();
+
+  const mergedActionData
+    = options.freshOnMount && actionData === mountActionDataRef.current
+      ? undefined
+      : actionData;
 
   return formHook.useAppForm({
     ...props,
     transform: useTransform(
-      baseForm => mergeForm(baseForm, actionData ?? {}),
-      [actionData],
+      baseForm => mergeForm(baseForm, mergedActionData ?? {}),
+      [mergedActionData],
     ),
     onSubmitMeta: {
       formId,

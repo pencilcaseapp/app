@@ -1,5 +1,6 @@
 import {
   and,
+  asc,
   count,
   desc,
   eq,
@@ -15,15 +16,22 @@ import {
 import { validate as isUuid } from 'uuid';
 import {
   DEFAULT_DOCUMENT_LINK_ACCESS,
+  type DocumentAccess,
   type DocumentLinkAccess,
 } from '~/constants/document';
 import { db } from '~/db';
-import { documentCollaborators, documents } from '~/db/schema';
+import { documentCollaborators, documents, users } from '~/db/schema';
 
 export type Document = InferSelectModel<typeof documents>;
 
 export type DocumentCollaborator
   = InferSelectModel<typeof documentCollaborators>;
+
+/** Who is looking at a document: the id and address of the session's user. */
+export interface DocumentViewer {
+  id: string;
+  email: string;
+}
 
 export interface CreateDocumentInput {
   userId: string;
@@ -53,38 +61,84 @@ export async function getDocument(id: string) {
 }
 
 /**
- * Reads the document alongside the viewer's collaborator status in a single
- * query. Leaves out `content`, which only the live server needs.
+ * Reads the document alongside the viewer's collaborator row in a single
+ * query. The row is theirs by user id, or by address for an invite nobody
+ * has accepted yet — an invite the viewer accepted and a connection they
+ * made through the link can both exist for a moment, and the invite is
+ * the one that counts. Leaves out `content`, which only the live server
+ * needs.
  */
-export async function getDocumentForViewer(id: string, viewerId?: string) {
+export async function getDocumentForViewer(
+  id: string,
+  viewer?: DocumentViewer,
+) {
   if (!isUuid(id)) {
     return undefined;
   }
 
-  const collaborates = viewerId && isUuid(viewerId)
-    ? exists(
-        db.select({ one: sql`1` })
-          .from(documentCollaborators)
-          .where(and(
-            eq(documentCollaborators.documentId, documents.id),
-            eq(documentCollaborators.userId, viewerId),
-          )),
+  const isViewer = viewer && isUuid(viewer.id)
+    ? or(
+        eq(documentCollaborators.userId, viewer.id),
+        and(
+          isNull(documentCollaborators.userId),
+          eq(documentCollaborators.email, viewer.email),
+        ),
       )
     : sql`FALSE`;
 
-  const [document] = await db.select({
+  const rows = await db.select({
     id: documents.id,
     title: documents.title,
     shared: documents.shared,
     linkAccess: documents.linkAccess,
     userId: documents.userId,
     deletedAt: documents.deletedAt,
-    isCollaborator: sql<boolean>`${collaborates}`,
+    collaborator: {
+      id: documentCollaborators.id,
+      userId: documentCollaborators.userId,
+      email: documentCollaborators.email,
+      access: documentCollaborators.access,
+      acceptedAt: documentCollaborators.acceptedAt,
+    },
   })
     .from(documents)
+    .leftJoin(documentCollaborators, and(
+      eq(documentCollaborators.documentId, documents.id),
+      isViewer,
+    ))
     .where(eq(documents.id, id));
 
-  return document;
+  return rows.find(row => row.collaborator?.email) ?? rows[0];
+}
+
+export type DocumentForViewer
+  = NonNullable<Awaited<ReturnType<typeof getDocumentForViewer>>>;
+
+/**
+ * The people invited by e-mail, oldest invite first, with the name of
+ * those who have accepted. Connections made through the link are left
+ * out: they are not the owner's doing and the panel does not list them.
+ */
+export async function getInvitedCollaborators(documentId: string) {
+  if (!isUuid(documentId)) {
+    return [];
+  }
+
+  return db.select({
+    id: documentCollaborators.id,
+    userId: documentCollaborators.userId,
+    email: sql<string>`${documentCollaborators.email}`,
+    access: sql<DocumentAccess>`${documentCollaborators.access}`,
+    acceptedAt: documentCollaborators.acceptedAt,
+    name: users.name,
+  })
+    .from(documentCollaborators)
+    .leftJoin(users, eq(users.id, documentCollaborators.userId))
+    .where(and(
+      eq(documentCollaborators.documentId, documentId),
+      isNotNull(documentCollaborators.email),
+    ))
+    .orderBy(asc(documentCollaborators.createdAt));
 }
 
 export async function getDocumentTitle(id: string) {
@@ -379,11 +433,194 @@ export async function connectCollaborator(input: ConnectCollaboratorInput) {
   return collaborator;
 }
 
-export async function removeCollaboratorsForDocument(documentId: string) {
+/**
+ * Drops the connections made through the link, which is what turning the
+ * link off takes back. The people invited by e-mail keep their rows.
+ */
+export async function removeLinkCollaborators(documentId: string) {
   if (!isUuid(documentId)) {
     return;
   }
 
   await db.delete(documentCollaborators)
-    .where(eq(documentCollaborators.documentId, documentId));
+    .where(and(
+      eq(documentCollaborators.documentId, documentId),
+      isNull(documentCollaborators.email),
+    ));
+}
+
+export interface InviteCollaboratorInput {
+  documentId: string;
+  email: string;
+  access: DocumentAccess;
+  /** The account the address already belongs to, when there is one. */
+  userId?: string;
+}
+
+/**
+ * Records an invite. When the address belongs to somebody who already
+ * followed the link, their connection becomes the invite instead of a
+ * second row for the same person. Returns `undefined` when the address or
+ * the person is invited already.
+ */
+export async function inviteCollaborator(input: InviteCollaboratorInput) {
+  const { documentId, email, access, userId } = input;
+
+  if (!isUuid(documentId) || (userId && !isUuid(userId))) {
+    return undefined;
+  }
+
+  const invited = await db.query.documentCollaborators.findFirst({
+    where: { documentId, email },
+    columns: { id: true },
+  });
+
+  if (invited) {
+    return undefined;
+  }
+
+  const [collaborator] = await db.insert(documentCollaborators)
+    .values({ documentId, email, access, userId })
+    .onConflictDoUpdate({
+      target: [
+        documentCollaborators.documentId,
+        documentCollaborators.userId,
+      ],
+      set: { email, access, updatedAt: sql`NOW()` },
+      setWhere: isNull(documentCollaborators.email),
+    })
+    .returning();
+
+  return collaborator;
+}
+
+export interface AcceptInviteInput {
+  collaboratorId: string;
+  userId: string;
+}
+
+/**
+ * Stamps an invite accepted and ties it to the account that opened the
+ * document with the invited address. A connection the same account made
+ * through the link in the meantime goes, so the pair of document and user
+ * stays unique.
+ */
+export async function acceptInvite(input: AcceptInviteInput) {
+  const { collaboratorId, userId } = input;
+
+  if (!isUuid(collaboratorId) || !isUuid(userId)) {
+    return undefined;
+  }
+
+  return db.transaction(async (tx) => {
+    const invite = await tx.query.documentCollaborators.findFirst({
+      where: {
+        id: collaboratorId,
+        email: { isNotNull: true },
+        acceptedAt: { isNull: true },
+      },
+      columns: { documentId: true },
+    });
+
+    if (!invite) {
+      return undefined;
+    }
+
+    await tx.delete(documentCollaborators)
+      .where(and(
+        eq(documentCollaborators.documentId, invite.documentId),
+        eq(documentCollaborators.userId, userId),
+        isNull(documentCollaborators.email),
+      ));
+
+    const [collaborator] = await tx.update(documentCollaborators)
+      .set({ userId, acceptedAt: sql`NOW()`, updatedAt: sql`NOW()` })
+      .where(eq(documentCollaborators.id, collaboratorId))
+      .returning();
+
+    return collaborator;
+  });
+}
+
+export interface OwnedCollaboratorInput {
+  documentId: string;
+  ownerId: string;
+  collaboratorId: string;
+}
+
+/**
+ * The collaborator row belongs to a document `ownerId` owns and has not
+ * deleted, which lets the updates below carry their authorisation check
+ * like `setDocumentShared` does.
+ */
+function ownedCollaborator(input: OwnedCollaboratorInput) {
+  const { documentId, ownerId, collaboratorId } = input;
+
+  return and(
+    eq(documentCollaborators.id, collaboratorId),
+    eq(documentCollaborators.documentId, documentId),
+    exists(
+      db.select({ one: sql`1` })
+        .from(documents)
+        .where(and(
+          eq(documents.id, documentId),
+          eq(documents.userId, ownerId),
+          isNull(documents.deletedAt),
+        )),
+    ),
+  );
+}
+
+export interface SetCollaboratorAccessInput extends OwnedCollaboratorInput {
+  access: DocumentAccess;
+}
+
+/**
+ * Changes what an invited person may do. Returns `undefined` when the row
+ * is not an invite of a document the owner may change.
+ */
+export async function setCollaboratorAccess(
+  input: SetCollaboratorAccessInput,
+) {
+  const { documentId, ownerId, collaboratorId, access } = input;
+
+  if (!isUuid(documentId) || !isUuid(ownerId) || !isUuid(collaboratorId)) {
+    return undefined;
+  }
+
+  const [collaborator] = await db.update(documentCollaborators)
+    .set({ access, updatedAt: sql`NOW()` })
+    .where(and(
+      ownedCollaborator({ documentId, ownerId, collaboratorId }),
+      isNotNull(documentCollaborators.email),
+    ))
+    .returning({
+      id: documentCollaborators.id,
+      userId: documentCollaborators.userId,
+      access: sql<DocumentAccess>`${documentCollaborators.access}`,
+    });
+
+  return collaborator;
+}
+
+/**
+ * Takes somebody's access away for good: the row is deleted, so a
+ * removed person can be invited afresh. Returns `undefined` when the row
+ * does not belong to a document the owner may change.
+ */
+export async function removeCollaborator(input: OwnedCollaboratorInput) {
+  const { documentId, ownerId, collaboratorId } = input;
+
+  if (!isUuid(documentId) || !isUuid(ownerId) || !isUuid(collaboratorId)) {
+    return undefined;
+  }
+
+  const [collaborator] = await db.delete(documentCollaborators)
+    .where(ownedCollaborator({ documentId, ownerId, collaboratorId }))
+    .returning({
+      id: documentCollaborators.id,
+      userId: documentCollaborators.userId,
+    });
+
+  return collaborator;
 }
