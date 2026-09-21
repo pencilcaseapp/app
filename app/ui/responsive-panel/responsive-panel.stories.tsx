@@ -11,7 +11,9 @@ import { Typography } from '../typography/typography';
  * trigger on every larger viewport — resize the preview across 640px to
  * switch between the two. Both variants keep the title above and the
  * footer below the content, so only the content in between scrolls once
- * the panel runs out of height.
+ * the panel runs out of height. A panel is closed on purpose — from its
+ * trigger, the backdrop, a click outside or Escape — and stays where it
+ * is while the window is away, so another tab can be visited mid-form.
  */
 const meta: Meta<typeof ResponsivePanel> = {
   title: 'Overlay/ResponsivePanel',

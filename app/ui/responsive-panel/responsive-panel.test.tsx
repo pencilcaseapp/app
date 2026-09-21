@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 import { Button } from '../button/button';
@@ -11,14 +11,15 @@ import type { ResponsivePanelContentProps } from './responsive-panel-content';
 vi.mock('~/hooks/use-is-mobile');
 
 function renderResponsivePanel(
-  { contentProps, defaultOpen }:
+  { contentProps, defaultOpen, onOpenChange }:
   {
     contentProps?: Partial<ResponsivePanelContentProps>;
     defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
   } = {},
 ) {
   return render(
-    <ResponsivePanel defaultOpen={defaultOpen}>
+    <ResponsivePanel defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
       <ResponsivePanelTrigger>
         <Button type="button">Share</Button>
       </ResponsivePanelTrigger>
@@ -29,9 +30,23 @@ function renderResponsivePanel(
   );
 }
 
+// Switching to another browser tab: the document gives up the focus and
+// the window is told about it afterwards.
+async function switchAwayFromTheTab() {
+  vi.spyOn(document, 'hasFocus').mockReturnValue(false);
+
+  await act(async () => {
+    window.dispatchEvent(new FocusEvent('blur'));
+  });
+}
+
 describe('ResponsivePanel', () => {
   beforeEach(() => {
     vi.mocked(useIsMobile).mockReturnValue(false);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe.each([
@@ -75,6 +90,21 @@ describe('ResponsivePanel', () => {
       expect(
         screen.getByRole('button', { name: 'Copy link' }),
       ).toBeInTheDocument();
+    });
+
+    /*
+     * Radix takes a menu away as soon as the window loses focus, which
+     * is the wrong call for a panel holding a form: the address the
+     * invite form wants is copied from another tab.
+     */
+    test('stays open when the window loses focus', async () => {
+      const onOpenChange = vi.fn();
+      renderResponsivePanel({ defaultOpen: true, onOpenChange });
+
+      await switchAwayFromTheTab();
+
+      expect(screen.getByText('Panel content')).toBeInTheDocument();
+      expect(onOpenChange).not.toHaveBeenCalled();
     });
 
     test('closes on Escape', async () => {
