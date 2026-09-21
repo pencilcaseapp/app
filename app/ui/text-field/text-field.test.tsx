@@ -53,7 +53,7 @@ describe('TextField', () => {
     expect(input.parentElement).toContainElement(trailing);
   });
 
-  test('keeps the field 44px tall with trailing content', () => {
+  test('leaves the padding on the input with trailing content', () => {
     render(
       <TextField
         id="email"
@@ -62,8 +62,12 @@ describe('TextField', () => {
       />,
     );
 
-    // h-11 is 44px, the height the design gives these fields.
-    expect(screen.getByLabelText('Email').parentElement).toHaveClass('h-11');
+    const input = screen.getByLabelText('Email');
+
+    // The input keeps the padding a field without trailing content has, so
+    // both come out the same height. The box around it adds none of its own.
+    expect(input).toHaveClass('p-3');
+    expect(input.parentElement).not.toHaveClass('p-3');
   });
 
   test('keeps the input bordered when there is no trailing content', () => {
