@@ -89,6 +89,7 @@ export const InviteForm: FC = () => {
                     <accessField.Select
                       aria-label="Access for the invited person"
                       items={ACCESS_ITEMS}
+                      variant="solid"
                     />
                   )}
                 </form.AppField>
