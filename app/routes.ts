@@ -20,7 +20,16 @@ export default [
   ]),
   route('doc/:id/delete', 'routes/doc-delete.ts'),
   route('doc/:id/restore', 'routes/doc-restore.ts'),
+  route('doc/:id/share', 'routes/doc-share.ts'),
   route('doc/:id/link-access', 'routes/doc-link-access.ts'),
+  route(
+    'doc/:id/collaborators/:collaboratorId/access',
+    'routes/doc-collaborator-access.ts',
+  ),
+  route(
+    'doc/:id/collaborators/:collaboratorId/remove',
+    'routes/doc-collaborator-remove.ts',
+  ),
   layout('layouts/auth.tsx', [
     route('signin', 'routes/signin.tsx'),
     route('otp/:otpId', 'routes/otp.tsx'),

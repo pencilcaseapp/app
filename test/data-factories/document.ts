@@ -1,6 +1,7 @@
 import { db } from '~/db';
 import { faker } from '@faker-js/faker';
 import { documentCollaborators, documents } from '~/db/schema';
+import type { DocumentAccess } from '~/constants/document';
 
 export async function createEmptyDocument(userId: string) {
   const [document] = await db.insert(documents).values({
@@ -47,6 +48,26 @@ export async function connectDocumentCollaborator(
 ) {
   const [collaborator] = await db.insert(documentCollaborators).values({
     documentId,
+    userId,
+  }).returning();
+
+  return collaborator;
+}
+
+/**
+ * An invite by e-mail. Without `userId` it is still pending; with one it
+ * was accepted by that account.
+ */
+export async function inviteDocumentCollaborator(
+  documentId: string,
+  email: string,
+  access: DocumentAccess = 'edit',
+  userId?: string,
+) {
+  const [collaborator] = await db.insert(documentCollaborators).values({
+    documentId,
+    email,
+    access,
     userId,
   }).returning();
 

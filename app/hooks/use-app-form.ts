@@ -5,6 +5,7 @@ import { useActionData, useSubmit } from 'react-router';
 import { ControlledCheckbox } from '~/components/controlled-checkbox/controlled-checkbox';
 import { ControlledHiddenInput } from '~/components/controlled-hidden-input/controlled-hidden-input';
 import { ControlledOneTimePasswordField } from '~/components/controlled-one-time-password-field/controlled-one-time-password-field';
+import { ControlledSelect } from '~/components/controlled-select/controlled-select';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
 import { ControlledSwitch } from '~/components/controlled-switch/controlled-switch';
 import { ControlledTextField } from '~/components/controlled-text-field/controlled-text-field';
@@ -19,6 +20,7 @@ export const formHook = createFormHook({
     Switch: ControlledSwitch,
     OneTimePasswordField: ControlledOneTimePasswordField,
     HiddenInput: ControlledHiddenInput,
+    Select: ControlledSelect,
   },
   formComponents: {
     SubmitButton: ControlledSubmitButton,

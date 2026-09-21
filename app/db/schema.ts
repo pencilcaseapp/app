@@ -1,7 +1,8 @@
 import { sql } from 'drizzle-orm';
-import { pgTable, boolean, integer, timestamp, uuid, text, bytea, jsonb, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import { pgTable, boolean, integer, timestamp, uuid, text, bytea, jsonb, uniqueIndex, index, check } from 'drizzle-orm/pg-core';
 import {
   DEFAULT_DOCUMENT_LINK_ACCESS,
+  type DocumentAccess,
   type DocumentLinkAccess,
 } from '~/constants/document';
 
@@ -122,17 +123,37 @@ export const creemWebhookEvents = pgTable('creem_webhook_events', {
   processedAt: timestamp('processed_at'),
 });
 
+/*
+ * Who may open a document besides its owner. A row is one of two things:
+ * somebody who followed the link while signed in (`user_id` only, and
+ * what they may do is the document's link access), or somebody the owner
+ * invited by e-mail (`email` and `access` set). An invite starts without
+ * a `user_id` and gets one the first time the invited address opens the
+ * document, which is what accepting it means.
+ */
 export const documentCollaborators = pgTable('document_collaborators', {
   id: uuid('id').primaryKey().defaultRandom(),
   documentId: uuid('document_id').notNull().references(() => documents.id),
-  userId: uuid('user_id').notNull().references(() => users.id),
+  userId: uuid('user_id').references(() => users.id),
+  email: text('email'),
+  access: text('access').$type<DocumentAccess>(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, table => [
   uniqueIndex('document_collaborators_document_id_user_id_idx')
     .on(table.documentId, table.userId),
+  uniqueIndex('document_collaborators_document_id_email_idx')
+    .on(table.documentId, table.email),
   index('document_collaborators_user_id_idx').on(table.userId),
   index('document_collaborators_document_id_idx').on(table.documentId),
+  check(
+    'document_collaborators_user_or_email_check',
+    sql`${table.userId} IS NOT NULL OR ${table.email} IS NOT NULL`,
+  ),
+  check(
+    'document_collaborators_invite_access_check',
+    sql`(${table.email} IS NULL) = (${table.access} IS NULL)`,
+  ),
 ]);
 
 /*

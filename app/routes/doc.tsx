@@ -1,20 +1,20 @@
 import type { Route } from './+types/doc';
 import { Link, Outlet, redirect, data, useRevalidator } from 'react-router';
-import { z } from 'zod';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
+import { openDocument, OpenDocumentError } from '~/services/document';
 import {
-  openDocument,
-  OpenDocumentError,
-  shareDocument,
-} from '~/services/document';
+  inviteCollaborator,
+  InviteCollaboratorError,
+  listInvitedCollaborators,
+} from '~/services/document-invite';
 import { ClientOnly } from '~/ui/client-only/client-only';
 import { href } from 'react-router';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import { getSignInUrl } from '~/services/auth';
-import { validateForm } from '~/utils/form';
+import { returnFormError, validateForm } from '~/utils/form';
 import { useDocumentTitle } from '~/contexts/document-title';
 import { useEditedDocument } from '~/contexts/edited-document';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useScrollToTopOn } from '~/hooks/use-scroll-to-top-on';
 import { MenuOrSignInButton } from '~/components/menu-or-sign-in-button/menu-or-sign-in-button';
 import { SharePanel } from '~/components/share-panel/share-panel';
@@ -23,7 +23,14 @@ import { DocEmptyState } from '~/components/doc-empty-state/doc-empty-state';
 import { PageTitle } from '~/components/page-title/page-title';
 import { getUserPresenceIdentity } from '~/utils/presence';
 import { Notification } from '~/ui/notification/notification';
-import { DELETED_DOCUMENT_RETENTION_DAYS } from '~/constants/document';
+import {
+  DELETED_DOCUMENT_RETENTION_DAYS,
+  documentInviteCopies,
+} from '~/constants/document';
+import {
+  inviteFormSchema,
+  type InviteFormResult,
+} from '~/components/share-panel/invite-form';
 
 enum DocumentError {
   NotFound,
@@ -33,14 +40,18 @@ enum DocumentError {
 const DELETED_DOCUMENT_NOTICE = 'This document is deleted and will be'
   + ` removed for good in ${DELETED_DOCUMENT_RETENTION_DAYS} days.`;
 
-const shareSchema = z.object({
-  shared: z.boolean(),
-});
+const inviteErrorMessages = {
+  [InviteCollaboratorError.SubscriptionRequired]:
+    documentInviteCopies.subscriptionRequired,
+  [InviteCollaboratorError.Owner]: documentInviteCopies.owner,
+  [InviteCollaboratorError.AlreadyInvited]:
+    documentInviteCopies.alreadyInvited,
+};
 
 export async function loader({ params, context, request }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
   const documentUrl = href(`/doc/:id`, { id: params.id });
-  const [error, document] = await openDocument(params.id, user?.id);
+  const [error, document] = await openDocument(params.id, user ?? undefined);
 
   if (error !== null) {
     switch (error) {
@@ -81,13 +92,14 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     return redirect(documentUrl);
   }
 
+  const isOwner = !!user && document.isOwner;
+
   return {
     ok: true as const,
     documentTitle: document.title,
     signInUrl: user ? null : getSignInUrl(documentUrl),
-    owner: user && document.isOwner
-      ? { name: user.name, email: user.email }
-      : null,
+    owner: isOwner ? { name: user.name, email: user.email } : null,
+    invited: isOwner ? await listInvitedCollaborators(params.id) : [],
     hasSubscription: user?.hasSubscription ?? false,
     shared: document.shared,
     linkAccess: document.linkAccess,
@@ -98,6 +110,11 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
   };
 }
 
+/**
+ * Invites somebody by e-mail from the share panel's form. A refused invite
+ * comes back as an error on the address field; the other actions of the
+ * panel have resource routes of their own.
+ */
 export async function action({ request, params, context }: Route.ActionArgs) {
   const user = context.get(optionalUserSessionContext);
 
@@ -105,23 +122,33 @@ export async function action({ request, params, context }: Route.ActionArgs) {
     throw data('Forbidden', { status: 403 });
   }
 
-  const form = await validateForm(request, shareSchema);
+  const form = await validateForm(request, inviteFormSchema);
 
   if (!form.ok) {
     return form.formState;
   }
 
-  const [error, result] = await shareDocument({
+  const [error, result] = await inviteCollaborator({
     documentId: params.id,
-    userId: user.id,
-    shared: form.data.shared,
+    user,
+    email: form.data.email,
+    access: form.data.access,
   });
 
-  if (error !== null) {
+  if (error === InviteCollaboratorError.PermissionDenied) {
     throw data('Forbidden', { status: 403 });
   }
 
-  return { ok: true as const, shared: result.shared };
+  if (error !== null) {
+    return returnFormError(form.data, {
+      email: { message: inviteErrorMessages[error] },
+    });
+  }
+
+  return {
+    ok: true,
+    invited: { email: result.email },
+  } satisfies InviteFormResult;
 }
 
 export default function ({ params, loaderData }: Route.ComponentProps) {
@@ -131,12 +158,17 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
   );
   const { reportDocumentEdit } = useEditedDocument();
   const { revalidate } = useRevalidator();
+  // Counts the connections the server closed on us. Once the loader has
+  // said what we may do now, the editor is remounted to reconnect with
+  // that — whether or not the answer changed.
+  const [reconnects, setReconnects] = useState(0);
   const onFirstEdit = useCallback(
     () => reportDocumentEdit(params.id),
     [reportDocumentEdit, params.id],
   );
-  const onAccessRevoked = useCallback(() => {
-    void revalidate();
+  const onAccessRevoked = useCallback(async () => {
+    await revalidate();
+    setReconnects(count => count + 1);
   }, [revalidate]);
   const deleted = loaderData.ok && loaderData.deleted;
   const readOnly = loaderData.ok && loaderData.readOnly;
@@ -172,9 +204,9 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
       <PageTitle>{title}</PageTitle>
       <ClientOnly>
         <CollaborativeEditor
-          // Deleting, restoring or a change of the link access changes what
-          // the live server grants, so the editor reconnects.
-          key={`${params.id}:${readOnly}`}
+          // Deleting, restoring or a change of access changes what the
+          // live server grants, so the editor reconnects.
+          key={`${params.id}:${readOnly}:${reconnects}`}
           id={params.id}
           presence={loaderData.ok ? loaderData.presence : null}
           onTitleChange={setTitle}
@@ -200,6 +232,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
                   linkAccess={loaderData.linkAccess}
                   shareUrl={loaderData.shareUrl}
                   owner={loaderData.owner}
+                  invited={loaderData.invited}
                   showUpgrade={!loaderData.hasSubscription}
                 />
               )

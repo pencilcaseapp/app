@@ -20,7 +20,8 @@ import { Separator } from '~/ui/separator/separator';
 import { ShareLinkButton } from '~/ui/share-link-button/share-link-button';
 import { SIDEBAR_DRAWER_MAX_HEIGHT } from '~/ui/sidebar/sidebar';
 import { UpgradeTeaser } from '~/ui/upgrade-teaser/upgrade-teaser';
-import type { PersonWithAccess } from './people-with-access';
+import { InviteForm } from './invite-form';
+import type { InvitedPerson, PersonWithAccess } from './people-with-access';
 import { PeopleWithAccess } from './people-with-access';
 import { ShareLinkAccess } from './share-link-access';
 
@@ -33,6 +34,7 @@ export interface SharePanelProps {
   linkAccess: DocumentLinkAccess;
   shareUrl: string;
   owner: PersonWithAccess;
+  invited?: InvitedPerson[];
   /** Offer the paid plan instead of the features behind it. */
   showUpgrade?: boolean;
   defaultOpen?: boolean;
@@ -44,6 +46,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
   linkAccess,
   shareUrl,
   owner,
+  invited = [],
   showUpgrade,
   defaultOpen,
 }) => {
@@ -68,7 +71,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
   const handleToggle = (checked: boolean) => {
     fetcher.submit(
       { shared: String(checked), csrf: csrfToken },
-      { method: 'post', action: href('/doc/:id', { id: documentId }) },
+      { method: 'post', action: href('/doc/:id/share', { id: documentId }) },
     );
   };
 
@@ -133,9 +136,15 @@ export const SharePanel: React.FC<SharePanelProps> = ({
           onSharedChange={handleToggle}
           linkAccess={currentLinkAccess}
           onLinkAccessChange={handleLinkAccessChange}
+          hasInvitedPeople={invited.length > 0}
         />
         <Separator />
-        <PeopleWithAccess owner={owner} />
+        {!showUpgrade && <InviteForm />}
+        <PeopleWithAccess
+          documentId={documentId}
+          owner={owner}
+          invited={invited}
+        />
         {showUpgrade && (
           <UpgradeTeaser
             as={Link}

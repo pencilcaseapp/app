@@ -54,7 +54,6 @@ export const relations = defineRelations(schema, r => ({
     user: r.one.users({
       from: r.documentCollaborators.userId,
       to: r.users.id,
-      optional: false,
     }),
   },
 }));

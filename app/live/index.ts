@@ -48,7 +48,7 @@ const hocuspocus = new Hocuspocus({
   name: config.instanceId,
   onConnect: async ({ documentName, requestHeaders, connectionConfig }) => {
     const user = await getAuthUserByCookie(requestHeaders.get('cookie'));
-    const access = await getLiveAccess(documentName, user?.id);
+    const access = await getLiveAccess(documentName, user ?? undefined);
 
     if (!access) {
       throw new ForbiddenError();
