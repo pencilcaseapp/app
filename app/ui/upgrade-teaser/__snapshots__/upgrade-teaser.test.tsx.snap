@@ -1,0 +1,48 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UpgradeTeaser > matches snapshot 1`] = `
+<div>
+  <a
+    class="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 no-underline bg-pca-yellow-500 hover:bg-pca-yellow-700 active:bg-pca-yellow-700 dark:bg-pca-yellow-500 dark:hover:bg-pca-yellow-700 dark:active:bg-pca-yellow-700 transition-[background-color,scale] duration-150 ease-out active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-grey-500"
+    href="#upgrade"
+  >
+    <span
+      class="inline-flex items-center justify-center rounded-full px-3 py-1 bg-pca-grey-900"
+    >
+      <span
+        class="antialiased font-inter text-xs text-white dark:text-white font-semibold leading-[18px] tracking-[0.02em]"
+      >
+        Pro
+      </span>
+    </span>
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-900 font-medium min-w-0 flex-1 truncate"
+    >
+      Invite people by email
+    </span>
+    <span
+      class="antialiased font-inter text-sm text-pca-grey-900 dark:text-pca-grey-900 font-semibold shrink-0"
+    >
+      Upgrade
+    </span>
+    <svg
+      aria-hidden="true"
+      class="-ml-2 h-4.5 w-4.5 shrink-0 text-pca-grey-900 dark:text-pca-grey-900"
+      fill="transparent"
+      focusable="false"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M9 18L15 12L9 6"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+      />
+    </svg>
+  </a>
+</div>
+`;
