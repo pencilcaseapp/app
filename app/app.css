@@ -325,6 +325,26 @@ body {
   }
 }
 
+/* A scroll area whose content dissolves into whatever sits above and below
+   it, in place of a hairline drawn between them. `useScrollEdgeFade` keeps
+   the two variables in step with the scroll position, so an edge only fades
+   while it has content behind it. */
+@utility scroll-edge-fade {
+  --fade-top: 0px;
+  --fade-bottom: 0px;
+
+  --scroll-edge-mask: linear-gradient(
+    to bottom,
+    transparent 0,
+    black var(--fade-top),
+    black calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
+
+  mask-image: var(--scroll-edge-mask);
+  -webkit-mask-image: var(--scroll-edge-mask);
+}
+
 @utility glass-surface {
   @apply bg-pca-white/75 dark:bg-pca-grey-900/55 backdrop-blur-lg backdrop-saturate-150;
 }
