@@ -178,26 +178,35 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
   // sight for a reader halfway down a long document.
   useScrollToTopOn(deleted);
 
+  // Settings is nested below this route, so both empty states render the
+  // outlet too: the dialog opens over them instead of the sidebar's
+  // Settings entry leading nowhere.
   if (!loaderData.ok && loaderData.error === DocumentError.NotFound) {
     return (
-      <DocEmptyState
-        title="Not Found"
-        description="It may have been deleted, moved, or the link you followed is taking you nowhere."
-        actionArea={<Button as={Link} to="/">Go home</Button>}
-        signInUrl={loaderData.signInUrl}
-        imageSrcLight="/lost-pencil-light.svg"
-        imageSrcDark="/lost-pencil-dark.svg"
-      />
+      <>
+        <DocEmptyState
+          title="Not Found"
+          description="It may have been deleted, moved, or the link you followed is taking you nowhere."
+          actionArea={<Button as={Link} to="/">Go home</Button>}
+          signInUrl={loaderData.signInUrl}
+          imageSrcLight="/lost-pencil-light.svg"
+          imageSrcDark="/lost-pencil-dark.svg"
+        />
+        <Outlet />
+      </>
     );
   }
 
   if (!loaderData.ok && loaderData.error === DocumentError.PermissionDenied) {
     return (
-      <DocEmptyState
-        title="Permission Denied"
-        description="You do not have permission to view this document. Please ask the owner to share the doc with you."
-        signInUrl={loaderData.signInUrl}
-      />
+      <>
+        <DocEmptyState
+          title="Permission Denied"
+          description="You do not have permission to view this document. Please ask the owner to share the doc with you."
+          signInUrl={loaderData.signInUrl}
+        />
+        <Outlet />
+      </>
     );
   }
 

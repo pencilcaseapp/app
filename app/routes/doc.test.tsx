@@ -1,7 +1,10 @@
 import { RouterContextProvider } from 'react-router';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { documentInviteCopies } from '~/constants/document';
-import { optionalUserSessionContext } from '~/contexts/user-session';
+import {
+  optionalUserSessionContext,
+  userSessionContext,
+} from '~/contexts/user-session';
 import { OpenDocumentError } from '~/services/document';
 import { InviteCollaboratorError } from '~/services/document-invite';
 import { documentFixture } from '~/test/fixtures/document';
@@ -144,6 +147,40 @@ test('renders permission denied state', async () => {
   const { findByText } = await renderDoc(context);
 
   expect(await findByText('Permission Denied')).toBeInTheDocument();
+});
+
+test('opens settings over the permission denied state', async () => {
+  const context = new RouterContextProvider();
+  context.set(optionalUserSessionContext, userFixture);
+  context.set(userSessionContext, userFixture);
+  openDocumentMock.mockResolvedValue([OpenDocumentError.PermissionDenied]);
+
+  const { findByRole, findByText } = await renderRoute(
+    '/doc/:id/settings',
+    { params: { id: documentFixture.id }, context, parentRoute: '/doc/:id' },
+  );
+
+  expect(await findByText('Permission Denied')).toBeInTheDocument();
+  expect(
+    await findByRole('dialog', { name: 'Settings' }),
+  ).toBeInTheDocument();
+});
+
+test('opens settings over the not found state', async () => {
+  const context = new RouterContextProvider();
+  context.set(optionalUserSessionContext, userFixture);
+  context.set(userSessionContext, userFixture);
+  openDocumentMock.mockResolvedValue([OpenDocumentError.NotFound]);
+
+  const { findByRole, findByText } = await renderRoute(
+    '/doc/:id/settings',
+    { params: { id: documentFixture.id }, context, parentRoute: '/doc/:id' },
+  );
+
+  expect(await findByText('Not Found')).toBeInTheDocument();
+  expect(
+    await findByRole('dialog', { name: 'Settings' }),
+  ).toBeInTheDocument();
 });
 
 test('sends an anonymous visitor to sign in', async () => {
