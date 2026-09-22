@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import type { FC, PropsWithChildren } from 'react';
 import type { DropdownMenuVariant } from './dropdown-menu-variant-context';
 import { DropdownMenuVariantContext } from './dropdown-menu-variant-context';
-import { menuSurfaceClasses } from '../menu-surface/menu-surface';
+import { menuShellClasses, menuSurfaceClasses } from '../menu-surface/menu-surface';
 
 export type DropdownMenuContentProps = RadixDropdownMenuContentProps
   & PropsWithChildren & {
@@ -21,7 +21,8 @@ export const DropdownMenuContent: FC<DropdownMenuContentProps> = ({
     <Content
       hideWhenDetached={true}
       className={classNames(
-        'flex flex-col min-w-64 p-1.5 gap-0.5 data-[state=open]:animate-scale-in data-[state=closed]:animate-scale-out data-[align=start]:origin-top-left data-[align=end]:origin-top-right data-[align=center]:origin-top z-50 rounded-2xl shadow-glass dark:shadow-glass-dark',
+        menuShellClasses,
+        'data-[state=open]:animate-scale-in data-[state=closed]:animate-scale-out data-[align=start]:origin-top-left data-[align=end]:origin-top-right data-[align=center]:origin-top z-50',
         menuSurfaceClasses[variant],
         // Safari drops the backdrop blur on the first frame of the fade, so
         // the frosted surface leaves for the colour it resolves to. The solid
