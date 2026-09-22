@@ -5,7 +5,7 @@ import {
   removeLinkCollaborators,
   restoreDocument as restoreDocumentRow,
   setDocumentLinkAccess,
-  setDocumentShared,
+  setDocumentLinkShared,
   softDeleteDocument,
   type DocumentForViewer,
   type DocumentViewer,
@@ -22,8 +22,9 @@ export enum OpenDocumentError {
 
 export interface OpenDocument {
   title: string | null;
-  shared: boolean;
-  /** What anyone with the link may do while the document is shared. */
+  /** True when the document is published to anyone with the link. */
+  linkShared: boolean;
+  /** What anyone with the link may do while the link is on. */
   linkAccess: DocumentLinkAccess;
   isOwner: boolean;
   /** A deleted document opens read-only, and only for its owner. */
@@ -75,7 +76,7 @@ export async function openDocument(
 
   return [null, {
     title: document.title,
-    shared: document.shared,
+    linkShared: document.linkShared,
     linkAccess: document.linkAccess,
     isOwner,
     deleted: document.deletedAt !== null,
@@ -112,37 +113,37 @@ export enum ShareDocumentError {
 
 export type ShareDocumentResult
   = [ShareDocumentError]
-    | [null, { shared: boolean; linkAccess: DocumentLinkAccess }];
+    | [null, { linkShared: boolean; linkAccess: DocumentLinkAccess }];
 
 export interface ShareDocumentInput {
   documentId: string;
   userId: string;
-  shared: boolean;
+  linkShared: boolean;
 }
 
 /**
- * Shares or unshares a document. The update is scoped to the owner, so a
+ * Turns the public link on or off. The update is scoped to the owner, so a
  * viewer who is not the owner is rejected without a separate lookup. It also
- * puts the link access back to viewing, so sharing always starts read-only.
- * Unsharing takes back what the link handed out and nothing else: the
- * people invited by e-mail keep their access, and reconnect after the
- * close like everybody else.
+ * puts the link access back to viewing, so a link turned on always starts
+ * read-only. Turning it off takes back what the link handed out and nothing
+ * else: the people invited by e-mail keep their access, and reconnect after
+ * the close like everybody else.
  */
 export async function shareDocument(
   input: ShareDocumentInput,
 ): Promise<ShareDocumentResult> {
-  const { documentId, userId, shared } = input;
-  const document = await setDocumentShared({
+  const { documentId, userId, linkShared } = input;
+  const document = await setDocumentLinkShared({
     documentId,
     ownerId: userId,
-    shared,
+    linkShared,
   });
 
   if (!document) {
     return [ShareDocumentError.PermissionDenied];
   }
 
-  if (!shared) {
+  if (!linkShared) {
     await removeLinkCollaborators(document.id);
     closeDocumentConnections({
       documentId: document.id,
@@ -151,7 +152,7 @@ export async function shareDocument(
   }
 
   return [null, {
-    shared: document.shared,
+    linkShared: document.linkShared,
     linkAccess: document.linkAccess,
   }];
 }
@@ -171,7 +172,7 @@ export interface ChangeLinkAccessInput {
 
 /**
  * Changes what anyone with the link may do. Owner scoped like
- * `shareDocument`, and refused for a document that is not shared: there is
+ * `shareDocument`, and refused for a document whose link is off: there is
  * no link to give access to. Everybody else's live connections are closed so
  * they reconnect with the access they have now instead of keeping the one
  * they opened the document with.
@@ -207,7 +208,7 @@ export type DeleteDocumentResult
 
 /**
  * Soft deletes a document. Only the owner may delete, collaborators are
- * rejected by the owner-scoped update. Deleting also unshares: the
+ * rejected by the owner-scoped update. Deleting also turns the link off: the
  * connections made through the link are dropped and every live connection
  * is closed, so the document is gone for everybody at once. The invites
  * stay, and come back with the document when it is restored.
@@ -230,9 +231,9 @@ export async function deleteDocument(
 
 /**
  * Undoes a soft deletion for the owner. The document comes back private;
- * sharing it again is a separate, deliberate step. The owner's read-only
- * connections are closed like on delete, so the editor reconnects with
- * full access the same way in both directions.
+ * turning the link on again is a separate, deliberate step. The owner's
+ * read-only connections are closed like on delete, so the editor reconnects
+ * with full access the same way in both directions.
  */
 export async function restoreDocument(
   documentId: string,
@@ -251,7 +252,7 @@ export async function restoreDocument(
 
 type DocumentAccessInfo = Pick<
   DocumentForViewer,
-  'userId' | 'shared' | 'linkAccess' | 'deletedAt' | 'collaborator'
+  'userId' | 'linkShared' | 'linkAccess' | 'deletedAt' | 'collaborator'
 >;
 
 function isOwnedBy(document: DocumentAccessInfo, viewer?: DocumentViewer) {
@@ -267,16 +268,18 @@ function isGone(document: DocumentAccessInfo, viewer?: DocumentViewer) {
 function isPendingInvite(
   collaborator: DocumentForViewer['collaborator'],
 ): collaborator is NonNullable<DocumentForViewer['collaborator']> {
-  return !!collaborator?.email && collaborator.acceptedAt === null;
+  return collaborator?.source === 'invite' && collaborator.acceptedAt === null;
 }
 
 /** The viewer was invited by e-mail, whether or not they accepted yet. */
 function isInvited(document: DocumentAccessInfo) {
-  return !!document.collaborator?.email;
+  return document.collaborator?.source === 'invite';
 }
 
 function hasAccess(document: DocumentAccessInfo, viewer?: DocumentViewer) {
-  return isOwnedBy(document, viewer) || isInvited(document) || document.shared;
+  return isOwnedBy(document, viewer)
+    || isInvited(document)
+    || document.linkShared;
 }
 
 /**

@@ -66,7 +66,7 @@ function ownedDocument(overrides?: Partial<{
   return {
     id: documentFixture.id,
     title: documentFixture.title,
-    shared: false,
+    linkShared: false,
     linkAccess: 'view',
     userId: owner.id,
     deletedAt: null,

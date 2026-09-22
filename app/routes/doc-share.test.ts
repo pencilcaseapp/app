@@ -22,10 +22,10 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-function callAction(shared: string) {
+function callAction(linkShared: string) {
   const formData = new FormData();
   formData.set('csrf', 'test-token');
-  formData.set('shared', shared);
+  formData.set('linkShared', linkShared);
 
   const request = new Request(
     `http://localhost/doc/${documentFixture.id}/share`,
@@ -44,16 +44,16 @@ function callAction(shared: string) {
 }
 
 test('shares the document for the signed in user', async () => {
-  shareDocumentMock.mockResolvedValue([null, { shared: true }]);
+  shareDocumentMock.mockResolvedValue([null, { linkShared: true }]);
 
   const result = await callAction('true');
 
   expect(shareDocumentMock).toHaveBeenCalledWith({
     documentId: documentFixture.id,
     userId: userFixture.id,
-    shared: true,
+    linkShared: true,
   });
-  expect(result).toStrictEqual({ ok: true, shared: true });
+  expect(result).toStrictEqual({ ok: true, linkShared: true });
 });
 
 test('responds with 403 when the service denies the user', async () => {

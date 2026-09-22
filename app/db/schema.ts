@@ -3,6 +3,7 @@ import { pgTable, boolean, integer, timestamp, uuid, text, bytea, jsonb, uniqueI
 import {
   DEFAULT_DOCUMENT_LINK_ACCESS,
   type DocumentAccess,
+  type DocumentCollaboratorSource,
   type DocumentLinkAccess,
 } from '~/constants/document';
 
@@ -76,7 +77,10 @@ export const documents = pgTable('documents', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title'),
   content: bytea('content'),
-  shared: boolean('shared').notNull().default(false),
+  // The document is published to anyone with the link; `linkAccess` is
+  // what the link lets them do. Says nothing about the people invited by
+  // e-mail, who have access whether or not the link is on.
+  linkShared: boolean('link_shared').notNull().default(false),
   linkAccess: text('link_access')
     .$type<DocumentLinkAccess>()
     .notNull()
@@ -124,16 +128,19 @@ export const creemWebhookEvents = pgTable('creem_webhook_events', {
 });
 
 /*
- * Who may open a document besides its owner. A row is one of two things:
- * somebody who followed the link while signed in (`user_id` only, and
- * what they may do is the document's link access), or somebody the owner
- * invited by e-mail (`email` and `access` set). An invite starts without
- * a `user_id` and gets one the first time the invited address opens the
- * document, which is what accepting it means.
+ * Who may open a document besides its owner. `source` says which of the
+ * two kinds a row is rather than leaving it to be read off the other
+ * columns: a `link` row is somebody who followed the link while signed in
+ * (`user_id` only, and what they may do is the document's link access),
+ * an `invite` row is an address the owner invited (`email` and `access`
+ * set). An invite starts without a `user_id` and gets one the first time
+ * the invited address opens the document, which is what `accepted_at`
+ * records. The checks below hold each kind to its own shape.
  */
 export const documentCollaborators = pgTable('document_collaborators', {
   id: uuid('id').primaryKey().defaultRandom(),
   documentId: uuid('document_id').notNull().references(() => documents.id),
+  source: text('source').$type<DocumentCollaboratorSource>().notNull(),
   userId: uuid('user_id').references(() => users.id),
   email: text('email'),
   access: text('access').$type<DocumentAccess>(),
@@ -148,16 +155,20 @@ export const documentCollaborators = pgTable('document_collaborators', {
   index('document_collaborators_user_id_idx').on(table.userId),
   index('document_collaborators_document_id_idx').on(table.documentId),
   check(
-    'document_collaborators_user_or_email_check',
-    sql`${table.userId} IS NOT NULL OR ${table.email} IS NOT NULL`,
+    'document_collaborators_source_check',
+    sql`${table.source} IN ('link', 'invite')`,
   ),
   check(
-    'document_collaborators_invite_access_check',
-    sql`(${table.email} IS NULL) = (${table.access} IS NULL)`,
+    'document_collaborators_link_shape_check',
+    sql`${table.source} <> 'link' OR (${table.userId} IS NOT NULL AND ${table.email} IS NULL AND ${table.access} IS NULL)`,
+  ),
+  check(
+    'document_collaborators_invite_shape_check',
+    sql`${table.source} <> 'invite' OR (${table.email} IS NOT NULL AND ${table.access} IS NOT NULL)`,
   ),
   check(
     'document_collaborators_accepted_invite_check',
-    sql`${table.acceptedAt} IS NULL OR (${table.email} IS NOT NULL AND ${table.userId} IS NOT NULL)`,
+    sql`${table.acceptedAt} IS NULL OR (${table.source} = 'invite' AND ${table.userId} IS NOT NULL)`,
   ),
 ]);
 

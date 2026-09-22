@@ -65,7 +65,7 @@ function renderDoc(context: RouterContextProvider) {
 
 function openedDocument(overrides?: Partial<{
   isOwner: boolean;
-  shared: boolean;
+  linkShared: boolean;
   deleted: boolean;
   readOnly: boolean;
   hasJoined: boolean;
@@ -74,7 +74,7 @@ function openedDocument(overrides?: Partial<{
 
   return [null, {
     title: documentFixture.title,
-    shared: false,
+    linkShared: false,
     linkAccess: 'view',
     isOwner: true,
     deleted,
@@ -121,7 +121,7 @@ test('does not look the invited people up for a visitor', async () => {
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, userFixture);
   openDocumentMock.mockResolvedValue(
-    openedDocument({ isOwner: false, shared: true }),
+    openedDocument({ isOwner: false, linkShared: true }),
   );
 
   await renderDoc(context);
@@ -201,9 +201,9 @@ test('redirects a visitor who just joined to refresh the nav', async () => {
   context.set(optionalUserSessionContext, userFixture);
   openDocumentMock
     .mockResolvedValueOnce(
-      openedDocument({ isOwner: false, shared: true, hasJoined: true }),
+      openedDocument({ isOwner: false, linkShared: true, hasJoined: true }),
     )
-    .mockResolvedValue(openedDocument({ isOwner: false, shared: true }));
+    .mockResolvedValue(openedDocument({ isOwner: false, linkShared: true }));
 
   await renderDoc(context);
 
@@ -216,7 +216,7 @@ test('lets an anonymous visitor read a shared document', async () => {
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, null);
   openDocumentMock.mockResolvedValue(
-    openedDocument({ isOwner: false, shared: true }),
+    openedDocument({ isOwner: false, linkShared: true }),
   );
 
   const { queryByText } = await renderDoc(context);

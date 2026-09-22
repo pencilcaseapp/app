@@ -17,7 +17,7 @@ import {
   restoreDocument,
   setCollaboratorAccess,
   setDocumentLinkAccess,
-  setDocumentShared,
+  setDocumentLinkShared,
   softDeleteDocument,
   updateDocument,
 } from './document';
@@ -52,7 +52,7 @@ describe('createDocument', () => {
       id: document.id,
       title: null,
       content: null,
-      shared: false,
+      linkShared: false,
       linkAccess: 'view',
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
@@ -96,7 +96,7 @@ describe('updateDocument', () => {
       id: fixture.id,
       title: 'Test Document',
       content: Buffer.from('Hello, World!'),
-      shared: false,
+      linkShared: false,
       linkAccess: 'view',
       createdAt: fixture.createdAt,
       updatedAt: expect.any(Date),
@@ -106,34 +106,34 @@ describe('updateDocument', () => {
   });
 });
 
-describe('setDocumentShared', () => {
-  it('toggles the shared flag for the owner', async () => {
+describe('setDocumentLinkShared', () => {
+  it('turns the link on and off for the owner', async () => {
     const user = await createTestUser();
     const fixture = await createEmptyDocument(user.id);
 
-    const shared = await setDocumentShared({
+    const shared = await setDocumentLinkShared({
       documentId: fixture.id,
       ownerId: user.id,
-      shared: true,
+      linkShared: true,
     });
-    expect(shared?.shared).toBe(true);
+    expect(shared?.linkShared).toBe(true);
 
-    const unshared = await setDocumentShared({
+    const unshared = await setDocumentLinkShared({
       documentId: fixture.id,
       ownerId: user.id,
-      shared: false,
+      linkShared: false,
     });
-    expect(unshared?.shared).toBe(false);
+    expect(unshared?.linkShared).toBe(false);
   });
 
   it('does not count as an edit', async () => {
     const user = await createTestUser();
     const fixture = await createDocumentWithTitle(user.id);
 
-    await setDocumentShared({
+    await setDocumentLinkShared({
       documentId: fixture.id,
       ownerId: user.id,
-      shared: true,
+      linkShared: true,
     });
 
     const document = await getDocument(fixture.id);
@@ -145,10 +145,10 @@ describe('setDocumentShared', () => {
     const older = await createDocumentWithTitle(user.id);
     const newer = await createDocumentWithTitle(user.id);
 
-    await setDocumentShared({
+    await setDocumentLinkShared({
       documentId: older.id,
       ownerId: user.id,
-      shared: true,
+      linkShared: true,
     });
 
     expect((await getDocumentList(user.id)).map(item => item.id))
@@ -160,39 +160,39 @@ describe('setDocumentShared', () => {
     const other = await createTestUser();
     const fixture = await createEmptyDocument(owner.id);
 
-    expect(await setDocumentShared({
+    expect(await setDocumentLinkShared({
       documentId: fixture.id,
       ownerId: other.id,
-      shared: true,
+      linkShared: true,
     })).toBeUndefined();
 
     const document = await getDocument(fixture.id);
-    expect(document?.shared).toBe(false);
+    expect(document?.linkShared).toBe(false);
   });
 
   it('returns undefined for a deleted document', async () => {
     const user = await createTestUser();
     const fixture = await createDeletedDocument(user.id);
 
-    expect(await setDocumentShared({
+    expect(await setDocumentLinkShared({
       documentId: fixture.id,
       ownerId: user.id,
-      shared: true,
+      linkShared: true,
     })).toBeUndefined();
 
     const document = await getDocument(fixture.id);
-    expect(document?.shared).toBe(false);
+    expect(document?.linkShared).toBe(false);
   });
 
   it('returns undefined for an invalid id', async () => {
-    expect(await setDocumentShared({
+    expect(await setDocumentLinkShared({
       documentId: 'not-a-uuid',
       ownerId: 'not-a-uuid',
-      shared: true,
+      linkShared: true,
     })).toBeUndefined();
   });
 
-  it('puts the link access back to viewing when sharing again', async () => {
+  it('puts the link access back to viewing on the next share', async () => {
     const user = await createTestUser();
     const fixture = await createSharedDocument(user.id);
     await setDocumentLinkAccess({
@@ -201,15 +201,15 @@ describe('setDocumentShared', () => {
       linkAccess: 'edit',
     });
 
-    await setDocumentShared({
+    await setDocumentLinkShared({
       documentId: fixture.id,
       ownerId: user.id,
-      shared: false,
+      linkShared: false,
     });
-    const shared = await setDocumentShared({
+    const shared = await setDocumentLinkShared({
       documentId: fixture.id,
       ownerId: user.id,
-      shared: true,
+      linkShared: true,
     });
 
     expect(shared?.linkAccess).toBe('view');
@@ -293,13 +293,13 @@ describe('getDocumentList', () => {
       {
         id: document2.id,
         title: document2.title,
-        shared: false,
+        linkShared: false,
         userId: user.id,
       },
       {
         id: document1.id,
         title: document1.title,
-        shared: false,
+        linkShared: false,
         userId: user.id,
       },
     ]);
@@ -317,13 +317,13 @@ describe('getDocumentList', () => {
     expect(documents).toContainEqual({
       id: ownDocument.id,
       title: ownDocument.title,
-      shared: false,
+      linkShared: false,
       userId: collaborator.id,
     });
     expect(documents).toContainEqual({
       id: sharedDocument.id,
       title: sharedDocument.title,
-      shared: true,
+      linkShared: true,
       userId: owner.id,
     });
   });
@@ -349,7 +349,7 @@ describe('getDocumentList', () => {
       {
         id: document.id,
         title: document.title,
-        shared: false,
+        linkShared: false,
         userId: user.id,
       },
     ]);
@@ -433,7 +433,7 @@ describe('softDeleteDocument', () => {
 
     const document = await getDocument(fixture.id);
     expect(document?.deletedAt).toBeInstanceOf(Date);
-    expect(document?.shared).toBe(false);
+    expect(document?.linkShared).toBe(false);
   });
 
   it('does not count as an edit', async () => {
@@ -455,7 +455,7 @@ describe('softDeleteDocument', () => {
 
     const document = await getDocument(fixture.id);
     expect(document?.deletedAt).toBeNull();
-    expect(document?.shared).toBe(true);
+    expect(document?.linkShared).toBe(true);
   });
 
   it('returns undefined for an invalid id', async () => {
@@ -474,7 +474,7 @@ describe('restoreDocument', () => {
 
     const document = await getDocument(fixture.id);
     expect(document?.deletedAt).toBeNull();
-    expect(document?.shared).toBe(false);
+    expect(document?.linkShared).toBe(false);
   });
 
   it('keeps the document in its place in the navigation', async () => {
@@ -520,6 +520,7 @@ describe('connectCollaborator', () => {
 
     expect(connection).toMatchObject({
       documentId: document.id,
+      source: 'link',
       userId: collaborator.id,
     });
   });
@@ -621,7 +622,7 @@ describe('getDocumentForViewer', () => {
       .toStrictEqual({
         id: fixture.id,
         title: fixture.title,
-        shared: true,
+        linkShared: true,
         linkAccess: 'view',
         userId: owner.id,
         deletedAt: null,
@@ -637,6 +638,7 @@ describe('getDocumentForViewer', () => {
       .toMatchObject({
         collaborator: {
           id: connection?.id,
+          source: 'link',
           userId: collaborator.id,
           email: null,
           access: null,
@@ -656,6 +658,7 @@ describe('getDocumentForViewer', () => {
       .toMatchObject({
         collaborator: {
           id: invite.id,
+          source: 'invite',
           userId: null,
           email: invitee.email,
           access: 'view',
@@ -766,6 +769,7 @@ describe('inviteCollaborator', () => {
 
     expect(invite).toMatchObject({
       documentId: fixture.id,
+      source: 'invite',
       email: 'new@example.com',
       access: 'edit',
       userId: null,
@@ -804,6 +808,7 @@ describe('inviteCollaborator', () => {
 
     expect(invite).toMatchObject({
       id: connection?.id,
+      source: 'invite',
       userId: collaborator.id,
       email: collaborator.email,
       access: 'view',

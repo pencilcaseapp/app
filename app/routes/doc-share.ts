@@ -11,7 +11,7 @@ export const middleware: MiddlewareFunction[] = [
 ];
 
 const formSchema = z.object({
-  shared: z.boolean(),
+  linkShared: z.boolean(),
 });
 
 /**
@@ -29,12 +29,12 @@ export async function action({ request, params, context }: Route.ActionArgs) {
   const [error, result] = await shareDocument({
     documentId: params.id,
     userId: user.id,
-    shared: form.data.shared,
+    linkShared: form.data.linkShared,
   });
 
   if (error !== null) {
     throw data('Forbidden', { status: 403 });
   }
 
-  return { ok: true as const, shared: result.shared };
+  return { ok: true as const, linkShared: result.linkShared };
 }

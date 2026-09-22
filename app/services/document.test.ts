@@ -13,14 +13,17 @@ import {
   shareDocument,
   ShareDocumentError,
 } from './document';
-import type { DocumentLinkAccess } from '~/constants/document';
+import type {
+  DocumentCollaboratorSource,
+  DocumentLinkAccess,
+} from '~/constants/document';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 
 const getDocumentForViewerMock = vi.fn();
 const connectCollaboratorMock = vi.fn();
 const acceptInviteMock = vi.fn();
-const setDocumentSharedMock = vi.fn();
+const setDocumentLinkSharedMock = vi.fn();
 const setDocumentLinkAccessMock = vi.fn();
 const removeLinkCollaboratorsMock = vi.fn();
 const softDeleteDocumentMock = vi.fn();
@@ -30,7 +33,8 @@ vi.mock('~/repos/document', () => ({
     getDocumentForViewerMock(...args),
   connectCollaborator: (...args: unknown[]) => connectCollaboratorMock(...args),
   acceptInvite: (...args: unknown[]) => acceptInviteMock(...args),
-  setDocumentShared: (...args: unknown[]) => setDocumentSharedMock(...args),
+  setDocumentLinkShared: (...args: unknown[]) =>
+    setDocumentLinkSharedMock(...args),
   setDocumentLinkAccess: (...args: unknown[]) =>
     setDocumentLinkAccessMock(...args),
   removeLinkCollaborators: (...args: unknown[]) =>
@@ -51,6 +55,7 @@ const viewer = { id: userFixture.id, email: userFixture.email };
 
 type Collaborator = {
   id: string;
+  source: DocumentCollaboratorSource;
   userId: string | null;
   email: string | null;
   access: DocumentLinkAccess | null;
@@ -58,7 +63,7 @@ type Collaborator = {
 };
 
 function viewerDocument(overrides?: Partial<{
-  shared: boolean;
+  linkShared: boolean;
   linkAccess: DocumentLinkAccess;
   userId: string;
   deletedAt: Date | null;
@@ -67,7 +72,7 @@ function viewerDocument(overrides?: Partial<{
   return {
     id: documentFixture.id,
     title: documentFixture.title,
-    shared: false,
+    linkShared: false,
     linkAccess: 'view' as DocumentLinkAccess,
     userId: userFixture.id,
     deletedAt: null,
@@ -80,6 +85,7 @@ function viewerDocument(overrides?: Partial<{
 function linkCollaborator(): Collaborator {
   return {
     id: collaboratorId,
+    source: 'link',
     userId: viewer.id,
     email: null,
     access: null,
@@ -100,6 +106,7 @@ function invite(
 ): Collaborator {
   return {
     id: collaboratorId,
+    source: 'invite',
     userId: linked || accepted ? viewer.id : null,
     email: viewer.email,
     access,
@@ -136,7 +143,7 @@ describe('openDocument', () => {
   it('returns not found for a deleted document to anybody else', async () => {
     getDocumentForViewerMock.mockResolvedValue(viewerDocument({
       userId: otherUserId,
-      shared: true,
+      linkShared: true,
       collaborator: linkCollaborator(),
       deletedAt: new Date(),
     }));
@@ -168,7 +175,7 @@ describe('openDocument', () => {
     expect(error).toBeNull();
     expect(document).toStrictEqual({
       title: documentFixture.title,
-      shared: false,
+      linkShared: false,
       linkAccess: 'view',
       isOwner: true,
       deleted: false,
@@ -180,7 +187,7 @@ describe('openDocument', () => {
 
   it('opens read-only for a visitor a link only lets read', async () => {
     getDocumentForViewerMock.mockResolvedValue(
-      viewerDocument({ userId: otherUserId, shared: true }),
+      viewerDocument({ userId: otherUserId, linkShared: true }),
     );
 
     const [, document] = await openDocument(documentFixture.id);
@@ -192,7 +199,7 @@ describe('openDocument', () => {
     getDocumentForViewerMock.mockResolvedValue(
       viewerDocument({
         userId: otherUserId,
-        shared: true,
+        linkShared: true,
         linkAccess: 'edit',
       }),
     );
@@ -224,7 +231,7 @@ describe('openDocument', () => {
 
   it('connects a visitor on their first open of a shared document', async () => {
     getDocumentForViewerMock.mockResolvedValue(
-      viewerDocument({ userId: otherUserId, shared: true }),
+      viewerDocument({ userId: otherUserId, linkShared: true }),
     );
 
     const [error, document] = await openDocument(
@@ -243,7 +250,7 @@ describe('openDocument', () => {
   it('does not reconnect a returning visitor', async () => {
     getDocumentForViewerMock.mockResolvedValue(viewerDocument({
       userId: otherUserId,
-      shared: true,
+      linkShared: true,
       collaborator: linkCollaborator(),
     }));
 
@@ -257,7 +264,7 @@ describe('openDocument', () => {
 
   it('does not connect an anonymous visitor', async () => {
     getDocumentForViewerMock.mockResolvedValue(
-      viewerDocument({ userId: otherUserId, shared: true }),
+      viewerDocument({ userId: otherUserId, linkShared: true }),
     );
 
     const [error, document] = await openDocument(documentFixture.id);
@@ -319,7 +326,7 @@ describe('openDocument', () => {
   it('gives an invited person the access the owner set, not the link\'s', async () => {
     getDocumentForViewerMock.mockResolvedValue(viewerDocument({
       userId: otherUserId,
-      shared: true,
+      linkShared: true,
       linkAccess: 'edit',
       collaborator: invite('view', { accepted: true }),
     }));
@@ -332,59 +339,59 @@ describe('openDocument', () => {
 
 describe('shareDocument', () => {
   it('shares a document for its owner', async () => {
-    setDocumentSharedMock.mockResolvedValue({
+    setDocumentLinkSharedMock.mockResolvedValue({
       id: documentFixture.id,
-      shared: true,
+      linkShared: true,
       linkAccess: 'view',
     });
 
     const [error, result] = await shareDocument({
       documentId: documentFixture.id,
       userId: userFixture.id,
-      shared: true,
+      linkShared: true,
     });
 
     expect(error).toBeNull();
-    expect(result?.shared).toBe(true);
-    expect(setDocumentSharedMock).toHaveBeenCalledWith({
+    expect(result?.linkShared).toBe(true);
+    expect(setDocumentLinkSharedMock).toHaveBeenCalledWith({
       documentId: documentFixture.id,
       ownerId: userFixture.id,
-      shared: true,
+      linkShared: true,
     });
     expect(removeLinkCollaboratorsMock).not.toHaveBeenCalled();
     expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
   });
 
   it('drops the collaborators when a document is unshared', async () => {
-    setDocumentSharedMock.mockResolvedValue({
+    setDocumentLinkSharedMock.mockResolvedValue({
       id: documentFixture.id,
-      shared: false,
+      linkShared: false,
       linkAccess: 'view',
     });
 
     const [error, result] = await shareDocument({
       documentId: documentFixture.id,
       userId: userFixture.id,
-      shared: false,
+      linkShared: false,
     });
 
     expect(error).toBeNull();
-    expect(result?.shared).toBe(false);
+    expect(result?.linkShared).toBe(false);
     expect(removeLinkCollaboratorsMock)
       .toHaveBeenCalledWith(documentFixture.id);
   });
 
   it('disconnects the collaborators editing right now', async () => {
-    setDocumentSharedMock.mockResolvedValue({
+    setDocumentLinkSharedMock.mockResolvedValue({
       id: documentFixture.id,
-      shared: false,
+      linkShared: false,
       linkAccess: 'view',
     });
 
     await shareDocument({
       documentId: documentFixture.id,
       userId: userFixture.id,
-      shared: false,
+      linkShared: false,
     });
 
     expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
@@ -394,12 +401,12 @@ describe('shareDocument', () => {
   });
 
   it('denies somebody who does not own the document', async () => {
-    setDocumentSharedMock.mockResolvedValue(undefined);
+    setDocumentLinkSharedMock.mockResolvedValue(undefined);
 
     const [error] = await shareDocument({
       documentId: documentFixture.id,
       userId: otherUserId,
-      shared: true,
+      linkShared: true,
     });
 
     expect(error).toBe(ShareDocumentError.PermissionDenied);
@@ -408,16 +415,16 @@ describe('shareDocument', () => {
   });
 
   it('reports the access the link starts with', async () => {
-    setDocumentSharedMock.mockResolvedValue({
+    setDocumentLinkSharedMock.mockResolvedValue({
       id: documentFixture.id,
-      shared: true,
+      linkShared: true,
       linkAccess: 'view',
     });
 
     const [, result] = await shareDocument({
       documentId: documentFixture.id,
       userId: userFixture.id,
-      shared: true,
+      linkShared: true,
     });
 
     expect(result?.linkAccess).toBe('view');
@@ -504,7 +511,7 @@ describe('getLiveAccess', () => {
   it('rejects anybody else from a deleted document', async () => {
     getDocumentForViewerMock.mockResolvedValue(viewerDocument({
       userId: otherUserId,
-      shared: true,
+      linkShared: true,
       deletedAt: new Date(),
     }));
 
@@ -523,7 +530,7 @@ describe('getLiveAccess', () => {
 
   it('lets an anonymous visitor read a shared document', async () => {
     getDocumentForViewerMock.mockResolvedValue(
-      viewerDocument({ userId: otherUserId, shared: true }),
+      viewerDocument({ userId: otherUserId, linkShared: true }),
     );
 
     expect(await getLiveAccess(documentFixture.id))
@@ -534,7 +541,7 @@ describe('getLiveAccess', () => {
     getDocumentForViewerMock.mockResolvedValue(
       viewerDocument({
         userId: otherUserId,
-        shared: true,
+        linkShared: true,
         linkAccess: 'edit',
       }),
     );
@@ -552,7 +559,7 @@ describe('getLiveAccess', () => {
 
   it('does not connect a collaborator', async () => {
     getDocumentForViewerMock.mockResolvedValue(
-      viewerDocument({ userId: otherUserId, shared: true }),
+      viewerDocument({ userId: otherUserId, linkShared: true }),
     );
 
     await getLiveAccess(documentFixture.id, viewer);

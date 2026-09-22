@@ -11,7 +11,7 @@ import { renderRoute } from '~/utils/testing';
 
 const openDocumentMock = vi.fn().mockResolvedValue([null, {
   title: 'The Document',
-  shared: false,
+  linkShared: false,
   isOwner: true,
   hasJoined: false,
 }]);
