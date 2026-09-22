@@ -161,6 +161,10 @@ export async function getDocumentTitle(id: string) {
 
 /**
  * The documents the user owns or collaborates on, deleted ones left out.
+ * `inviteShared` says whether anybody was invited to the document by
+ * e-mail, which the navigation marks alongside `linkShared`: it rides
+ * along as a correlated `EXISTS` so the list still costs one query
+ * however long it is.
  */
 export async function getDocumentList(userId: string) {
   if (!isUuid(userId)) {
@@ -171,6 +175,14 @@ export async function getDocumentList(userId: string) {
     id: documents.id,
     title: documents.title,
     linkShared: documents.linkShared,
+    inviteShared: exists(
+      db.select({ one: sql`1` })
+        .from(documentCollaborators)
+        .where(and(
+          eq(documentCollaborators.documentId, documents.id),
+          eq(documentCollaborators.source, 'invite'),
+        )),
+    ).mapWith(Boolean),
     userId: documents.userId,
   })
     .from(documents)

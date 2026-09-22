@@ -48,11 +48,31 @@ import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete
 import { RestoreDocumentMenu } from '~/components/restore-document-menu/restore-document-menu';
 import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
+import type { DocumentShareState } from '~/constants/document';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 
 export const handle = {
   bodyClassName: 'w-full',
 };
+
+/**
+ * What the navigation marks a document as. Anyone with the link can open
+ * it whether or not people were invited as well, so the link wins over
+ * the invites.
+ */
+function getShareState(
+  document: { linkShared: boolean; inviteShared: boolean },
+): DocumentShareState {
+  if (document.linkShared) {
+    return 'link';
+  }
+
+  if (document.inviteShared) {
+    return 'invite';
+  }
+
+  return 'private';
+}
 
 const bottomNavigation = [
   { label: 'Create Doc', to: href('/new'), icon: 'create-doc' },
@@ -75,6 +95,7 @@ export async function loader({ context }: Route.LoaderArgs) {
     label: doc.title ?? 'Untitled',
     to: href('/doc/:id', { id: doc.id }),
     linkShared: doc.linkShared,
+    shareState: getShareState(doc),
     isOwner: doc.userId === user?.id,
   }));
   const deletedNavigation = deletedDocumentList.map(doc => ({
@@ -128,6 +149,7 @@ type NavigationItemData = {
   label: string;
   to: string;
   linkShared: boolean;
+  shareState: DocumentShareState;
   isOwner: boolean;
 };
 type DeletedItemData = { id: string; label: string; to: string };
@@ -226,6 +248,7 @@ function EditorSidebar({
                       return (
                         <DocumentItem
                           title={label}
+                          shareState={item.shareState}
                           as={NavLink}
                           to={item.to}
                           key={item.to}

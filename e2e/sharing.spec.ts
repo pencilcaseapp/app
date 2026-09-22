@@ -36,6 +36,24 @@ test('an invited user sees the shared document under All Docs', async ({
   await expect(userB.documentInAllDocs(heading)).toBeVisible();
 });
 
+test('the navigation marks a document shared through the link', async ({
+  userA,
+}) => {
+  await userA.createDocument();
+
+  const heading = `Marked doc ${Date.now()}`;
+  await userA.typeLines(heading);
+
+  const row = userA.documentInAllDocs(heading);
+  await expect(row).toHaveAccessibleName(heading);
+
+  await userA.shareDocument();
+  await expect(row).toHaveAccessibleName(/Shared publicly/);
+
+  await userA.unshareDocument();
+  await expect(row).toHaveAccessibleName(heading);
+});
+
 test('unsharing revokes the access of the other user immediately', async ({
   userA,
   userB,

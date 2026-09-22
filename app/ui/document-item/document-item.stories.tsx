@@ -266,6 +266,43 @@ export const List: Story = {
 };
 
 /**
+ * A document nobody else can open carries no mark. One published to
+ * anyone with the link is marked with a globe, whether or not people were
+ * invited to it as well, and one shared only with the people invited by
+ * e-mail with a pair of figures. The mark sits before the title, so the
+ * row menu keeps the right edge to itself.
+ */
+export const ShareState: Story = {
+  render: () => (
+    <div className="flex flex-col gap-1.5">
+      <DocumentItem
+        as={NavLink}
+        to="/documents/1"
+        title="Grocery list"
+      />
+      <DocumentItem
+        as={NavLink}
+        to="/documents/2"
+        title="Q3 roadmap"
+        shareState="link"
+      />
+      <DocumentItem
+        as={NavLink}
+        to="/documents/3"
+        title="Le Cours Français (A.2.1)"
+        shareState="invite"
+      />
+      <DocumentItem
+        as={NavLink}
+        to="/documents/4"
+        title="A very long document title that will not fit inside the container"
+        shareState="link"
+      />
+    </div>
+  ),
+};
+
+/**
  * When the list is reordered — for instance because the document you are
  * editing becomes the most recently updated one — the rows that lose a place
  * glide over that one row, and the row that came out on top settles in where

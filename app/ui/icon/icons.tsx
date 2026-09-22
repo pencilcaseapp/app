@@ -36,6 +36,7 @@ export type IconName
     | 'mail'
     | 'externalLink'
     | 'globe'
+    | 'users'
     | 'lock';
 
 export const icons: {
@@ -372,6 +373,15 @@ export const icons: {
   'globe': (
     <path
       d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM2 12H22M12 2C14.5 4.7 16 8.2 16 12C16 15.8 14.5 19.3 12 22M12 2C9.5 4.7 8 8.2 8 12C8 15.8 9.5 19.3 12 22"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'users': (
+    <path
+      d="M13 7.5A4.25 4.25 0 1 1 4.5 7.5A4.25 4.25 0 1 1 13 7.5ZM2.25 20.75A6.5 5.5 0 0 1 15.25 20.75M14.65 3.29A4.25 4.25 0 1 1 14.65 11.71M21.75 20.75A6.5 5.5 0 0 0 16.48 15.35"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
