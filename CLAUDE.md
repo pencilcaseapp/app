@@ -255,7 +255,14 @@ editor — which the plugin asks for per cursor the first time it draws it.
 It redraws from two places, so both have to opt in: the `selectionHighlight`
 prop covers awareness updates and `syncCursorPositionsFn` covers Yjs document
 changes; drop either and a cursor first drawn by that path keeps the rect
-rendering for good. The one thing the plugin does not do is keep a name tag on
+rendering for good. An empty line is the one caret the plugin cannot place:
+the collapsed range it measures reports nothing there and the caret lands in
+the top left corner of the page until the first character is typed, so
+`useRemoteCursorPositions` (`app/hooks/use-remote-cursor-positions.ts`) puts
+it on the last line box of the selection range instead. Only one of the two
+redraw paths can be replaced, so it corrects the carets from a
+`MutationObserver` on the cursors container, which sees the inline styles
+either path writes. The one thing the plugin does not do is keep a name tag on
 screen, so
 `useCursorNameBounds` measures the tags it drew and nudges them sideways with
 a `transform` — the only property those rules leave alone.
