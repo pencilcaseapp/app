@@ -9,6 +9,7 @@ import type { IconName } from '../icon/icons';
 import { Icon } from '../icon/icon';
 import type { DropdownMenuVariant } from './dropdown-menu-variant-context';
 import { useDropdownMenuVariant } from './dropdown-menu-variant-context';
+import { menuItemClasses } from '../menu-surface/menu-surface';
 
 export type DropdownMenuItemProps = RadixDropdownMenuItemProps
   & PropsWithChildren & {
@@ -51,7 +52,7 @@ export const DropdownMenuItem = <C extends React.ElementType = 'a'>({
     <Item disabled={disabled} textValue={textValue} onSelect={onSelect} asChild>
       <Component
         className={classNames(
-          'relative w-full inline-flex items-center rounded-[10px] transition-colors focus:outline-hidden px-2.5 py-1.5 duration-150 group',
+          menuItemClasses,
           variantClasses[variant],
           color === 'primary'
           && 'text-pca-grey-900 dark:text-pca-white',

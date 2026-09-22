@@ -20,6 +20,7 @@ import './editor.css';
 import { EditorPluginAutoFocus } from './plugins/editor-plugin-auto-focus';
 import { EditorPluginEditable } from './plugins/editor-plugin-editable';
 import { EditorPluginCheckList } from './plugins/editor-plugin-check-list';
+import { EditorPluginSlashMenu } from './plugins/editor-plugin-slash-menu';
 
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
@@ -74,6 +75,7 @@ export const Editor: React.FC<EditorProps> = ({
         />
         <EditorPluginRichText topArea={notification} />
         {editable && <EditorPluginAutoFocus />}
+        {editable && <EditorPluginSlashMenu />}
         <EditorPluginCheckList />
         <ListPlugin />
         <ClickableLinkPlugin newTab />
