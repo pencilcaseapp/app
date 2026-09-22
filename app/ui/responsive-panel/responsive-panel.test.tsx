@@ -131,6 +131,20 @@ describe('ResponsivePanel', () => {
         );
     });
 
+    test('fades the content into the title and the footer', () => {
+      renderResponsivePanel({
+        defaultOpen: true,
+        contentProps: { footerArea: <button type="button">Copy link</button> },
+      });
+
+      const scrollArea = screen.getByText('Panel content').parentElement;
+
+      expect(scrollArea).toHaveClass('scroll-edge-fade');
+      // There is nothing to scroll yet, so neither edge dissolves.
+      expect(scrollArea?.style.getPropertyValue('--fade-top')).toBe('0px');
+      expect(scrollArea?.style.getPropertyValue('--fade-bottom')).toBe('0px');
+    });
+
     test('has no close button, since the trigger closes it again', () => {
       renderResponsivePanel({ defaultOpen: true });
 
