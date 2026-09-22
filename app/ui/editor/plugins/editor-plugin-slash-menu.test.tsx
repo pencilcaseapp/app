@@ -151,6 +151,18 @@ describe('EditorPluginSlashMenu', () => {
     expect(menuItems()).toEqual(['Checklist']);
   });
 
+  test('keeps the same menu while the query narrows it', async () => {
+    renderSlashMenu();
+
+    await type('/');
+    const menu = screen.getByRole('menu', { name: 'Block types' });
+
+    await type('head');
+
+    expect(screen.getByRole('menu', { name: 'Block types' })).toBe(menu);
+    expect(menuItems()).toEqual(['Heading 1', 'Heading 2', 'Heading 3']);
+  });
+
   test('closes when nothing matches', async () => {
     renderSlashMenu();
 
