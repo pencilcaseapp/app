@@ -271,7 +271,12 @@ switch posts to `/doc/:id/share` instead. An invite is a
 (`acceptInvite`); a row with only a `user_id` is somebody who came in
 through the link and is not listed in the panel.
 An invited person gets the access the owner set for them whatever the
-link allows; everybody else needs the link. Changing or removing that
+link allows; everybody else needs the link. Every invite is an e-mail to
+an address the owner typed, so `inviteCollaborator` caps the invites one
+account may send in a day (`DOCUMENT_INVITE_LIMIT` in
+`app/constants/document.ts`) and counts them from `email_logs` rather
+than `document_collaborators`, because removing an invite deletes its
+row. Changing or removing that
 access (`/doc/:id/collaborators/:collaboratorId/access` and `/remove`,
 hard delete) closes only that person's live connections through
 `closeDocumentConnections({ userId })`, and the doc route remounts the

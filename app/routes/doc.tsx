@@ -44,6 +44,8 @@ const inviteErrorMessages = {
   [InviteCollaboratorError.SubscriptionRequired]:
     documentInviteCopies.subscriptionRequired,
   [InviteCollaboratorError.Owner]: documentInviteCopies.owner,
+  [InviteCollaboratorError.TooManyInvites]:
+    documentInviteCopies.tooManyInvites,
   [InviteCollaboratorError.AlreadyInvited]:
     documentInviteCopies.alreadyInvited,
 };

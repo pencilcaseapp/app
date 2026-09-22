@@ -283,6 +283,26 @@ test('puts a refused invite on the address field', async () => {
   });
 });
 
+test('tells the owner when they sent too many invites', async () => {
+  inviteCollaboratorMock
+    .mockResolvedValue([InviteCollaboratorError.TooManyInvites]);
+
+  const result = await callAction({
+    email: 'grace@example.com',
+    access: 'edit',
+  });
+
+  expect(result).toMatchObject({
+    errorMap: {
+      onServer: {
+        fields: {
+          email: { message: documentInviteCopies.tooManyInvites },
+        },
+      },
+    },
+  });
+});
+
 test('responds with 403 when the service denies the user', async () => {
   inviteCollaboratorMock
     .mockResolvedValue([InviteCollaboratorError.PermissionDenied]);
