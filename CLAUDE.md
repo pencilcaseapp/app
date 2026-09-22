@@ -332,6 +332,22 @@ originate from the Hocuspocus provider, and `EditedDocumentProvider`
 (`app/contexts/edited-document.tsx`) carries that from `routes/doc.tsx` up to
 the sidebar, which renders below the same layout but outside its `<Outlet />`.
 
+**Scroll restoration — `app/hooks/use-document-scroll-restoration.ts`.** The
+page itself scrolls the document, and `<ScrollRestoration />` cannot put a
+reader back where they were after a reload: the content arrives over the
+websocket well after the page has loaded, so at the point React Router
+restores there is nothing to scroll through. The hook therefore keeps the
+window position per document id in `sessionStorage` and waits for the
+provider's `onSynced` before taking it, then for the page to actually grow
+that far — Lexical renders the content over several frames, and a document
+that lost content while the reader was away never reaches the saved offset,
+so the restore is capped at what the page reaches and gives up after a
+couple of seconds. A stored position also carries the id of the page load
+that wrote it: the editor remounts whenever access changes (`reconnects` in
+the doc route's `key`), and a remount must not move a reader who never left
+— nor undo the jump to the notice `useScrollToTopOn` makes when the open
+document is deleted.
+
 **Layering.** `app/routes/` and `app/layouts/` (loaders/actions) → `app/services/`
 (business logic) → `app/repos/` (Drizzle queries, one module per table) →
 `app/db/`. Repos validate UUIDs before querying and return `undefined`/`[]`
