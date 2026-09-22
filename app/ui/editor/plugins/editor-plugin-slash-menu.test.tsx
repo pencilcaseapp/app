@@ -8,7 +8,8 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
-import { $isHeadingNode, HeadingNode } from '@lexical/rich-text';
+import { $isHeadingNode, HeadingNode, QuoteNode } from '@lexical/rich-text';
+import { CodeHighlightNode, CodeNode } from '@lexical/code-core';
 import { $isListNode, ListItemNode, ListNode } from '@lexical/list';
 import {
   $getRoot,
@@ -37,7 +38,14 @@ function renderSlashMenu() {
         onError: (error) => {
           throw error;
         },
-        nodes: [HeadingNode, ListNode, ListItemNode],
+        nodes: [
+          HeadingNode,
+          QuoteNode,
+          CodeNode,
+          CodeHighlightNode,
+          ListNode,
+          ListItemNode,
+        ],
       }}
     >
       <EditorRef />
@@ -116,10 +124,12 @@ describe('EditorPluginSlashMenu', () => {
       'Numbered list',
       'Bulleted list',
       'Checklist',
+      'Code block',
+      'Quote',
     ]);
   });
 
-  test('separates the headings from the lists', async () => {
+  test('separates the headings, the lists and the other blocks', async () => {
     renderSlashMenu();
 
     await type('/');
@@ -131,8 +141,21 @@ describe('EditorPluginSlashMenu', () => {
       child => child.getAttribute('role') === 'separator',
     );
 
-    expect(separators).toHaveLength(1);
+    expect(separators).toHaveLength(2);
     expect(children.indexOf(separators[0])).toBe(3);
+    expect(children.indexOf(separators[1])).toBe(7);
+  });
+
+  test('stays closed for a slash typed in a code block', async () => {
+    const { user } = renderSlashMenu();
+
+    await type('/');
+    await user.click(screen.getByRole('menuitem', { name: 'Code block' }));
+
+    await type('/');
+
+    expect(rowType()).toBe('code');
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 
   test('stays closed for a slash typed after text', async () => {
@@ -201,6 +224,26 @@ describe('EditorPluginSlashMenu', () => {
     await user.click(screen.getByRole('menuitem', { name: 'Checklist' }));
 
     expect(rowType()).toBe('check');
+    expect(documentText()).toBe('');
+  });
+
+  test('turns the row into a code block', async () => {
+    const { user } = renderSlashMenu();
+
+    await type('/');
+    await user.click(screen.getByRole('menuitem', { name: 'Code block' }));
+
+    expect(rowType()).toBe('code');
+    expect(documentText()).toBe('');
+  });
+
+  test('turns the row into a quote', async () => {
+    const { user } = renderSlashMenu();
+
+    await type('/');
+    await user.click(screen.getByRole('menuitem', { name: 'Quote' }));
+
+    expect(rowType()).toBe('quote');
     expect(documentText()).toBe('');
   });
 

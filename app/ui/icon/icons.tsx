@@ -8,6 +8,8 @@ export type IconName
     | 'listUl'
     | 'listOl'
     | 'listCheck'
+    | 'code'
+    | 'quote'
     | 'share'
     | 'sidebar'
     | 'close'
@@ -108,6 +110,24 @@ export const icons: {
   'listOl': (
     <path
       d="M11 17H19M4 15.6853V15.5C4 14.6716 4.67157 14 5.5 14H5.54054C6.34658 14 7.00021 14.6534 7.00021 15.4595C7.00021 15.8103 6.8862 16.1519 6.67568 16.4326L4 20.0002L7 20M11 7H19M4 5L6 4V10"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'code': (
+    <path
+      d="M8 9L4.5 12L8 15M16 9L19.5 12L16 15M13.5 6.5L10.5 17.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'quote': (
+    <path
+      d="M5 5V19M10 8H19M10 12H19M10 16H15"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
