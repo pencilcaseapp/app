@@ -2,7 +2,7 @@ import { Outlet } from 'react-router';
 import { Logo } from '~/ui/logo/logo';
 
 export const handle = {
-  bodyClassName: 'w-full bg-pca-yellow-500 dark:bg-black',
+  bodyClassName: 'w-full bg-pca-yellow-500 dark:bg-pca-grey-900',
 };
 
 export default function LayoutAuth() {

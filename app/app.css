@@ -325,6 +325,16 @@ body {
   }
 }
 
+/* The page surface every screen sits on. A route that sets no background of
+   its own still matches the editor, and a layout that wants another one
+   overrides it from `bodyClassName` — the auth screens do in light mode,
+   which is why only the light side differs between them. */
+@layer base {
+  body {
+    @apply bg-pca-white dark:bg-pca-grey-900;
+  }
+}
+
 /* The gap anything sitting on the bottom edge of the screen keeps clear.
    In a browser tab that is whatever the toolbar below already reserves.
    The installed app has no toolbar and draws right through the home
