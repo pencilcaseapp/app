@@ -76,6 +76,19 @@ export const ResponsivePanelContent: FC<ResponsivePanelContentProps> = ({
       <DropdownMenuContent
         align="end"
         collisionPadding={12}
+        /*
+         * A non-modal Radix menu dismisses on any focus landing outside
+         * it, and the editor takes the focus back on its own: the
+         * auto-focus plugin does when the synced document turns out to
+         * be empty, and Lexical's reconciler does whenever it re-applies
+         * a selection while something else holds the focus. Either lands
+         * a moment after the panel opened and took it away, which read
+         * as the panel opening and closing again by itself. The panel is
+         * closed on purpose instead — the trigger, a click outside or
+         * Escape — so focus alone never takes it away, which is what the
+         * modal variant of the same menu does.
+         */
+        onFocusOutside={event => event.preventDefault()}
         className={classNames(
           // The menu's own `gap-0.5` wins over a plain `gap-0`, and the
           // panel spaces its parts itself.

@@ -107,6 +107,38 @@ describe('ResponsivePanel', () => {
       expect(onOpenChange).not.toHaveBeenCalled();
     });
 
+    /*
+     * The editor pulls the focus back on its own — the auto-focus plugin
+     * when the synced document turns out to be empty, and Lexical's
+     * reconciler whenever it re-applies a selection while something
+     * outside the editor holds the focus. Neither is the user closing
+     * the panel.
+     */
+    test('stays open when something outside takes the focus', async () => {
+      const onOpenChange = vi.fn();
+      renderResponsivePanel({ defaultOpen: true, onOpenChange });
+
+      const outside = document.createElement('div');
+      outside.tabIndex = -1;
+      document.body.append(outside);
+
+      await act(async () => {
+        outside.focus();
+      });
+
+      expect(screen.getByText('Panel content')).toBeInTheDocument();
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    test('closes on a click outside', async () => {
+      const user = userEvent.setup();
+      renderResponsivePanel({ defaultOpen: true });
+
+      await user.click(document.body);
+
+      expect(screen.queryByText('Panel content')).not.toBeInTheDocument();
+    });
+
     test('closes on Escape', async () => {
       const user = userEvent.setup();
       renderResponsivePanel({ defaultOpen: true });
