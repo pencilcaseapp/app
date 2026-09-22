@@ -294,12 +294,14 @@ describe('getDocumentList', () => {
         id: document2.id,
         title: document2.title,
         linkShared: false,
+        inviteShared: false,
         userId: user.id,
       },
       {
         id: document1.id,
         title: document1.title,
         linkShared: false,
+        inviteShared: false,
         userId: user.id,
       },
     ]);
@@ -318,12 +320,14 @@ describe('getDocumentList', () => {
       id: ownDocument.id,
       title: ownDocument.title,
       linkShared: false,
+      inviteShared: false,
       userId: collaborator.id,
     });
     expect(documents).toContainEqual({
       id: sharedDocument.id,
       title: sharedDocument.title,
       linkShared: true,
+      inviteShared: false,
       userId: owner.id,
     });
   });
@@ -350,12 +354,68 @@ describe('getDocumentList', () => {
         id: document.id,
         title: document.title,
         linkShared: false,
+        inviteShared: false,
         userId: user.id,
       },
     ]);
     expect(documents).not.toContainEqual(
       expect.objectContaining({ id: deleted.id }),
     );
+  });
+
+  it('reports a document somebody was invited to', async () => {
+    const user = await createTestUser();
+    const document = await createDocumentWithTitle(user.id);
+    await inviteDocumentCollaborator(document.id, 'invited@example.com');
+
+    const [item] = await getDocumentList(user.id);
+
+    expect(item).toMatchObject({
+      id: document.id,
+      linkShared: false,
+      inviteShared: true,
+    });
+  });
+
+  it('reports a document that is both linked and invited to', async () => {
+    const user = await createTestUser();
+    const document = await createSharedDocument(user.id);
+    await inviteDocumentCollaborator(document.id, 'invited@example.com');
+
+    const [item] = await getDocumentList(user.id);
+
+    expect(item).toMatchObject({
+      id: document.id,
+      linkShared: true,
+      inviteShared: true,
+    });
+  });
+
+  it('does not count somebody who came in through the link', async () => {
+    const user = await createTestUser();
+    const other = await createTestUser();
+    const document = await createSharedDocument(user.id);
+    await connectDocumentCollaborator(document.id, other.id);
+
+    const [item] = await getDocumentList(user.id);
+
+    expect(item).toMatchObject({
+      id: document.id,
+      inviteShared: false,
+    });
+  });
+
+  it('reports the invites of one document only', async () => {
+    const user = await createTestUser();
+    const invited = await createDocumentWithTitle(user.id);
+    const untouched = await createDocumentWithTitle(user.id);
+    await inviteDocumentCollaborator(invited.id, 'invited@example.com');
+
+    const documents = await getDocumentList(user.id);
+    const byId = new Map(documents.map(item => [item.id, item.inviteShared]));
+
+    expect(byId.get(invited.id)).toBe(true);
+    expect(byId.get(untouched.id)).toBe(false);
   });
 });
 

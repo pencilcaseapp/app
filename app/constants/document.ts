@@ -25,6 +25,15 @@ export const DOCUMENT_COLLABORATOR_SOURCE = ['link', 'invite'] as const;
 export type DocumentCollaboratorSource
   = typeof DOCUMENT_COLLABORATOR_SOURCE[number];
 
+/**
+ * Who can open a document, as the navigation says it: nobody but the
+ * owner (`private`), anyone with the link (`link`), or the people
+ * invited by e-mail (`invite`). The link wins over the invites — a
+ * document anyone can open is public whether or not somebody was
+ * invited to it as well.
+ */
+export type DocumentShareState = 'private' | 'link' | 'invite';
+
 /** An invite defaults to editing: inviting somebody by name is asking
  * them to work on the document, not to look at it. */
 export const DEFAULT_DOCUMENT_INVITE_ACCESS: DocumentAccess = 'edit';

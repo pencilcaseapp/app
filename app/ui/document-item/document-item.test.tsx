@@ -42,6 +42,54 @@ describe('DocumentItem', () => {
     );
   });
 
+  test('matches snapshot with a share mark', () => {
+    const { container } = render(
+      <DocumentItem
+        href="/documents/1"
+        title="My document"
+        shareState="link"
+      />,
+    );
+
+    expect(container).toMatchSnapshot();
+  });
+
+  test('leaves a private document unmarked', () => {
+    const { container } = render(
+      <DocumentItem href="/documents/1" title="My document" />,
+    );
+
+    expect(container.querySelector('svg')).toBeNull();
+    expect(screen.getByRole('link')).toHaveAccessibleName('My document');
+  });
+
+  test('marks a document shared through the link with a globe', () => {
+    const { container } = render(
+      <DocumentItem
+        href="/documents/1"
+        title="My document"
+        shareState="link"
+      />,
+    );
+
+    expect(container.querySelector('svg')).toBeInTheDocument();
+    expect(screen.getByRole('link'))
+      .toHaveAccessibleName('My document , Shared publicly');
+  });
+
+  test('marks a document shared by e-mail with the people icon', () => {
+    render(
+      <DocumentItem
+        href="/documents/1"
+        title="My document"
+        shareState="invite"
+      />,
+    );
+
+    expect(screen.getByRole('link'))
+      .toHaveAccessibleName('My document , Shared with invited people');
+  });
+
   test('renders the actionArea as a sibling of the link', () => {
     render(
       <DocumentItem

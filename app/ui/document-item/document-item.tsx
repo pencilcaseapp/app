@@ -1,16 +1,33 @@
 import { Typography } from '../typography/typography';
+import { Icon } from '../icon/icon';
+import type { IconName } from '../icon/icons';
 import type { PolymorphicComponentPropWithRef } from '../polymorphic-types/polymorphic-types';
+import type { DocumentShareState } from '~/constants/document';
 import classNames from 'classnames';
 import { useMedia } from 'react-use';
 import { useReducedMotion } from 'motion/react';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { REORDER_DURATION_MS } from './reorder-animation';
 
+/**
+ * The mark before the title, one per shared state. A private document
+ * carries none: it is the common case and stays quiet.
+ */
+const shareMarks: Record<
+  Exclude<DocumentShareState, 'private'>,
+  { icon: IconName; label: string }
+> = {
+  link: { icon: 'globe', label: 'Shared publicly' },
+  invite: { icon: 'users', label: 'Shared with invited people' },
+};
+
 export type DocumentItemProps<C extends React.ElementType>
   = PolymorphicComponentPropWithRef<
     C,
     {
       title: string;
+      /** Who can open the document, marked before the title. */
+      shareState?: DocumentShareState;
       actionArea?: React.ReactNode;
     }
   >;
@@ -18,6 +35,7 @@ export type DocumentItemProps<C extends React.ElementType>
 export function DocumentItem<C extends React.ElementType = 'a'>(
   { as = 'a' as C,
     title,
+    shareState = 'private',
     actionArea,
     className,
     ref,
@@ -94,6 +112,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
   ]);
 
   const Component = as as React.ElementType;
+  const shareMark = shareState === 'private' ? null : shareMarks[shareState];
 
   return (
     <div
@@ -114,6 +133,12 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
         title={title}
         className="flex items-center gap-2 min-w-0 flex-1 pl-3 h-12 lg:h-10 focus:outline-none before:content-[''] before:absolute before:inset-0 before:rounded-xl"
       >
+        {shareMark && (
+          <Icon
+            icon={shareMark.icon}
+            className="size-4 shrink-0 text-pca-grey-500 group-has-aria-[current=page]:text-pca-grey-900 dark:group-has-aria-[current=page]:text-pca-grey-900"
+          />
+        )}
         <Typography
           variant="bodySmall"
           as="span"
@@ -121,6 +146,15 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
         >
           {title}
         </Typography>
+        {/*
+          The mark is decorative, so what it says is read out after the
+          title instead — an entry announces itself by name first.
+        */}
+        {shareMark && (
+          <span className="sr-only">
+            {`, ${shareMark.label}`}
+          </span>
+        )}
       </Component>
       {actionArea && (
         <div className={classNames([
