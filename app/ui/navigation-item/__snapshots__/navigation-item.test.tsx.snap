@@ -3,11 +3,12 @@
 exports[`NavigationItem > matches snapshot 1`] = `
 <div>
   <div
-    class="transition-all group flex items-center justify-between gap-2 h-12 lg:h-10 pl-3 lg:pl-2 pr-0.5 rounded-xl cursor-pointer active:scale-[0.98] has-aria-[current=page]:bg-pca-grey-200 dark:has-aria-[current=page]:bg-pca-grey-800 hover:bg-pca-grey-100 dark:hover:bg-pca-grey-800 active:bg-pca-grey-100 dark:active:bg-pca-grey-800 has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50"
+    class="transition-all group relative flex items-center justify-between gap-2 h-12 lg:h-10 pl-3 lg:pl-2 pr-0.5 rounded-xl cursor-pointer active:scale-[0.98] has-aria-[current=page]:bg-pca-grey-200 dark:has-aria-[current=page]:bg-pca-grey-800 hover:bg-pca-grey-100 dark:hover:bg-pca-grey-800 active:bg-pca-grey-100 dark:active:bg-pca-grey-800 has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50"
   >
     <a
-      class="flex items-center gap-2 min-w-0 flex-1 py-1 focus:outline-none"
+      class="flex items-center gap-2 min-w-0 flex-1 py-1 focus:outline-none before:content-[''] before:absolute before:inset-0 before:rounded-xl"
       href="/spaces/personal"
+      title="Personal"
     >
       <svg
         aria-hidden="true"
@@ -26,13 +27,12 @@ exports[`NavigationItem > matches snapshot 1`] = `
       </svg>
       <span
         class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white text-left block truncate min-w-0 flex-1"
-        title="Personal"
       >
         Personal
       </span>
     </a>
     <div
-      class="shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity"
+      class="relative shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity"
     >
       <span
         data-testid="action-area"

@@ -30,4 +30,27 @@ describe('DocumentItem', () => {
     expect(anchor).toBeInTheDocument();
     expect(anchor).toHaveAttribute('href', '/documents/1');
   });
+
+  test('titles the link so the truncation tooltip survives the overlay', () => {
+    const { container } = render(
+      <DocumentItem href="/documents/1" title="My document" />,
+    );
+
+    expect(container.querySelector('a')).toHaveAttribute(
+      'title',
+      'My document',
+    );
+  });
+
+  test('renders the actionArea as a sibling of the link', () => {
+    render(
+      <DocumentItem
+        href="/documents/1"
+        title="My document"
+        actionArea={<button data-testid="action-area">…</button>}
+      />,
+    );
+
+    expect(screen.getByTestId('action-area').closest('a')).toBeNull();
+  });
 });

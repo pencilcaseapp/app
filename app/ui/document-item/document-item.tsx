@@ -71,7 +71,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
   const wrapperClasses = classNames([
     // Only colors transition — `transition-all` would fight the layout
     // animation for control over `transform`.
-    'transition-colors group h-12 lg:h-10 flex items-center justify-between gap-2 pr-1 lg:pr-0.5 rounded-xl cursor-pointer',
+    'transition-colors group relative h-12 lg:h-10 flex items-center justify-between gap-2 pr-1 lg:pr-0.5 rounded-xl cursor-pointer',
     // Hover / open state — covers the whole row including actionArea.
     // Scoped to non-active rows so the yellow active surface isn't overridden.
     'not-has-aria-[current=page]:hover:bg-pca-grey-100 dark:not-has-aria-[current=page]:hover:bg-pca-grey-800',
@@ -100,23 +100,31 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
       ref={wrapperRef}
       className={wrapperClasses}
     >
+      {/*
+        The link's `::before` stretches over the whole row, so the gap and
+        the padding the action area sits in navigate too instead of
+        swallowing the click. The action area is positioned to stay on top
+        of it, which keeps the two apart without nesting a button in the
+        link. The overlay covers the title, so the truncation tooltip moves
+        to the link itself.
+      */}
       <Component
         {...rest}
         ref={ref}
-        className="flex items-center gap-2 min-w-0 flex-1 pl-3 h-12 lg:h-10 focus:outline-none"
+        title={title}
+        className="flex items-center gap-2 min-w-0 flex-1 pl-3 h-12 lg:h-10 focus:outline-none before:content-[''] before:absolute before:inset-0 before:rounded-xl"
       >
         <Typography
           variant="bodySmall"
           as="span"
           className="block truncate min-w-0 flex-1 group-has-aria-[current=page]:font-semibold! dark:group-has-aria-[current=page]:text-pca-grey-900!"
-          title={title}
         >
           {title}
         </Typography>
       </Component>
       {actionArea && (
         <div className={classNames([
-          'shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity',
+          'relative shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity',
           'group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700',
           'dark:group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700',
           'group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700!',
