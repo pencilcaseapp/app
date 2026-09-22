@@ -19,8 +19,16 @@ import {
   type LexicalEditor,
   type TextNode,
 } from 'lexical';
-import { Fragment, useCallback, useMemo, useState } from 'react';
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { createPortal } from 'react-dom';
+import { useReducedMotion } from 'motion/react';
 import classNames from 'classnames';
 import { Icon } from '~/ui/icon/icon';
 import type { IconName } from '~/ui/icon/icons';
@@ -133,6 +141,25 @@ function matchOptions(query: string | null) {
 const SLASH_QUERY = /^\/(\S*)$/;
 
 /**
+ * The `scaleIn` of the other menus, run from JS.
+ *
+ * The typeahead plugin positions the menu from an element it takes out of the
+ * page and puts back on every keystroke. That cancels and restarts a CSS
+ * animation, so `animate-scale-in` played again on every character of the
+ * query and the menu read as closing and reopening. An animation started once,
+ * when the menu mounts, survives the same treatment.
+ */
+const SCALE_IN_KEYFRAMES = [
+  { opacity: 0.8, transform: 'scale(0.9)' },
+  { opacity: 1, transform: 'scale(1)' },
+];
+
+const SCALE_IN_OPTIONS = {
+  duration: 250,
+  easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+};
+
+/**
  * Whether the text up to the caret is the whole row. The trigger only looks at
  * the text node the caret sits in, so this is what keeps the menu to a row the
  * slash starts: nothing before it, nothing after the caret.
@@ -147,6 +174,83 @@ function $isWholeRow(text: string) {
 
   return row !== null && row.getTextContent() === text;
 }
+
+type SlashMenuProps = {
+  options: SlashMenuOption[];
+  selectedIndex: number | null;
+  onHighlight: (index: number) => void;
+  onSelect: (option: SlashMenuOption) => void;
+};
+
+const SlashMenu: React.FC<SlashMenuProps> = ({
+  options,
+  selectedIndex,
+  onHighlight,
+  onSelect,
+}) => {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (shouldReduceMotion) {
+      return;
+    }
+
+    menuRef.current?.animate(SCALE_IN_KEYFRAMES, SCALE_IN_OPTIONS);
+  }, [shouldReduceMotion]);
+
+  return (
+    <div
+      ref={menuRef}
+      role="menu"
+      aria-label="Block types"
+      className={classNames(
+        menuShellClasses,
+        menuSurfaceClasses.glass,
+        'z-50 origin-top-left',
+      )}
+    >
+      {options.map((option, index) => (
+        <Fragment key={option.key}>
+          {index > 0
+            && options[index - 1].block.group !== option.block.group
+            && <Separator className="my-1" />}
+          <button
+            type="button"
+            role="menuitem"
+            id={`typeahead-item-${index}`}
+            ref={option.setRefElement}
+            aria-selected={index === selectedIndex}
+            className={classNames(
+              menuItemClasses,
+              'cursor-pointer text-pca-grey-900 dark:text-pca-white',
+              index === selectedIndex
+              && 'bg-pca-grey-200/40 dark:bg-pca-white/10',
+            )}
+            // The caret stays where it is: the menu is picked from, not
+            // focused, and a blur would close it before the click lands.
+            onMouseDown={event => event.preventDefault()}
+            onMouseEnter={() => onHighlight(index)}
+            onClick={() => onSelect(option)}
+          >
+            <Icon
+              icon={option.block.icon}
+              className="mr-2 shrink-0 w-5 h-5"
+            />
+            <Typography
+              as="span"
+              variant="bodySmall"
+              className="grow text-inherit!"
+              textAlign="left"
+            >
+              {option.block.label}
+            </Typography>
+          </button>
+        </Fragment>
+      ))}
+    </div>
+  );
+};
 
 /**
  * The block menu the editor opens on a slash: typing `/` on an empty row
@@ -209,54 +313,12 @@ export const EditorPluginSlashMenu: React.FC = () => {
     }
 
     return createPortal(
-      <div
-        role="menu"
-        aria-label="Block types"
-        className={classNames(
-          menuShellClasses,
-          menuSurfaceClasses.glass,
-          'z-50 origin-top-left animate-scale-in',
-        )}
-      >
-        {menuOptions.map((option, index) => (
-          <Fragment key={option.key}>
-            {index > 0
-              && menuOptions[index - 1].block.group !== option.block.group
-              && <Separator className="my-1" />}
-            <button
-              type="button"
-              role="menuitem"
-              id={`typeahead-item-${index}`}
-              ref={option.setRefElement}
-              aria-selected={index === selectedIndex}
-              className={classNames(
-                menuItemClasses,
-                'cursor-pointer text-pca-grey-900 dark:text-pca-white',
-                index === selectedIndex
-                && 'bg-pca-grey-200/40 dark:bg-pca-white/10',
-              )}
-              // The caret stays where it is: the menu is picked from, not
-              // focused, and a blur would close it before the click lands.
-              onMouseDown={event => event.preventDefault()}
-              onMouseEnter={() => setHighlightedIndex(index)}
-              onClick={() => selectOptionAndCleanUp(option)}
-            >
-              <Icon
-                icon={option.block.icon}
-                className="mr-2 shrink-0 w-5 h-5"
-              />
-              <Typography
-                as="span"
-                variant="bodySmall"
-                className="grow text-inherit!"
-                textAlign="left"
-              >
-                {option.block.label}
-              </Typography>
-            </button>
-          </Fragment>
-        ))}
-      </div>,
+      <SlashMenu
+        options={menuOptions}
+        selectedIndex={selectedIndex}
+        onHighlight={setHighlightedIndex}
+        onSelect={selectOptionAndCleanUp}
+      />,
       anchorElementRef.current,
     );
   }, []);
