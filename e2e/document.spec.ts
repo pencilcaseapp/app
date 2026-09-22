@@ -99,3 +99,26 @@ test('the whole navigation row opens the document, menu space and all', async ({
   await expect(userA.page).toHaveURL(urlA);
   await expect(userA.editor).toContainText(heading);
 });
+
+test('a reloaded document comes back where the reader left off', async ({
+  user,
+}) => {
+  await user.createDocument();
+  await user.typeLines(
+    `Scroll doc ${Date.now()}`,
+    ...Array.from({ length: 45 }, (_, index) => `Line ${index + 1}`),
+  );
+
+  await user.page.evaluate(() => window.scrollTo({ top: 400 }));
+  await expect
+    .poll(() => user.page.evaluate(() => window.scrollY))
+    .toBe(400);
+
+  // The content only arrives over the websocket after the page has
+  // loaded, so the scroll position is taken once the editor has it.
+  await user.page.reload();
+  await expect(user.editor).toContainText('Line 45');
+  await expect
+    .poll(() => user.page.evaluate(() => window.scrollY))
+    .toBe(400);
+});

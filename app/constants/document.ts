@@ -42,3 +42,9 @@ export const documentInviteCopies = {
   invalidEmail: 'Enter a valid email address',
   tooManyInvites: 'Too many invites. Please try again later',
 };
+
+/**
+ * Where the scroll position of a document is kept, one entry per document
+ * id, so a reload can put the reader back where they were.
+ */
+export const DOCUMENT_SCROLL_STORAGE_PREFIX = 'pca-doc-scroll:';

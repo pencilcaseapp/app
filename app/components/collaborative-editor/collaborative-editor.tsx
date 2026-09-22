@@ -10,6 +10,9 @@ import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
 import { useFirstLocalEdit } from '~/hooks/use-first-local-edit';
 import { useAccessRevoked } from '~/hooks/use-access-revoked';
 import { useCollaborators } from '~/hooks/use-collaborators';
+import {
+  useDocumentScrollRestoration,
+} from '~/hooks/use-document-scroll-restoration';
 import { useCursorNameBounds } from '~/hooks/use-cursor-name-bounds';
 import { useRemoteCursorPositions } from '~/hooks/use-remote-cursor-positions';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
@@ -45,7 +48,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     editable,
     notification,
   }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSynced, setIsSynced] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const [isVirtualKeyboardOpen] = useVirtualKeyboard();
@@ -73,6 +75,10 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     }));
 
     const collaborators = useCollaborators(provider);
+
+    // The content is only in the page once the live connection has synced,
+    // so the reader can only be put back where they were after that.
+    useDocumentScrollRestoration(id, isSynced);
 
     useCursorNameBounds(ref);
     const syncCursorPositionsFn = useRemoteCursorPositions(ref);
