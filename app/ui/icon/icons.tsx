@@ -127,7 +127,7 @@ export const icons: {
   ),
   'quote': (
     <path
-      d="M5 5V19M10 8H19M10 12H19M10 16H15"
+      d="M8.5 6.75C5 8.5 3.5 10.75 3.5 14.25A2.9 2.9 0 1 0 6.25 11.35M17 6.75C13.5 8.5 12 10.75 12 14.25A2.9 2.9 0 1 0 14.75 11.35"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
