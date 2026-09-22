@@ -29,13 +29,16 @@ Three parts matter for us:
   extension writes, so two instances holding the same document do not race each
   other into Postgres.
 
-What it does **not** do is propagate connection closes. Unsharing a document has
-to reach every instance holding a connection to it, so `app/live/connections.ts`
-publishes revocations on its own channel (`pencil-case:live:revoke-access`) and
-each instance closes the connections it owns. The publisher also closes its own
-right away rather than waiting for its message to come back, which keeps the
-single instance case synchronous; `Connection.close()` removes the connection
-from the document, so handling the echo of our own message is a no-op.
+What it does **not** do is propagate connection closes or access changes.
+Unsharing a document, or changing what a collaborator may do, has to reach
+every instance holding a connection to it, so `app/live/connections.ts`
+publishes both on its own channel (`pencil-case:live:revoke-access`, a
+`type` of `close` or `access`) and each instance closes or switches the
+connections it owns. The publisher also handles its own right away rather
+than waiting for its message to come back, which keeps the single instance
+case synchronous; `Connection.close()` removes the connection from the
+document and a switch to the access a connection already has sends nothing,
+so handling the echo of our own message is a no-op.
 
 ## Configuration
 

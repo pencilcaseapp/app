@@ -40,9 +40,12 @@ vi.mock('~/repos/document', () => ({
 }));
 
 const closeDocumentConnectionsMock = vi.fn();
+const updateDocumentAccessMock = vi.fn();
 vi.mock('~/live/connections', () => ({
   closeDocumentConnections: (...args: unknown[]) =>
     closeDocumentConnectionsMock(...args),
+  updateDocumentAccess: (...args: unknown[]) =>
+    updateDocumentAccessMock(...args),
 }));
 
 const otherUserId = 'e6d9c8f1-0000-4000-8000-000000000000';
@@ -446,7 +449,7 @@ describe('changeLinkAccess', () => {
     });
   });
 
-  it('sends everybody else back for the access they have now', async () => {
+  it('switches everybody else to the access they have now', async () => {
     setDocumentLinkAccessMock.mockResolvedValue({
       id: documentFixture.id,
       linkAccess: 'view',
@@ -458,7 +461,8 @@ describe('changeLinkAccess', () => {
       linkAccess: 'view',
     });
 
-    expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
+    expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
+    expect(updateDocumentAccessMock).toHaveBeenCalledWith({
       documentId: documentFixture.id,
       keepUserId: userFixture.id,
     });

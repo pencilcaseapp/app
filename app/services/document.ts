@@ -10,7 +10,10 @@ import {
   type DocumentForViewer,
   type DocumentViewer,
 } from '~/repos/document';
-import { closeDocumentConnections } from '~/live/connections';
+import {
+  closeDocumentConnections,
+  updateDocumentAccess,
+} from '~/live/connections';
 import type { DocumentLinkAccess } from '~/constants/document';
 
 export type { DocumentViewer } from '~/repos/document';
@@ -172,9 +175,9 @@ export interface ChangeLinkAccessInput {
 /**
  * Changes what anyone with the link may do. Owner scoped like
  * `shareDocument`, and refused for a document that is not shared: there is
- * no link to give access to. Everybody else's live connections are closed so
- * they reconnect with the access they have now instead of keeping the one
- * they opened the document with.
+ * no link to give access to. Everybody else's live connections are switched
+ * in place to the access they have now instead of keeping the one they
+ * opened the document with; the people invited by e-mail keep theirs.
  */
 export async function changeLinkAccess(
   input: ChangeLinkAccessInput,
@@ -190,7 +193,7 @@ export async function changeLinkAccess(
     return [ChangeLinkAccessError.PermissionDenied];
   }
 
-  closeDocumentConnections({
+  await updateDocumentAccess({
     documentId: document.id,
     keepUserId: userId,
   });

@@ -147,13 +147,24 @@ the permission denied screen via `useAccessRevoked` → `revalidate()`; the
 hook also drops the provider from the shared socket right there, without
 the close `detach` would send, because the server queues a close for a
 connection it no longer has as the first message of the next connection to
-that document — and closes that one with it. The two
+that document — and closes that one with it. A change of access that leaves
+somebody in the document does not close anything: `updateDocumentAccess`
+resolves the access of each open connection again (`getLiveAccess`,
+registered with the server, against the viewer kept on the connection's
+context), flips Hocuspocus' per-connection `readOnly` in place and sends a
+stateless `LiveAccessMessage`, which `useLiveAccess` turns into the doc
+route's `editable` ahead of the loader saying the same. The connection and
+its awareness state stay, so the presence avatars do not flicker. The one
+case the hook still reconnects for is an edit the server received after it
+went read-only: it is dropped there but stays in the local document, so a
+switch with an unconfirmed change is treated like a revocation. The two
 sides find each other through `globalThis`: `server.ts` and the routes are
 separate bundles in prod, so importing the instance would give each of them
-their own. Closing is per process, and the Redis extension does not propagate
-it, so `registerRevocationChannel` publishes the revocation on its own channel
-and every instance closes the connections it holds; the publisher closes its
-own straight away, and the echo of its own message is a no-op.
+their own. Closing and switching are per process, and the Redis extension
+does not propagate either, so `registerRevocationChannel` publishes both on
+its own channel and every instance handles the connections it holds; the
+publisher handles its own straight away, and the echo of its own message is
+a no-op.
 
 **Subscriptions — `app/services/subscription.ts`, `docs/subscriptions.md`.**
 The pro subscription is sold through Creem (merchant of record): the
@@ -276,12 +287,14 @@ an address the owner typed, so `inviteCollaborator` caps the invites one
 account may send in a day (`DOCUMENT_INVITE_LIMIT` in
 `app/constants/document.ts`) and counts them from `email_logs` rather
 than `document_collaborators`, because removing an invite deletes its
-row. Changing or removing that
-access (`/doc/:id/collaborators/:collaboratorId/access` and `/remove`,
-hard delete) closes only that person's live connections through
-`closeDocumentConnections({ userId })`, and the doc route remounts the
-editor after every close the server made (`reconnects` in its `key`), so
-a person whose access changed reconnects with it — including when the
+row. Changing that access
+(`/doc/:id/collaborators/:collaboratorId/access`) switches only that
+person's live connections in place through
+`updateDocumentAccess({ userId })`; removing it (`/remove`, hard delete)
+closes them through `closeDocumentConnections({ userId })`, and the doc
+route remounts the editor after every close the server made
+(`reconnects` in its `key`), so a person whose access was revoked
+reconnects with whatever the link still gives them — including when the
 loader's `readOnly` did not change, which would otherwise leave them
 detached. `docs/emails.md` covers the e-mail.
 

@@ -4,7 +4,10 @@ import {
   type DocumentAccess,
 } from '~/constants/document';
 import { EmailTemplate } from '~/constants/email';
-import { closeDocumentConnections } from '~/live/connections';
+import {
+  closeDocumentConnections,
+  updateDocumentAccess,
+} from '~/live/connections';
 import {
   getDocumentForViewer,
   getInvitedCollaborators,
@@ -143,8 +146,8 @@ export interface ChangeCollaboratorAccessInput {
 
 /**
  * Changes what an invited person may do. Owner scoped through the update
- * like the link access. Only that person's live connections are closed, so
- * they reconnect with the access they have now and nobody else notices.
+ * like the link access. Only that person's live connections are switched,
+ * in place, so they get the access they have now and nobody else notices.
  */
 export async function changeCollaboratorAccess(
   input: ChangeCollaboratorAccessInput,
@@ -162,7 +165,7 @@ export async function changeCollaboratorAccess(
   }
 
   if (collaborator.userId) {
-    closeDocumentConnections({ documentId, userId: collaborator.userId });
+    await updateDocumentAccess({ documentId, userId: collaborator.userId });
   }
 
   return [null, { access: collaborator.access }];

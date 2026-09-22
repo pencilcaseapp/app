@@ -49,9 +49,12 @@ vi.mock('./email-templates', () => ({
 }));
 
 const closeDocumentConnectionsMock = vi.fn();
+const updateDocumentAccessMock = vi.fn();
 vi.mock('~/live/connections', () => ({
   closeDocumentConnections: (...args: unknown[]) =>
     closeDocumentConnectionsMock(...args),
+  updateDocumentAccess: (...args: unknown[]) =>
+    updateDocumentAccessMock(...args),
 }));
 
 const owner = { ...userFixture, hasSubscription: true };
@@ -266,7 +269,7 @@ describe('inviteCollaborator', () => {
 });
 
 describe('changeCollaboratorAccess', () => {
-  it('changes the access and reconnects the person', async () => {
+  it('changes the access and switches the person over', async () => {
     setCollaboratorAccessMock.mockResolvedValue({
       id: collaboratorId,
       userId: otherUserId,
@@ -288,13 +291,13 @@ describe('changeCollaboratorAccess', () => {
       collaboratorId,
       access: 'view',
     });
-    expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
+    expect(updateDocumentAccessMock).toHaveBeenCalledWith({
       documentId: documentFixture.id,
       userId: otherUserId,
     });
   });
 
-  it('has nobody to reconnect for a pending invite', async () => {
+  it('has nobody to switch over for a pending invite', async () => {
     setCollaboratorAccessMock.mockResolvedValue({
       id: collaboratorId,
       userId: null,
@@ -309,7 +312,7 @@ describe('changeCollaboratorAccess', () => {
     });
 
     expect(error).toBeNull();
-    expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
+    expect(updateDocumentAccessMock).not.toHaveBeenCalled();
   });
 
   it('denies whoever the update refused', async () => {
@@ -323,7 +326,7 @@ describe('changeCollaboratorAccess', () => {
     });
 
     expect(error).toBe(ChangeCollaboratorAccessError.PermissionDenied);
-    expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
+    expect(updateDocumentAccessMock).not.toHaveBeenCalled();
   });
 });
 

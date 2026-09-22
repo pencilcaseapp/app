@@ -164,6 +164,9 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
   // said what we may do now, the editor is remounted to reconnect with
   // that — whether or not the answer changed.
   const [reconnects, setReconnects] = useState(0);
+  // What the server switched the open connection to, ahead of the loader
+  // saying the same: the editor has to stop taking edits the server drops.
+  const [liveReadOnly, setLiveReadOnly] = useState<boolean | null>(null);
   const onFirstEdit = useCallback(
     () => reportDocumentEdit(params.id),
     [reportDocumentEdit, params.id],
@@ -172,8 +175,13 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
     await revalidate();
     setReconnects(count => count + 1);
   }, [revalidate]);
+  const onAccessChanged = useCallback(async (readOnly: boolean) => {
+    setLiveReadOnly(readOnly);
+    await revalidate();
+    setLiveReadOnly(null);
+  }, [revalidate]);
   const deleted = loaderData.ok && loaderData.deleted;
-  const readOnly = loaderData.ok && loaderData.readOnly;
+  const readOnly = liveReadOnly ?? (loaderData.ok && loaderData.readOnly);
   // Deleting the open document puts the notice above the content, out of
   // sight for a reader halfway down a long document.
   useScrollToTopOn(deleted);
@@ -206,14 +214,15 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
       <PageTitle>{title}</PageTitle>
       <ClientOnly>
         <CollaborativeEditor
-          // Deleting, restoring or a change of access changes what the
-          // live server grants, so the editor reconnects.
-          key={`${params.id}:${readOnly}:${reconnects}`}
+          // Deleting or restoring closes the connection, so the editor
+          // reconnects; a change of access is switched on the connection.
+          key={`${params.id}:${reconnects}`}
           id={params.id}
           presence={loaderData.ok ? loaderData.presence : null}
           onTitleChange={setTitle}
           onFirstEdit={onFirstEdit}
           onAccessRevoked={onAccessRevoked}
+          onAccessChanged={onAccessChanged}
           editable={!readOnly}
           notification={deleted && (
             <Notification

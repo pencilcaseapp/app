@@ -12,6 +12,7 @@ import {
   ForbiddenError,
   registerLiveServer,
   registerRevocationChannel,
+  type LiveConnectionContext,
 } from './connections';
 import { createRedisExtension } from './redis';
 import { extractTitleFromYDoc } from '~/utils/yjs';
@@ -57,12 +58,17 @@ const hocuspocus = new Hocuspocus({
     // A read-only connection still receives updates; its own are dropped.
     connectionConfig.readOnly = access.readOnly;
 
-    return { userId: user?.id };
+    // The viewer stays on the connection so its access can be resolved
+    // again in place when the owner changes it.
+    return {
+      userId: user?.id,
+      viewer: user ? { id: user.id, email: user.email } : undefined,
+    } satisfies LiveConnectionContext;
   },
   extensions,
 });
 
-registerLiveServer(hocuspocus);
+registerLiveServer(hocuspocus, getLiveAccess);
 
 export const ws = crossws({
   hooks: {

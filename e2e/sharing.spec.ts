@@ -92,13 +92,18 @@ test('granting editing reaches the other user immediately', async ({
 
   await userA.setLinkAccess('Can edit');
 
-  // No reload: the live server closes User B's connection and the client
-  // revalidates into an editor that may write.
+  // No reload: the live server switches User B's connection to writing
+  // and the client revalidates into an editor that may write.
   await expect(userB.editor).toBeVisible({ timeout: 10_000 });
 
   await userB.appendLinesAfter(heading, 'Written by User B.');
   await expect(userA.editor)
     .toContainText('Written by User B.', { timeout: 10_000 });
+
+  await userA.setLinkAccess('Can view');
+
+  await expect(userB.editor).toBeHidden({ timeout: 10_000 });
+  await expect(userB.content).toContainText('Written by User B.');
 });
 
 test('a free account is offered the upgrade over inviting', async ({

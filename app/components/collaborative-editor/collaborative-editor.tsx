@@ -8,11 +8,18 @@ import {
 } from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui/editor/editor';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useSocketClient } from '~/contexts/socket-client';
 import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
 import { useFirstLocalEdit } from '~/hooks/use-first-local-edit';
 import { useAccessRevoked } from '~/hooks/use-access-revoked';
+import { useLiveAccess } from '~/hooks/use-live-access';
 import { useCollaborators } from '~/hooks/use-collaborators';
 import { useCursorNameBounds } from '~/hooks/use-cursor-name-bounds';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
@@ -42,6 +49,8 @@ export interface CollaborativeEditorProps {
   onTitleChange?: (title: string | null) => void;
   onFirstEdit?: () => void;
   onAccessRevoked?: () => void;
+  /** The server switched this connection between read-only and write. */
+  onAccessChanged?: (readOnly: boolean) => void;
   topbarLeft?: React.ReactNode;
   topbarRight?: React.ReactNode;
   editable?: boolean;
@@ -55,6 +64,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     onTitleChange,
     onFirstEdit,
     onAccessRevoked,
+    onAccessChanged,
     topbarLeft,
     topbarRight,
     editable,
@@ -92,6 +102,17 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     useCursorNameBounds(ref);
     useFirstLocalEdit(doc, provider, onFirstEdit);
     useAccessRevoked(provider, onAccessRevoked);
+    useLiveAccess(provider, useCallback(
+      ({ readOnly, stale }: { readOnly: boolean; stale: boolean }) => {
+        if (stale) {
+          onAccessRevoked?.();
+          return;
+        }
+
+        onAccessChanged?.(readOnly);
+      },
+      [onAccessRevoked, onAccessChanged],
+    ));
 
     const [providerFactory] = useState(() => (
       id: string,
