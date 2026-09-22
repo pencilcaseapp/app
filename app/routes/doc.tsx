@@ -103,7 +103,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     owner: isOwner ? { name: user.name, email: user.email } : null,
     invited: isOwner ? await listInvitedCollaborators(params.id) : [],
     hasSubscription: user?.hasSubscription ?? false,
-    shared: document.shared,
+    linkShared: document.linkShared,
     linkAccess: document.linkAccess,
     deleted: document.deleted,
     readOnly: document.readOnly,
@@ -239,7 +239,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
             ? (
                 <SharePanel
                   documentId={params.id}
-                  shared={loaderData.shared}
+                  linkShared={loaderData.linkShared}
                   linkAccess={loaderData.linkAccess}
                   shareUrl={loaderData.shareUrl}
                   owner={loaderData.owner}

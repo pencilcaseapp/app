@@ -30,7 +30,8 @@ const DRAWER_FOOTER_HEIGHT = 64;
 
 export interface SharePanelProps {
   documentId: string;
-  shared: boolean;
+  /** True when the document is published to anyone with the link. */
+  linkShared: boolean;
   linkAccess: DocumentLinkAccess;
   shareUrl: string;
   owner: PersonWithAccess;
@@ -42,7 +43,7 @@ export interface SharePanelProps {
 
 export const SharePanel: React.FC<SharePanelProps> = ({
   documentId,
-  shared,
+  linkShared,
   linkAccess,
   shareUrl,
   owner,
@@ -57,8 +58,8 @@ export const SharePanel: React.FC<SharePanelProps> = ({
   const isMobile = useIsMobile();
   const canShare = useCanShare();
 
-  const sharing = fetcher.formData?.get('shared');
-  const isShared = sharing ? sharing === 'true' : shared;
+  const sharing = fetcher.formData?.get('linkShared');
+  const isShared = sharing ? sharing === 'true' : linkShared;
 
   // Sharing puts the access back to viewing server side, so a link being
   // turned on shows that right away instead of what it allowed last time.
@@ -70,7 +71,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
 
   const handleToggle = (checked: boolean) => {
     fetcher.submit(
-      { shared: String(checked), csrf: csrfToken },
+      { linkShared: String(checked), csrf: csrfToken },
       { method: 'post', action: href('/doc/:id/share', { id: documentId }) },
     );
   };

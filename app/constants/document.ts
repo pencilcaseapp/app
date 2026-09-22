@@ -14,6 +14,17 @@ export const DOCUMENT_LINK_ACCESS = DOCUMENT_ACCESS;
 
 export type DocumentLinkAccess = DocumentAccess;
 
+/**
+ * How somebody came to have access to a document: they followed the
+ * public link, or the owner invited their address by e-mail. The two are
+ * told apart by `document_collaborators.source` rather than by which of
+ * the other columns happen to be set.
+ */
+export const DOCUMENT_COLLABORATOR_SOURCE = ['link', 'invite'] as const;
+
+export type DocumentCollaboratorSource
+  = typeof DOCUMENT_COLLABORATOR_SOURCE[number];
+
 /** An invite defaults to editing: inviting somebody by name is asking
  * them to work on the document, not to look at it. */
 export const DEFAULT_DOCUMENT_INVITE_ACCESS: DocumentAccess = 'edit';

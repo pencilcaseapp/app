@@ -34,7 +34,7 @@ const invitedPeople: InvitedPerson[] = [
 type Action = (args: ActionFunctionArgs) => unknown;
 
 function renderSharePanel({
-  shared = false,
+  linkShared = false,
   linkAccess = 'view' as DocumentLinkAccess,
   defaultOpen = true,
   showUpgrade = false,
@@ -45,7 +45,7 @@ function renderSharePanel({
   collaboratorAccessAction = async () => ({ ok: true }),
   collaboratorRemoveAction = async () => ({ ok: true }),
 }: {
-  shared?: boolean;
+  linkShared?: boolean;
   linkAccess?: DocumentLinkAccess;
   defaultOpen?: boolean;
   showUpgrade?: boolean;
@@ -65,7 +65,7 @@ function renderSharePanel({
           <ToastProvider>
             <SharePanel
               documentId={documentId}
-              shared={shared}
+              linkShared={linkShared}
               linkAccess={linkAccess}
               shareUrl={shareUrl}
               owner={owner}
@@ -187,7 +187,7 @@ describe('SharePanel', () => {
   });
 
   test('reflects the unshared state', () => {
-    renderSharePanel({ shared: false });
+    renderSharePanel({ linkShared: false });
 
     expect(screen.getByRole('switch')).not.toBeChecked();
     expect(
@@ -196,7 +196,7 @@ describe('SharePanel', () => {
   });
 
   test('reflects the shared state', () => {
-    renderSharePanel({ shared: true });
+    renderSharePanel({ linkShared: true });
 
     expect(screen.getByRole('switch')).toBeChecked();
     expect(
@@ -205,7 +205,7 @@ describe('SharePanel', () => {
   });
 
   test('keeps the copy button enabled while the link is off', () => {
-    renderSharePanel({ shared: false });
+    renderSharePanel({ linkShared: false });
 
     expect(
       screen.getByRole('button', { name: 'Copy link' }),
@@ -213,7 +213,7 @@ describe('SharePanel', () => {
   });
 
   test('lists the owner under the people with access', () => {
-    renderSharePanel({ shared: true });
+    renderSharePanel({ linkShared: true });
 
     expect(screen.getByRole('heading', { name: 'People with access · 1' }))
       .toBeInTheDocument();
@@ -231,7 +231,7 @@ describe('SharePanel', () => {
             <ToastProvider>
               <SharePanel
                 documentId={documentId}
-                shared
+                linkShared
                 linkAccess="view"
                 shareUrl={shareUrl}
                 owner={{ name: null, email: owner.email }}
@@ -253,7 +253,7 @@ describe('SharePanel', () => {
     const share = stubShare();
     vi.mocked(useIsMobile).mockReturnValue(true);
 
-    renderSharePanel({ shared: true });
+    renderSharePanel({ linkShared: true });
 
     expect(
       screen.queryByRole('button', { name: 'Copy link' }),
@@ -267,7 +267,7 @@ describe('SharePanel', () => {
   test('keeps the copy button on phones without the share sheet', () => {
     vi.mocked(useIsMobile).mockReturnValue(true);
 
-    renderSharePanel({ shared: true });
+    renderSharePanel({ linkShared: true });
 
     expect(
       screen.getByRole('button', { name: 'Copy link' }),
@@ -279,9 +279,9 @@ describe('SharePanel', () => {
     let submittedShared: FormDataEntryValue | null = null;
 
     renderSharePanel({
-      shared: false,
+      linkShared: false,
       shareAction: async ({ request }) => {
-        submittedShared = (await request.formData()).get('shared');
+        submittedShared = (await request.formData()).get('linkShared');
         return { ok: true };
       },
     });
@@ -292,7 +292,7 @@ describe('SharePanel', () => {
   });
 
   test('hides the link access while the document is private', () => {
-    renderSharePanel({ shared: false });
+    renderSharePanel({ linkShared: false });
 
     expect(
       screen.queryByRole('combobox', { name: 'Link access' }),
@@ -300,7 +300,7 @@ describe('SharePanel', () => {
   });
 
   test('shows the access of a shared link', () => {
-    renderSharePanel({ shared: true, linkAccess: 'edit' });
+    renderSharePanel({ linkShared: true, linkAccess: 'edit' });
 
     expect(screen.getByRole('combobox', { name: 'Link access' }))
       .toHaveTextContent('Can edit');
@@ -311,7 +311,7 @@ describe('SharePanel', () => {
     let submitted: FormDataEntryValue | null = null;
 
     renderSharePanel({
-      shared: true,
+      linkShared: true,
       linkAccessAction: async ({ request }) => {
         submitted = (await request.formData()).get('linkAccess');
         return { ok: true };
@@ -328,7 +328,7 @@ describe('SharePanel', () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
 
     renderSharePanel({
-      shared: true,
+      linkShared: true,
       linkAccessAction: () => new Promise(() => {}),
     });
 
@@ -344,7 +344,7 @@ describe('SharePanel', () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
 
     renderSharePanel({
-      shared: false,
+      linkShared: false,
       // What the link allowed the last time it was shared.
       linkAccess: 'edit',
       shareAction: () => new Promise(() => {}),
@@ -361,7 +361,7 @@ describe('SharePanel', () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
 
     renderSharePanel({
-      shared: false,
+      linkShared: false,
       shareAction: () => new Promise(() => {}),
     });
 
@@ -566,7 +566,7 @@ describe('SharePanel', () => {
   });
 
   test('says that invited people can open a private document', () => {
-    renderSharePanel({ shared: false, invited: invitedPeople });
+    renderSharePanel({ linkShared: false, invited: invitedPeople });
 
     expect(screen.getByText('Right now only invited people can open it'))
       .toBeInTheDocument();

@@ -89,12 +89,13 @@ export async function getDocumentForViewer(
   const rows = await db.select({
     id: documents.id,
     title: documents.title,
-    shared: documents.shared,
+    linkShared: documents.linkShared,
     linkAccess: documents.linkAccess,
     userId: documents.userId,
     deletedAt: documents.deletedAt,
     collaborator: {
       id: documentCollaborators.id,
+      source: documentCollaborators.source,
       userId: documentCollaborators.userId,
       email: documentCollaborators.email,
       access: documentCollaborators.access,
@@ -108,7 +109,7 @@ export async function getDocumentForViewer(
     ))
     .where(eq(documents.id, id));
 
-  return rows.find(row => row.collaborator?.email) ?? rows[0];
+  return rows.find(row => row.collaborator?.source === 'invite') ?? rows[0];
 }
 
 export type DocumentForViewer
@@ -136,7 +137,7 @@ export async function getInvitedCollaborators(documentId: string) {
     .leftJoin(users, eq(users.id, documentCollaborators.userId))
     .where(and(
       eq(documentCollaborators.documentId, documentId),
-      isNotNull(documentCollaborators.email),
+      eq(documentCollaborators.source, 'invite'),
     ))
     .orderBy(asc(documentCollaborators.createdAt));
 }
@@ -169,7 +170,7 @@ export async function getDocumentList(userId: string) {
   return db.select({
     id: documents.id,
     title: documents.title,
-    shared: documents.shared,
+    linkShared: documents.linkShared,
     userId: documents.userId,
   })
     .from(documents)
@@ -245,30 +246,32 @@ export async function updateDocument(
   return document;
 }
 
-export interface SetDocumentSharedInput {
+export interface SetDocumentLinkSharedInput {
   documentId: string;
   ownerId: string;
-  shared: boolean;
+  linkShared: boolean;
 }
 
 /**
- * Flips the shared flag only when the document belongs to `ownerId`, so the
- * authorisation check does not need a query of its own. Returns `undefined`
- * when the document does not exist, is deleted, or is owned by somebody else.
- * Sharing resets the link access, so a link turned on again never hands out
- * editing because it did the last time. Like the soft deletion this leaves
- * `updatedAt` alone: sharing is not an edit and should not move the document
- * in the navigation.
+ * Turns the link on or off, only when the document belongs to `ownerId`, so
+ * the authorisation check does not need a query of its own. Returns
+ * `undefined` when the document does not exist, is deleted, or is owned by
+ * somebody else. Turning the link on resets the link access, so a link
+ * turned on again never hands out editing because it did the last time.
+ * Like the soft deletion this leaves `updatedAt` alone: sharing is not an
+ * edit and should not move the document in the navigation.
  */
-export async function setDocumentShared(input: SetDocumentSharedInput) {
-  const { documentId, ownerId, shared } = input;
+export async function setDocumentLinkShared(
+  input: SetDocumentLinkSharedInput,
+) {
+  const { documentId, ownerId, linkShared } = input;
 
   if (!isUuid(documentId) || !isUuid(ownerId)) {
     return undefined;
   }
 
   const [document] = await db.update(documents)
-    .set({ shared, linkAccess: DEFAULT_DOCUMENT_LINK_ACCESS })
+    .set({ linkShared, linkAccess: DEFAULT_DOCUMENT_LINK_ACCESS })
     .where(and(
       eq(documents.id, documentId),
       eq(documents.userId, ownerId),
@@ -276,7 +279,7 @@ export async function setDocumentShared(input: SetDocumentSharedInput) {
     ))
     .returning({
       id: documents.id,
-      shared: documents.shared,
+      linkShared: documents.linkShared,
       linkAccess: documents.linkAccess,
     });
 
@@ -291,8 +294,8 @@ export interface SetDocumentLinkAccessInput {
 
 /**
  * Changes what anyone with the link may do. Owner scoped like
- * `setDocumentShared` and only for a document that is actually shared, and
- * it leaves `updatedAt` alone for the same reason.
+ * `setDocumentLinkShared` and only for a document whose link is on, and it
+ * leaves `updatedAt` alone for the same reason.
  */
 export async function setDocumentLinkAccess(
   input: SetDocumentLinkAccessInput,
@@ -308,7 +311,7 @@ export async function setDocumentLinkAccess(
     .where(and(
       eq(documents.id, documentId),
       eq(documents.userId, ownerId),
-      eq(documents.shared, true),
+      eq(documents.linkShared, true),
       isNull(documents.deletedAt),
     ))
     .returning({
@@ -320,8 +323,8 @@ export async function setDocumentLinkAccess(
 }
 
 /**
- * Marks the document deleted and turns sharing off in the same update.
- * Scoped to the owner like `setDocumentShared`; returns `undefined` when
+ * Marks the document deleted and turns the link off in the same update.
+ * Scoped to the owner like `setDocumentLinkShared`; returns `undefined` when
  * the document does not exist or belongs to somebody else. Neither this
  * nor the restore touches `updatedAt`: the content did not change, and a
  * restored document should land back where it was in the navigation.
@@ -332,7 +335,7 @@ export async function softDeleteDocument(documentId: string, ownerId: string) {
   }
 
   const [document] = await db.update(documents)
-    .set({ deletedAt: sql`NOW()`, shared: false })
+    .set({ deletedAt: sql`NOW()`, linkShared: false })
     .where(and(
       eq(documents.id, documentId),
       eq(documents.userId, ownerId),
@@ -420,6 +423,7 @@ export async function connectCollaborator(input: ConnectCollaboratorInput) {
   const [collaborator] = await db.insert(documentCollaborators)
     .values({
       documentId,
+      source: 'link',
       userId,
     })
     .onConflictDoNothing({
@@ -445,7 +449,7 @@ export async function removeLinkCollaborators(documentId: string) {
   await db.delete(documentCollaborators)
     .where(and(
       eq(documentCollaborators.documentId, documentId),
-      isNull(documentCollaborators.email),
+      eq(documentCollaborators.source, 'link'),
     ));
 }
 
@@ -480,14 +484,14 @@ export async function inviteCollaborator(input: InviteCollaboratorInput) {
   }
 
   const [collaborator] = await db.insert(documentCollaborators)
-    .values({ documentId, email, access, userId })
+    .values({ documentId, source: 'invite', email, access, userId })
     .onConflictDoUpdate({
       target: [
         documentCollaborators.documentId,
         documentCollaborators.userId,
       ],
-      set: { email, access, updatedAt: sql`NOW()` },
-      setWhere: isNull(documentCollaborators.email),
+      set: { source: 'invite', email, access, updatedAt: sql`NOW()` },
+      setWhere: eq(documentCollaborators.source, 'link'),
     })
     .returning();
 
@@ -516,7 +520,7 @@ export async function acceptInvite(input: AcceptInviteInput) {
     const invite = await tx.query.documentCollaborators.findFirst({
       where: {
         id: collaboratorId,
-        email: { isNotNull: true },
+        source: 'invite',
         acceptedAt: { isNull: true },
       },
       columns: { documentId: true },
@@ -530,7 +534,7 @@ export async function acceptInvite(input: AcceptInviteInput) {
       .where(and(
         eq(documentCollaborators.documentId, invite.documentId),
         eq(documentCollaborators.userId, userId),
-        isNull(documentCollaborators.email),
+        eq(documentCollaborators.source, 'link'),
       ));
 
     const [collaborator] = await tx.update(documentCollaborators)
@@ -551,7 +555,7 @@ export interface OwnedCollaboratorInput {
 /**
  * The collaborator row belongs to a document `ownerId` owns and has not
  * deleted, which lets the updates below carry their authorisation check
- * like `setDocumentShared` does.
+ * like `setDocumentLinkShared` does.
  */
 function ownedCollaborator(input: OwnedCollaboratorInput) {
   const { documentId, ownerId, collaboratorId } = input;
@@ -592,7 +596,7 @@ export async function setCollaboratorAccess(
     .set({ access, updatedAt: sql`NOW()` })
     .where(and(
       ownedCollaborator({ documentId, ownerId, collaboratorId }),
-      isNotNull(documentCollaborators.email),
+      eq(documentCollaborators.source, 'invite'),
     ))
     .returning({
       id: documentCollaborators.id,

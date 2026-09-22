@@ -22,7 +22,7 @@ export async function createDocumentWithTitle(userId: string) {
 export async function createSharedDocument(userId: string) {
   const [document] = await db.insert(documents).values({
     title: faker.lorem.sentence({ min: 3, max: 10 }),
-    shared: true,
+    linkShared: true,
     userId: userId ?? null,
   }).returning();
 
@@ -48,6 +48,7 @@ export async function connectDocumentCollaborator(
 ) {
   const [collaborator] = await db.insert(documentCollaborators).values({
     documentId,
+    source: 'link',
     userId,
   }).returning();
 
@@ -74,6 +75,7 @@ export async function inviteDocumentCollaborator(
   const { access = 'edit', userId, accepted = false } = options;
   const [collaborator] = await db.insert(documentCollaborators).values({
     documentId,
+    source: 'invite',
     email,
     access,
     userId,
