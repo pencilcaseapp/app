@@ -1,6 +1,8 @@
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import classNames from 'classnames';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
+import { useRef } from 'react';
+import { useScrollEdgeFade } from '~/hooks/use-scroll-edge-fade';
 import { Button } from '~/ui/button/button';
 import { DrawerContent } from '~/ui/drawer/drawer-content';
 import { DrawerContentInner } from '~/ui/drawer/drawer-content-inner';
@@ -26,7 +28,8 @@ export type ResponsivePanelContentProps = {
  * the scrollable content and the footer pinned below it. Both variants cap
  * their own height — the drawer through `maxHeight`, the dropdown through
  * the height Radix leaves between the trigger and the viewport edge — so
- * only the content in between ever scrolls.
+ * only the content in between ever scrolls, dissolving into the title and
+ * the footer on whichever side still has something behind it.
  */
 export const ResponsivePanelContent: FC<ResponsivePanelContentProps> = ({
   children,
@@ -81,14 +84,38 @@ export const ResponsivePanelContent: FC<ResponsivePanelContentProps> = ({
         )}
       >
         <PanelTitle title={title} />
-        {/* The negative inset keeps focus rings inside the scroll area
-            from being clipped by its own overflow. */}
-        <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-1">
+        <PanelScrollArea fadeBottom={footerArea !== undefined}>
           {children}
-        </div>
+        </PanelScrollArea>
         {footerArea && <div className="shrink-0 pt-3">{footerArea}</div>}
       </DropdownMenuContent>
     </DropdownMenuPortal>
+  );
+};
+
+/*
+ * The scrollable middle of the dropdown variant, which dissolves into the
+ * title above and the footer below it the same way the drawer does. It
+ * holds the ref itself because the menu mounts its content only once it
+ * opens, and the fade has to start with the element there.
+ */
+const PanelScrollArea: FC<PropsWithChildren<{ fadeBottom: boolean }>> = ({
+  children,
+  fadeBottom,
+}) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useScrollEdgeFade(contentRef, { top: true, bottom: fadeBottom });
+
+  return (
+    // The negative inset keeps focus rings inside the scroll area from
+    // being clipped by its own overflow.
+    <div
+      ref={contentRef}
+      className="scroll-edge-fade -mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-1"
+    >
+      {children}
+    </div>
   );
 };
 
