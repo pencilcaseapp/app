@@ -1,8 +1,8 @@
-import { eq, type InferSelectModel } from 'drizzle-orm';
+import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { emailLogs } from '~/db/schema';
-import { EmailLogStatus } from '~/constants/email';
+import { EmailLogStatus, type EmailTemplate } from '~/constants/email';
 
 export type EmailLog = InferSelectModel<typeof emailLogs>;
 
@@ -36,6 +36,32 @@ export async function claimEmailLog(input: {
     .returning();
 
   return log;
+}
+
+/**
+ * How many e-mails of one template the user has caused since a point in
+ * time, every status included: a send that was skipped or failed was
+ * still asked for, which is what a rate limit counts.
+ */
+export async function countEmailLogsByUser(input: {
+  userId: string;
+  template: EmailTemplate;
+  since: Date;
+}) {
+  const { userId, template, since } = input;
+
+  if (!isUuid(userId)) {
+    return 0;
+  }
+
+  return db.$count(
+    emailLogs,
+    and(
+      eq(emailLogs.userId, userId),
+      eq(emailLogs.template, template),
+      gt(emailLogs.createdAt, since),
+    ),
+  );
 }
 
 export async function getEmailLog(id: string) {

@@ -2,8 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { faker } from '@faker-js/faker';
 import { EmailLogStatus, EmailTemplate } from '~/constants/email';
 import { createTestUser } from '~/test/data-factories/user';
+import { db } from '~/db';
+import { emailLogs } from '~/db/schema';
+import { eq } from 'drizzle-orm';
 import {
   claimEmailLog,
+  countEmailLogsByUser,
   getEmailLog,
   getEmailLogByIdempotencyKey,
   markEmailLogFailed,
@@ -11,10 +15,15 @@ import {
   markEmailLogSkipped,
 } from './email-log';
 
-function logInput(overrides: Partial<{ userId: string }> = {}) {
+function logInput(overrides: Partial<{
+  userId: string;
+  template: EmailTemplate;
+}> = {}) {
+  const template = overrides.template ?? EmailTemplate.OtpCode;
+
   return {
-    idempotencyKey: `${EmailTemplate.OtpCode}:${faker.string.uuid()}`,
-    template: EmailTemplate.OtpCode,
+    idempotencyKey: `${template}:${faker.string.uuid()}`,
+    template,
     email: faker.internet.email(),
     subject: 'Your code',
     ...overrides,
@@ -133,5 +142,64 @@ describe('markEmailLogFailed', () => {
 
     expect(log?.status).toBe(EmailLogStatus.Failed);
     expect(log?.error).toBe('Boom');
+  });
+});
+
+describe('countEmailLogsByUser', () => {
+  const template = EmailTemplate.DocumentInvite;
+
+  function invite(userId?: string) {
+    return claimEmailLog(logInput({ userId, template }));
+  }
+
+  it('counts the e-mails of the template the user sent since', async () => {
+    const user = await createTestUser();
+    const other = await createTestUser();
+    const since = new Date(Date.now() - 60 * 1000);
+    const sent = await invite(user.id);
+    const failed = await invite(user.id);
+    const skipped = await invite(user.id);
+    await markEmailLogSent({ id: sent!.id });
+    await markEmailLogFailed({ id: failed!.id, error: 'boom' });
+    await markEmailLogSkipped({ id: skipped!.id, reason: 'Test address' });
+    await claimEmailLog(logInput({ userId: user.id }));
+    await invite(other.id);
+    await invite();
+
+    const count = await countEmailLogsByUser({
+      userId: user.id,
+      template,
+      since,
+    });
+
+    expect(count).toBe(3);
+  });
+
+  it('leaves out the e-mails before the date', async () => {
+    const user = await createTestUser();
+    const old = await invite(user.id);
+    await db
+      .update(emailLogs)
+      .set({ createdAt: new Date(Date.now() - 2 * 60 * 1000) })
+      .where(eq(emailLogs.id, old!.id));
+    await invite(user.id);
+
+    const count = await countEmailLogsByUser({
+      userId: user.id,
+      template,
+      since: new Date(Date.now() - 60 * 1000),
+    });
+
+    expect(count).toBe(1);
+  });
+
+  it('returns 0 for an id that is not a uuid', async () => {
+    const count = await countEmailLogsByUser({
+      userId: 'nobody',
+      template,
+      since: new Date(0),
+    });
+
+    expect(count).toBe(0);
   });
 });

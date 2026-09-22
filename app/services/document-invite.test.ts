@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   changeCollaboratorAccess,
   ChangeCollaboratorAccessError,
@@ -12,6 +12,8 @@ import {
 } from './document-invite';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
+import { DOCUMENT_INVITE_LIMIT } from '~/constants/document';
+import { EmailTemplate } from '~/constants/email';
 
 const getDocumentForViewerMock = vi.fn();
 const getInvitedCollaboratorsMock = vi.fn();
@@ -32,6 +34,12 @@ vi.mock('~/repos/document', () => ({
 const getUserByEmailMock = vi.fn();
 vi.mock('~/repos/user', () => ({
   getUserByEmail: (...args: unknown[]) => getUserByEmailMock(...args),
+}));
+
+const countEmailLogsByUserMock = vi.fn();
+vi.mock('~/repos/email-log', () => ({
+  countEmailLogsByUser: (...args: unknown[]) =>
+    countEmailLogsByUserMock(...args),
 }));
 
 const sendEmailDocumentInviteMock = vi.fn();
@@ -80,7 +88,12 @@ beforeEach(() => {
   vi.clearAllMocks();
   getDocumentForViewerMock.mockResolvedValue(ownedDocument());
   getUserByEmailMock.mockResolvedValue(undefined);
+  countEmailLogsByUserMock.mockResolvedValue(0);
   insertInviteMock.mockResolvedValue({ id: inviteId });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe('listInvitedCollaborators', () => {
@@ -223,6 +236,31 @@ describe('inviteCollaborator', () => {
     const [error] = await invite('grace@example.com');
 
     expect(error).toBe(InviteCollaboratorError.AlreadyInvited);
+    expect(sendEmailDocumentInviteMock).not.toHaveBeenCalled();
+  });
+
+  it('counts the invite e-mails the owner sent in the last day', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-22T12:00:00Z'));
+    countEmailLogsByUserMock.mockResolvedValue(DOCUMENT_INVITE_LIMIT - 1);
+
+    const [error] = await invite('grace@example.com');
+
+    expect(error).toBeNull();
+    expect(countEmailLogsByUserMock).toHaveBeenCalledWith({
+      userId: owner.id,
+      template: EmailTemplate.DocumentInvite,
+      since: new Date('2026-09-21T12:00:00Z'),
+    });
+  });
+
+  it('refuses an invite past the limit', async () => {
+    countEmailLogsByUserMock.mockResolvedValue(DOCUMENT_INVITE_LIMIT);
+
+    const [error] = await invite('grace@example.com');
+
+    expect(error).toBe(InviteCollaboratorError.TooManyInvites);
+    expect(insertInviteMock).not.toHaveBeenCalled();
     expect(sendEmailDocumentInviteMock).not.toHaveBeenCalled();
   });
 });

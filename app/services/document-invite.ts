@@ -1,4 +1,9 @@
-import type { DocumentAccess } from '~/constants/document';
+import {
+  DOCUMENT_INVITE_LIMIT,
+  DOCUMENT_INVITE_WINDOW_MS,
+  type DocumentAccess,
+} from '~/constants/document';
+import { EmailTemplate } from '~/constants/email';
 import { closeDocumentConnections } from '~/live/connections';
 import {
   getDocumentForViewer,
@@ -7,6 +12,7 @@ import {
   removeCollaborator as deleteCollaborator,
   setCollaboratorAccess,
 } from '~/repos/document';
+import { countEmailLogsByUser } from '~/repos/email-log';
 import { getUserByEmail, type User } from '~/repos/user';
 import { normalizeEmail } from '~/utils/email';
 import { sendEmailDocumentInvite } from './email-templates';
@@ -39,6 +45,7 @@ export enum InviteCollaboratorError {
   PermissionDenied,
   SubscriptionRequired,
   Owner,
+  TooManyInvites,
   AlreadyInvited,
 }
 
@@ -58,7 +65,10 @@ export interface InviteCollaboratorInput {
  * and the e-mail carries its id as the idempotency scope, so a retried
  * send never goes out twice while an invite sent afresh after a removal
  * does. The address is stored the way sign-in stores it, which is what
- * lets the invite find its account later.
+ * lets the invite find its account later. The invites one account may
+ * send in a day are capped like the codes, counted from the e-mail log
+ * rather than the collaborators, because removing an invite deletes its
+ * row and would otherwise reset the count.
  */
 export async function inviteCollaborator(
   input: InviteCollaboratorInput,
@@ -77,6 +87,10 @@ export async function inviteCollaborator(
 
   if (email === normalizeEmail(user.email)) {
     return [InviteCollaboratorError.Owner];
+  }
+
+  if (!await canInvite(user.id)) {
+    return [InviteCollaboratorError.TooManyInvites];
   }
 
   const invitee = await getUserByEmail(email);
@@ -101,6 +115,16 @@ export async function inviteCollaborator(
   });
 
   return [null, { email }];
+}
+
+async function canInvite(userId: string) {
+  const count = await countEmailLogsByUser({
+    userId,
+    template: EmailTemplate.DocumentInvite,
+    since: new Date(Date.now() - DOCUMENT_INVITE_WINDOW_MS),
+  });
+
+  return count < DOCUMENT_INVITE_LIMIT;
 }
 
 export enum ChangeCollaboratorAccessError {
