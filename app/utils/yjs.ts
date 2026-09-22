@@ -22,12 +22,12 @@ export function extractTitleFromYDoc(ydoc: Y.Doc): string | null {
       continue;
     }
 
-    const text = getTextFromXmlText(delta.insert);
+    const text = getTextFromXmlText(delta.insert).trim();
     if (text === '') {
       return null;
     }
 
-    return text.length > 70 ? `${text.slice(0, 70)} …` : text;
+    return text.length > 70 ? `${text.slice(0, 70).trimEnd()} …` : text;
   }
 
   return null;

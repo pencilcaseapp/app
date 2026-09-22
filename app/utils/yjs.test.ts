@@ -235,8 +235,24 @@ describe('extractTitleFromYDoc', () => {
     );
 
     const title = extractTitleFromYDoc(doc);
-    expect(title).toBe(`${longText.slice(0, 70)} …`);
-    expect(title!.length).toBe(72); // 70 chars + ' …'
+    expect(title).toBe(`${longText.slice(0, 70).trimEnd()} …`);
+    expect(title).not.toMatch(/\s\s…$/);
+  });
+
+  it('trims whitespace around the title', () => {
+    const doc = createYDocFromEditorState(
+      makeEditorState([makeHeading('  My Document Title  ', 'h1')]),
+    );
+
+    expect(extractTitleFromYDoc(doc)).toBe('My Document Title');
+  });
+
+  it('returns null when the first block is only whitespace', () => {
+    const doc = createYDocFromEditorState(
+      makeEditorState([makeParagraph('   '), makeParagraph('Body text')]),
+    );
+
+    expect(extractTitleFromYDoc(doc)).toBeNull();
   });
 
   it('returns null for an empty document', () => {
