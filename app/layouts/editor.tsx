@@ -51,7 +51,7 @@ import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 
 export const handle = {
-  bodyClassName: 'w-full bg-pca-white dark:bg-pca-grey-900',
+  bodyClassName: 'w-full',
 };
 
 const bottomNavigation = [
