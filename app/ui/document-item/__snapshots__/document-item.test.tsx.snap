@@ -3,21 +3,21 @@
 exports[`DocumentItem > matches snapshot 1`] = `
 <div>
   <div
-    class="transition-colors group h-12 lg:h-10 flex items-center justify-between gap-2 pr-1 lg:pr-0.5 rounded-xl cursor-pointer not-has-aria-[current=page]:hover:bg-pca-grey-100 dark:not-has-aria-[current=page]:hover:bg-pca-grey-800 not-has-aria-[current=page]:has-data-[state=open]:bg-pca-grey-100 dark:not-has-aria-[current=page]:has-data-[state=open]:bg-pca-grey-800 not-has-aria-[current=page]:has-[:focus-visible]:bg-pca-grey-200 dark:not-has-aria-[current=page]:has-[:focus-visible]:bg-pca-grey-800 not-has-aria-[current=page]:has-[:active]:bg-pca-grey-200 dark:not-has-aria-[current=page]:has-[:active]:bg-pca-grey-800 has-aria-[current=page]:bg-pca-yellow-500 dark:has-aria-[current=page]:bg-pca-yellow-500 dark:has-aria-[current=page]:text-pca-grey-900 has-[[aria-current=page]:focus-visible]:bg-pca-yellow-700 dark:has-[[aria-current=page]:focus-visible]:bg-pca-yellow-700 has-[[aria-current=page]:active]:bg-pca-yellow-700 dark:has-[[aria-current=page]:active]:bg-pca-yellow-700 has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50 data-[reorder=shift]:animate-row-shift data-[reorder=settle]:animate-row-settle"
+    class="transition-colors group relative h-12 lg:h-10 flex items-center justify-between gap-2 pr-1 lg:pr-0.5 rounded-xl cursor-pointer not-has-aria-[current=page]:hover:bg-pca-grey-100 dark:not-has-aria-[current=page]:hover:bg-pca-grey-800 not-has-aria-[current=page]:has-data-[state=open]:bg-pca-grey-100 dark:not-has-aria-[current=page]:has-data-[state=open]:bg-pca-grey-800 not-has-aria-[current=page]:has-[:focus-visible]:bg-pca-grey-200 dark:not-has-aria-[current=page]:has-[:focus-visible]:bg-pca-grey-800 not-has-aria-[current=page]:has-[:active]:bg-pca-grey-200 dark:not-has-aria-[current=page]:has-[:active]:bg-pca-grey-800 has-aria-[current=page]:bg-pca-yellow-500 dark:has-aria-[current=page]:bg-pca-yellow-500 dark:has-aria-[current=page]:text-pca-grey-900 has-[[aria-current=page]:focus-visible]:bg-pca-yellow-700 dark:has-[[aria-current=page]:focus-visible]:bg-pca-yellow-700 has-[[aria-current=page]:active]:bg-pca-yellow-700 dark:has-[[aria-current=page]:active]:bg-pca-yellow-700 has-[:disabled]:pointer-events-none has-[:disabled]:opacity-50 data-[reorder=shift]:animate-row-shift data-[reorder=settle]:animate-row-settle"
   >
     <a
-      class="flex items-center gap-2 min-w-0 flex-1 pl-3 h-12 lg:h-10 focus:outline-none"
+      class="flex items-center gap-2 min-w-0 flex-1 pl-3 h-12 lg:h-10 focus:outline-none before:content-[''] before:absolute before:inset-0 before:rounded-xl"
       href="/documents/1"
+      title="My document"
     >
       <span
         class="antialiased font-inter text-sm font-normal text-pca-grey-900 dark:text-white block truncate min-w-0 flex-1 group-has-aria-[current=page]:font-semibold! dark:group-has-aria-[current=page]:text-pca-grey-900!"
-        title="My document"
       >
         My document
       </span>
     </a>
     <div
-      class="shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700 group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700! dark:group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700! group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button]:text-pca-grey-900!"
+      class="relative shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700 group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700! dark:group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700! group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700 dark:group-has-aria-[current=page]:[&_button]:text-pca-grey-900!"
     >
       <span
         data-testid="action-area"

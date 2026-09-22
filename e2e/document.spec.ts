@@ -67,3 +67,35 @@ test('a retitled document keeps its title in the navigation', async ({
   await expect(userA.page.getByRole('link', { name: heading, exact: true }))
     .toHaveCount(0);
 });
+
+test('the whole navigation row opens the document, menu space and all', async ({
+  userA,
+}) => {
+  const urlA = await userA.createDocument();
+  const heading = `Row click doc ${Date.now()}`;
+  await userA.typeLines(heading);
+  const urlB = await userA.createDocument();
+  await userA.typeLines(`Other doc ${Date.now()}`);
+
+  // The list only carries the stored title, which the live server writes
+  // behind its debounce — reload the other document until it has.
+  const link = userA.documentInAllDocs(heading);
+  await expect(async () => {
+    await userA.openDocument(urlB);
+    await expect(link).toBeVisible({ timeout: 3000 });
+  }).toPass();
+
+  // The strip between the title and the row's menu button: reserved for
+  // the menu, but not the menu itself, and the row's own dead zone until
+  // the link was stretched over it.
+  const linkBox = (await link.boundingBox())!;
+  const menuBox
+    = (await userA.documentMenuTrigger('All Docs', heading).boundingBox())!;
+  await userA.page.mouse.click(
+    (linkBox.x + linkBox.width + menuBox.x) / 2,
+    linkBox.y + linkBox.height / 2,
+  );
+
+  await expect(userA.page).toHaveURL(urlA);
+  await expect(userA.editor).toContainText(heading);
+});

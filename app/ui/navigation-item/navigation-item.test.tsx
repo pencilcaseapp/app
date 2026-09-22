@@ -35,6 +35,14 @@ describe('NavigationItem', () => {
     expect(anchor).toHaveAttribute('href', '/spaces/personal');
   });
 
+  test('titles the link so the truncation tooltip survives the overlay', () => {
+    const { container } = render(
+      <NavigationItem href="/spaces/personal" title="Personal" icon="space" />,
+    );
+
+    expect(container.querySelector('a')).toHaveAttribute('title', 'Personal');
+  });
+
   test('renders the actionArea as a sibling of the link', () => {
     render(
       <NavigationItem
