@@ -17,11 +17,15 @@ export interface EditorPluginRichTextProps {
 }
 
 /**
- * How far down the page a tapped caret may sit before the keyboard opens.
- * Above the top of the keyboard on every phone held upright, whose keyboard
- * starts at about half the page (54% on an iPhone 17 Pro).
+ * Where a tapped line glides to as the keyboard opens, wherever it was
+ * tapped: a third of the way down the page, well above the top of the
+ * keyboard on every phone held upright (about half the page, 54% on an
+ * iPhone 17 Pro).
  */
-const SAFE_CARET_SHARE = 0.45;
+const READING_POSITION_SHARE = 1 / 3;
+
+/** A move this small is left alone rather than animated. */
+const MIN_GLIDE = 4;
 
 /** How long after the tap the caret has to arrive to be moved. */
 const CARET_PLACEMENT_WINDOW = 300;
@@ -74,17 +78,15 @@ const ENTER_EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
 
 /*
  * Switching the layout blanks the page for the few frames it takes iOS to
- * draw the new scroll area, and the caret moved clear of the keyboard jumps.
- * So content that has to move starts out of sight where it was, fades in
+ * draw the new scroll area, and the tapped line moving to the reading
+ * position jumps. So the content starts out of sight where it was, fades in
  * softly and glides to where it is now, alongside the keyboard sliding up —
  * the glide slowing down gently rather than covering most of the distance
  * in its first frames. (Fading it out beforehand costs more than it hides:
  * before the switch the content is the whole document, and iOS stalls the
- * page to draw all of it into a layer.) Content that stays where it is is
- * left alone — fading all of it in only draws the eye to a switch that is
- * otherwise hard to see.
+ * page to draw all of it into a layer.)
  */
-const FADE_IN = { duration: 240, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' };
+const FADE_IN = { duration: 400, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' };
 const GLIDE = { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
 
 const animateIntoPlace = (element: HTMLElement, distance: number) => {
@@ -123,12 +125,32 @@ const getCaretBottom = (content?: HTMLElement) => {
     return null;
   }
 
-  const caret = selection.getRangeAt(0).getBoundingClientRect();
+  let caret = selection.getRangeAt(0).getBoundingClientRect();
+  // On an empty line the caret has no box of its own; the line has.
+  if (caret.height === 0) {
+    const node = selection.anchorNode;
+    const line = node instanceof Element ? node : node?.parentElement;
+    if (line) {
+      caret = line.getBoundingClientRect();
+    }
+  }
   const slide = content
     ? new DOMMatrix(getComputedStyle(content).transform).m42
     : 0;
 
   return caret.height > 0 ? caret.bottom - slide : null;
+};
+
+/** Scrolls `element` so the caret in `content` sits at `bottom`. */
+const moveCaretTo = (
+  element: HTMLElement,
+  content: HTMLElement,
+  bottom: number,
+) => {
+  const caretBottom = getCaretBottom(content);
+  if (caretBottom !== null) {
+    element.scrollTop += caretBottom - bottom;
+  }
 };
 
 /**
@@ -199,10 +221,11 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
    * Waiting for the keyboard is too late: by the time the viewport shrinks,
    * iOS has already scrolled the page to put the caret right above the
    * keyboard, and the page cannot know how tall the keyboard will be. So the
-   * tap that opens it switches the layout, and a caret it puts low on the
-   * page moves up to where no keyboard reaches, which leaves the browser
-   * nothing to scroll. Not on the tap itself: the page must not move before
-   * the tap has landed, or it lands somewhere else.
+   * tap that opens it switches the layout, and the tapped line moves to the
+   * reading position, where no keyboard reaches, which leaves the browser
+   * nothing to scroll — wherever the tap was, so it feels the same every
+   * time. Not on the tap itself: the page must not move before the tap has
+   * landed, or it lands somewhere else.
    */
   useEffect(() => {
     const element = scrollerRef.current;
@@ -220,15 +243,17 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
         const before = getCaretBottom();
         enterEditLayout(element);
         const { clientHeight } = document.documentElement;
-        keepCaretAbove(
+        moveCaretTo(
           element,
           content,
-          clientHeight * SAFE_CARET_SHARE,
+          clientHeight * READING_POSITION_SHARE,
         );
         const after = getCaretBottom();
 
+        // Up or down; a line at the very start of the document cannot move
+        // down, and one that already sits there does not move at all.
         const distance = before !== null && after !== null ? before - after : 0;
-        if (!shouldReduceMotion && distance > 0) {
+        if (!shouldReduceMotion && Math.abs(distance) >= MIN_GLIDE) {
           animateIntoPlace(content, distance);
         }
       });
