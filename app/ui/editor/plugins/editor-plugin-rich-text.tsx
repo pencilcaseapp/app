@@ -71,32 +71,36 @@ const leaveEditLayout = (element: HTMLElement) => {
 
 /** The easing of the drawers, close to the one the keyboard slides in with. */
 const ENTER_EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
-const ENTER_DURATION = 300;
 
 /*
  * Switching the layout blanks the page for the few frames it takes iOS to
  * draw the new scroll area, and the caret moved clear of the keyboard jumps.
- * So content that has to move starts out of sight where it was and slides
- * to where it is now, alongside the keyboard sliding up. (Fading
- * it out beforehand costs more than it hides: before the switch the content
- * is the whole document, and iOS stalls the page to draw all of it into a
- * layer.) Content that stays where it is is left alone — fading all of it in
- * only draws the eye to a switch that is otherwise hard to see.
+ * So content that has to move starts out of sight where it was, fades in
+ * softly and glides to where it is now, alongside the keyboard sliding up —
+ * the glide slowing down gently rather than covering most of the distance
+ * in its first frames. (Fading it out beforehand costs more than it hides:
+ * before the switch the content is the whole document, and iOS stalls the
+ * page to draw all of it into a layer.) Content that stays where it is is
+ * left alone — fading all of it in only draws the eye to a switch that is
+ * otherwise hard to see.
  */
+const FADE_IN = { duration: 240, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' };
+const GLIDE = { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
+
 const animateIntoPlace = (element: HTMLElement, distance: number) => {
-  const from = { opacity: 0, transform: `translateY(${distance}px)` };
   element.style.opacity = '0';
-  element.style.transform = from.transform;
+  element.style.transform = `translateY(${distance}px)`;
   // iOS draws the caret itself and leaves it behind where the content was.
   element.style.caretColor = 'transparent';
 
   requestAnimationFrame(() => {
-    // Back in sight within the first quarter of the time (the easing front-
-    // loads the progress), before the slide has gone far:
-    // the fade only has to cover the switch, not draw the eye.
-    const animation = element.animate(
-      [from, { opacity: 1, offset: 0.6 }, { opacity: 1, transform: 'translateY(0)' }],
-      { duration: ENTER_DURATION, easing: ENTER_EASING },
+    element.animate([{ opacity: 0 }, { opacity: 1 }], FADE_IN);
+    const glide = element.animate(
+      [
+        { transform: `translateY(${distance}px)` },
+        { transform: 'translateY(0)' },
+      ],
+      GLIDE,
     );
     element.style.opacity = '';
     element.style.transform = '';
@@ -104,8 +108,8 @@ const animateIntoPlace = (element: HTMLElement, distance: number) => {
     const showCaret = () => {
       element.style.caretColor = '';
     };
-    animation.addEventListener('finish', showCaret);
-    animation.addEventListener('cancel', showCaret);
+    glide.addEventListener('finish', showCaret);
+    glide.addEventListener('cancel', showCaret);
   });
 };
 
