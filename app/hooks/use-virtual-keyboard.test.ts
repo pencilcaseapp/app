@@ -62,6 +62,10 @@ describe('useVirtualKeyboard', () => {
       value: VIEWPORT_HEIGHT,
       configurable: true,
     });
+    Object.defineProperty(document.documentElement, 'clientHeight', {
+      value: VIEWPORT_HEIGHT,
+      configurable: true,
+    });
     Object.defineProperty(window, 'visualViewport', {
       value: viewport,
       configurable: true,
@@ -81,6 +85,19 @@ describe('useVirtualKeyboard', () => {
   it('should report the keyboard open when an editable element is focused', () => {
     focus(createEditable());
     const { result } = renderHook(() => useVirtualKeyboard());
+
+    setViewportHeight(400);
+
+    expect(result.current[0]).toBe(true);
+  });
+
+  it('should report the keyboard open when the window shrinks with it', () => {
+    focus(createEditable());
+    const { result } = renderHook(() => useVirtualKeyboard());
+    Object.defineProperty(window, 'innerHeight', {
+      value: 410,
+      configurable: true,
+    });
 
     setViewportHeight(400);
 
