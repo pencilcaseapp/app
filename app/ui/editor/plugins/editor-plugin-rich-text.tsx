@@ -3,7 +3,6 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useEffect, useRef } from 'react';
 import classNames from 'classnames';
-import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { BLUR_COMMAND, COMMAND_PRIORITY_CRITICAL } from 'lexical';
 import { useMedia } from 'react-use';
@@ -39,7 +38,6 @@ const enterEditLayout = (element: HTMLElement) => {
     return;
   }
 
-  disableBodyScroll(element);
   const scrollTop = document.documentElement.scrollTop;
   element.dataset.editing = '';
   element.style.minHeight = 'auto';
@@ -56,7 +54,6 @@ const enterEditLayout = (element: HTMLElement) => {
  * browser's toolbar.
  */
 const leaveEditLayout = (element: HTMLElement, lift: number) => {
-  enableBodyScroll(element);
   const scrollTop = Math.max(0, element.scrollTop - lift);
   delete element.dataset.editing;
   element.style.minHeight = '';
@@ -295,7 +292,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
             placeholder={<span />}
             className={classNames([
               topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
-              'pb-3 md:pb-12 data-editing:pb-[55dvh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)] overflow-y-auto',
+              'pb-3 md:pb-12 data-editing:pb-[55dvh] data-editing:overscroll-y-contain w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)] overflow-y-auto',
             ])}
           />
         )}
