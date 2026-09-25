@@ -28,6 +28,9 @@ const CARET_PLACEMENT_WINDOW = 300;
 
 const CARET_MARGIN = 16;
 
+/** How long the keyboard takes to slide in. */
+const KEYBOARD_SLIDE_DURATION = 400;
+
 /*
  * While editing, the content scrolls in the element around it, sized to the
  * area above the keyboard, instead of the page scrolling — and
@@ -69,14 +72,6 @@ const leaveEditLayout = (element: HTMLElement, lift: number) => {
 const ENTER_EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
 const ENTER_DURATION = 300;
 
-/*
- * Switching the layout blanks the page for the few frames it takes iOS to
- * draw the new scroll area, and the caret moved clear of the keyboard jumps.
- * So the content starts out of sight where it was and fades in on its way
- * to where it is now, alongside the keyboard sliding up. (Fading it out
- * beforehand costs more than it hides: before the switch the content is the
- * whole document, and iOS stalls the page to draw all of it into a layer.)
- */
 /** Slides the content back down to where it was before editing lifted it. */
 const animateBackDown = (element: HTMLElement, distance: number) => {
   element.animate(
@@ -85,6 +80,16 @@ const animateBackDown = (element: HTMLElement, distance: number) => {
   );
 };
 
+/*
+ * Switching the layout blanks the page for the few frames it takes iOS to
+ * draw the new scroll area, and the caret moved clear of the keyboard jumps.
+ * So content that has to move starts out of sight where it was and fades in
+ * on its way to where it is now, alongside the keyboard sliding up. (Fading
+ * it out beforehand costs more than it hides: before the switch the content
+ * is the whole document, and iOS stalls the page to draw all of it into a
+ * layer.) Content that stays where it is is left alone — fading all of it in
+ * only draws the eye to a switch that is otherwise hard to see.
+ */
 const animateIntoPlace = (element: HTMLElement, distance: number) => {
   const from = { opacity: 0, transform: `translateY(${distance}px)` };
   element.style.opacity = '0';
@@ -224,11 +229,9 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
         );
         const after = getCaretBottom();
 
-        if (!shouldReduceMotion) {
-          animateIntoPlace(
-            content,
-            before !== null && after !== null ? before - after : 0,
-          );
+        const distance = before !== null && after !== null ? before - after : 0;
+        if (!shouldReduceMotion && distance > 0) {
+          animateIntoPlace(content, distance);
         }
       });
     };
@@ -268,7 +271,12 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
 
   // Fitted to the area above the keyboard, and back to the whole page when
   // the keyboard goes away while the content keeps its focus — a hardware
-  // keyboard does that.
+  // keyboard does that. The viewport reports the keyboard as soon as it
+  // starts to slide in, so the area shrinks once the keyboard covers what
+  // it cuts off; any earlier, and the content below vanishes in front of it.
+  // Not when the content slides up to lift the caret: the caret is drawn
+  // below the keyboard until it arrives, and iOS scrolls the page to reveal
+  // it for as long as the page is taller than what the keyboard leaves.
   useEffect(() => {
     const element = scrollerRef.current;
     const content = contenteditableRef.current;
@@ -284,12 +292,22 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
       return;
     }
 
-    element.style.height = `${viewport.height}px`;
-    liftRef.current += keepCaretAbove(
-      element,
-      content,
-      element.getBoundingClientRect().bottom - CARET_MARGIN,
-    );
+    const fit = () => {
+      element.style.height = `${viewport.height}px`;
+      liftRef.current += keepCaretAbove(
+        element,
+        content,
+        element.getBoundingClientRect().bottom - CARET_MARGIN,
+      );
+    };
+
+    if (!isVirtualKeyboardOpen || liftRef.current > 0) {
+      fit();
+      return;
+    }
+
+    const slide = setTimeout(fit, KEYBOARD_SLIDE_DURATION);
+    return () => clearTimeout(slide);
   }, [isVirtualKeyboardOpen]);
 
   return (
