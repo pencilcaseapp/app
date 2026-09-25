@@ -31,7 +31,8 @@ export const useVirtualKeyboard = () => {
 
       setIsOpen(
         !!viewport
-        && window.innerHeight - viewport.height > KEYBOARD_HEIGHT_THRESHOLD
+        && document.documentElement.clientHeight - viewport.height
+        > KEYBOARD_HEIGHT_THRESHOLD
         && hasEditableFocus(),
       );
     };
