@@ -40,6 +40,9 @@ const CARET_MARGIN = 16;
 /** How long the keyboard takes to slide in. */
 const KEYBOARD_SLIDE_DURATION = 350;
 
+/** How long the keyboard takes to come up after the tap. */
+const KEYBOARD_REVEAL_DURATION = 600;
+
 /** How long after the keyboard goes iOS may still scroll the page back. */
 const KEYBOARD_RESTORE_WINDOW = 700;
 
@@ -47,28 +50,38 @@ const KEYBOARD_RESTORE_WINDOW = 700;
  * While editing, the content scrolls in the element around it, sized to the
  * area above the keyboard, instead of the page scrolling. Not in the content
  * itself: iOS places a tap in an editable element that is scrolled as if it
- * were not, so a double tap selected from the start of the document.
+ * were not, so a double tap selected from the start of the document. The page
+ * stays where it is, the element pushed down to where the page shows it, so
+ * nothing on screen moves as the scrolling changes hands.
  */
-const enterEditLayout = (element: HTMLElement) => {
+const enterEditLayout = (frame: HTMLElement, element: HTMLElement) => {
   if ('editing' in element.dataset) {
     return;
   }
 
   const scrollTop = document.documentElement.scrollTop;
+  const { clientHeight } = document.documentElement;
+  frame.style.paddingTop = `${scrollTop}px`;
+  // Tall enough for the page to stay put with the browser bar collapsed.
+  frame.style.height = `${scrollTop + Math.max(clientHeight, innerHeight)}px`;
   element.dataset.editing = '';
   element.style.minHeight = 'auto';
-  element.style.height = `${document.documentElement.clientHeight}px`;
-  document.documentElement.scrollTop = 0;
+  element.style.height = `${clientHeight}px`;
   element.scrollTop = scrollTop;
 };
+
+/** Where the page stays while editing. */
+const getFrozenTop = (frame: HTMLElement) => parseFloat(frame.style.paddingTop);
 
 /*
  * The page takes over at the very offset the content had, so nothing moves
  * as the keyboard goes — which the room below the content always leaves the
  * page enough of.
  */
-const leaveEditLayout = (element: HTMLElement) => {
+const leaveEditLayout = (frame: HTMLElement, element: HTMLElement) => {
   const scrollTop = element.scrollTop;
+  frame.style.paddingTop = '';
+  frame.style.height = '';
   delete element.dataset.editing;
   element.style.minHeight = '';
   element.style.height = '';
@@ -82,26 +95,18 @@ const leaveEditLayout = (element: HTMLElement) => {
 const ENTER_EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
 
 /*
- * Switching the layout blanks the page for the few frames it takes iOS to
- * draw the new scroll area, and the tapped line moving to the reading
- * position jumps. So the content starts out of sight where it was, fades in
- * softly and glides to where it is now, alongside the keyboard sliding up —
- * the glide slowing down gently rather than covering most of the distance
- * in its first frames. (Fading it out beforehand costs more than it hides:
- * before the switch the content is the whole document, and iOS stalls the
- * page to draw all of it into a layer.)
+ * The tapped line glides to the reading position alongside the keyboard
+ * sliding up, slowing down gently rather than covering most of the distance
+ * in its first frames.
  */
-const FADE_IN = { duration: 400, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' };
 const GLIDE = { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
 
-const animateIntoPlace = (element: HTMLElement, distance: number) => {
-  element.style.opacity = '0';
+const glideIntoPlace = (element: HTMLElement, distance: number) => {
   element.style.transform = `translateY(${distance}px)`;
   // iOS draws the caret itself and leaves it behind where the content was.
   element.style.caretColor = 'transparent';
 
   requestAnimationFrame(() => {
-    element.animate([{ opacity: 0 }, { opacity: 1 }], FADE_IN);
     const glide = element.animate(
       [
         { transform: `translateY(${distance}px)` },
@@ -109,7 +114,6 @@ const animateIntoPlace = (element: HTMLElement, distance: number) => {
       ],
       GLIDE,
     );
-    element.style.opacity = '';
     element.style.transform = '';
 
     const showCaret = () => {
@@ -118,6 +122,35 @@ const animateIntoPlace = (element: HTMLElement, distance: number) => {
     glide.addEventListener('finish', showCaret);
     glide.addEventListener('cancel', showCaret);
   });
+};
+
+/*
+ * As the keyboard comes up, iOS scrolls the page to line the caret up with
+ * the top of the keyboard, up or down, wherever the caret is — unless the
+ * element being edited counts as hidden, which one without a height of its
+ * own does, even with its text showing. So while the keyboard comes up, the
+ * element collapses and the content around it keeps its size and the text
+ * its place.
+ */
+const hideFromKeyboard = (content: HTMLElement) => {
+  const editable = content.firstElementChild;
+  if (!(editable instanceof HTMLElement)) {
+    return () => {};
+  }
+
+  content.style.height = `${content.offsetHeight}px`;
+  content.style.paddingTop = getComputedStyle(editable).paddingTop;
+  editable.style.paddingBlock = '0';
+  editable.style.minHeight = '0';
+  editable.style.height = '0';
+
+  return () => {
+    content.style.height = '';
+    content.style.paddingTop = '';
+    editable.style.paddingBlock = '';
+    editable.style.minHeight = '';
+    editable.style.height = '';
+  };
 };
 
 /**
@@ -182,6 +215,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   topArea,
   contentOverlay,
 }) => {
+  const frameRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   // The content and what is laid over it, which move together.
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -197,10 +231,11 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
       return editor.registerCommand(
         BLUR_COMMAND,
         () => {
+          const frame = frameRef.current;
           const scroller = scrollerRef.current;
-          if (scroller && 'editing' in scroller.dataset) {
+          if (frame && scroller && 'editing' in scroller.dataset) {
             leftRef.current = {
-              top: leaveEditLayout(scroller),
+              top: leaveEditLayout(frame, scroller),
               until: performance.now() + KEYBOARD_RESTORE_WINDOW,
             };
           }
@@ -235,20 +270,25 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
    * landed, or it lands somewhere else.
    */
   useEffect(() => {
+    const frame = frameRef.current;
     const element = scrollerRef.current;
     const content = canvasRef.current;
-    if (!element || !content || !isTouchDevice) {
+    if (!frame || !element || !content || !isTouchDevice) {
       return;
     }
 
     let placement: ReturnType<typeof setTimeout>;
+    let reveal: ReturnType<typeof setTimeout>;
+    let showToKeyboard = () => {};
 
     const onCaretPlaced = () => {
       document.removeEventListener('selectionchange', onCaretPlaced);
       clearTimeout(placement);
       requestAnimationFrame(() => {
         const before = getCaretBottom();
-        enterEditLayout(element);
+        enterEditLayout(frame, element);
+        showToKeyboard = hideFromKeyboard(content);
+        reveal = setTimeout(showToKeyboard, KEYBOARD_REVEAL_DURATION);
         const { clientHeight } = document.documentElement;
         moveCaretTo(
           element,
@@ -261,7 +301,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
         // down, and one that already sits there does not move at all.
         const distance = before !== null && after !== null ? before - after : 0;
         if (!shouldReduceMotion && Math.abs(distance) >= MIN_GLIDE) {
-          animateIntoPlace(content, distance);
+          glideIntoPlace(content, distance);
         }
       });
     };
@@ -279,14 +319,14 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
       }, CARET_PLACEMENT_WINDOW);
     });
 
-    // The page has nothing to scroll while editing, yet iOS scrolls it when
-    // it reckons the caret sits below the keyboard — in a phone held
-    // sideways, say, whose keyboard covers more than the caret was moved
-    // clear of.
+    // The page stays put while editing, yet iOS scrolls it when it reckons
+    // the caret sits below the keyboard — in a phone held sideways, say,
+    // whose keyboard covers more than the caret was moved clear of.
     const onPageScroll = () => {
       if ('editing' in element.dataset) {
-        if (window.scrollY !== 0) {
-          window.scrollTo(0, 0);
+        const top = getFrozenTop(frame);
+        if (Math.round(window.scrollY) !== Math.round(top)) {
+          window.scrollTo(0, top);
         }
         return;
       }
@@ -316,6 +356,8 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
       window.removeEventListener('touchstart', onTouchStart);
       document.removeEventListener('selectionchange', onCaretPlaced);
       clearTimeout(placement);
+      clearTimeout(reveal);
+      showToKeyboard();
     };
   }, [isTouchDevice, shouldReduceMotion]);
 
@@ -327,15 +369,16 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   // keyboard; cut off once the keyboard is in, it vanishes behind the
   // translucent bar above it.
   useEffect(() => {
+    const frame = frameRef.current;
     const element = scrollerRef.current;
     const content = canvasRef.current;
     const viewport = window.visualViewport;
-    if (!element || !content || !viewport) {
+    if (!frame || !element || !content || !viewport) {
       return;
     }
 
     if (isVirtualKeyboardOpen) {
-      enterEditLayout(element);
+      enterEditLayout(frame, element);
     }
     else if (!('editing' in element.dataset)) {
       return;
@@ -367,20 +410,22 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
       )}
       <RichTextPlugin
         contentEditable={(
-          <div
-            ref={scrollerRef}
-            className="group/scroller data-editing:overflow-y-auto data-editing:overscroll-y-contain"
-          >
-            <div ref={canvasRef} className="relative">
-              <ContentEditable
-                aria-placeholder="Type something …"
-                placeholder={<span />}
-                className={classNames([
-                  topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
-                  'pb-3 md:pb-12 touch-screen:pb-[55dvh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
-                ])}
-              />
-              {contentOverlay}
+          <div ref={frameRef}>
+            <div
+              ref={scrollerRef}
+              className="group/scroller data-editing:overflow-y-auto data-editing:overscroll-y-contain"
+            >
+              <div ref={canvasRef} className="relative">
+                <ContentEditable
+                  aria-placeholder="Type something …"
+                  placeholder={<span />}
+                  className={classNames([
+                    topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
+                    'pb-3 md:pb-12 touch-screen:pb-[55dvh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
+                  ])}
+                />
+                {contentOverlay}
+              </div>
             </div>
           </div>
         )}
