@@ -86,7 +86,7 @@ const ENTER_EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
  * before the switch the content is the whole document, and iOS stalls the
  * page to draw all of it into a layer.)
  */
-const FADE_IN = { duration: 240, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' };
+const FADE_IN = { duration: 400, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' };
 const GLIDE = { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
 
 const animateIntoPlace = (element: HTMLElement, distance: number) => {
