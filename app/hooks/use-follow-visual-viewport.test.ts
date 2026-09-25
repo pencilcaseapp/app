@@ -53,20 +53,37 @@ describe('useFollowVisualViewport', () => {
     expect(element.style.opacity).toBe('');
   });
 
-  it('fades out while what is on screen moves', () => {
+  it('fades out while a finger scrolls what is on screen', () => {
     renderFollow(element);
     moveViewport(282);
     settle();
 
+    act(() => {
+      window.dispatchEvent(new Event('touchstart'));
+    });
     moveViewport(272);
 
     expect(element.style.opacity).toBe('0');
     expect(element.style.transform).toBe('translateY(282px)');
 
+    act(() => {
+      window.dispatchEvent(new Event('touchend'));
+    });
     settle();
 
     expect(element.style.opacity).toBe('');
     expect(element.style.transform).toBe('translateY(272px)');
+  });
+
+  it('follows a single step straight away', () => {
+    renderFollow(element);
+    moveViewport(282);
+    settle();
+
+    moveViewport(326);
+
+    expect(element.style.opacity).toBe('');
+    expect(element.style.transform).toBe('translateY(326px)');
   });
 
   it('stays in sight while the page itself scrolls', () => {

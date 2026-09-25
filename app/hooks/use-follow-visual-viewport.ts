@@ -3,6 +3,12 @@ import { useEffect, type RefObject } from 'react';
 /** How long the viewport has to sit still before the element shows again. */
 const SETTLE_DELAY = 250;
 
+/**
+ * A move this soon after a touch or the move before it is part of a scroll
+ * rather than a step of its own.
+ */
+const SCROLL_GAP = 100;
+
 /** Quick to go, so it hardly travels with the page on its way out. */
 const FADE_OUT_DURATION = 80;
 const FADE_IN_DURATION = 150;
@@ -31,6 +37,9 @@ export function useFollowVisualViewport(
 
     let settle: ReturnType<typeof setTimeout>;
     let offset = viewport.offsetTop;
+    let touching = false;
+    let lastTouch = 0;
+    let lastMove = 0;
 
     const hide = () => {
       element.style.transition = `opacity ${FADE_OUT_DURATION}ms ease-out`;
@@ -39,9 +48,13 @@ export function useFollowVisualViewport(
       settle = setTimeout(show, SETTLE_DELAY);
     };
 
+    const place = () => {
+      element.style.transform = offset > 0 ? `translateY(${offset}px)` : '';
+    };
+
     const show = () => {
       element.style.transition = `opacity ${FADE_IN_DURATION}ms ease-out`;
-      element.style.transform = offset > 0 ? `translateY(${offset}px)` : '';
+      place();
       element.style.opacity = '';
     };
 
@@ -51,7 +64,27 @@ export function useFollowVisualViewport(
       }
 
       offset = viewport.offsetTop;
-      hide();
+      const now = performance.now();
+      const scrolling = touching
+        || now - lastTouch < SCROLL_GAP
+        || now - lastMove < SCROLL_GAP;
+      lastMove = now;
+
+      if (scrolling || element.style.opacity === '0') {
+        hide();
+      }
+      else {
+        place();
+      }
+    };
+
+    const onTouchStart = () => {
+      touching = true;
+    };
+
+    const onTouchEnd = () => {
+      touching = false;
+      lastTouch = performance.now();
     };
 
     // By the time the keyboard counts as open, iOS has begun to move what is
@@ -59,11 +92,17 @@ export function useFollowVisualViewport(
     hide();
     viewport.addEventListener('scroll', onMove);
     viewport.addEventListener('resize', onMove);
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
     return () => {
       clearTimeout(settle);
       viewport.removeEventListener('scroll', onMove);
       viewport.removeEventListener('resize', onMove);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
       element.style.transform = '';
       element.style.opacity = '';
       element.style.transition = '';

@@ -12,6 +12,18 @@
    keyboard handling goes by. */
 @custom-variant touch-screen (@media (pointer: coarse) and (hover: none));
 
+/* Where iOS keeps the caret while the keyboard is open: clear of the topbar
+   and of the bar it floats above the keyboard. Without it, iOS centres the
+   caret as soon as it would go behind them, rather than moving it a line. */
+@layer base {
+  html {
+    @variant touch-screen {
+      scroll-padding-top: 4rem;
+      scroll-padding-bottom: 4.5rem;
+    }
+  }
+}
+
 @theme {
   --color-pca-white: oklch(1 0 0);
 
