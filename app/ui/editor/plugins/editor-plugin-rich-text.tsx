@@ -29,9 +29,12 @@ const CARET_PLACEMENT_WINDOW = 300;
 const CARET_MARGIN = 16;
 
 /*
- * While editing, the content scrolls inside itself, sized to the area above
- * the keyboard, instead of the page scrolling — and `data-editing` gives it
- * the room below to scroll a caret at its end up clear of the keyboard.
+ * While editing, the content scrolls in the element around it, sized to the
+ * area above the keyboard, instead of the page scrolling — and
+ * `data-editing` gives it the room below to scroll a caret at its end up
+ * clear of the keyboard. Not in the content itself: iOS places a tap in an
+ * editable element that is scrolled as if it were not, so a double tap
+ * selected from the start of the document.
  */
 const enterEditLayout = (element: HTMLElement) => {
   if ('editing' in element.dataset) {
@@ -105,23 +108,34 @@ const animateIntoPlace = (element: HTMLElement, distance: number) => {
   });
 };
 
-const getCaretBottom = () => {
+/**
+ * Where the caret ends up once the content has slid into place: while it is
+ * sliding, the caret moves along with it.
+ */
+const getCaretBottom = (content?: HTMLElement) => {
   const selection = window.getSelection();
   if (!selection?.rangeCount) {
     return null;
   }
 
   const caret = selection.getRangeAt(0).getBoundingClientRect();
+  const slide = content
+    ? new DOMMatrix(getComputedStyle(content).transform).m42
+    : 0;
 
-  return caret.height > 0 ? caret.bottom : null;
+  return caret.height > 0 ? caret.bottom - slide : null;
 };
 
 /**
- * Scrolls `element` so the caret sits no lower than `bottom`, and tells how
- * far it scrolled.
+ * Scrolls `element` so the caret in `content` sits no lower than `bottom`,
+ * and tells how far it scrolled.
  */
-const keepCaretAbove = (element: HTMLElement, bottom: number) => {
-  const caretBottom = getCaretBottom();
+const keepCaretAbove = (
+  element: HTMLElement,
+  content: HTMLElement,
+  bottom: number,
+) => {
+  const caretBottom = getCaretBottom(content);
   if (caretBottom === null || caretBottom <= bottom) {
     return 0;
   }
@@ -135,6 +149,7 @@ const keepCaretAbove = (element: HTMLElement, bottom: number) => {
 export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   topArea,
 }) => {
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const contenteditableRef = useRef<HTMLDivElement>(null);
   const liftRef = useRef(0);
   const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
@@ -147,17 +162,13 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
       return editor.registerCommand(
         BLUR_COMMAND,
         () => {
-          if (
-            contenteditableRef.current
-            && 'editing' in contenteditableRef.current.dataset
-          ) {
-            const lift = Math.min(
-              liftRef.current,
-              contenteditableRef.current.scrollTop,
-            );
-            leaveEditLayout(contenteditableRef.current, lift);
+          const scroller = scrollerRef.current;
+          const content = contenteditableRef.current;
+          if (scroller && content && 'editing' in scroller.dataset) {
+            const lift = Math.min(liftRef.current, scroller.scrollTop);
+            leaveEditLayout(scroller, lift);
             if (lift > 0 && !shouldReduceMotion) {
-              animateBackDown(contenteditableRef.current, lift);
+              animateBackDown(content, lift);
             }
             liftRef.current = 0;
           }
@@ -171,7 +182,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   );
 
   useEffect(() => {
-    const el = contenteditableRef.current;
+    const el = scrollerRef.current;
     if (!el) return;
 
     const onScroll = () => {
@@ -191,8 +202,9 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
    * the tap has landed, or it lands somewhere else.
    */
   useEffect(() => {
-    const element = contenteditableRef.current;
-    if (!element || !isTouchDevice) {
+    const element = scrollerRef.current;
+    const content = contenteditableRef.current;
+    if (!element || !content || !isTouchDevice) {
       return;
     }
 
@@ -207,13 +219,14 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
         const { clientHeight } = document.documentElement;
         liftRef.current = keepCaretAbove(
           element,
+          content,
           clientHeight * SAFE_CARET_SHARE,
         );
         const after = getCaretBottom();
 
         if (!shouldReduceMotion) {
           animateIntoPlace(
-            element,
+            content,
             before !== null && after !== null ? before - after : 0,
           );
         }
@@ -257,9 +270,10 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   // the keyboard goes away while the content keeps its focus — a hardware
   // keyboard does that.
   useEffect(() => {
-    const element = contenteditableRef.current;
+    const element = scrollerRef.current;
+    const content = contenteditableRef.current;
     const viewport = window.visualViewport;
-    if (!element || !viewport) {
+    if (!element || !content || !viewport) {
       return;
     }
 
@@ -273,6 +287,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
     element.style.height = `${viewport.height}px`;
     liftRef.current += keepCaretAbove(
       element,
+      content,
       element.getBoundingClientRect().bottom - CARET_MARGIN,
     );
   }, [isVirtualKeyboardOpen]);
@@ -286,15 +301,20 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
       )}
       <RichTextPlugin
         contentEditable={(
-          <ContentEditable
-            ref={contenteditableRef}
-            aria-placeholder="Type something …"
-            placeholder={<span />}
-            className={classNames([
-              topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
-              'pb-3 md:pb-12 data-editing:pb-[55dvh] data-editing:overscroll-y-contain w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)] overflow-y-auto',
-            ])}
-          />
+          <div
+            ref={scrollerRef}
+            className="group/scroller data-editing:overflow-y-auto data-editing:overscroll-y-contain"
+          >
+            <ContentEditable
+              ref={contenteditableRef}
+              aria-placeholder="Type something …"
+              placeholder={<span />}
+              className={classNames([
+                topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
+                'pb-3 md:pb-12 group-data-editing/scroller:pb-[55dvh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
+              ])}
+            />
+          </div>
         )}
         ErrorBoundary={LexicalErrorBoundary}
       />
