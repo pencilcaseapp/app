@@ -29,7 +29,7 @@ const CARET_PLACEMENT_WINDOW = 300;
 const CARET_MARGIN = 16;
 
 /** How long the keyboard takes to slide in. */
-const KEYBOARD_SLIDE_DURATION = 400;
+const KEYBOARD_SLIDE_DURATION = 350;
 
 /*
  * While editing, the content scrolls in the element around it, sized to the
@@ -83,8 +83,8 @@ const animateBackDown = (element: HTMLElement, distance: number) => {
 /*
  * Switching the layout blanks the page for the few frames it takes iOS to
  * draw the new scroll area, and the caret moved clear of the keyboard jumps.
- * So content that has to move starts out of sight where it was and fades in
- * on its way to where it is now, alongside the keyboard sliding up. (Fading
+ * So content that has to move starts out of sight where it was and slides
+ * to where it is now, alongside the keyboard sliding up. (Fading
  * it out beforehand costs more than it hides: before the switch the content
  * is the whole document, and iOS stalls the page to draw all of it into a
  * layer.) Content that stays where it is is left alone — fading all of it in
@@ -98,8 +98,11 @@ const animateIntoPlace = (element: HTMLElement, distance: number) => {
   element.style.caretColor = 'transparent';
 
   requestAnimationFrame(() => {
+    // Back in sight within the first quarter of the time (the easing front-
+    // loads the progress), before the slide has gone far:
+    // the fade only has to cover the switch, not draw the eye.
     const animation = element.animate(
-      [from, { opacity: 1, transform: 'translateY(0)' }],
+      [from, { opacity: 1, offset: 0.6 }, { opacity: 1, transform: 'translateY(0)' }],
       { duration: ENTER_DURATION, easing: ENTER_EASING },
     );
     element.style.opacity = '';
@@ -272,11 +275,10 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   // Fitted to the area above the keyboard, and back to the whole page when
   // the keyboard goes away while the content keeps its focus — a hardware
   // keyboard does that. The viewport reports the keyboard as soon as it
-  // starts to slide in, so the area shrinks once the keyboard covers what
-  // it cuts off; any earlier, and the content below vanishes in front of it.
-  // Not when the content slides up to lift the caret: the caret is drawn
-  // below the keyboard until it arrives, and iOS scrolls the page to reveal
-  // it for as long as the page is taller than what the keyboard leaves.
+  // starts to slide in, so the area follows it up rather than giving up the
+  // content below in one go: cut off right away, it vanishes in front of the
+  // keyboard; cut off once the keyboard is in, it vanishes behind the
+  // translucent bar above it.
   useEffect(() => {
     const element = scrollerRef.current;
     const content = contenteditableRef.current;
@@ -292,23 +294,22 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
       return;
     }
 
-    const fit = () => {
-      element.style.height = `${viewport.height}px`;
-      liftRef.current += keepCaretAbove(
-        element,
-        content,
-        element.getBoundingClientRect().bottom - CARET_MARGIN,
-      );
-    };
+    const bottom = element.getBoundingClientRect().top + viewport.height;
+    liftRef.current += keepCaretAbove(element, content, bottom - CARET_MARGIN);
 
-    if (!isVirtualKeyboardOpen || liftRef.current > 0) {
-      fit();
+    if (!isVirtualKeyboardOpen || shouldReduceMotion) {
+      element.style.height = `${viewport.height}px`;
       return;
     }
 
-    const slide = setTimeout(fit, KEYBOARD_SLIDE_DURATION);
-    return () => clearTimeout(slide);
-  }, [isVirtualKeyboardOpen]);
+    const follow = element.animate(
+      [{ height: element.style.height }, { height: `${viewport.height}px` }],
+      { duration: KEYBOARD_SLIDE_DURATION, easing: ENTER_EASING },
+    );
+    element.style.height = `${viewport.height}px`;
+
+    return () => follow.cancel();
+  }, [isVirtualKeyboardOpen, shouldReduceMotion]);
 
   return (
     <>
