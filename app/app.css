@@ -8,6 +8,10 @@
 @plugin "tailwind-scrollbar";
 
 
+/* A screen that opens a virtual keyboard: the same query the editor's
+   keyboard handling goes by. */
+@custom-variant touch-screen (@media (pointer: coarse) and (hover: none));
+
 @theme {
   --color-pca-white: oklch(1 0 0);
 

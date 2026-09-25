@@ -31,13 +31,14 @@ const CARET_MARGIN = 16;
 /** How long the keyboard takes to slide in. */
 const KEYBOARD_SLIDE_DURATION = 350;
 
+/** How long after the keyboard goes iOS may still scroll the page back. */
+const KEYBOARD_RESTORE_WINDOW = 700;
+
 /*
  * While editing, the content scrolls in the element around it, sized to the
- * area above the keyboard, instead of the page scrolling — and
- * `data-editing` gives it the room below to scroll a caret at its end up
- * clear of the keyboard. Not in the content itself: iOS places a tap in an
- * editable element that is scrolled as if it were not, so a double tap
- * selected from the start of the document.
+ * area above the keyboard, instead of the page scrolling. Not in the content
+ * itself: iOS places a tap in an editable element that is scrolled as if it
+ * were not, so a double tap selected from the start of the document.
  */
 const enterEditLayout = (element: HTMLElement) => {
   if ('editing' in element.dataset) {
@@ -53,32 +54,24 @@ const enterEditLayout = (element: HTMLElement) => {
 };
 
 /*
- * `lift` is how far the content was scrolled to keep the caret clear of the
- * keyboard. It is given back with the keyboard gone: the room below the
- * content that made it possible goes with it, and the page would otherwise
- * end up at the end of the document, with nothing left to show under the
- * browser's toolbar.
+ * The page takes over at the very offset the content had, so nothing moves
+ * as the keyboard goes — which the room below the content always leaves the
+ * page enough of.
  */
-const leaveEditLayout = (element: HTMLElement, lift: number) => {
-  const scrollTop = Math.max(0, element.scrollTop - lift);
+const leaveEditLayout = (element: HTMLElement) => {
+  const scrollTop = element.scrollTop;
   delete element.dataset.editing;
   element.style.minHeight = '';
   element.style.height = '';
   element.scrollTop = 0;
   document.documentElement.scrollTop = scrollTop;
+
+  return scrollTop;
 };
 
 /** The easing of the drawers, close to the one the keyboard slides in with. */
 const ENTER_EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
 const ENTER_DURATION = 300;
-
-/** Slides the content back down to where it was before editing lifted it. */
-const animateBackDown = (element: HTMLElement, distance: number) => {
-  element.animate(
-    [{ transform: `translateY(${-distance}px)` }, { transform: 'translateY(0)' }],
-    { duration: ENTER_DURATION, easing: ENTER_EASING },
-  );
-};
 
 /*
  * Switching the layout blanks the page for the few frames it takes iOS to
@@ -159,7 +152,8 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
 }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const contenteditableRef = useRef<HTMLDivElement>(null);
-  const liftRef = useRef(0);
+  // Where editing left the page, and until when it is held there.
+  const leftRef = useRef({ top: 0, until: 0 });
   const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
   const shouldReduceMotion = useReducedMotion();
   const [isVirtualKeyboardOpen] = useVirtualKeyboard();
@@ -171,14 +165,11 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
         BLUR_COMMAND,
         () => {
           const scroller = scrollerRef.current;
-          const content = contenteditableRef.current;
-          if (scroller && content && 'editing' in scroller.dataset) {
-            const lift = Math.min(liftRef.current, scroller.scrollTop);
-            leaveEditLayout(scroller, lift);
-            if (lift > 0 && !shouldReduceMotion) {
-              animateBackDown(content, lift);
-            }
-            liftRef.current = 0;
+          if (scroller && 'editing' in scroller.dataset) {
+            leftRef.current = {
+              top: leaveEditLayout(scroller),
+              until: performance.now() + KEYBOARD_RESTORE_WINDOW,
+            };
           }
 
           return false;
@@ -186,7 +177,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
         COMMAND_PRIORITY_CRITICAL,
       );
     },
-    [editor, shouldReduceMotion],
+    [editor],
   );
 
   useEffect(() => {
@@ -225,7 +216,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
         const before = getCaretBottom();
         enterEditLayout(element);
         const { clientHeight } = document.documentElement;
-        liftRef.current = keepCaretAbove(
+        keepCaretAbove(
           element,
           content,
           clientHeight * SAFE_CARET_SHARE,
@@ -257,16 +248,36 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
     // sideways, say, whose keyboard covers more than the caret was moved
     // clear of.
     const onPageScroll = () => {
-      if ('editing' in element.dataset && window.scrollY !== 0) {
-        window.scrollTo(0, 0);
+      if ('editing' in element.dataset) {
+        if (window.scrollY !== 0) {
+          window.scrollTo(0, 0);
+        }
+        return;
+      }
+
+      // With the keyboard gone, iOS scrolls the page back to where it was
+      // before the keyboard came up, which would drop the text the reader
+      // just edited; it stays where editing left it.
+      const left = leftRef.current;
+      if (performance.now() < left.until) {
+        if (Math.round(window.scrollY) !== left.top) {
+          window.scrollTo(0, left.top);
+        }
       }
     };
 
+    // A reader who starts scrolling is not held.
+    const onTouchStart = () => {
+      leftRef.current.until = 0;
+    };
+
     window.addEventListener('scroll', onPageScroll, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
 
     return () => {
       stopListeningForTaps();
       window.removeEventListener('scroll', onPageScroll);
+      window.removeEventListener('touchstart', onTouchStart);
       document.removeEventListener('selectionchange', onCaretPlaced);
       clearTimeout(placement);
     };
@@ -295,7 +306,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
     }
 
     const bottom = element.getBoundingClientRect().top + viewport.height;
-    liftRef.current += keepCaretAbove(element, content, bottom - CARET_MARGIN);
+    keepCaretAbove(element, content, bottom - CARET_MARGIN);
 
     if (!isVirtualKeyboardOpen || shouldReduceMotion) {
       element.style.height = `${viewport.height}px`;
@@ -330,7 +341,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
               placeholder={<span />}
               className={classNames([
                 topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
-                'pb-3 md:pb-12 group-data-editing/scroller:pb-[55dvh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
+                'pb-3 md:pb-12 touch-screen:pb-[55dvh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
               ])}
             />
           </div>
