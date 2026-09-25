@@ -41,11 +41,18 @@ if (config.environment === 'prod') {
 else {
   const viteDevServer = await import('vite').then(vite =>
     vite.createServer({
-      server: { middlewareMode: true },
+      // HMR shares the app's port, so it also reaches a phone on the LAN.
+      server: { middlewareMode: true, hmr: { server } },
     }),
   );
 
   server.on('upgrade', async (request, socket, head) => {
+    const protocol = request.headers['sec-websocket-protocol'];
+
+    if (protocol === 'vite-hmr' || protocol === 'vite-ping') {
+      return;
+    }
+
     const { ws } = await viteDevServer.ssrLoadModule('./app/live/index.ts');
     ws.handleUpgrade(request, socket, head);
   });
