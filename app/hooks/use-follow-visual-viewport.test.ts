@@ -27,7 +27,6 @@ describe('useFollowVisualViewport', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     element = document.createElement('header');
-    element.animate = vi.fn() as unknown as HTMLElement['animate'];
     Object.defineProperty(window, 'visualViewport', {
       value: viewport,
       configurable: true,
@@ -54,14 +53,31 @@ describe('useFollowVisualViewport', () => {
     expect(element.style.opacity).toBe('');
   });
 
-  it('follows a reader scrolling along', () => {
+  it('fades out while what is on screen moves', () => {
     renderFollow(element);
     moveViewport(282);
     settle();
 
     moveViewport(272);
 
+    expect(element.style.opacity).toBe('0');
+    expect(element.style.transform).toBe('translateY(282px)');
+
+    settle();
+
+    expect(element.style.opacity).toBe('');
     expect(element.style.transform).toBe('translateY(272px)');
+  });
+
+  it('stays in sight while the page itself scrolls', () => {
+    renderFollow(element);
+    moveViewport(282);
+    settle();
+
+    act(() => {
+      viewport.dispatchEvent(new Event('scroll'));
+    });
+
     expect(element.style.opacity).toBe('');
   });
 

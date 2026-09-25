@@ -3,22 +3,20 @@ import { useEffect, type RefObject } from 'react';
 /** How long the viewport has to sit still before the element shows again. */
 const SETTLE_DELAY = 250;
 
-/**
- * A step of the viewport larger than this is iOS moving it on its own, in
- * one animated go, rather than the reader scrolling it frame by frame.
- */
-const JUMP = 40;
+/** Quick to go, so it hardly travels with the page on its way out. */
+const FADE_OUT_DURATION = 80;
+const FADE_IN_DURATION = 150;
 
 /**
  * Keeps a `position: fixed` element at the top of what is on screen.
  *
- * With the keyboard open, iOS reveals the caret by moving what is on screen
- * over the page rather than scrolling it, and fixed elements stay behind
- * with the page. A reader scrolling moves it frame by frame, and the element
- * follows along. iOS moving it on its own animates the move, but reports
- * where it ends right away, so the element would sit halfway down the screen
- * for the length of it: then it is out of sight until the viewport settles,
- * and fades in where it belongs.
+ * With the keyboard open, the page is taller than what is on screen, and iOS
+ * moves what is on screen over the page — to reveal the caret, and as the
+ * reader scrolls — while fixed elements stay behind with the page. Moving
+ * the element along always trails the move by a frame, so it would jolt with
+ * every step: instead it fades out while what is on screen moves, and fades
+ * back in where it belongs once it settles. Scrolling the page itself moves
+ * nothing on screen, and leaves the element where it is.
  */
 export function useFollowVisualViewport(
   ref: RefObject<HTMLElement | null>,
@@ -34,36 +32,31 @@ export function useFollowVisualViewport(
     let settle: ReturnType<typeof setTimeout>;
     let offset = viewport.offsetTop;
 
-    const place = () => {
-      element.style.transform = offset > 0 ? `translateY(${offset}px)` : '';
-    };
-
-    const show = () => {
-      place();
-      element.animate(
-        [{ opacity: 0 }, { opacity: 1 }],
-        { duration: 150, easing: 'ease-out' },
-      );
-      element.style.opacity = '';
-    };
-
-    const onMove = () => {
-      const step = Math.abs(viewport.offsetTop - offset);
-      offset = viewport.offsetTop;
-
-      if (step < JUMP && element.style.opacity !== '0') {
-        place();
-        return;
-      }
-
+    const hide = () => {
+      element.style.transition = `opacity ${FADE_OUT_DURATION}ms ease-out`;
       element.style.opacity = '0';
       clearTimeout(settle);
       settle = setTimeout(show, SETTLE_DELAY);
     };
 
-    // By the time the keyboard counts as open, the move has already begun.
-    element.style.opacity = '0';
-    settle = setTimeout(show, SETTLE_DELAY);
+    const show = () => {
+      element.style.transition = `opacity ${FADE_IN_DURATION}ms ease-out`;
+      element.style.transform = offset > 0 ? `translateY(${offset}px)` : '';
+      element.style.opacity = '';
+    };
+
+    const onMove = () => {
+      if (Math.round(viewport.offsetTop) === Math.round(offset)) {
+        return;
+      }
+
+      offset = viewport.offsetTop;
+      hide();
+    };
+
+    // By the time the keyboard counts as open, iOS has begun to move what is
+    // on screen to reveal the caret, and reports where that move ends.
+    hide();
     viewport.addEventListener('scroll', onMove);
     viewport.addEventListener('resize', onMove);
 
@@ -73,6 +66,7 @@ export function useFollowVisualViewport(
       viewport.removeEventListener('resize', onMove);
       element.style.transform = '';
       element.style.opacity = '';
+      element.style.transition = '';
     };
   }, [ref, enabled]);
 }
