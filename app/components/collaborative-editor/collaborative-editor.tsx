@@ -15,7 +15,6 @@ import {
 } from '~/hooks/use-document-scroll-restoration';
 import { useCursorNameBounds } from '~/hooks/use-cursor-name-bounds';
 import { useRemoteCursorPositions } from '~/hooks/use-remote-cursor-positions';
-import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 import { createPortal } from 'react-dom';
 import { getGuestId } from '~/utils/guest-id';
 import {
@@ -50,7 +49,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
   }) => {
     const [isSynced, setIsSynced] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
-    const [isVirtualKeyboardOpen] = useVirtualKeyboard();
     const socketClient = useSocketClient();
     // A signed out visitor is identified by a guest id kept in their browser,
     // so they keep their name and colour when they come back.
@@ -110,15 +108,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
         provider.detach();
       };
     }, [provider]);
-
-    useEffect(() => {
-      if (isVirtualKeyboardOpen) {
-        ref.current?.style.setProperty('visibility', 'hidden');
-      }
-      else {
-        ref.current?.style.removeProperty('visibility');
-      }
-    }, [isVirtualKeyboardOpen]);
 
     return (
       <LexicalCollaboration>
