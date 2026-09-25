@@ -5,7 +5,8 @@ import type {
   TriggerFn,
 } from '@lexical/react/LexicalTypeaheadMenuPlugin';
 import { MenuOption } from '@lexical/react/LexicalMenuOption';
-import { $createHeadingNode } from '@lexical/rich-text';
+import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
+import { $createCodeNode, $isCodeNode } from '@lexical/code-core';
 import { $setBlocksType } from '@lexical/selection';
 import {
   INSERT_CHECK_LIST_COMMAND,
@@ -15,6 +16,7 @@ import {
 import {
   $getSelection,
   $isRangeSelection,
+  type ElementNode,
   type LexicalCommand,
   type LexicalEditor,
   type TextNode,
@@ -40,7 +42,7 @@ import {
   menuSurfaceClasses,
 } from '~/ui/menu-surface/menu-surface';
 
-type SlashMenuGroup = 'heading' | 'list';
+type SlashMenuGroup = 'heading' | 'list' | 'block';
 
 type SlashMenuBlock = {
   key: string;
@@ -52,13 +54,13 @@ type SlashMenuBlock = {
   $insert: (editor: LexicalEditor) => void;
 };
 
-const $insertHeading = (tag: 'h1' | 'h2' | 'h3') => () => {
+const $insertBlock = (createNode: () => ElementNode) => () => {
   const selection = $getSelection();
   if (!$isRangeSelection(selection)) {
     return;
   }
 
-  $setBlocksType(selection, () => $createHeadingNode(tag));
+  $setBlocksType(selection, createNode);
 };
 
 const $insertList
@@ -73,7 +75,7 @@ const BLOCKS: SlashMenuBlock[] = [
     icon: 'h1',
     group: 'heading',
     keywords: ['heading', 'title', 'h1'],
-    $insert: $insertHeading('h1'),
+    $insert: $insertBlock(() => $createHeadingNode('h1')),
   },
   {
     key: 'h2',
@@ -81,7 +83,7 @@ const BLOCKS: SlashMenuBlock[] = [
     icon: 'h2',
     group: 'heading',
     keywords: ['heading', 'subtitle', 'h2'],
-    $insert: $insertHeading('h2'),
+    $insert: $insertBlock(() => $createHeadingNode('h2')),
   },
   {
     key: 'h3',
@@ -89,7 +91,7 @@ const BLOCKS: SlashMenuBlock[] = [
     icon: 'h3',
     group: 'heading',
     keywords: ['heading', 'subtitle', 'h3'],
-    $insert: $insertHeading('h3'),
+    $insert: $insertBlock(() => $createHeadingNode('h3')),
   },
   {
     key: 'number',
@@ -114,6 +116,22 @@ const BLOCKS: SlashMenuBlock[] = [
     group: 'list',
     keywords: ['checklist', 'todo', 'task', 'list'],
     $insert: $insertList(INSERT_CHECK_LIST_COMMAND),
+  },
+  {
+    key: 'code',
+    label: 'Code block',
+    icon: 'code',
+    group: 'block',
+    keywords: ['code', 'snippet', 'block'],
+    $insert: $insertBlock(() => $createCodeNode()),
+  },
+  {
+    key: 'quote',
+    label: 'Quote',
+    icon: 'quote',
+    group: 'block',
+    keywords: ['quote', 'blockquote', 'citation'],
+    $insert: $insertBlock(() => $createQuoteNode()),
   },
 ];
 
@@ -163,6 +181,8 @@ const SCALE_IN_OPTIONS = {
  * Whether the text up to the caret is the whole row. The trigger only looks at
  * the text node the caret sits in, so this is what keeps the menu to a row the
  * slash starts: nothing before it, nothing after the caret.
+ *
+ * A code block is not a row to offer blocks for — a slash there is code.
  */
 function $isWholeRow(text: string) {
   const selection = $getSelection();
@@ -172,7 +192,7 @@ function $isWholeRow(text: string) {
 
   const row = selection.anchor.getNode().getParent();
 
-  return row !== null && row.getTextContent() === text;
+  return row !== null && !$isCodeNode(row) && row.getTextContent() === text;
 }
 
 type SlashMenuProps = {
