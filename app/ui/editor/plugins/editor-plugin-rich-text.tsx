@@ -48,9 +48,16 @@ const enterEditLayout = (element: HTMLElement) => {
   element.scrollTop = scrollTop;
 };
 
-const leaveEditLayout = (element: HTMLElement) => {
+/*
+ * `lift` is how far the content was scrolled to keep the caret clear of the
+ * keyboard. It is given back with the keyboard gone: the room below the
+ * content that made it possible goes with it, and the page would otherwise
+ * end up at the end of the document, with nothing left to show under the
+ * browser's toolbar.
+ */
+const leaveEditLayout = (element: HTMLElement, lift: number) => {
   enableBodyScroll(element);
-  const scrollTop = element.scrollTop;
+  const scrollTop = Math.max(0, element.scrollTop - lift);
   delete element.dataset.editing;
   element.style.minHeight = '';
   element.style.height = '';
@@ -70,6 +77,14 @@ const ENTER_DURATION = 300;
  * beforehand costs more than it hides: before the switch the content is the
  * whole document, and iOS stalls the page to draw all of it into a layer.)
  */
+/** Slides the content back down to where it was before editing lifted it. */
+const animateBackDown = (element: HTMLElement, distance: number) => {
+  element.animate(
+    [{ transform: `translateY(${-distance}px)` }, { transform: 'translateY(0)' }],
+    { duration: ENTER_DURATION, easing: ENTER_EASING },
+  );
+};
+
 const animateIntoPlace = (element: HTMLElement, distance: number) => {
   const from = { opacity: 0, transform: `translateY(${distance}px)` };
   element.style.opacity = '0';
@@ -104,18 +119,27 @@ const getCaretBottom = () => {
   return caret.height > 0 ? caret.bottom : null;
 };
 
-/** Scrolls `element` so the caret sits no lower than `bottom`. */
+/**
+ * Scrolls `element` so the caret sits no lower than `bottom`, and tells how
+ * far it scrolled.
+ */
 const keepCaretAbove = (element: HTMLElement, bottom: number) => {
   const caretBottom = getCaretBottom();
-  if (caretBottom !== null && caretBottom > bottom) {
-    element.scrollTop += caretBottom - bottom;
+  if (caretBottom === null || caretBottom <= bottom) {
+    return 0;
   }
+
+  const scrollTop = element.scrollTop;
+  element.scrollTop += caretBottom - bottom;
+
+  return element.scrollTop - scrollTop;
 };
 
 export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   topArea,
 }) => {
   const contenteditableRef = useRef<HTMLDivElement>(null);
+  const liftRef = useRef(0);
   const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
   const shouldReduceMotion = useReducedMotion();
   const [isVirtualKeyboardOpen] = useVirtualKeyboard();
@@ -130,7 +154,15 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
             contenteditableRef.current
             && 'editing' in contenteditableRef.current.dataset
           ) {
-            leaveEditLayout(contenteditableRef.current);
+            const lift = Math.min(
+              liftRef.current,
+              contenteditableRef.current.scrollTop,
+            );
+            leaveEditLayout(contenteditableRef.current, lift);
+            if (lift > 0 && !shouldReduceMotion) {
+              animateBackDown(contenteditableRef.current, lift);
+            }
+            liftRef.current = 0;
           }
 
           return false;
@@ -138,7 +170,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
         COMMAND_PRIORITY_CRITICAL,
       );
     },
-    [editor],
+    [editor, shouldReduceMotion],
   );
 
   useEffect(() => {
@@ -176,7 +208,10 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
         const before = getCaretBottom();
         enterEditLayout(element);
         const { clientHeight } = document.documentElement;
-        keepCaretAbove(element, clientHeight * SAFE_CARET_SHARE);
+        liftRef.current = keepCaretAbove(
+          element,
+          clientHeight * SAFE_CARET_SHARE,
+        );
         const after = getCaretBottom();
 
         if (!shouldReduceMotion) {
@@ -239,7 +274,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
     }
 
     element.style.height = `${viewport.height}px`;
-    keepCaretAbove(
+    liftRef.current += keepCaretAbove(
       element,
       element.getBoundingClientRect().bottom - CARET_MARGIN,
     );
