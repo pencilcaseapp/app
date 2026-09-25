@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { DOCUMENT_SCROLL_STORAGE_PREFIX } from '~/constants/document';
 
 /** How long the reader has to sit still before the position is written. */
@@ -16,7 +17,7 @@ const GROWTH_TIMEOUT_MS = 2000;
  * and a reader halfway down one must not be moved by that — only by a
  * reload, which is the one thing that loses the position on its own.
  */
-const PAGE_LOAD_ID = crypto.randomUUID();
+const PAGE_LOAD_ID = uuidv4();
 
 type StoredPosition = {
   top: number;
