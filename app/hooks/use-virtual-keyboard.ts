@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMedia } from 'react-use';
+import { listenForEditableTap } from '~/utils/editable-tap';
 
 const KEYBOARD_HEIGHT_THRESHOLD = 50;
 
@@ -26,27 +27,47 @@ export const useVirtualKeyboard = () => {
       return;
     }
 
+    // Nor is a shrinking viewport with the content focused: the spinner of
+    // a pull-to-refresh shrinks it as well, and a focus the page moved there
+    // itself opens no keyboard. Only a tap on the content does.
+    let tapped = false;
+
     const listener = () => {
       const viewport = window.visualViewport;
 
       setIsOpen(
-        !!viewport
+        tapped
+        && !!viewport
         && document.documentElement.clientHeight - viewport.height
         > KEYBOARD_HEIGHT_THRESHOLD
         && hasEditableFocus(),
       );
     };
 
+    const stopListeningForTaps = listenForEditableTap(window, () => {
+      tapped = true;
+      listener();
+    });
     window.visualViewport?.addEventListener('resize', listener);
     // Focus moves before the viewport settles, and on the way out of the app
     // it is the only thing that moves at all.
+    const onFocusOut = (event: FocusEvent) => {
+      const next = event.relatedTarget;
+
+      if (!(next instanceof HTMLElement && next.isContentEditable)) {
+        tapped = false;
+      }
+
+      listener();
+    };
     window.addEventListener('focusin', listener);
-    window.addEventListener('focusout', listener);
+    window.addEventListener('focusout', onFocusOut);
 
     return () => {
+      stopListeningForTaps();
       window.visualViewport?.removeEventListener('resize', listener);
       window.removeEventListener('focusin', listener);
-      window.removeEventListener('focusout', listener);
+      window.removeEventListener('focusout', onFocusOut);
     };
   }, [isTouchDevice]);
 
