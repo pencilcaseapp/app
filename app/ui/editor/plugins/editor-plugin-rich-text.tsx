@@ -14,6 +14,11 @@ import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
 export interface EditorPluginRichTextProps {
   /** Rendered above the content, taking over the topbar clearance. */
   topArea?: React.ReactNode;
+  /**
+   * Laid over the content and scrolled along with it — for things placed
+   * against the text, like the cursors of the other people in it.
+   */
+  contentOverlay?: React.ReactNode;
 }
 
 /**
@@ -175,9 +180,11 @@ const keepCaretAbove = (
 
 export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   topArea,
+  contentOverlay,
 }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const contenteditableRef = useRef<HTMLDivElement>(null);
+  // The content and what is laid over it, which move together.
+  const canvasRef = useRef<HTMLDivElement>(null);
   // Where editing left the page, and until when it is held there.
   const leftRef = useRef({ top: 0, until: 0 });
   const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
@@ -229,7 +236,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
    */
   useEffect(() => {
     const element = scrollerRef.current;
-    const content = contenteditableRef.current;
+    const content = canvasRef.current;
     if (!element || !content || !isTouchDevice) {
       return;
     }
@@ -321,7 +328,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   // translucent bar above it.
   useEffect(() => {
     const element = scrollerRef.current;
-    const content = contenteditableRef.current;
+    const content = canvasRef.current;
     const viewport = window.visualViewport;
     if (!element || !content || !viewport) {
       return;
@@ -364,15 +371,17 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
             ref={scrollerRef}
             className="group/scroller data-editing:overflow-y-auto data-editing:overscroll-y-contain"
           >
-            <ContentEditable
-              ref={contenteditableRef}
-              aria-placeholder="Type something …"
-              placeholder={<span />}
-              className={classNames([
-                topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
-                'pb-3 md:pb-12 touch-screen:pb-[55dvh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
-              ])}
-            />
+            <div ref={canvasRef} className="relative">
+              <ContentEditable
+                aria-placeholder="Type something …"
+                placeholder={<span />}
+                className={classNames([
+                  topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
+                  'pb-3 md:pb-12 touch-screen:pb-[55dvh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
+                ])}
+              />
+              {contentOverlay}
+            </div>
           </div>
         )}
         ErrorBoundary={LexicalErrorBoundary}

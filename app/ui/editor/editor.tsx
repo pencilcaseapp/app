@@ -33,6 +33,8 @@ export interface EditorProps extends React.PropsWithChildren {
   editable?: boolean;
   /** Shown between the topbar and the content. */
   notification?: React.ReactNode;
+  /** Laid over the content and scrolled along with it. */
+  contentOverlay?: React.ReactNode;
 }
 
 export const Editor: React.FC<EditorProps> = ({
@@ -42,6 +44,7 @@ export const Editor: React.FC<EditorProps> = ({
   topbarRight,
   editable = true,
   notification,
+  contentOverlay,
   children,
 }) => {
   const config = useMemo<EditorConfig>(() => ({
@@ -73,7 +76,10 @@ export const Editor: React.FC<EditorProps> = ({
           topbarRight={topbarRight}
           editable={editable}
         />
-        <EditorPluginRichText topArea={notification} />
+        <EditorPluginRichText
+          topArea={notification}
+          contentOverlay={contentOverlay}
+        />
         {editable && <EditorPluginAutoFocus />}
         {editable && <EditorPluginSlashMenu />}
         <EditorPluginCheckList />
