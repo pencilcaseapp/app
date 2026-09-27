@@ -259,7 +259,9 @@ function EditorSidebar({
                             <DropdownMenu>
                               <DropdownMenuTrigger iconTitle="Item options" />
                               <DropdownMenuPortal>
-                                <DropdownMenuContent align="start">
+                                <DropdownMenuContent
+                                  align={isMobile ? 'end' : 'start'}
+                                >
                                   <DropdownMenuItem
                                     as="button"
                                     onClick={() => {
