@@ -18,7 +18,8 @@ vi.mock('react-router', async () => {
 });
 
 const createDocumentMock = vi.fn();
-vi.mock('~/repos/document', async () => ({
+vi.mock('~/services/document', async () => ({
+  CreateDocumentError: { LimitReached: 0 },
   createDocument: (...args: unknown[]) => createDocumentMock(...args),
 }));
 
@@ -30,10 +31,10 @@ test('creates a new document and redirects', async () => {
   const context = new RouterContextProvider();
   context.set(userSessionContext, userFixture);
 
-  createDocumentMock.mockResolvedValue({
+  createDocumentMock.mockResolvedValue([null, {
     ...documentFixture,
     id: 'abd-def-123',
-  });
+  }]);
 
   await renderRoute('/new', {
     params: {},
@@ -45,17 +46,28 @@ test('creates a new document and redirects', async () => {
   );
 });
 
-test('sets document owner if user is logged in', async () => {
+test('creates the document for the signed in user', async () => {
   const context = new RouterContextProvider();
   context.set(userSessionContext, userFixture);
-  createDocumentMock.mockResolvedValue(documentFixture);
+  createDocumentMock.mockResolvedValue([null, documentFixture]);
 
   await renderRoute('/new', {
     params: {},
     context,
   });
 
-  expect(createDocumentMock).toHaveBeenCalledWith({
-    userId: userFixture.id,
+  expect(createDocumentMock).toHaveBeenCalledWith(userFixture);
+});
+
+test('redirects to the upgrade once the free limit is reached', async () => {
+  const context = new RouterContextProvider();
+  context.set(userSessionContext, userFixture);
+  createDocumentMock.mockResolvedValue([0]);
+
+  await renderRoute('/new', {
+    params: {},
+    context,
   });
+
+  expect(redirectMock).toHaveBeenCalledWith(href('/upgrade'));
 });

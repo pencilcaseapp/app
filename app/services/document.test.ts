@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   changeLinkAccess,
   ChangeLinkAccessError,
+  createDocument,
+  CreateDocumentError,
   deleteDocument,
   DeleteDocumentError,
   getLiveAccess,
@@ -17,6 +19,7 @@ import type {
   DocumentCollaboratorSource,
   DocumentLinkAccess,
 } from '~/constants/document';
+import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 
@@ -28,7 +31,11 @@ const setDocumentLinkAccessMock = vi.fn();
 const removeLinkCollaboratorsMock = vi.fn();
 const softDeleteDocumentMock = vi.fn();
 const restoreDocumentRowMock = vi.fn();
+const countOwnedDocumentsMock = vi.fn();
+const createDocumentRowMock = vi.fn();
 vi.mock('~/repos/document', () => ({
+  countOwnedDocuments: (...args: unknown[]) => countOwnedDocumentsMock(...args),
+  createDocument: (...args: unknown[]) => createDocumentRowMock(...args),
   getDocumentForViewer: (...args: unknown[]) =>
     getDocumentForViewerMock(...args),
   connectCollaborator: (...args: unknown[]) => connectCollaboratorMock(...args),
@@ -669,5 +676,48 @@ describe('restoreDocument', () => {
 
     expect(error).toBe(DeleteDocumentError.PermissionDenied);
     expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('createDocument', () => {
+  beforeEach(() => {
+    createDocumentRowMock.mockResolvedValue(documentFixture);
+  });
+
+  it('creates a document below the free limit', async () => {
+    countOwnedDocumentsMock.mockResolvedValue(FREE_DOCUMENT_LIMIT - 1);
+
+    const result = await createDocument({
+      ...userFixture,
+      hasSubscription: false,
+    });
+
+    expect(result).toEqual([null, { id: documentFixture.id }]);
+    expect(createDocumentRowMock).toHaveBeenCalledWith({
+      userId: userFixture.id,
+    });
+  });
+
+  it('refuses a free account at the limit', async () => {
+    countOwnedDocumentsMock.mockResolvedValue(FREE_DOCUMENT_LIMIT);
+
+    const result = await createDocument({
+      ...userFixture,
+      hasSubscription: false,
+    });
+
+    expect(result).toEqual([CreateDocumentError.LimitReached]);
+    expect(createDocumentRowMock).not.toHaveBeenCalled();
+  });
+
+  it('does not limit a subscribed account', async () => {
+    countOwnedDocumentsMock.mockResolvedValue(FREE_DOCUMENT_LIMIT + 10);
+
+    const result = await createDocument({
+      ...userFixture,
+      hasSubscription: true,
+    });
+
+    expect(result).toEqual([null, { id: documentFixture.id }]);
   });
 });

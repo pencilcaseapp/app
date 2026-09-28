@@ -20,7 +20,6 @@ import { DropdownMenuContent } from '~/ui/dropdown-menu/dropdown-menu-content';
 import { DropdownMenuItem } from '~/ui/dropdown-menu/dropdown-menu-item';
 import { DropdownMenuPortal } from '~/ui/dropdown-menu/dropdown-menu-portal';
 import { DropdownMenuTrigger } from '~/ui/dropdown-menu/dropdown-menu-trigger';
-import type { IconName } from '~/ui/icon/icons';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
 import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import { Sidebar } from '~/ui/sidebar/sidebar';
@@ -31,6 +30,7 @@ import {
   getDeletedDocumentList,
   getDocumentList,
 } from '~/repos/document';
+import { hasReachedDocumentLimit } from '~/services/document';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { useStableOrder } from '~/hooks/use-stable-order';
 import { useLiveTitles } from '~/hooks/use-live-titles';
@@ -47,6 +47,7 @@ import {
 import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
 import { RestoreDocumentMenu } from '~/components/restore-document-menu/restore-document-menu';
 import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
+import { DocumentLimitDialog } from '~/components/document-limit-dialog/document-limit-dialog';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import type { DocumentShareState } from '~/constants/document';
 import { useIsMobile } from '~/hooks/use-is-mobile';
@@ -73,10 +74,6 @@ function getShareState(
 
   return 'private';
 }
-
-const bottomNavigation = [
-  { label: 'Create Doc', to: href('/new'), icon: 'create-doc' },
-];
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
@@ -109,6 +106,9 @@ export async function loader({ context }: Route.LoaderArgs) {
     navigation,
     deletedNavigation,
     ownedDocumentCount,
+    documentLimitReached: user
+      ? hasReachedDocumentLimit(user, ownedDocumentCount)
+      : false,
   };
 }
 
@@ -118,6 +118,7 @@ export default function LayoutEditor({
     navigation,
     deletedNavigation,
     ownedDocumentCount,
+    documentLimitReached,
   },
 }: Route.ComponentProps) {
   return (
@@ -131,6 +132,7 @@ export default function LayoutEditor({
                     navigation={navigation}
                     deletedNavigation={deletedNavigation}
                     ownedDocumentCount={ownedDocumentCount}
+                    documentLimitReached={documentLimitReached}
                     showUpgrade={!user.hasSubscription}
                   >
                     <Outlet />
@@ -160,6 +162,8 @@ export interface EditorSidebarProps extends PropsWithChildren {
   deletedNavigation: DeletedItemData[];
   /** Documents the user created themselves, what the meter shows. */
   ownedDocumentCount: number;
+  /** "Create Doc" opens the upgrade dialog instead of `/new`. */
+  documentLimitReached: boolean;
   showUpgrade?: boolean;
 }
 
@@ -171,6 +175,7 @@ function EditorSidebar({
   navigation,
   deletedNavigation,
   ownedDocumentCount,
+  documentLimitReached,
   showUpgrade,
   children,
 }: EditorSidebarProps) {
@@ -201,6 +206,7 @@ function EditorSidebar({
   const [documentToDelete, setDocumentToDelete]
     = useState<DocumentToDelete>();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isLimitDialogOpen, setIsLimitDialogOpen] = useState(false);
   // Settings lives under the open document, so the entry only exists
   // while one is open (the only editor page — `/new` always redirects).
   const documentMatch = matchPath(
@@ -217,6 +223,9 @@ function EditorSidebar({
     : null;
   const upgradeUrl = documentMatch?.params.id
     ? href('/doc/:id/settings/subscription', { id: documentMatch.params.id })
+    : href('/upgrade');
+  const checkoutUrl = documentMatch?.params.id
+    ? href('/doc/:id/checkout', { id: documentMatch.params.id })
     : href('/upgrade');
 
   useEffect(() => {
@@ -297,6 +306,13 @@ function EditorSidebar({
                     onOpenChange={setIsDeleteDialogOpen}
                   />
                 )}
+                {/* Not in the bottom area, which the slim sidebar
+                    renders a second time. */}
+                <DocumentLimitDialog
+                  checkoutUrl={checkoutUrl}
+                  open={isLimitDialogOpen}
+                  onOpenChange={setIsLimitDialogOpen}
+                />
               </>
             ),
           },
@@ -343,16 +359,27 @@ function EditorSidebar({
                 to={upgradeUrl}
               />
             )}
-            {bottomNavigation?.map(item => (
-              <NavigationItem
-                onClick={closeOnNavigate}
-                key={`${item.label}-${item.to}`}
-                title={item.label}
-                to={item.to}
-                icon={item.icon as IconName}
-                as={NavLink}
-              />
-            ))}
+            {documentLimitReached
+              ? (
+                  <NavigationItem
+                    // The sidebar stays open on mobile, the drawer
+                    // stacks on top of it.
+                    onClick={() => setIsLimitDialogOpen(true)}
+                    title="Create Doc"
+                    icon="create-doc"
+                    as="button"
+                    type="button"
+                  />
+                )
+              : (
+                  <NavigationItem
+                    onClick={closeOnNavigate}
+                    title="Create Doc"
+                    to={href('/new')}
+                    icon="create-doc"
+                    as={NavLink}
+                  />
+                )}
             {settingsUrl && (
               <NavigationItem
                 // On mobile the sidebar stays open: the settings drawer
