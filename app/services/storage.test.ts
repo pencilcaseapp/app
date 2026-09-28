@@ -2,7 +2,12 @@
 
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { deleteObjects, getObjectStream, putObject } from './storage';
+import {
+  copyObject,
+  deleteObjects,
+  getObjectStream,
+  putObject,
+} from './storage';
 
 async function read(stream: ReadableStream<Uint8Array>) {
   return new TextDecoder().decode(await new Response(stream).arrayBuffer());
@@ -19,6 +24,21 @@ describe('storage', () => {
     });
 
     const stream = await getObjectStream(key);
+    expect(await read(stream!)).toBe('hello');
+  });
+
+  it('copies an object to another key', async () => {
+    const key = `test/${randomUUID()}`;
+    const copyKey = `test/${randomUUID()}`;
+    await putObject({
+      key,
+      body: new TextEncoder().encode('hello'),
+      contentType: 'text/plain',
+    });
+
+    await copyObject(key, copyKey);
+
+    const stream = await getObjectStream(copyKey);
     expect(await read(stream!)).toBe('hello');
   });
 

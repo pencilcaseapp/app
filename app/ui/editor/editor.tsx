@@ -23,6 +23,7 @@ import { EditorPluginCheckList } from './plugins/editor-plugin-check-list';
 import { EditorPluginSlashMenu } from './plugins/editor-plugin-slash-menu';
 import {
   EditorPluginImages,
+  type CopyImage,
   type UploadImage,
 } from './plugins/editor-plugin-images';
 import { ImageNode } from './nodes/image-node';
@@ -43,6 +44,8 @@ export interface EditorProps extends React.PropsWithChildren {
   contentOverlay?: React.ReactNode;
   /** Lets people paste, drop and pick images; without it they cannot. */
   uploadImage?: UploadImage;
+  /** Copies the images of content pasted from another document. */
+  copyImage?: CopyImage;
 }
 
 export const Editor: React.FC<EditorProps> = ({
@@ -54,6 +57,7 @@ export const Editor: React.FC<EditorProps> = ({
   notification,
   contentOverlay,
   uploadImage,
+  copyImage,
   children,
 }) => {
   const config = useMemo<EditorConfig>(() => ({
@@ -96,7 +100,10 @@ export const Editor: React.FC<EditorProps> = ({
           <EditorPluginSlashMenu canInsertImages={Boolean(uploadImage)} />
         )}
         {editable && uploadImage && (
-          <EditorPluginImages uploadImage={uploadImage} />
+          <EditorPluginImages
+            uploadImage={uploadImage}
+            copyImage={copyImage}
+          />
         )}
         {editable && <EditorPluginImageDrag />}
         <EditorPluginCheckList />

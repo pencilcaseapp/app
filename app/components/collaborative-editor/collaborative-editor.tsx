@@ -15,6 +15,7 @@ import {
 } from '~/hooks/use-document-scroll-restoration';
 import { useCursorNameBounds } from '~/hooks/use-cursor-name-bounds';
 import { useRemoteCursorPositions } from '~/hooks/use-remote-cursor-positions';
+import { useCopyImage } from '~/hooks/use-copy-image';
 import { useUploadImage } from '~/hooks/use-upload-image';
 import { getGuestId } from '~/utils/guest-id';
 import {
@@ -83,6 +84,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     useFirstLocalEdit(doc, provider, onFirstEdit);
     useAccessRevoked(provider, onAccessRevoked);
     const uploadImage = useUploadImage(id);
+    const copyImage = useCopyImage(id);
 
     const [providerFactory] = useState(() => (
       id: string,
@@ -119,6 +121,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
           editable={editable}
           notification={notification}
           uploadImage={uploadImage}
+          copyImage={copyImage}
           // Inside the content, so the cursors scroll along with it — also
           // while typing, when the content scrolls in the editor rather
           // than the page.

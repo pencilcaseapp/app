@@ -11,15 +11,8 @@ import {
   type NodeKey,
 } from 'lexical';
 import { useEffect, useRef } from 'react';
+import { parseAssetSrc } from '~/utils/asset-src';
 import { listenForEditableTap, TAP_SLOP } from '~/utils/editable-tap';
-
-/*
- * Image nodes reach the editor from other people, through the live
- * document or a paste, so a node may point anywhere. Only our own assets
- * are loaded: anything else would have every reader's browser call out to
- * a server of the author's choosing.
- */
-const ASSET_SRC = /^\/doc\/[0-9a-f-]{36}\/assets\/[0-9a-f-]{36}$/;
 
 export interface ImageViewProps {
   nodeKey: NodeKey;
@@ -130,7 +123,11 @@ export const ImageView: React.FC<ImageViewProps> = ({
     });
   }, [editor, isSelected]);
 
-  if (!ASSET_SRC.test(src)) {
+  // Image nodes reach the editor from other people, through the live
+  // document or a paste, so a node may point anywhere. Only our own assets
+  // are loaded: anything else would have every reader's browser call out
+  // to a server of the author's choosing.
+  if (!parseAssetSrc(src)) {
     return (
       <div
         style={{ aspectRatio: `${width} / ${height}`, width }}

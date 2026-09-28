@@ -12,10 +12,12 @@ import {
   $createTextNode,
   $getRoot,
   type LexicalEditor,
+  PASTE_COMMAND,
 } from 'lexical';
 import { $isImageNode, ImageNode } from '../nodes/image-node';
 import {
   EditorPluginImages,
+  type CopyImage,
   PICK_IMAGES_COMMAND,
   type UploadImage,
 } from './editor-plugin-images';
@@ -35,6 +37,7 @@ const image = {
 };
 
 const uploadImage = vi.fn<UploadImage>();
+const copyImage = vi.fn<CopyImage>();
 
 function renderPlugin() {
   render(
@@ -52,7 +55,7 @@ function renderPlugin() {
         contentEditable={<ContentEditable aria-label="editor" />}
         ErrorBoundary={LexicalErrorBoundary}
       />
-      <EditorPluginImages uploadImage={uploadImage} />
+      <EditorPluginImages uploadImage={uploadImage} copyImage={copyImage} />
     </LexicalComposer>,
   );
 }
@@ -91,8 +94,51 @@ async function drop(...files: File[]) {
 
 const png = () => new File(['png'], 'image.png', { type: 'image/png' });
 
+const otherImage = {
+  src: '/doc/c4a2d3e5-0000-4000-8000-000000000000/assets/'
+    + 'd5b3e4f6-0000-4000-8000-000000000000',
+  width: 300,
+  height: 200,
+};
+
+/** Pastes what Lexical puts on the clipboard: a paragraph and an image. */
+async function pasteLexical(pastedImage: typeof image) {
+  const json = JSON.stringify({
+    namespace: 'test',
+    nodes: [
+      {
+        type: 'paragraph',
+        version: 1,
+        children: [{ type: 'text', version: 1, text: 'Pasted' }],
+      },
+      { type: 'image', version: 1, ...pastedImage },
+    ],
+  });
+  const event = {
+    clipboardData: {
+      types: ['application/x-lexical-editor'],
+      getData: (type: string) =>
+        type === 'application/x-lexical-editor' ? json : '',
+    },
+    preventDefault: vi.fn(),
+  } as unknown as ClipboardEvent;
+
+  await act(async () => {
+    editor.dispatchCommand(PASTE_COMMAND, event);
+  });
+
+  return event;
+}
+
+function imageSrcs() {
+  return editor.getEditorState().read(() => $getRoot().getChildren()
+    .filter($isImageNode)
+    .map(node => node.exportJSON().src));
+}
+
 beforeEach(() => {
   uploadImage.mockReset();
+  copyImage.mockReset();
   renderPlugin();
 });
 
@@ -185,4 +231,39 @@ describe('EditorPluginImages', () => {
       expect(uploadImage).toHaveBeenCalledWith(expect.any(File));
       expect(blocks()).toEqual(['First', 'image', 'Second']);
     });
+
+  test('pastes an image of another document as a copy', async () => {
+    copyImage.mockResolvedValue(image);
+    setParagraphs(['First'], 0);
+
+    const event = await pasteLexical(otherImage);
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(copyImage).toHaveBeenCalledWith(
+      expect.objectContaining(otherImage),
+    );
+    expect(blocks()).toEqual(['FirstPasted', 'image']);
+    expect(imageSrcs()).toEqual([image.src]);
+  });
+
+  test('leaves an image out when it could not be copied', async () => {
+    copyImage.mockResolvedValue(undefined);
+    setParagraphs(['First'], 0);
+
+    await pasteLexical(otherImage);
+
+    expect(blocks()).toEqual(['FirstPasted']);
+  });
+
+  test('leaves a paste that needs no copy to Lexical', async () => {
+    copyImage.mockReturnValue(null);
+    setParagraphs(['First'], 0);
+
+    const event = await pasteLexical(image);
+
+    expect(copyImage).toHaveBeenCalled();
+    expect(imageSrcs()).toEqual([image.src]);
+    expect(blocks()).toEqual(['FirstPasted', 'image']);
+    expect(event.preventDefault).toHaveBeenCalledTimes(1);
+  });
 });

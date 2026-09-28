@@ -23,6 +23,7 @@ export default [
   route('doc/:id/checkout', 'routes/doc-checkout.ts'),
   route('doc/:id/share', 'routes/doc-share.ts'),
   route('doc/:id/assets', 'routes/doc-assets.ts'),
+  route('doc/:id/assets/copies', 'routes/doc-asset-copies.ts'),
   route('doc/:id/assets/:assetId', 'routes/doc-asset.ts'),
   route('doc/:id/link-access', 'routes/doc-link-access.ts'),
   route(

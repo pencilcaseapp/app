@@ -151,6 +151,34 @@ test('a pasted image is stored and stays across a reload', async ({
   await expectLoaded(images(userA.page));
 });
 
+test('an image pasted into another document is copied into it', async ({
+  userA,
+}) => {
+  const { page, editor } = userA;
+  await userA.createDocument();
+  await userA.typeLines(`Copy source ${Date.now()}`, 'Above the image.');
+  await sendImage(editor, 'paste', await createPng(300, 200));
+  await expectLoaded(images(page));
+  const sourceSrc = await images(page).getAttribute('src');
+
+  await images(page).click();
+  await page.keyboard.press('ControlOrMeta+C');
+
+  const urlB = await userA.createDocument();
+  await userA.typeLines(`Copy target ${Date.now()}`, '');
+  await page.keyboard.press('ControlOrMeta+V');
+
+  // Lexical keeps a caret helper <img> next to an image at the end of the
+  // document, which has no src.
+  const pasted = page.locator('[contenteditable] img[src]');
+  const documentIdB = new URL(urlB).pathname.split('/').pop();
+  await expect(pasted).toHaveCount(1);
+  await expect(pasted)
+    .toHaveAttribute('src', new RegExp(`^/doc/${documentIdB}/assets/`));
+  expect(await pasted.getAttribute('src')).not.toBe(sourceSrc);
+  await expectLoaded(pasted);
+});
+
 test('a large photo is shrunk before it is uploaded', async ({ userA }) => {
   await userA.createDocument();
   await userA.typeLines(`Large image doc ${Date.now()}`, 'A photo.');

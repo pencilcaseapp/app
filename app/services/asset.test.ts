@@ -2,7 +2,14 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import sharp from 'sharp';
-import { addImage, AddImageError, openAsset, OpenAssetError } from './asset';
+import {
+  addImage,
+  AddImageError,
+  copyImage,
+  CopyImageError,
+  openAsset,
+  OpenAssetError,
+} from './asset';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 
@@ -19,8 +26,10 @@ vi.mock('~/repos/document-asset', () => ({
 }));
 
 const putObjectMock = vi.fn();
+const copyObjectMock = vi.fn();
 const getObjectStreamMock = vi.fn();
 vi.mock('~/services/storage', () => ({
+  copyObject: (...args: unknown[]) => copyObjectMock(...args),
   putObject: (...args: unknown[]) => putObjectMock(...args),
   getObjectStream: (...args: unknown[]) => getObjectStreamMock(...args),
 }));
@@ -133,6 +142,96 @@ describe('addImage', () => {
     expect(result).toEqual([AddImageError.UnsupportedType]);
     expect(putObjectMock).not.toHaveBeenCalled();
     expect(createAssetMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('copyImage', () => {
+  const sourceDocumentId = 'c4a2d3e5-0000-4000-8000-000000000000';
+  const source = {
+    id: 'd5b3e4f6-0000-4000-8000-000000000000',
+    documentId: sourceDocumentId,
+    storageKey: `documents/${sourceDocumentId}/d5b3e4f6.webp`,
+    contentType: 'image/webp',
+    byteSize: 1234,
+    width: 800,
+    height: 600,
+  };
+  const src = `/doc/${sourceDocumentId}/assets/${source.id}`;
+
+  it('copies the image into the document and records it', async () => {
+    getLiveAccessMock.mockResolvedValue({ readOnly: false });
+    getAssetMock.mockResolvedValue(source);
+
+    const [error, image] = await copyImage({ documentId, viewer, src });
+
+    expect(error).toBeNull();
+    expect(image).toMatchObject({ width: 800, height: 600 });
+    expect(getLiveAccessMock).toHaveBeenCalledWith(documentId, viewer);
+    expect(getLiveAccessMock).toHaveBeenCalledWith(sourceDocumentId, viewer);
+
+    const storageKey = `documents/${documentId}/${image!.id}.webp`;
+    expect(copyObjectMock).toHaveBeenCalledWith(source.storageKey, storageKey);
+    expect(createAssetMock).toHaveBeenCalledWith({
+      id: image!.id,
+      documentId,
+      userId: viewer.id,
+      storageKey,
+      contentType: 'image/webp',
+      byteSize: 1234,
+      width: 800,
+      height: 600,
+    });
+  });
+
+  it('does not copy into a document the viewer may only read', async () => {
+    getLiveAccessMock.mockResolvedValue({ readOnly: true });
+
+    const result = await copyImage({ documentId, viewer, src });
+
+    expect(result).toEqual([CopyImageError.PermissionDenied]);
+    expect(copyObjectMock).not.toHaveBeenCalled();
+  });
+
+  it('does not copy from a document the viewer may not open', async () => {
+    getLiveAccessMock
+      .mockResolvedValueOnce({ readOnly: false })
+      .mockResolvedValueOnce(undefined);
+    getAssetMock.mockResolvedValue(source);
+
+    const result = await copyImage({ documentId, viewer, src });
+
+    expect(result).toEqual([CopyImageError.NotFound]);
+    expect(copyObjectMock).not.toHaveBeenCalled();
+  });
+
+  it('does not copy an asset under another document', async () => {
+    getLiveAccessMock.mockResolvedValue({ readOnly: false });
+    getAssetMock.mockResolvedValue({ ...source, documentId });
+
+    const result = await copyImage({ documentId, viewer, src });
+
+    expect(result).toEqual([CopyImageError.NotFound]);
+    expect(copyObjectMock).not.toHaveBeenCalled();
+  });
+
+  it('does not copy what is not one of our assets', async () => {
+    getLiveAccessMock.mockResolvedValue({ readOnly: false });
+
+    const result = await copyImage({
+      documentId,
+      viewer,
+      src: 'https://example.com/image.png',
+    });
+
+    expect(result).toEqual([CopyImageError.NotFound]);
+    expect(getAssetMock).not.toHaveBeenCalled();
+  });
+
+  it('does not exist for somebody who may not open the document', async () => {
+    getLiveAccessMock.mockResolvedValue(undefined);
+
+    expect(await copyImage({ documentId, src }))
+      .toEqual([CopyImageError.NotFound]);
   });
 });
 

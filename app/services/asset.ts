@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto';
 import { IMAGE_CONTENT_TYPE, MAX_ASSET_UPLOAD_BYTES } from '~/constants/asset';
 import { createAsset, getAsset } from '~/repos/document-asset';
 import { getLiveAccess, type DocumentViewer } from '~/services/document';
-import { getObjectStream, putObject } from '~/services/storage';
+import { copyObject, getObjectStream, putObject } from '~/services/storage';
+import { parseAssetSrc } from '~/utils/asset-src';
 import { processImage } from '~/utils/image';
 
 export enum AddImageError {
@@ -74,6 +75,71 @@ export async function addImage(input: AddImageInput): Promise<AddImageResult> {
   });
 
   return [null, { id, width: image.width, height: image.height }];
+}
+
+export enum CopyImageError {
+  NotFound,
+  PermissionDenied,
+}
+
+export interface CopyImageInput {
+  documentId: string;
+  viewer?: DocumentViewer;
+  /** Where the image is served from in the document it was pasted from. */
+  src: string;
+}
+
+export type CopyImageResult = [CopyImageError] | [null, AddedImage];
+
+/**
+ * Copies an image pasted from another document into this one, so each
+ * document keeps owning its files: the image stays for whoever may open
+ * this document, and goes when this document is purged, not the other
+ * one. Only somebody who may edit this document and open the other one
+ * may copy.
+ */
+export async function copyImage(
+  input: CopyImageInput,
+): Promise<CopyImageResult> {
+  const { documentId, viewer, src } = input;
+  const access = await getLiveAccess(documentId, viewer);
+
+  if (!access) {
+    return [CopyImageError.NotFound];
+  }
+
+  if (access.readOnly) {
+    return [CopyImageError.PermissionDenied];
+  }
+
+  const source = parseAssetSrc(src);
+  const asset = source && await getAsset(source.assetId);
+
+  if (
+    !asset
+    || asset.documentId !== source.documentId
+    || !await getLiveAccess(asset.documentId, viewer)
+  ) {
+    return [CopyImageError.NotFound];
+  }
+
+  const id = randomUUID();
+  const storageKey = `documents/${documentId}/${id}.webp`;
+
+  await copyObject(asset.storageKey, storageKey);
+
+  await createAsset({
+    id,
+    documentId,
+    userId: viewer?.id,
+    storageKey,
+    contentType: asset.contentType,
+    byteSize: asset.byteSize,
+    width: asset.width,
+    height: asset.height,
+  });
+
+  return [null, { id, width: asset.width, height: asset.height }];
 }
 
 export enum OpenAssetError {
