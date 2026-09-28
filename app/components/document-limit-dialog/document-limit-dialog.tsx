@@ -45,7 +45,6 @@ export const DocumentLimitDialog: FC<DocumentLimitDialogProps> = ({
               href={checkoutUrl}
               className="w-full"
               colorDark="grey-900"
-              icon="externalLink"
             >
               Upgrade to Pro
             </Button>
