@@ -1,8 +1,15 @@
 // @vitest-environment node
 
+import { randomUUID } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import sharp from 'sharp';
-import { addImage, AddImageError, openAsset, OpenAssetError } from './asset';
+import {
+  addImage,
+  AddImageError,
+  findAsset,
+  FindAssetError,
+  readAsset,
+} from './asset';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 
@@ -19,10 +26,10 @@ vi.mock('~/repos/asset', () => ({
 }));
 
 const putObjectMock = vi.fn();
-const getObjectStreamMock = vi.fn();
+const getObjectMock = vi.fn();
 vi.mock('~/services/storage', () => ({
   putObject: (...args: unknown[]) => putObjectMock(...args),
-  getObjectStream: (...args: unknown[]) => getObjectStreamMock(...args),
+  getObject: (...args: unknown[]) => getObjectMock(...args),
 }));
 
 const viewer = { id: userFixture.id, email: userFixture.email };
@@ -136,7 +143,7 @@ describe('addImage', () => {
   });
 });
 
-describe('openAsset', () => {
+describe('findAsset', () => {
   const asset = {
     id: 'b3f1c2d4-0000-4000-8000-000000000000',
     documentId,
@@ -144,45 +151,73 @@ describe('openAsset', () => {
     contentType: 'image/webp',
     byteSize: 1234,
   };
-  const body = new ReadableStream();
 
-  it('streams the asset to somebody who may open its document', async () => {
+  it('finds the asset for somebody who may open its document', async () => {
     getAssetMock.mockResolvedValue(asset);
     getLiveAccessMock.mockResolvedValue({ readOnly: true });
-    getObjectStreamMock.mockResolvedValue(body);
 
-    const result = await openAsset(asset.id, viewer);
-
-    expect(result).toEqual([null, {
-      contentType: 'image/webp',
-      byteSize: 1234,
-      body,
-    }]);
+    expect(await findAsset(asset.id, viewer)).toEqual([null, asset]);
     expect(getLiveAccessMock).toHaveBeenCalledWith(documentId, viewer);
-    expect(getObjectStreamMock).toHaveBeenCalledWith(asset.storageKey);
   });
 
   it('does not exist for somebody who may not open the document', async () => {
     getAssetMock.mockResolvedValue(asset);
     getLiveAccessMock.mockResolvedValue(undefined);
 
-    const result = await openAsset(asset.id, viewer);
+    const result = await findAsset(asset.id, viewer);
 
-    expect(result).toEqual([OpenAssetError.NotFound]);
-    expect(getObjectStreamMock).not.toHaveBeenCalled();
+    expect(result).toEqual([FindAssetError.NotFound]);
   });
 
   it('does not exist when there is no such asset', async () => {
     getAssetMock.mockResolvedValue(undefined);
 
-    expect(await openAsset(asset.id)).toEqual([OpenAssetError.NotFound]);
+    expect(await findAsset(asset.id)).toEqual([FindAssetError.NotFound]);
+  });
+});
+
+describe('readAsset', () => {
+  const body = new TextEncoder().encode('image');
+
+  function createAsset() {
+    const id = randomUUID();
+
+    return {
+      id,
+      documentId,
+      userId: null,
+      storageKey: `documents/${documentId}/${id}.webp`,
+      contentType: 'image/webp',
+      byteSize: body.byteLength,
+      width: 10,
+      height: 10,
+      createdAt: new Date(),
+    };
+  }
+
+  it('reads the asset from the bucket once and then from memory', async () => {
+    const asset = createAsset();
+    getObjectMock.mockResolvedValue(body);
+
+    expect(await readAsset(asset)).toBe(body);
+    expect(await readAsset(asset)).toBe(body);
+    expect(getObjectMock).toHaveBeenCalledOnce();
+    expect(getObjectMock).toHaveBeenCalledWith(asset.storageKey);
   });
 
-  it('does not exist when the bucket has lost the file', async () => {
-    getAssetMock.mockResolvedValue(asset);
-    getLiveAccessMock.mockResolvedValue({ readOnly: false });
-    getObjectStreamMock.mockResolvedValue(undefined);
+  it('asks the bucket once for requests arriving together', async () => {
+    const asset = createAsset();
+    getObjectMock.mockResolvedValue(body);
 
-    expect(await openAsset(asset.id)).toEqual([OpenAssetError.NotFound]);
+    await Promise.all([readAsset(asset), readAsset(asset)]);
+
+    expect(getObjectMock).toHaveBeenCalledOnce();
+  });
+
+  it('is undefined when the bucket has lost the file', async () => {
+    const asset = createAsset();
+    getObjectMock.mockResolvedValue(undefined);
+
+    expect(await readAsset(asset)).toBeUndefined();
   });
 });

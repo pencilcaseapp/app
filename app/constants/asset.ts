@@ -16,3 +16,9 @@ export const IMAGE_CONTENT_TYPE = 'image/webp';
  * the instance.
  */
 export const MAX_IMAGE_PIXELS = 50_000_000;
+
+/**
+ * How much of the recently served assets an instance keeps in memory, so
+ * the bucket is not asked for the same image on every request.
+ */
+export const ASSET_CACHE_BYTES = 64 * 1024 * 1024;

@@ -1,8 +1,13 @@
 import { randomUUID } from 'node:crypto';
-import { IMAGE_CONTENT_TYPE, MAX_ASSET_UPLOAD_BYTES } from '~/constants/asset';
-import { createAsset, getAsset } from '~/repos/asset';
+import { LRUCache } from 'lru-cache';
+import {
+  ASSET_CACHE_BYTES,
+  IMAGE_CONTENT_TYPE,
+  MAX_ASSET_UPLOAD_BYTES,
+} from '~/constants/asset';
+import { createAsset, getAsset, type Asset } from '~/repos/asset';
 import { getLiveAccess, type DocumentViewer } from '~/services/document';
-import { getObjectStream, putObject } from '~/services/storage';
+import { getObject, putObject } from '~/services/storage';
 import { processImage } from '~/utils/image';
 
 export enum AddImageError {
@@ -76,42 +81,43 @@ export async function addImage(input: AddImageInput): Promise<AddImageResult> {
   return [null, { id, width: image.width, height: image.height }];
 }
 
-export enum OpenAssetError {
+export enum FindAssetError {
   NotFound,
 }
 
-export interface OpenAsset {
-  contentType: string;
-  byteSize: number;
-  body: ReadableStream<Uint8Array>;
-}
-
-export type OpenAssetResult = [OpenAssetError] | [null, OpenAsset];
+export type FindAssetResult = [FindAssetError] | [null, Asset];
 
 /**
  * An asset is for whoever may open its document, by the same rules as the
  * document itself. Anybody else is told it does not exist, whether it does
  * or not.
  */
-export async function openAsset(
+export async function findAsset(
   assetId: string,
   viewer?: DocumentViewer,
-): Promise<OpenAssetResult> {
+): Promise<FindAssetResult> {
   const asset = await getAsset(assetId);
 
   if (!asset || !await getLiveAccess(asset.documentId, viewer)) {
-    return [OpenAssetError.NotFound];
+    return [FindAssetError.NotFound];
   }
 
-  const body = await getObjectStream(asset.storageKey);
+  return [null, asset];
+}
 
-  if (!body) {
-    return [OpenAssetError.NotFound];
-  }
+/*
+ * An asset never changes once it is stored, so an instance keeps the ones
+ * it served lately in memory and only goes to the bucket, by far the
+ * slowest part of serving one, for the rest. Only ever read after
+ * `findAsset`, so access is still checked on every request.
+ */
+const cache = new LRUCache<string, Uint8Array<ArrayBuffer>>({
+  maxSize: ASSET_CACHE_BYTES,
+  sizeCalculation: body => body.byteLength,
+  fetchMethod: key => getObject(key),
+});
 
-  return [null, {
-    contentType: asset.contentType,
-    byteSize: asset.byteSize,
-    body,
-  }];
+/** The asset's content, or `undefined` when the bucket has lost it. */
+export async function readAsset(asset: Asset) {
+  return cache.fetch(asset.storageKey);
 }

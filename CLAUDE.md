@@ -236,8 +236,11 @@ upload itself: lossless for a PNG (mostly screenshots, whose text a lossy
 encoder smears) unless that runs past a megabyte, lossy otherwise. An `assets` row belongs to the document, not the
 uploader. The bucket stays private: `/user-assets/:assetId` checks
 access with `getLiveAccess`, the same rules as the document, and
-streams the object through the app, so unsharing a document takes its
-images along. Soft delete leaves them alone (the Deleted view and a
+serves the object through the app, so unsharing a document takes its
+images along. An object never changes, so each instance keeps the ones
+it served lately in memory (`readAsset`, `ASSET_CACHE_BYTES`) and the
+asset id doubles as the ETag, which answers an expired browser copy
+with a 304 — both only after the access check. Soft delete leaves them alone (the Deleted view and a
 restore still need them); `purgeDeletedDocuments` deletes the objects,
 then the rows, then the documents. In the editor an image is an
 `ImageNode` (`app/ui/editor/nodes/`), a block of its own.

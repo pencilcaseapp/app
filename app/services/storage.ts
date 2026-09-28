@@ -38,15 +38,20 @@ export async function putObject(input: PutObjectInput) {
   }));
 }
 
-/** The object's content as a stream, or `undefined` when there is none. */
-export async function getObjectStream(key: string) {
+/** The object's content, or `undefined` when there is none. */
+export async function getObject(
+  key: string,
+): Promise<Uint8Array<ArrayBuffer> | undefined> {
   try {
     const object = await client.send(new GetObjectCommand({
       Bucket: config.storage.bucket,
       Key: key,
     }));
 
-    return object.Body?.transformToWebStream();
+    // Typed for any buffer, but a response body is never a shared one.
+    return object.Body?.transformToByteArray() as Promise<
+      Uint8Array<ArrayBuffer> | undefined
+    >;
   }
   catch (error) {
     if (error instanceof NoSuchKey) {

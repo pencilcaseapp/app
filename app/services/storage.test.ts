@@ -2,14 +2,10 @@
 
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { deleteObjects, getObjectStream, putObject } from './storage';
-
-async function read(stream: ReadableStream<Uint8Array>) {
-  return new TextDecoder().decode(await new Response(stream).arrayBuffer());
-}
+import { deleteObjects, getObject, putObject } from './storage';
 
 describe('storage', () => {
-  it('stores an object and streams it back', async () => {
+  it('stores an object and reads it back', async () => {
     const key = `test/${randomUUID()}`;
 
     await putObject({
@@ -18,12 +14,12 @@ describe('storage', () => {
       contentType: 'text/plain',
     });
 
-    const stream = await getObjectStream(key);
-    expect(await read(stream!)).toBe('hello');
+    const body = await getObject(key);
+    expect(new TextDecoder().decode(body)).toBe('hello');
   });
 
   it('returns undefined for a key that does not exist', async () => {
-    expect(await getObjectStream(`test/${randomUUID()}`)).toBeUndefined();
+    expect(await getObject(`test/${randomUUID()}`)).toBeUndefined();
   });
 
   it('deletes objects, missing ones included', async () => {
@@ -36,6 +32,6 @@ describe('storage', () => {
 
     await deleteObjects([key, `test/${randomUUID()}`]);
 
-    expect(await getObjectStream(key)).toBeUndefined();
+    expect(await getObject(key)).toBeUndefined();
   });
 });
