@@ -1,9 +1,16 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import classNames from 'classnames';
-import { CLICK_COMMAND, COMMAND_PRIORITY_LOW, type NodeKey } from 'lexical';
+import {
+  $getSelection,
+  $isNodeSelection,
+  $setSelection,
+  CLICK_COMMAND,
+  COMMAND_PRIORITY_LOW,
+  type NodeKey,
+} from 'lexical';
 import { useEffect, useRef } from 'react';
-import { TAP_SLOP } from '~/utils/editable-tap';
+import { listenForEditableTap, TAP_SLOP } from '~/utils/editable-tap';
 
 /*
  * Image nodes reach the editor from other people, through the live
@@ -100,6 +107,26 @@ export const ImageView: React.FC<ImageViewProps> = ({
       image.removeEventListener('touchend', onTouchEnd);
     };
   }, [editor, src, setSelected, clearSelection]);
+
+  /*
+   * The tap on text that follows has to find the editor as a first tap
+   * would. With the image still selected, the editor turns that selection
+   * into a caret of its own while the browser places one, and the keyboard
+   * handling measures the wrong caret.
+   */
+  useEffect(() => {
+    if (!isSelected) {
+      return;
+    }
+
+    return listenForEditableTap(window, () => {
+      editor.update(() => {
+        if ($isNodeSelection($getSelection())) {
+          $setSelection(null);
+        }
+      }, { discrete: true });
+    });
+  }, [editor, isSelected]);
 
   if (!ASSET_SRC.test(src)) {
     return (
