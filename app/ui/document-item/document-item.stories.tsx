@@ -117,15 +117,17 @@ export const Active: Story = {
 };
 
 /**
- * A long title is truncated with an ellipsis and the full title is shown
- * as a native tooltip via the `title` attribute.
+ * A long title fades out at the end instead of breaking off in an ellipsis.
+ * The fade is a mask, so it works on every background the row takes, and it
+ * moves in to clear the action area whenever that shows. The full title is
+ * shown as a native tooltip via the `title` attribute.
  */
-export const TruncatedTitle: Story = {
+export const LongTitle: Story = {
   render: () => (
     <DocumentItem
       as={NavLink}
       to="/documents/1"
-      title="A very long document title that will not fit inside the container and gets truncated"
+      title="A very long document title that will not fit inside the container"
       actionArea={(
         <DropdownMenu>
           <DropdownMenuTrigger iconTitle="Document options" />

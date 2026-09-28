@@ -376,6 +376,32 @@ body {
   -webkit-mask-image: var(--scroll-edge-mask);
 }
 
+/* A single line of text that runs out of room dissolves at its end instead of
+   breaking off in an ellipsis. Being a mask, it fades into whatever the text
+   sits on, so the hover, the active yellow and both themes need no colour of
+   their own. `--fade-inset` pulls the fade in from the end to clear something
+   laid over it, like a row's menu button; it is registered so it can glide
+   there alongside the button fading in. */
+@property --fade-inset {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@utility end-fade {
+  --end-fade-mask: linear-gradient(
+    to left,
+    transparent var(--fade-inset),
+    black calc(var(--fade-inset) + 2rem)
+  );
+
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: var(--end-fade-mask);
+  -webkit-mask-image: var(--end-fade-mask);
+  transition: --fade-inset 150ms ease-out;
+}
+
 @utility glass-surface {
   @apply bg-pca-white/75 dark:bg-pca-grey-900/55 backdrop-blur-lg backdrop-saturate-150;
 }
