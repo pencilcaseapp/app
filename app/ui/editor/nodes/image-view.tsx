@@ -232,7 +232,7 @@ export const ImageView: React.FC<ImageViewProps> = ({
           data-resize-handle={side}
           onPointerDown={startResize(side)}
           className={classNames(
-            'absolute top-1/2 h-12 max-h-[50%] w-1.5 -translate-y-1/2',
+            'absolute top-1/2 h-12 max-h-[50%] w-3 -translate-y-1/2',
             'cursor-ew-resize touch-none rounded-full',
             'bg-pca-yellow-500',
             side === 'left' ? 'left-1' : 'right-1',
