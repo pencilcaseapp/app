@@ -232,7 +232,8 @@ image to `/doc/:id/assets` (whoever may edit, signed in or through the
 link); `processImage` (`app/utils/image.ts`) reads the type from the
 bytes (JPEG, PNG, WebP, GIF, AVIF — never SVG), turns it upright, drops
 the metadata, scales it to `MAX_IMAGE_WIDTH` and stores WebP, never the
-upload itself. An `assets` row belongs to the document, not the
+upload itself: lossless for a PNG (mostly screenshots, whose text a lossy
+encoder smears) unless that runs past a megabyte, lossy otherwise. An `assets` row belongs to the document, not the
 uploader. The bucket stays private: `/user-assets/:assetId` checks
 access with `getLiveAccess`, the same rules as the document, and
 streams the object through the app, so unsharing a document takes its
@@ -245,7 +246,7 @@ then the rows, then the documents. In the editor an image is an
 node waiting on its upload would be in the shared document, and undoing
 the moment it finished would leave everybody an empty image. Before
 posting, `shrinkImage` (`app/utils/shrink-image.ts`) scales a photo down
-to `MAX_IMAGE_WIDTH` in the browser, which cuts the upload to a fraction;
+to `MAX_IMAGE_WIDTH` in the browser (not a PNG or GIF), which cuts the upload to a fraction;
 it is only a speed-up, the server processes whatever arrives the same way.
 Nodes come from other people through Yjs and pastes, so `ImageView` only loads
 `/user-assets/…` sources and nothing else. The node's constructor needs

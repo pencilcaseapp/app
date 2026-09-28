@@ -28,6 +28,41 @@ describe('processImage', () => {
     expect(image).toMatchObject({ width: 1600, height: 500 });
   });
 
+  it('keeps a screenshot lossless', async () => {
+    const input = await toBytes(createImage(400, 300).composite([{
+      input: Buffer.from('<svg width="400" height="300"><text x="10" '
+        + 'y="40" font-size="24">Sharp text</text></svg>'),
+    }]).png());
+
+    const image = await processImage(input);
+    const [stored, original] = await Promise.all([
+      sharp(image!.data).removeAlpha().raw().toBuffer(),
+      sharp(input).removeAlpha().raw().toBuffer(),
+    ]);
+
+    expect(stored.equals(original)).toBe(true);
+  });
+
+  it('encodes a PNG photo lossy when lossless would be too big', async () => {
+    const input = await toBytes(sharp({
+      create: {
+        width: 1600,
+        height: 1200,
+        channels: 3,
+        background: '#39f',
+        noise: { type: 'gaussian', mean: 128, sigma: 40 },
+      },
+    }).png());
+
+    const image = await processImage(input);
+    const [stored, original] = await Promise.all([
+      sharp(image!.data).raw().toBuffer(),
+      sharp(input).raw().toBuffer(),
+    ]);
+
+    expect(stored.equals(original)).toBe(false);
+  });
+
   it('turns a photo upright and drops its metadata', async () => {
     const input = await toBytes(createImage(300, 200).jpeg().withMetadata({
       orientation: 6,

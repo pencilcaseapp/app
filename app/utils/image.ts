@@ -1,4 +1,4 @@
-import sharp, { type Metadata } from 'sharp';
+import sharp, { type Metadata, type WebpOptions } from 'sharp';
 import { MAX_IMAGE_PIXELS, MAX_IMAGE_WIDTH } from '~/constants/asset';
 
 export interface ProcessedImage {
@@ -14,6 +14,17 @@ export interface ProcessedImage {
  * read.
  */
 const ACCEPTED_FORMATS = ['jpeg', 'png', 'webp', 'gif'];
+
+/*
+ * A PNG is mostly a screenshot or a graphic: text and hard edges, which a
+ * lossy encoder smears. Those are kept lossless, which a screenshot
+ * survives at a few hundred kilobytes; a photo that happens to be a PNG
+ * would not, so past `MAX_LOSSLESS_BYTES` it is encoded like any photo.
+ * Smart subsampling keeps coloured edges from bleeding in photos.
+ */
+const LOSSLESS: WebpOptions = { lossless: true };
+const LOSSY: WebpOptions = { quality: 85, smartSubsample: true };
+const MAX_LOSSLESS_BYTES = 1024 * 1024;
 
 /**
  * Turns an upload into the one form images are stored in: upright, without
@@ -33,11 +44,25 @@ export async function processImage(
       return undefined;
     }
 
-    const { data, info } = await sharp(input, { ...options, animated: true })
-      .rotate()
-      .resize({ width: MAX_IMAGE_WIDTH, withoutEnlargement: true })
-      .webp({ quality: 80, effort: 2 })
-      .toBuffer({ resolveWithObject: true });
+    const isScaledDown = metadata.autoOrient.width > MAX_IMAGE_WIDTH;
+    const encode = (webp: WebpOptions) => {
+      const image = sharp(input, { ...options, animated: true })
+        .rotate()
+        .resize({ width: MAX_IMAGE_WIDTH, withoutEnlargement: true });
+
+      // Scaling down softens edges; this gives text back its crispness.
+      return (isScaledDown ? image.sharpen({ sigma: 0.5 }) : image)
+        .webp({ effort: 2, ...webp })
+        .toBuffer({ resolveWithObject: true });
+    };
+
+    let { data, info } = await encode(
+      metadata.format === 'png' ? LOSSLESS : LOSSY,
+    );
+
+    if (data.length > MAX_LOSSLESS_BYTES && metadata.format === 'png') {
+      ({ data, info } = await encode(LOSSY));
+    }
 
     return {
       data: new Uint8Array(data),

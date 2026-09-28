@@ -52,9 +52,8 @@ describe('shrinkImage', () => {
     expect((await shrinkImage(photo())).type).toBe('image/jpeg');
   });
 
-  it('keeps a PNG as it is when WebP cannot be encoded', async () => {
+  it('keeps a PNG, which the server scales better', async () => {
     stubBitmap(4000, 3000);
-    convertToBlob.mockResolvedValue(new Blob([], { type: 'image/png' }));
     const file = photo('image/png');
 
     expect(await shrinkImage(file)).toBe(file);
