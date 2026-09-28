@@ -34,7 +34,7 @@ jobs:
           cache: npm
       - name: Install deps
         run: npm ci
-      - name: Start Postgres and Redis
+      - name: Start Postgres, Redis and S3
         run: npm run docker:up
       - name: Tests
         run: npm run test
@@ -64,7 +64,7 @@ jobs:
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-      - name: Start Postgres and Redis
+      - name: Start Postgres, Redis and S3
         run: npm run docker:up
       # The paid-checkout spec needs the secret and fails without it.
       - name: E2E tests

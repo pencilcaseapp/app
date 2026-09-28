@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { drag, tap } from '~/test/touch';
 import { useVirtualKeyboard } from './use-virtual-keyboard';
 
 const isTouchDevice = vi.hoisted(() => ({ value: true }));
@@ -62,6 +63,10 @@ describe('useVirtualKeyboard', () => {
       value: VIEWPORT_HEIGHT,
       configurable: true,
     });
+    Object.defineProperty(document.documentElement, 'clientHeight', {
+      value: VIEWPORT_HEIGHT,
+      configurable: true,
+    });
     Object.defineProperty(window, 'visualViewport', {
       value: viewport,
       configurable: true,
@@ -78,18 +83,53 @@ describe('useVirtualKeyboard', () => {
     expect(result.current[0]).toBe(false);
   });
 
-  it('should report the keyboard open when an editable element is focused', () => {
-    focus(createEditable());
+  it('should report the keyboard open when editable content is tapped', () => {
     const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
 
     setViewportHeight(400);
 
     expect(result.current[0]).toBe(true);
   });
 
-  it('should ignore a viewport that barely shrinks', () => {
-    focus(createEditable());
+  it('should report the keyboard open when the window shrinks with it', () => {
     const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
+    Object.defineProperty(window, 'innerHeight', {
+      value: 410,
+      configurable: true,
+    });
+
+    setViewportHeight(400);
+
+    expect(result.current[0]).toBe(true);
+  });
+
+  it('should ignore a shrinking viewport around content nobody tapped', () => {
+    // A focus the page moves there itself, with the pull-to-refresh
+    // spinner shrinking the viewport.
+    const { result } = renderHook(() => useVirtualKeyboard());
+    focus(createEditable());
+
+    setViewportHeight(400);
+
+    expect(result.current[0]).toBe(false);
+  });
+
+  it('should ignore a finger dragged across the content', () => {
+    const editable = createEditable();
+    const { result } = renderHook(() => useVirtualKeyboard());
+    focus(editable);
+    drag(editable);
+
+    setViewportHeight(400);
+
+    expect(result.current[0]).toBe(false);
+  });
+
+  it('should ignore a viewport that barely shrinks', () => {
+    const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
 
     setViewportHeight(VIEWPORT_HEIGHT - 10);
 
@@ -115,8 +155,8 @@ describe('useVirtualKeyboard', () => {
   });
 
   it('should report the keyboard closed when focus moves to a field outside the editor', () => {
-    focus(createEditable());
     const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
     setViewportHeight(400);
 
     focus(createTextInput());
@@ -126,8 +166,8 @@ describe('useVirtualKeyboard', () => {
 
   it('should report the keyboard closed when the editable element loses focus', () => {
     const editable = createEditable();
-    focus(editable);
     const { result } = renderHook(() => useVirtualKeyboard());
+    tap(editable);
     setViewportHeight(400);
 
     blur(editable);
@@ -136,8 +176,8 @@ describe('useVirtualKeyboard', () => {
   });
 
   it('should report the keyboard closed again when the viewport grows back', () => {
-    focus(createEditable());
     const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
     setViewportHeight(400);
 
     setViewportHeight(VIEWPORT_HEIGHT);
@@ -147,8 +187,8 @@ describe('useVirtualKeyboard', () => {
 
   it('should ignore the viewport on a device without a virtual keyboard', () => {
     isTouchDevice.value = false;
-    focus(createEditable());
     const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
 
     setViewportHeight(400);
 

@@ -20,7 +20,9 @@ export default [
   ]),
   route('doc/:id/delete', 'routes/doc-delete.ts'),
   route('doc/:id/restore', 'routes/doc-restore.ts'),
+  route('doc/:id/checkout', 'routes/doc-checkout.ts'),
   route('doc/:id/share', 'routes/doc-share.ts'),
+  route('doc/:id/assets', 'routes/doc-assets.ts'),
   route('doc/:id/link-access', 'routes/doc-link-access.ts'),
   route(
     'doc/:id/collaborators/:collaboratorId/access',
@@ -35,6 +37,7 @@ export default [
     route('otp/:otpId', 'routes/otp.tsx'),
     route('onboarding', 'routes/onboarding.tsx'),
   ]),
+  route('user-assets/:assetId', 'routes/user-assets.ts'),
   route('signout', 'routes/signout.ts'),
   route('upgrade', 'routes/upgrade.ts'),
   route('invite/:code', 'routes/invite.ts'),

@@ -20,6 +20,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1141.0",
     "@base-ui/react": "^1.8.0",
     "@bull-board/api": "^9.10.1",
     "@bull-board/express": "^9.10.1",
@@ -32,6 +33,7 @@
     "@lexical/code-prism": "^0.51.0",
     "@lexical/headless": "^0.51.0",
     "@lexical/react": "^0.51.0",
+    "@lexical/utils": "^0.51.0",
     "@lexical/yjs": "^0.51.0",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
@@ -46,7 +48,6 @@
     "@tanstack/react-form-remix": "^1.33.3",
     "@uidotdev/usehooks": "^2.4.1",
     "argon2": "^0.45.1",
-    "body-scroll-lock": "^4.0.0-beta.0",
     "bullmq": "^6.3.7",
     "classnames": "^2.5.1",
     "compression": "^1.8.2",
@@ -70,6 +71,7 @@
     "react-router": "8.4.0",
     "react-use": "^17.6.1",
     "remix-utils": "^10.0.0",
+    "sharp": "^0.35.5",
     "uuid": "^14.0.2",
     "yjs": "^13.6.32",
     "zod": "^4.6.5"
@@ -86,7 +88,6 @@
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
-    "@types/body-scroll-lock": "^3.1.2",
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.6",
     "@types/express-ws": "^3.0.6",

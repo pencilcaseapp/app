@@ -21,6 +21,11 @@ import { EditorPluginAutoFocus } from './plugins/editor-plugin-auto-focus';
 import { EditorPluginEditable } from './plugins/editor-plugin-editable';
 import { EditorPluginCheckList } from './plugins/editor-plugin-check-list';
 import { EditorPluginSlashMenu } from './plugins/editor-plugin-slash-menu';
+import {
+  EditorPluginImages,
+  type UploadImage,
+} from './plugins/editor-plugin-images';
+import { ImageNode } from './nodes/image-node';
 
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
@@ -33,6 +38,10 @@ export interface EditorProps extends React.PropsWithChildren {
   editable?: boolean;
   /** Shown between the topbar and the content. */
   notification?: React.ReactNode;
+  /** Laid over the content and scrolled along with it. */
+  contentOverlay?: React.ReactNode;
+  /** Lets people paste and drop images; without it they cannot. */
+  uploadImage?: UploadImage;
 }
 
 export const Editor: React.FC<EditorProps> = ({
@@ -42,6 +51,8 @@ export const Editor: React.FC<EditorProps> = ({
   topbarRight,
   editable = true,
   notification,
+  contentOverlay,
+  uploadImage,
   children,
 }) => {
   const config = useMemo<EditorConfig>(() => ({
@@ -59,6 +70,7 @@ export const Editor: React.FC<EditorProps> = ({
       HeadingNode,
       QuoteNode,
       HorizontalRuleNode,
+      ImageNode,
     ],
     theme: editorTheme,
   }), [initialEditorState, editable]);
@@ -73,9 +85,15 @@ export const Editor: React.FC<EditorProps> = ({
           topbarRight={topbarRight}
           editable={editable}
         />
-        <EditorPluginRichText topArea={notification} />
+        <EditorPluginRichText
+          topArea={notification}
+          contentOverlay={contentOverlay}
+        />
         {editable && <EditorPluginAutoFocus />}
         {editable && <EditorPluginSlashMenu />}
+        {editable && uploadImage && (
+          <EditorPluginImages uploadImage={uploadImage} />
+        )}
         <EditorPluginCheckList />
         <ListPlugin />
         <ClickableLinkPlugin newTab />

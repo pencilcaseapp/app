@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { GUEST_ID_STORAGE_KEY } from '~/constants/presence';
 
 let fallbackGuestId: string | null = null;
@@ -14,7 +15,7 @@ export function getGuestId(): string {
       return storedGuestId;
     }
 
-    const guestId = crypto.randomUUID();
+    const guestId = uuidv4();
     localStorage.setItem(GUEST_ID_STORAGE_KEY, guestId);
 
     return guestId;
@@ -22,7 +23,7 @@ export function getGuestId(): string {
   catch {
     // Private browsing can make localStorage throw. The visitor then keeps
     // their identity for as long as the tab lives.
-    fallbackGuestId ??= crypto.randomUUID();
+    fallbackGuestId ??= uuidv4();
 
     return fallbackGuestId;
   }

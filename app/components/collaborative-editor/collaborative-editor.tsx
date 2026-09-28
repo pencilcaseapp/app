@@ -15,8 +15,7 @@ import {
 } from '~/hooks/use-document-scroll-restoration';
 import { useCursorNameBounds } from '~/hooks/use-cursor-name-bounds';
 import { useRemoteCursorPositions } from '~/hooks/use-remote-cursor-positions';
-import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
-import { createPortal } from 'react-dom';
+import { useUploadImage } from '~/hooks/use-upload-image';
 import { getGuestId } from '~/utils/guest-id';
 import {
   getGuestPresenceIdentity,
@@ -50,7 +49,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
   }) => {
     const [isSynced, setIsSynced] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
-    const [isVirtualKeyboardOpen] = useVirtualKeyboard();
     const socketClient = useSocketClient();
     // A signed out visitor is identified by a guest id kept in their browser,
     // so they keep their name and colour when they come back.
@@ -84,6 +82,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     const syncCursorPositionsFn = useRemoteCursorPositions(ref);
     useFirstLocalEdit(doc, provider, onFirstEdit);
     useAccessRevoked(provider, onAccessRevoked);
+    const uploadImage = useUploadImage(id);
 
     const [providerFactory] = useState(() => (
       id: string,
@@ -111,15 +110,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
       };
     }, [provider]);
 
-    useEffect(() => {
-      if (isVirtualKeyboardOpen) {
-        ref.current?.style.setProperty('visibility', 'hidden');
-      }
-      else {
-        ref.current?.style.removeProperty('visibility');
-      }
-    }, [isVirtualKeyboardOpen]);
-
     return (
       <LexicalCollaboration>
         <Editor
@@ -128,6 +118,11 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
           topbarRight={topbarRight}
           editable={editable}
           notification={notification}
+          uploadImage={uploadImage}
+          // Inside the content, so the cursors scroll along with it — also
+          // while typing, when the content scrolls in the editor rather
+          // than the page.
+          contentOverlay={<div ref={ref} />}
         >
           <CollaborationPlugin
             id={id}
@@ -140,7 +135,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
             selectionHighlight
             syncCursorPositionsFn={syncCursorPositionsFn}
           />
-          {createPortal(<div ref={ref}></div>, document.body)}
         </Editor>
       </LexicalCollaboration>
     );

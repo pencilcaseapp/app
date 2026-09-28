@@ -50,6 +50,7 @@ const theme: EditorThemeClasses = {
     code: 'editor-text-code',
   },
   hr: 'editor-hr',
+  image: 'editor-image',
   code: 'editor-code',
   codeHighlight: {
     'atrule': 'editor-code-token-attr',

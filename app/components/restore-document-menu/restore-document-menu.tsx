@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { href, useFetcher } from 'react-router';
 import { useAuthenticityToken } from 'remix-utils/csrf/react';
+import { useIsMobile } from '~/hooks/use-is-mobile';
 import { DropdownMenu } from '~/ui/dropdown-menu/dropdown-menu';
 import { DropdownMenuContent } from '~/ui/dropdown-menu/dropdown-menu-content';
 import { DropdownMenuItem } from '~/ui/dropdown-menu/dropdown-menu-item';
@@ -22,6 +23,7 @@ export const RestoreDocumentMenu: FC<RestoreDocumentMenuProps> = ({
 }) => {
   const fetcher = useFetcher();
   const csrfToken = useAuthenticityToken();
+  const isMobile = useIsMobile();
 
   const restore = () => {
     void fetcher.submit(
@@ -34,7 +36,7 @@ export const RestoreDocumentMenu: FC<RestoreDocumentMenuProps> = ({
     <DropdownMenu defaultOpen={defaultOpen}>
       <DropdownMenuTrigger iconTitle="Item options" />
       <DropdownMenuPortal>
-        <DropdownMenuContent align="start">
+        <DropdownMenuContent align={isMobile ? 'end' : 'start'}>
           <DropdownMenuItem as="button" onClick={restore} icon="restore">
             Restore
           </DropdownMenuItem>
