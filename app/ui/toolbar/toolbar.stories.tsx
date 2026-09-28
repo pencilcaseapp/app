@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Toolbar } from './toolbar';
 import { ToolbarGroup } from './toolbar-group';
 import { ToolbarToggle } from './toolbar-toggle';
+import { ToolbarButton } from './toolbar-button';
 import { ToolbarSeparator } from './toolbar-separator';
 
 /**
@@ -36,6 +37,10 @@ export const WithGroups: Story = {
         <ToolbarToggle tooltipLabel="Bulleted list" icon="listUl" isActive={false} />
         <ToolbarToggle tooltipLabel="Numbered list" icon="listOl" isActive={false} />
         <ToolbarToggle tooltipLabel="Checklist" icon="listCheck" isActive={false} />
+      </ToolbarGroup>
+      <ToolbarSeparator />
+      <ToolbarGroup>
+        <ToolbarButton tooltipLabel="Image" icon="image" />
       </ToolbarGroup>
     </Toolbar>
   ),

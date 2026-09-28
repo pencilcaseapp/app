@@ -41,6 +41,7 @@ import {
   menuShellClasses,
   menuSurfaceClasses,
 } from '~/ui/menu-surface/menu-surface';
+import { PICK_IMAGES_COMMAND } from './editor-plugin-images';
 
 type SlashMenuGroup = 'heading' | 'list' | 'block';
 
@@ -63,7 +64,7 @@ const $insertBlock = (createNode: () => ElementNode) => () => {
   $setBlocksType(selection, createNode);
 };
 
-const $insertList
+const $dispatch
   = (command: LexicalCommand<void>) => (editor: LexicalEditor) => {
     editor.dispatchCommand(command, undefined);
   };
@@ -99,7 +100,7 @@ const BLOCKS: SlashMenuBlock[] = [
     icon: 'listOl',
     group: 'list',
     keywords: ['numbered', 'ordered', 'list'],
-    $insert: $insertList(INSERT_ORDERED_LIST_COMMAND),
+    $insert: $dispatch(INSERT_ORDERED_LIST_COMMAND),
   },
   {
     key: 'bullet',
@@ -107,7 +108,7 @@ const BLOCKS: SlashMenuBlock[] = [
     icon: 'listUl',
     group: 'list',
     keywords: ['bulleted', 'unordered', 'list'],
-    $insert: $insertList(INSERT_UNORDERED_LIST_COMMAND),
+    $insert: $dispatch(INSERT_UNORDERED_LIST_COMMAND),
   },
   {
     key: 'check',
@@ -115,7 +116,15 @@ const BLOCKS: SlashMenuBlock[] = [
     icon: 'listCheck',
     group: 'list',
     keywords: ['checklist', 'todo', 'task', 'list'],
-    $insert: $insertList(INSERT_CHECK_LIST_COMMAND),
+    $insert: $dispatch(INSERT_CHECK_LIST_COMMAND),
+  },
+  {
+    key: 'image',
+    label: 'Image',
+    icon: 'image',
+    group: 'block',
+    keywords: ['image', 'picture', 'photo', 'upload'],
+    $insert: $dispatch(PICK_IMAGES_COMMAND),
   },
   {
     key: 'code',
@@ -135,14 +144,16 @@ class SlashMenuOption extends MenuOption {
 
 const OPTIONS = BLOCKS.map(block => new SlashMenuOption(block));
 
-function matchOptions(query: string | null) {
+const OPTIONS_WITHOUT_IMAGES = OPTIONS.filter(({ key }) => key !== 'image');
+
+function matchOptions(options: SlashMenuOption[], query: string | null) {
   if (!query) {
-    return OPTIONS;
+    return options;
   }
 
   const needle = query.toLowerCase();
 
-  return OPTIONS.filter(({ block }) =>
+  return options.filter(({ block }) =>
     block.label.toLowerCase().startsWith(needle)
     || block.keywords.some(keyword => keyword.startsWith(needle)),
   );
@@ -264,10 +275,15 @@ const SlashMenu: React.FC<SlashMenuProps> = ({
   );
 };
 
+export interface EditorPluginSlashMenuProps {
+  /** Offers an image, which needs `EditorPluginImages` to pick it. */
+  canInsertImages?: boolean;
+}
+
 /**
  * The block menu the editor opens on a slash: typing `/` on an empty row
- * offers the heading, list and code blocks, and picking one turns the row
- * into that block and takes the query back out.
+ * offers the heading, list, image and code blocks, and picking one turns the
+ * row into that block and takes the query back out.
  *
  * Only on an empty row, because a slash in the middle of a sentence is a
  * slash — the menu is for the row somebody is about to write, which is also
@@ -279,11 +295,17 @@ const SlashMenu: React.FC<SlashMenuProps> = ({
  * focused. That is why this is not the dropdown component — it shares the
  * surface and the item box with it, not the Radix focus handling.
  */
-export const EditorPluginSlashMenu: React.FC = () => {
+export const EditorPluginSlashMenu: React.FC<EditorPluginSlashMenuProps> = ({
+  canInsertImages = false,
+}) => {
   const [editor] = useLexicalComposerContext();
   const [query, setQuery] = useState<string | null>(null);
 
-  const options = useMemo(() => matchOptions(query), [query]);
+  const available = canInsertImages ? OPTIONS : OPTIONS_WITHOUT_IMAGES;
+  const options = useMemo(
+    () => matchOptions(available, query),
+    [available, query],
+  );
 
   const triggerFn = useCallback<TriggerFn>((text) => {
     const match = SLASH_QUERY.exec(text);
@@ -292,12 +314,12 @@ export const EditorPluginSlashMenu: React.FC = () => {
     }
 
     const [replaceableString, matchingString] = match;
-    if (matchOptions(matchingString).length === 0) {
+    if (matchOptions(available, matchingString).length === 0) {
       return null;
     }
 
     return { leadOffset: 0, matchingString, replaceableString };
-  }, []);
+  }, [available]);
 
   const onSelectOption = useCallback((
     option: SlashMenuOption,

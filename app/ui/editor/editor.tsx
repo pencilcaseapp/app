@@ -40,7 +40,7 @@ export interface EditorProps extends React.PropsWithChildren {
   notification?: React.ReactNode;
   /** Laid over the content and scrolled along with it. */
   contentOverlay?: React.ReactNode;
-  /** Lets people paste and drop images; without it they cannot. */
+  /** Lets people paste, drop and pick images; without it they cannot. */
   uploadImage?: UploadImage;
 }
 
@@ -84,13 +84,16 @@ export const Editor: React.FC<EditorProps> = ({
           topbarLeft={topbarLeft}
           topbarRight={topbarRight}
           editable={editable}
+          canInsertImages={Boolean(uploadImage)}
         />
         <EditorPluginRichText
           topArea={notification}
           contentOverlay={contentOverlay}
         />
         {editable && <EditorPluginAutoFocus />}
-        {editable && <EditorPluginSlashMenu />}
+        {editable && (
+          <EditorPluginSlashMenu canInsertImages={Boolean(uploadImage)} />
+        )}
         {editable && uploadImage && (
           <EditorPluginImages uploadImage={uploadImage} />
         )}

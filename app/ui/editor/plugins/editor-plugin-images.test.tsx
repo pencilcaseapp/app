@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { act, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -13,7 +14,11 @@ import {
   type LexicalEditor,
 } from 'lexical';
 import { $isImageNode, ImageNode } from '../nodes/image-node';
-import { EditorPluginImages, type UploadImage } from './editor-plugin-images';
+import {
+  EditorPluginImages,
+  PICK_IMAGES_COMMAND,
+  type UploadImage,
+} from './editor-plugin-images';
 
 let editor: LexicalEditor;
 
@@ -159,4 +164,24 @@ describe('EditorPluginImages', () => {
     expect(handled).toBe(false);
     expect(uploadImage).not.toHaveBeenCalled();
   });
+
+  test('opens the file picker and inserts what was picked at the caret',
+    async () => {
+      uploadImage.mockResolvedValue(image);
+      setParagraphs(['First', 'Second'], 0);
+      const picker = document.querySelector<HTMLInputElement>(
+        'input[type="file"]',
+      )!;
+      const open = vi.spyOn(picker, 'click');
+
+      act(() => {
+        editor.dispatchCommand(PICK_IMAGES_COMMAND, undefined);
+      });
+      expect(open).toHaveBeenCalled();
+
+      await userEvent.upload(picker, png());
+
+      expect(uploadImage).toHaveBeenCalledWith(expect.any(File));
+      expect(blocks()).toEqual(['First', 'image', 'Second']);
+    });
 });

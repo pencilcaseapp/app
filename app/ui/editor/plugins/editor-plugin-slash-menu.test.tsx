@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -15,6 +15,7 @@ import {
   $getRoot,
   $getSelection,
   $isRangeSelection,
+  COMMAND_PRIORITY_LOW,
   KEY_ARROW_DOWN_COMMAND,
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
@@ -22,6 +23,7 @@ import {
   type LexicalEditor,
 } from 'lexical';
 import { EditorPluginSlashMenu } from './editor-plugin-slash-menu';
+import { PICK_IMAGES_COMMAND } from './editor-plugin-images';
 
 let editor: LexicalEditor;
 
@@ -30,7 +32,7 @@ const EditorRef: React.FC = () => {
   return null;
 };
 
-function renderSlashMenu() {
+function renderSlashMenu({ canInsertImages = false } = {}) {
   render(
     <LexicalComposer
       initialConfig={{
@@ -54,7 +56,7 @@ function renderSlashMenu() {
       />
       <ListPlugin />
       <CheckListPlugin />
-      <EditorPluginSlashMenu />
+      <EditorPluginSlashMenu canInsertImages={canInsertImages} />
     </LexicalComposer>,
   );
 
@@ -232,6 +234,33 @@ describe('EditorPluginSlashMenu', () => {
     await user.click(screen.getByRole('menuitem', { name: 'Code block' }));
 
     expect(rowType()).toBe('code');
+    expect(documentText()).toBe('');
+  });
+
+  test('offers an image only when images can be inserted', async () => {
+    renderSlashMenu();
+
+    await type('/');
+
+    expect(menuItems()).not.toContain('Image');
+  });
+
+  test('opens the image picker in place of the row', async () => {
+    const { user } = renderSlashMenu({ canInsertImages: true });
+    const pickImages = vi.fn(() => true);
+    editor.registerCommand(
+      PICK_IMAGES_COMMAND,
+      pickImages,
+      COMMAND_PRIORITY_LOW,
+    );
+
+    await type('/');
+
+    expect(menuItems().slice(-2)).toEqual(['Image', 'Code block']);
+
+    await user.click(screen.getByRole('menuitem', { name: 'Image' }));
+
+    expect(pickImages).toHaveBeenCalled();
     expect(documentText()).toBe('');
   });
 
