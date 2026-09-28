@@ -1,19 +1,10 @@
-import {
-  href,
-  redirect,
-  redirectDocument,
-  type MiddlewareFunction,
-} from 'react-router';
-import { z } from 'zod';
+import { href, redirect, type MiddlewareFunction } from 'react-router';
 import {
   CurrentSubscription,
   CurrentSubscriptionFooter,
 } from '~/components/current-subscription/current-subscription';
 import { SettingsDialogContentInner } from '~/components/settings-dialog/settings-dialog';
-import {
-  SubscriptionUpgrade,
-  SubscriptionUpgradeFooter,
-} from '~/components/subscription-upgrade/subscription-upgrade';
+import { SubscriptionUpgrade } from '~/components/subscription-upgrade/subscription-upgrade';
 import { SearchParamToast } from '~/constants/search-params';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
@@ -21,18 +12,14 @@ import { getDocumentList } from '~/repos/document';
 import {
   completeProCheckout,
   getSubscriptionOverview,
-  startProCheckout,
 } from '~/services/subscription';
 import { formatDate } from '~/utils/date';
-import { validateForm } from '~/utils/form';
 import { withSearchParams } from '~/utils/url';
 import type { Route } from './+types/settings-subscription';
 
 export const middleware: MiddlewareFunction[] = [
   authMiddleware,
 ];
-
-const formSchema = z.object({});
 
 /**
  * The checkout sends the user back here, to the settings over the
@@ -81,35 +68,6 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
   };
 }
 
-export async function action({ request, params, context }: Route.ActionArgs) {
-  const form = await validateForm(request, formSchema);
-  const user = context.get(userSessionContext);
-  const subscriptionUrl
-    = href('/doc/:id/settings/subscription', { id: params.id });
-
-  if (!form.ok) {
-    return form.formState;
-  }
-
-  const overview = await getSubscriptionOverview(user);
-
-  if (overview.kind !== 'none') {
-    return redirect(subscriptionUrl);
-  }
-
-  const successUrl = new URL(subscriptionUrl, request.url).toString();
-  const [error, result] = await startProCheckout(user, successUrl);
-
-  if (error !== null) {
-    return redirect(withSearchParams(subscriptionUrl, {
-      [SearchParamToast.ToastDanger]:
-        'Starting the checkout failed. Please try again.',
-    }));
-  }
-
-  return redirectDocument(result.checkoutUrl);
-}
-
 /*
  * The subscription section: the upgrade offer, or the subscription
  * behind the pro features once there is one. Each view's action sits
@@ -117,16 +75,15 @@ export async function action({ request, params, context }: Route.ActionArgs) {
  * manage, and so no footer.
  */
 export default function SettingsSubscriptionRoute({
+  params: { id: documentId },
   loaderData: { overview, hasBillingAccount, documentCount },
 }: Route.ComponentProps) {
   if (overview.kind === 'none') {
     return (
-      <SettingsDialogContentInner
-        section="subscription"
-        footerArea={<SubscriptionUpgradeFooter />}
-      >
-        <SubscriptionUpgrade documentCount={documentCount} />
-      </SettingsDialogContentInner>
+      <SubscriptionUpgrade
+        documentCount={documentCount}
+        documentId={documentId}
+      />
     );
   }
 

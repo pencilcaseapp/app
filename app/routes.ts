@@ -20,6 +20,7 @@ export default [
   ]),
   route('doc/:id/delete', 'routes/doc-delete.ts'),
   route('doc/:id/restore', 'routes/doc-restore.ts'),
+  route('doc/:id/checkout', 'routes/doc-checkout.ts'),
   route('doc/:id/share', 'routes/doc-share.ts'),
   route('doc/:id/link-access', 'routes/doc-link-access.ts'),
   route(

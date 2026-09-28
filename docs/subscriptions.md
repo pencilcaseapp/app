@@ -25,14 +25,17 @@ on. Nothing about money lives in our code — only state.
   without a date or a portal link.
   `getSubscriptionOverview` in `app/services/subscription.ts` decides
   between the three.
-- The section's **action** creates a checkout session through
+- The upgrade button is a plain link to **`/doc/:id/checkout`**,
+  whose loader creates a checkout session through
   `POST /v1/checkouts` — prefilled with the account email, or with
   the user's `creem_customer_id` when they had a subscription before,
   so Creem reuses the customer — and redirects the browser to Creem's
-  hosted checkout (`redirectDocument`: leaving the app is always a
-  full navigation). The `success_url` is the section's own URL, so
-  the user comes back to the settings over the document they
-  upgraded from. The user id rides along as `metadata.userId`; that
+  hosted checkout, like `/billing-portal` does for the portal. It
+  used to be a form posting to the section's action, which left the
+  button loading for good when the user came back from Creem with the
+  back button; a link leaves nothing pending. The `success_url` is
+  the section's URL, so the user comes back to the settings over the
+  document they upgraded from. The user id rides along as `metadata.userId`; that
   metadata is attached to the subscription and comes back in every
   webhook, which is how events find the account no matter what email
   was used to pay.

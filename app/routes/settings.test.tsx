@@ -169,7 +169,7 @@ describe('the settings routes', () => {
         await screen.findByRole('dialog', { name: 'Subscription' }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: 'Upgrade to Pro' }),
+        screen.getByRole('link', { name: 'Upgrade to Pro' }),
       ).toBeInTheDocument();
       expect(
         screen.queryByRole('button', { name: 'Save' }),

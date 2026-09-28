@@ -9,17 +9,15 @@ import {
 import type { User } from '~/repos/user';
 import {
   CompleteProCheckoutError,
-  StartProCheckoutError,
   type SubscriptionOverview,
 } from '~/services/subscription';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
-import { action, loader } from './settings-subscription';
+import { loader } from './settings-subscription';
 import type { Route } from './+types/settings-subscription';
 
 const getDocumentListMock = vi.fn().mockResolvedValue([]);
 const getSubscriptionOverviewMock = vi.fn();
-const startProCheckoutMock = vi.fn();
 const completeProCheckoutMock = vi.fn();
 
 vi.mock('~/repos/document', () => ({
@@ -33,7 +31,6 @@ vi.mock('~/services/subscription', async (importOriginal) => {
     ...actual,
     getSubscriptionOverview:
       (...args: unknown[]) => getSubscriptionOverviewMock(...args),
-    startProCheckout: (...args: unknown[]) => startProCheckoutMock(...args),
     completeProCheckout:
       (...args: unknown[]) => completeProCheckoutMock(...args),
   };
@@ -90,8 +87,8 @@ describe('page', () => {
       `You’ve used 2 of your ${FREE_DOCUMENT_LIMIT} free docs.`,
     ))
       .toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Upgrade to Pro' }))
-      .toBeEnabled();
+    expect(screen.getByRole('link', { name: 'Upgrade to Pro' }))
+      .toHaveAttribute('href', `/doc/${DOC_ID}/checkout`);
     expect(screen.getByText('Secure checkout by Creem.')).toBeInTheDocument();
     expect(screen.getByRole('rowheader', { name: 'Docs' }))
       .toBeInTheDocument();
@@ -136,7 +133,7 @@ describe('page', () => {
       });
       expect(portal).toHaveAttribute('href', href('/billing-portal'));
       expect(portal).toHaveAttribute('target', '_blank');
-      expect(screen.queryByRole('button', { name: 'Upgrade to Pro' }))
+      expect(screen.queryByRole('link', { name: 'Upgrade to Pro' }))
         .not.toBeInTheDocument();
       expect(getDocumentListMock).not.toHaveBeenCalled();
     });
@@ -174,7 +171,7 @@ describe('page', () => {
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Manage subscription' }))
       .not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Upgrade to Pro' }))
+    expect(screen.queryByRole('link', { name: 'Upgrade to Pro' }))
       .not.toBeInTheDocument();
   });
 });
@@ -240,59 +237,4 @@ describe('loader', () => {
     expect(response.headers.get('Location'))
       .toContain(`${subscriptionUrl}?toastDanger`);
   });
-});
-
-describe('action', () => {
-  function callAction(user: User) {
-    const request = new Request(`http://localhost:3000${subscriptionUrl}`, {
-      method: 'POST',
-      body: new FormData(),
-    });
-
-    return action({
-      request,
-      url: new URL(request.url),
-      pattern: '/doc/:id/settings/subscription',
-      params: { id: DOC_ID },
-      context: contextFor(user),
-    } as Route.ActionArgs);
-  }
-
-  test('sends the user to the Creem checkout and back here', async () => {
-    getSubscriptionOverviewMock.mockResolvedValue({ kind: 'none' });
-    startProCheckoutMock.mockResolvedValue([
-      null,
-      { checkoutUrl: 'https://creem.invalid/checkout/ch_123' },
-    ]);
-
-    const response = await callAction(userFixture) as Response;
-
-    expect(response.headers.get('Location'))
-      .toBe('https://creem.invalid/checkout/ch_123');
-    expect(startProCheckoutMock).toHaveBeenCalledWith(
-      userFixture,
-      `http://localhost:3000${subscriptionUrl}`,
-    );
-  });
-
-  test('starts no checkout for a user with the pro features', async () => {
-    getSubscriptionOverviewMock.mockResolvedValue({ kind: 'complimentary' });
-
-    const response = await callAction(subscriber) as Response;
-
-    expect(response.headers.get('Location')).toBe(subscriptionUrl);
-    expect(startProCheckoutMock).not.toHaveBeenCalled();
-  });
-
-  test('sends the user back with a toast when the checkout fails',
-    async () => {
-      getSubscriptionOverviewMock.mockResolvedValue({ kind: 'none' });
-      startProCheckoutMock
-        .mockResolvedValue([StartProCheckoutError.CheckoutFailed]);
-
-      const response = await callAction(userFixture) as Response;
-
-      expect(response.headers.get('Location'))
-        .toContain(`${subscriptionUrl}?toastDanger`);
-    });
 });
