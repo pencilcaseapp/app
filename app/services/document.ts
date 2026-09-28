@@ -1,6 +1,8 @@
 import {
   acceptInvite,
   connectCollaborator,
+  countOwnedDocuments,
+  createDocument as createDocumentRow,
   getDocumentForViewer,
   removeLinkCollaborators,
   restoreDocument as restoreDocumentRow,
@@ -12,6 +14,8 @@ import {
 } from '~/repos/document';
 import { closeDocumentConnections } from '~/live/connections';
 import type { DocumentLinkAccess } from '~/constants/document';
+import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
+import type { User } from '~/repos/user';
 
 export type { DocumentViewer } from '~/repos/document';
 
@@ -303,4 +307,38 @@ function isReadOnlyFor(document: DocumentAccessInfo, viewer?: DocumentViewer) {
   }
 
   return document.linkAccess === 'view';
+}
+
+/**
+ * A free account may own `FREE_DOCUMENT_LIMIT` documents at a time. The
+ * deleted ones do not count, so deleting one frees a place again.
+ */
+export function hasReachedDocumentLimit(
+  user: Pick<User, 'hasSubscription'>,
+  ownedDocumentCount: number,
+) {
+  return !user.hasSubscription && ownedDocumentCount >= FREE_DOCUMENT_LIMIT;
+}
+
+export enum CreateDocumentError {
+  LimitReached,
+}
+
+export type CreateDocumentResult
+  = [CreateDocumentError] | [null, { id: string }];
+
+export async function createDocument(
+  user: Pick<User, 'id' | 'hasSubscription'>,
+): Promise<CreateDocumentResult> {
+  const ownedDocumentCount = user.hasSubscription
+    ? 0
+    : await countOwnedDocuments(user.id);
+
+  if (hasReachedDocumentLimit(user, ownedDocumentCount)) {
+    return [CreateDocumentError.LimitReached];
+  }
+
+  const document = await createDocumentRow({ userId: user.id });
+
+  return [null, { id: document.id }];
 }
