@@ -5,7 +5,7 @@ import type {
   TriggerFn,
 } from '@lexical/react/LexicalTypeaheadMenuPlugin';
 import { MenuOption } from '@lexical/react/LexicalMenuOption';
-import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
+import { $createHeadingNode } from '@lexical/rich-text';
 import { $createCodeNode, $isCodeNode } from '@lexical/code-core';
 import { $setBlocksType } from '@lexical/selection';
 import {
@@ -124,14 +124,6 @@ const BLOCKS: SlashMenuBlock[] = [
     group: 'block',
     keywords: ['code', 'snippet', 'block'],
     $insert: $insertBlock(() => $createCodeNode()),
-  },
-  {
-    key: 'quote',
-    label: 'Quote',
-    icon: 'quote',
-    group: 'block',
-    keywords: ['quote', 'blockquote', 'citation'],
-    $insert: $insertBlock(() => $createQuoteNode()),
   },
 ];
 
@@ -274,8 +266,8 @@ const SlashMenu: React.FC<SlashMenuProps> = ({
 
 /**
  * The block menu the editor opens on a slash: typing `/` on an empty row
- * offers the heading and list blocks, and picking one turns the row into that
- * block and takes the query back out.
+ * offers the heading, list and code blocks, and picking one turns the row
+ * into that block and takes the query back out.
  *
  * Only on an empty row, because a slash in the middle of a sentence is a
  * slash — the menu is for the row somebody is about to write, which is also

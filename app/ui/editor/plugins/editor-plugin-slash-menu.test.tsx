@@ -8,7 +8,7 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
-import { $isHeadingNode, HeadingNode, QuoteNode } from '@lexical/rich-text';
+import { $isHeadingNode, HeadingNode } from '@lexical/rich-text';
 import { CodeHighlightNode, CodeNode } from '@lexical/code-core';
 import { $isListNode, ListItemNode, ListNode } from '@lexical/list';
 import {
@@ -40,7 +40,6 @@ function renderSlashMenu() {
         },
         nodes: [
           HeadingNode,
-          QuoteNode,
           CodeNode,
           CodeHighlightNode,
           ListNode,
@@ -125,7 +124,6 @@ describe('EditorPluginSlashMenu', () => {
       'Bulleted list',
       'Checklist',
       'Code block',
-      'Quote',
     ]);
   });
 
@@ -234,16 +232,6 @@ describe('EditorPluginSlashMenu', () => {
     await user.click(screen.getByRole('menuitem', { name: 'Code block' }));
 
     expect(rowType()).toBe('code');
-    expect(documentText()).toBe('');
-  });
-
-  test('turns the row into a quote', async () => {
-    const { user } = renderSlashMenu();
-
-    await type('/');
-    await user.click(screen.getByRole('menuitem', { name: 'Quote' }));
-
-    expect(rowType()).toBe('quote');
     expect(documentText()).toBe('');
   });
 

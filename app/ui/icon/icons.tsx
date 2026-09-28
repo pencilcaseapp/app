@@ -9,7 +9,6 @@ export type IconName
     | 'listOl'
     | 'listCheck'
     | 'code'
-    | 'quote'
     | 'share'
     | 'sidebar'
     | 'close'
@@ -123,12 +122,6 @@ export const icons: {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-    />
-  ),
-  'quote': (
-    <path
-      d="M5.52 6.6L10.47 6.6L10.47 11.55C10.47 14.43 8.86 16.23 6.33 17.13C7.86 15.78 8.49 14.16 8.49 12.45L5.52 12.45ZM13.52 6.6L18.48 6.6L18.48 11.55C18.48 14.43 16.85 16.23 14.33 17.13C15.86 15.78 16.49 14.16 16.49 12.45L13.52 12.45Z"
-      fill="currentColor"
     />
   ),
   'listUl': (
