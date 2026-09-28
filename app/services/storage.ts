@@ -1,4 +1,5 @@
 import {
+  CopyObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   NoSuchKey,
@@ -55,6 +56,15 @@ export async function getObjectStream(key: string) {
 
     throw error;
   }
+}
+
+/** Copies an object within the bucket, content type included. */
+export async function copyObject(fromKey: string, toKey: string) {
+  await client.send(new CopyObjectCommand({
+    Bucket: config.storage.bucket,
+    CopySource: `${config.storage.bucket}/${fromKey}`,
+    Key: toKey,
+  }));
 }
 
 /** Deleting a key that does not exist is not an error. */

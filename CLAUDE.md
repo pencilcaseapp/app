@@ -257,7 +257,12 @@ posting, `shrinkImage` (`app/utils/shrink-image.ts`) scales a photo down
 to `MAX_IMAGE_WIDTH` in the browser (not a PNG or GIF), which cuts the upload to a fraction;
 it is only a speed-up, the server processes whatever arrives the same way.
 Nodes come from other people through Yjs and pastes, so `ImageView` only loads
-`/doc/:id/assets/…` sources and nothing else. The node's constructor needs
+`/doc/:id/assets/…` sources (`parseAssetSrc`) and nothing else. Content
+pasted from another document carries that document's images, so the
+plugin holds the paste back until `useCopyImage` has copied each of them
+into this one (`POST /doc/:id/assets/copies`, `copyImage`): otherwise the
+image would stay the other document's, broken for whoever cannot open it
+and gone when it is purged. An image that cannot be copied is left out. The node's constructor needs
 defaults — the Yjs binding builds every node type without arguments to
 learn its properties, and throws on sync if that fails.
 
