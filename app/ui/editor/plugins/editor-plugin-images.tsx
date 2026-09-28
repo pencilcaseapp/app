@@ -8,10 +8,13 @@ import {
   $isParagraphNode,
   $isRangeSelection,
   COMMAND_PRIORITY_LOW,
+  createCommand,
+  mergeRegister,
+  type LexicalCommand,
   type LexicalEditor,
   type NodeKey,
 } from 'lexical';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { $createImageNode, ImageNode, type ImagePayload } from '../nodes/image-node';
 
 /**
@@ -20,47 +23,88 @@ import { $createImageNode, ImageNode, type ImagePayload } from '../nodes/image-n
  */
 export type UploadImage = (file: File) => Promise<ImagePayload | undefined>;
 
+/** Opens the file picker and inserts the chosen images at the caret. */
+export const PICK_IMAGES_COMMAND: LexicalCommand<void>
+  = createCommand('PICK_IMAGES_COMMAND');
+
+/** What the server accepts, so the picker offers nothing else. */
+const ACCEPTED_IMAGE_TYPES = 'image/jpeg,image/png,image/webp,image/gif';
+
 export interface EditorPluginImagesProps {
   uploadImage: UploadImage;
 }
 
 /**
- * Images pasted or dropped into the editor. Each one is stored first and
- * only then inserted, below the block the caret was in when it arrived: an
- * image node waiting for its upload would be part of the shared document,
- * and undoing the moment its upload finished would leave everybody with an
- * empty image.
+ * Images pasted, dropped or picked into the editor. Each one is stored
+ * first and only then inserted, below the block the caret was in when it
+ * arrived: an image node waiting for its upload would be part of the shared
+ * document, and undoing the moment its upload finished would leave
+ * everybody with an empty image.
  */
 export const EditorPluginImages: React.FC<EditorPluginImagesProps> = ({
   uploadImage,
 }) => {
   const [editor] = useLexicalComposerContext();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const pickedBlockKeyRef = useRef<NodeKey | null>(null);
 
   useEffect(() => {
     if (!editor.hasNodes([ImageNode])) {
       throw new Error('EditorPluginImages: ImageNode is not registered');
     }
 
-    return editor.registerCommand(
-      DRAG_DROP_PASTE,
-      (files) => {
-        const images = files.filter(file => file.type.startsWith('image/'));
+    return mergeRegister(
+      editor.registerCommand(
+        DRAG_DROP_PASTE,
+        (files) => {
+          const images = files.filter(file => file.type.startsWith('image/'));
 
-        if (images.length === 0) {
-          return false;
-        }
+          if (images.length === 0) {
+            return false;
+          }
 
-        const blockKey = $getAnchorBlockKey();
+          const blockKey = $getAnchorBlockKey();
 
-        void insertImages(editor, images, blockKey, uploadImage);
+          void insertImages(editor, images, blockKey, uploadImage);
 
-        return true;
-      },
-      COMMAND_PRIORITY_LOW,
+          return true;
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        PICK_IMAGES_COMMAND,
+        () => {
+          // A browser opens the picker only from within the click or key
+          // press that asked for it, so this has to stay synchronous.
+          pickedBlockKeyRef.current = $getAnchorBlockKey();
+          inputRef.current?.click();
+
+          return true;
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
     );
   }, [editor, uploadImage]);
 
-  return null;
+  const onPick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const images = Array.from(event.target.files ?? []);
+
+    // Picking the same file again fires no change otherwise.
+    event.target.value = '';
+
+    void insertImages(editor, images, pickedBlockKeyRef.current, uploadImage);
+  };
+
+  return (
+    <input
+      ref={inputRef}
+      type="file"
+      accept={ACCEPTED_IMAGE_TYPES}
+      multiple
+      hidden
+      onChange={onPick}
+    />
+  );
 };
 
 async function insertImages(

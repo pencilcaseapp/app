@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -9,11 +9,32 @@ import { HeadingNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { COMMAND_PRIORITY_LOW } from 'lexical';
+import { useEffect } from 'react';
 import { EditorPluginToolbar } from './editor-plugin-toolbar';
+import { PICK_IMAGES_COMMAND } from './editor-plugin-images';
 import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import type { Collaborator } from '~/utils/presence';
 
-function renderToolbar(avatars: Collaborator[] = []) {
+const pickImages = vi.fn(() => true);
+
+const PickImagesSpy: React.FC = () => {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => editor.registerCommand(
+    PICK_IMAGES_COMMAND,
+    pickImages,
+    COMMAND_PRIORITY_LOW,
+  ), [editor]);
+
+  return null;
+};
+
+function renderToolbar(
+  avatars: Collaborator[] = [],
+  { canInsertImages = false } = {},
+) {
   return render(
     <SidebarProvider>
       <LexicalComposer
@@ -25,7 +46,11 @@ function renderToolbar(avatars: Collaborator[] = []) {
           nodes: [HeadingNode, ListNode, ListItemNode],
         }}
       >
-        <EditorPluginToolbar avatars={avatars} />
+        <EditorPluginToolbar
+          avatars={avatars}
+          canInsertImages={canInsertImages}
+        />
+        <PickImagesSpy />
         <RichTextPlugin
           contentEditable={
             <ContentEditable aria-label="editor" />
@@ -85,6 +110,22 @@ describe('EditorPluginToolbar', () => {
     expect(screen.getByRole('button', { name: 'Bulleted list' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Numbered list' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Checklist' })).toBeInTheDocument();
+  });
+
+  test('offers an image only when images can be inserted', () => {
+    renderToolbar();
+
+    expect(screen.queryByRole('button', { name: 'Image' }))
+      .not.toBeInTheDocument();
+  });
+
+  test('opens the image picker', async () => {
+    const user = userEvent.setup();
+    renderToolbar([], { canInsertImages: true });
+
+    await user.click(screen.getByRole('button', { name: 'Image' }));
+
+    expect(pickImages).toHaveBeenCalled();
   });
 
   test('toggles bold when B is clicked', async () => {

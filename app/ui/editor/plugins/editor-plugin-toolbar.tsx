@@ -9,6 +9,7 @@ import { Topbar } from '~/ui/topbar/topbar';
 import { Toolbar } from '~/ui/toolbar/toolbar';
 import { ToolbarGroup } from '~/ui/toolbar/toolbar-group';
 import { ToolbarToggle } from '~/ui/toolbar/toolbar-toggle';
+import { ToolbarButton } from '~/ui/toolbar/toolbar-button';
 import { ToolbarSeparator } from '~/ui/toolbar/toolbar-separator';
 import type { EditorFormatBlock } from '../editor.types';
 import { useMedia, useWindowScroll } from 'react-use';
@@ -22,16 +23,25 @@ import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
 import { StackedAvatars } from '~/ui/stacked-avatar/stacked-avatar';
 import { MAX_VISIBLE_COLLABORATORS } from '~/constants/presence';
 import type { Collaborator } from '~/utils/presence';
+import { PICK_IMAGES_COMMAND } from './editor-plugin-images';
 
 export interface EditorPluginToolbarProps {
   avatars: Collaborator[];
   topbarLeft?: React.ReactNode;
   topbarRight?: React.ReactNode;
   editable?: boolean;
+  /** Offers an image, which needs `EditorPluginImages` to pick it. */
+  canInsertImages?: boolean;
 }
 
 export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
-  = ({ avatars, topbarLeft, topbarRight, editable = true }) => {
+  = ({
+    avatars,
+    topbarLeft,
+    topbarRight,
+    editable = true,
+    canInsertImages = false,
+  }) => {
     const [editor] = useLexicalComposerContext();
     const [formatBlock, setFormatBlock] = useState<EditorFormatBlock>('p');
     const [textStyle, setTextStyle] = useState({
@@ -138,6 +148,10 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
       });
     }, [editor]);
 
+    const pickImages = useCallback(() => {
+      editor.dispatchCommand(PICK_IMAGES_COMMAND, undefined);
+    }, [editor]);
+
     const handleEditorFocus = useCallback((e: React.MouseEvent) => {
       e.preventDefault();
     }, []);
@@ -178,6 +192,14 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
                 <ToolbarToggle isActive={formatBlock === 'number'} onMouseDown={handleEditorFocus} onClick={() => toggleList('number')} icon="listOl" tooltipLabel="Numbered list" />
                 <ToolbarToggle isActive={formatBlock === 'check'} onMouseDown={handleEditorFocus} onClick={() => toggleList('check')} icon="listCheck" tooltipLabel="Checklist" />
               </ToolbarGroup>
+              {canInsertImages && (
+                <>
+                  <ToolbarSeparator />
+                  <ToolbarGroup>
+                    <ToolbarButton onMouseDown={handleEditorFocus} onClick={pickImages} icon="image" tooltipLabel="Image" />
+                  </ToolbarGroup>
+                </>
+              )}
             </Toolbar>
           )
         )}
