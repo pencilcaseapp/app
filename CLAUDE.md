@@ -243,8 +243,11 @@ then the rows, then the documents. In the editor an image is an
 `EditorPluginImages` answers `DRAG_DROP_PASTE` by uploading first
 (`useUploadImage`, which also owns the toasts) and inserting after: a
 node waiting on its upload would be in the shared document, and undoing
-the moment it finished would leave everybody an empty image. Nodes come
-from other people through Yjs and pastes, so `ImageView` only loads
+the moment it finished would leave everybody an empty image. Before
+posting, `shrinkImage` (`app/utils/shrink-image.ts`) scales a photo down
+to `MAX_IMAGE_WIDTH` in the browser, which cuts the upload to a fraction;
+it is only a speed-up, the server processes whatever arrives the same way.
+Nodes come from other people through Yjs and pastes, so `ImageView` only loads
 `/user-assets/…` sources and nothing else. The node's constructor needs
 defaults — the Yjs binding builds every node type without arguments to
 learn its properties, and throws on sync if that fails.

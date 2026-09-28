@@ -4,6 +4,7 @@ import { href } from 'react-router';
 import { useAuthenticityToken } from 'remix-utils/csrf/react';
 import { MAX_ASSET_UPLOAD_BYTES } from '~/constants/asset';
 import type { UploadImage } from '~/ui/editor/plugins/editor-plugin-images';
+import { shrinkImage } from '~/utils/shrink-image';
 
 export const uploadImageCopies = {
   uploading: 'Uploading image …',
@@ -32,15 +33,6 @@ export const useUploadImage = (documentId: string): UploadImage => {
   const { add, close } = Toast.useToastManager();
 
   return useCallback(async (file) => {
-    if (file.size > MAX_ASSET_UPLOAD_BYTES) {
-      add({ type: 'danger', title: uploadImageCopies.tooLarge });
-      return undefined;
-    }
-
-    const formData = new FormData();
-    formData.set('csrf', csrfToken);
-    formData.set('file', file);
-
     let toastId: string | undefined;
     const timer = setTimeout(() => {
       toastId = add({
@@ -51,6 +43,17 @@ export const useUploadImage = (documentId: string): UploadImage => {
     }, UPLOADING_TOAST_DELAY);
 
     try {
+      const image = await shrinkImage(file);
+
+      if (image.size > MAX_ASSET_UPLOAD_BYTES) {
+        add({ type: 'danger', title: uploadImageCopies.tooLarge });
+        return undefined;
+      }
+
+      const formData = new FormData();
+      formData.set('csrf', csrfToken);
+      formData.set('file', image);
+
       const response = await fetch(
         href('/doc/:id/assets', { id: documentId }),
         { method: 'POST', body: formData },

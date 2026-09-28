@@ -1,9 +1,19 @@
 import sharp from 'sharp';
 import { expect, type Locator, type Page } from '@playwright/test';
 
-export async function createPng(width: number, height: number) {
+export async function createPng(
+  width: number,
+  height: number,
+  { noise = false } = {},
+) {
   const data = await sharp({
-    create: { width, height, channels: 3, background: '#39f' },
+    create: {
+      width,
+      height,
+      channels: 3,
+      background: '#39f',
+      ...noise && { noise: { type: 'gaussian', mean: 128, sigma: 30 } },
+    },
   }).png().toBuffer();
 
   return [...data];
@@ -15,10 +25,13 @@ export async function sendImage(
   eventType: 'paste' | 'drop',
   bytes: number[],
 ) {
-  await target.evaluate((element, { eventType, bytes }) => {
+  // Base64 crosses into the page far faster than an array of numbers.
+  const base64 = Buffer.from(bytes).toString('base64');
+
+  await target.evaluate((element, { eventType, base64 }) => {
     const dataTransfer = new DataTransfer();
     dataTransfer.items.add(new File(
-      [new Uint8Array(bytes)],
+      [Uint8Array.from(atob(base64), char => char.charCodeAt(0))],
       'image.png',
       { type: 'image/png' },
     ));
@@ -39,7 +52,7 @@ export async function sendImage(
         });
 
     element.dispatchEvent(event);
-  }, { eventType, bytes });
+  }, { eventType, base64 });
 }
 
 export function images(page: Page) {

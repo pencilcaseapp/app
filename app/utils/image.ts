@@ -36,7 +36,7 @@ export async function processImage(
     const { data, info } = await sharp(input, { ...options, animated: true })
       .rotate()
       .resize({ width: MAX_IMAGE_WIDTH, withoutEnlargement: true })
-      .webp({ quality: 80 })
+      .webp({ quality: 80, effort: 2 })
       .toBuffer({ resolveWithObject: true });
 
     return {
