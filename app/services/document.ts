@@ -4,6 +4,8 @@ import {
   countOwnedDocuments,
   createDocument as createDocumentRow,
   getDocumentForViewer,
+  getDocumentIdsDeletedBefore,
+  hardDeleteDocuments,
   removeLinkCollaborators,
   restoreDocument as restoreDocumentRow,
   setDocumentLinkAccess,
@@ -12,7 +14,9 @@ import {
   type DocumentForViewer,
   type DocumentViewer,
 } from '~/repos/document';
+import { deleteAssetsOfDocuments, getAssetsOfDocuments } from '~/repos/asset';
 import { closeDocumentConnections } from '~/live/connections';
+import { deleteObjects } from '~/services/storage';
 import type { DocumentLinkAccess } from '~/constants/document';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import type { User } from '~/repos/user';
@@ -341,4 +345,35 @@ export async function createDocument(
   const document = await createDocumentRow({ userId: user.id });
 
   return [null, { id: document.id }];
+}
+
+const PURGE_BATCH_SIZE = 1000;
+
+/**
+ * Hard deletes documents that were soft deleted before the given date, in
+ * batches so a backlog never turns into one long statement. Their files go
+ * from the bucket before their rows, so a failure halfway leaves rows to
+ * retry with rather than files nothing points at any more.
+ */
+export async function purgeDeletedDocuments(before: Date) {
+  let deletedCount = 0;
+
+  while (true) {
+    const ids = await getDocumentIdsDeletedBefore(before, PURGE_BATCH_SIZE);
+
+    if (ids.length === 0) {
+      return deletedCount;
+    }
+
+    const assets = await getAssetsOfDocuments(ids);
+    await deleteObjects(assets.map(asset => asset.storageKey));
+    await deleteAssetsOfDocuments(ids);
+    await hardDeleteDocuments(ids);
+
+    deletedCount += ids.length;
+
+    if (ids.length < PURGE_BATCH_SIZE) {
+      return deletedCount;
+    }
+  }
 }

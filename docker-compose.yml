@@ -46,6 +46,28 @@ services:
       timeout: 5s
       retries: 10
 
+  # Stands in for the S3-compatible object storage (Cellar in prod), one
+  # bucket per environment.
+  s3:
+    image: adobe/s3mock:5.2.3
+    # The image's own user cannot write to the volume.
+    user: root
+    restart: always
+    environment:
+      - COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS=pencil-case-dev,pencil-case-test
+      - COM_ADOBE_TESTING_S3MOCK_STORE_ROOT=/data
+      - COM_ADOBE_TESTING_S3MOCK_STORE_RETAIN_FILES_ON_EXIT=true
+    ports:
+      - "9090:9090"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9090/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - s3_data:/data
+
 volumes:
   postgres_dev_data:
   postgres_test_data:
+  s3_data:

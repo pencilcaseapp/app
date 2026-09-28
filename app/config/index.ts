@@ -55,6 +55,19 @@ export interface Config {
     };
   };
 
+  /**
+   * S3-compatible object storage for what people add to documents, Cellar
+   * in prod. The bucket stays private: the app streams objects out after
+   * checking access to the document.
+   */
+  storage: {
+    endpoint: string;
+    region: string;
+    bucket: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+  };
+
   email: {
     apiToken?: string;
     from: {

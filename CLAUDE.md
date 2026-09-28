@@ -19,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run docker:up      # start dev (:5433) and test (:5434) Postgres containers
+npm run docker:up      # start Postgres (dev :5433, test :5434), Redis, S3 (:9090)
 npm run dev            # dev server on http://localhost:3000 (runs migrations on boot)
 npm run test           # vitest (watch mode); requires the test Postgres on :5434
 npm run e2e            # Playwright e2e tests; needs the dev Postgres/Redis (docs/e2e.md)
@@ -221,6 +221,24 @@ with `npm run email`. Email components snapshot the *inlined* CSS through
 `renderEmail` (`app/emails/testing.tsx`), which is what pins the Tailwind
 pipeline across React Email upgrades. The OTP template's copy is load bearing
 for iOS one-time-code detection — read `docs/emails.md` before rewording it.
+
+**Assets — `app/services/asset.ts`.** Files people add to a document
+(images, for now) live in S3-compatible object storage: Cellar on Clever
+Cloud in prod (`CELLAR_ADDON_*`, set when the add-on is linked, plus
+`STORAGE_BUCKET`), the `s3` container from `docker-compose.yml`
+(adobe/s3mock, one bucket per environment) everywhere else, including
+the tests, which hit it for real like Postgres. The editor posts an
+image to `/doc/:id/assets` (whoever may edit, signed in or through the
+link); `processImage` (`app/utils/image.ts`) reads the type from the
+bytes (JPEG, PNG, WebP, GIF, AVIF — never SVG), turns it upright, drops
+the metadata, scales it to `MAX_IMAGE_WIDTH` and stores WebP, never the
+upload itself. An `assets` row belongs to the document, not the
+uploader. The bucket stays private: `/user-assets/:assetId` checks
+access with `getLiveAccess`, the same rules as the document, and
+streams the object through the app, so unsharing a document takes its
+images along. Soft delete leaves them alone (the Deleted view and a
+restore still need them); `purgeDeletedDocuments` deletes the objects,
+then the rows, then the documents.
 
 **Presence — `app/utils/presence.ts`.** The avatars next to the Share button
 are the other people in the document, read from the Yjs awareness the

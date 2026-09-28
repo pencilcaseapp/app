@@ -383,41 +383,36 @@ export async function restoreDocument(documentId: string, ownerId: string) {
   return document;
 }
 
-const PURGE_BATCH_SIZE = 1000;
+/** Documents soft deleted before the given date, oldest first. */
+export async function getDocumentIdsDeletedBefore(
+  before: Date,
+  limit: number,
+) {
+  const rows = await db
+    .select({ id: documents.id })
+    .from(documents)
+    .where(lt(documents.deletedAt, before))
+    .orderBy(asc(documents.deletedAt))
+    .limit(limit);
+
+  return rows.map(row => row.id);
+}
 
 /**
- * Hard deletes documents that were soft deleted before the given date, in
- * batches so a backlog never turns into one long statement. Deleting drops
- * the collaborators already; clearing them again here keeps the foreign
- * key satisfied whatever state a row is in.
+ * Hard deletes documents. Deleting drops the collaborators already;
+ * clearing them again here keeps the foreign key satisfied whatever state
+ * a row is in. Their assets have to be gone first.
  */
-export async function purgeDocumentsDeletedBefore(before: Date) {
-  let deletedCount = 0;
-
-  while (true) {
-    const batch = await db
-      .select({ id: documents.id })
-      .from(documents)
-      .where(lt(documents.deletedAt, before))
-      .limit(PURGE_BATCH_SIZE);
-    const ids = batch.map(document => document.id);
-
-    if (ids.length === 0) {
-      return deletedCount;
-    }
-
-    await db.transaction(async (tx) => {
-      await tx.delete(documentCollaborators)
-        .where(inArray(documentCollaborators.documentId, ids));
-      await tx.delete(documents).where(inArray(documents.id, ids));
-    });
-
-    deletedCount += ids.length;
-
-    if (ids.length < PURGE_BATCH_SIZE) {
-      return deletedCount;
-    }
+export async function hardDeleteDocuments(ids: string[]) {
+  if (ids.length === 0) {
+    return;
   }
+
+  await db.transaction(async (tx) => {
+    await tx.delete(documentCollaborators)
+      .where(inArray(documentCollaborators.documentId, ids));
+    await tx.delete(documents).where(inArray(documents.id, ids));
+  });
 }
 
 export interface ConnectCollaboratorInput {

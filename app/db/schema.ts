@@ -199,3 +199,27 @@ export const emailLogs = pgTable('email_logs', {
   index('email_logs_email_idx').on(table.email),
   index('email_logs_created_at_idx').on(table.createdAt),
 ]);
+
+/*
+ * A file somebody added to a document, kept in object storage under
+ * `storage_key`. Belongs to the document rather than to whoever uploaded
+ * it: access follows the document's sharing, and it goes when the document
+ * is purged. `user_id` is empty for somebody editing through the link
+ * while signed out. `width` and `height` are the stored image's own size,
+ * which lets the editor reserve its box before it loads.
+ */
+export const assets = pgTable('assets', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  documentId: uuid('document_id').notNull().references(() => documents.id),
+  userId: uuid('user_id').references(() => users.id),
+  storageKey: text('storage_key').notNull(),
+  contentType: text('content_type').notNull(),
+  byteSize: integer('byte_size').notNull(),
+  width: integer('width').notNull(),
+  height: integer('height').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, table => [
+  uniqueIndex('assets_storage_key_idx').on(table.storageKey),
+  index('assets_document_id_idx').on(table.documentId),
+  index('assets_user_id_idx').on(table.userId),
+]);
