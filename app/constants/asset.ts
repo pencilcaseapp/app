@@ -16,3 +16,11 @@ export const IMAGE_CONTENT_TYPE = 'image/webp';
  * the instance.
  */
 export const MAX_IMAGE_PIXELS = 50_000_000;
+
+/**
+ * Signed asset URLs are handed out per window of this many seconds and
+ * stay valid for two, so everybody gets the same URL for a while (and the
+ * caches keep working) and a redirect is never followed with less than a
+ * window left. It is also how long a revoked reader keeps loading images.
+ */
+export const SIGNED_ASSET_URL_WINDOW_SECONDS = 5 * 60;

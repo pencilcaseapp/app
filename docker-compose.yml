@@ -46,8 +46,8 @@ services:
       timeout: 5s
       retries: 10
 
-  # Stands in for the S3-compatible object storage (Cellar in prod), one
-  # bucket per environment.
+  # Stands in for the S3-compatible object storage (a Bunny storage zone in
+  # prod), one bucket per environment.
   s3:
     image: adobe/s3mock:5.2.3
     # The image's own user cannot write to the volume.

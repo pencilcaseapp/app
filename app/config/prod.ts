@@ -42,16 +42,21 @@ export function getConfigProd(): Config {
       },
     },
 
-    // CELLAR_ADDON_* are set by Clever Cloud when the Cellar add-on is linked.
+    // A Bunny storage zone with S3 compatibility: the zone's name is both
+    // the bucket and the access key, its password the secret.
     storage: {
-      endpoint: `https://${env.get('CELLAR_ADDON_HOST').required().asString()}`,
-      region: env.get('STORAGE_REGION').default('us-east-1').asString(),
-      bucket: env.get('STORAGE_BUCKET').required().asString(),
-      accessKeyId: env.get('CELLAR_ADDON_KEY_ID').required().asString(),
-      secretAccessKey: env
-        .get('CELLAR_ADDON_KEY_SECRET')
-        .required()
+      endpoint: env
+        .get('STORAGE_ENDPOINT')
+        .default('https://de-s3.storage.bunnycdn.com')
         .asString(),
+      region: env.get('STORAGE_REGION').default('de').asString(),
+      bucket: env.get('STORAGE_ZONE').required().asString(),
+      accessKeyId: env.get('STORAGE_ZONE').required().asString(),
+      secretAccessKey: env.get('STORAGE_PASSWORD').required().asString(),
+      cdn: {
+        url: env.get('STORAGE_CDN_URL').required().asUrlString(),
+        tokenKey: env.get('STORAGE_CDN_TOKEN_KEY').required().asString(),
+      },
     },
 
     email: {
