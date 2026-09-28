@@ -144,3 +144,17 @@ test('a pasted image is stored and stays across a reload', async ({
   }).toPass();
   await expectLoaded(images(userA.page));
 });
+
+test('a dropped image lands in the document', async ({ userA }) => {
+  await userA.createDocument();
+  await userA.typeLines(`Drop doc ${Date.now()}`, 'Drop below me.');
+
+  await sendImage(
+    userA.editor.getByText('Drop below me.'),
+    'drop',
+    await createPng(300, 200),
+  );
+
+  await expect(images(userA.page)).toHaveCount(1);
+  await expectLoaded(images(userA.page));
+});
