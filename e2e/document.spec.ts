@@ -181,4 +181,10 @@ test('a dropped image lands in the document', async ({ userA }) => {
 
   await expect(images(userA.page)).toHaveCount(1);
   await expectLoaded(images(userA.page));
+
+  const image = await images(userA.page).boundingBox();
+  const column = await userA.editor
+    .locator('p', { hasText: 'Drop below me.' }).boundingBox();
+  const center = (box: typeof image) => box!.x + box!.width / 2;
+  expect(Math.abs(center(image) - center(column))).toBeLessThan(2);
 });
