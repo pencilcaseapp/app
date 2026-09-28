@@ -147,6 +147,8 @@ export const ImageView: React.FC<ImageViewProps> = ({
       width={width}
       height={height}
       alt=""
+      loading="lazy"
+      decoding="async"
       draggable={false}
       className={classNames(
         'mx-auto block h-auto max-w-full rounded-sm',
