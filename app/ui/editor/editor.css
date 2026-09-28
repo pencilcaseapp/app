@@ -352,6 +352,11 @@
   }
 }
 
+/* Images */
+.editor-image {
+  margin: 0 0 1.25rem;
+}
+
 /* Horizontal Rules */
 .editor-hr {
   border: none;

@@ -238,7 +238,16 @@ access with `getLiveAccess`, the same rules as the document, and
 streams the object through the app, so unsharing a document takes its
 images along. Soft delete leaves them alone (the Deleted view and a
 restore still need them); `purgeDeletedDocuments` deletes the objects,
-then the rows, then the documents.
+then the rows, then the documents. In the editor an image is an
+`ImageNode` (`app/ui/editor/nodes/`), a block of its own.
+`EditorPluginImages` answers `DRAG_DROP_PASTE` by uploading first
+(`useUploadImage`, which also owns the toasts) and inserting after: a
+node waiting on its upload would be in the shared document, and undoing
+the moment it finished would leave everybody an empty image. Nodes come
+from other people through Yjs and pastes, so `ImageView` only loads
+`/user-assets/…` sources and nothing else. The node's constructor needs
+defaults — the Yjs binding builds every node type without arguments to
+learn its properties, and throws on sync if that fails.
 
 **Presence — `app/utils/presence.ts`.** The avatars next to the Share button
 are the other people in the document, read from the Yjs awareness the
