@@ -1,4 +1,5 @@
 import { expect, test } from './fixtures';
+import { createPng, expectLoaded, images, sendImage } from './utils';
 
 test('a new document keeps its content across a reload', async ({ user }) => {
   await user.createDocument();
@@ -121,4 +122,25 @@ test('a reloaded document comes back where the reader left off', async ({
   await expect
     .poll(() => user.page.evaluate(() => window.scrollY))
     .toBe(400);
+});
+
+test('a pasted image is stored and stays across a reload', async ({
+  userA,
+}) => {
+  await userA.createDocument();
+  await userA.typeLines(`Image doc ${Date.now()}`, 'Above the image.');
+
+  await sendImage(userA.editor, 'paste', await createPng(800, 400));
+
+  const image = images(userA.page);
+  await expect(image).toHaveCount(1);
+  await expect(image).toHaveAttribute('src', /^\/user-assets\//);
+  await expect(image).toHaveAttribute('width', '800');
+  await expectLoaded(image);
+
+  await expect(async () => {
+    await userA.page.reload();
+    await expect(images(userA.page)).toHaveCount(1, { timeout: 3000 });
+  }).toPass();
+  await expectLoaded(images(userA.page));
 });
