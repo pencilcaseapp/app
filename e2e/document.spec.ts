@@ -1,5 +1,11 @@
 import { expect, test } from './fixtures';
-import { createPng, expectLoaded, images, sendImage } from './utils';
+import {
+  createJpeg,
+  createPng,
+  expectLoaded,
+  images,
+  sendImage,
+} from './utils';
 
 test('a new document keeps its content across a reload', async ({ user }) => {
   await user.createDocument();
@@ -145,10 +151,10 @@ test('a pasted image is stored and stays across a reload', async ({
   await expectLoaded(images(userA.page));
 });
 
-test('a large image is shrunk before it is uploaded', async ({ userA }) => {
+test('a large photo is shrunk before it is uploaded', async ({ userA }) => {
   await userA.createDocument();
   await userA.typeLines(`Large image doc ${Date.now()}`, 'A photo.');
-  const png = await createPng(2400, 1200, { noise: true });
+  const jpeg = await createJpeg(2400, 1200);
 
   // The body of a multipart upload is out of Playwright's reach.
   await userA.page.evaluate(() => {
@@ -159,12 +165,12 @@ test('a large image is shrunk before it is uploaded', async ({ userA }) => {
       return fetch(input, init);
     };
   });
-  await sendImage(userA.editor, 'paste', png);
+  await sendImage(userA.editor, 'paste', jpeg, 'image/jpeg');
 
   await expect(images(userA.page)).toHaveCount(1);
   const uploadSize = await userA.page.locator('body')
     .getAttribute('data-upload-size');
-  expect(Number(uploadSize)).toBeLessThan(png.length / 2);
+  expect(Number(uploadSize)).toBeLessThan(jpeg.length / 2);
   await expect(images(userA.page)).toHaveAttribute('width', '1600');
   await expectLoaded(images(userA.page));
 });

@@ -1,20 +1,25 @@
 import sharp from 'sharp';
 import { expect, type Locator, type Page } from '@playwright/test';
 
-export async function createPng(
-  width: number,
-  height: number,
-  { noise = false } = {},
-) {
+export async function createPng(width: number, height: number) {
+  const data = await sharp({
+    create: { width, height, channels: 3, background: '#39f' },
+  }).png().toBuffer();
+
+  return [...data];
+}
+
+/** A photo-like JPEG, which the browser shrinks before uploading. */
+export async function createJpeg(width: number, height: number) {
   const data = await sharp({
     create: {
       width,
       height,
       channels: 3,
       background: '#39f',
-      ...noise && { noise: { type: 'gaussian', mean: 128, sigma: 30 } },
+      noise: { type: 'gaussian', mean: 128, sigma: 30 },
     },
-  }).png().toBuffer();
+  }).jpeg({ quality: 95 }).toBuffer();
 
   return [...data];
 }
@@ -24,16 +29,17 @@ export async function sendImage(
   target: Locator,
   eventType: 'paste' | 'drop',
   bytes: number[],
+  type = 'image/png',
 ) {
   // Base64 crosses into the page far faster than an array of numbers.
   const base64 = Buffer.from(bytes).toString('base64');
 
-  await target.evaluate((element, { eventType, base64 }) => {
+  await target.evaluate((element, { eventType, base64, type }) => {
     const dataTransfer = new DataTransfer();
     dataTransfer.items.add(new File(
       [Uint8Array.from(atob(base64), char => char.charCodeAt(0))],
-      'image.png',
-      { type: 'image/png' },
+      'image',
+      { type },
     ));
 
     const rect = element.getBoundingClientRect();
@@ -52,7 +58,7 @@ export async function sendImage(
         });
 
     element.dispatchEvent(event);
-  }, { eventType, base64 });
+  }, { eventType, base64, type });
 }
 
 export function images(page: Page) {
