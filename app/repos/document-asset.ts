@@ -1,9 +1,9 @@
 import { inArray, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
-import { assets } from '~/db/schema';
+import { documentAssets } from '~/db/schema';
 
-export type Asset = InferSelectModel<typeof assets>;
+export type Asset = InferSelectModel<typeof documentAssets>;
 
 export interface CreateAssetInput {
   id: string;
@@ -17,7 +17,7 @@ export interface CreateAssetInput {
 }
 
 export async function createAsset(input: CreateAssetInput) {
-  const [asset] = await db.insert(assets).values(input).returning();
+  const [asset] = await db.insert(documentAssets).values(input).returning();
 
   return asset;
 }
@@ -27,7 +27,7 @@ export async function getAsset(id: string) {
     return undefined;
   }
 
-  return db.query.assets.findFirst({ where: { id } });
+  return db.query.documentAssets.findFirst({ where: { id } });
 }
 
 export async function getAssetsOfDocuments(documentIds: string[]) {
@@ -37,8 +37,8 @@ export async function getAssetsOfDocuments(documentIds: string[]) {
 
   return db
     .select()
-    .from(assets)
-    .where(inArray(assets.documentId, documentIds));
+    .from(documentAssets)
+    .where(inArray(documentAssets.documentId, documentIds));
 }
 
 export async function deleteAssetsOfDocuments(documentIds: string[]) {
@@ -46,5 +46,7 @@ export async function deleteAssetsOfDocuments(documentIds: string[]) {
     return;
   }
 
-  await db.delete(assets).where(inArray(assets.documentId, documentIds));
+  await db
+    .delete(documentAssets)
+    .where(inArray(documentAssets.documentId, documentIds));
 }

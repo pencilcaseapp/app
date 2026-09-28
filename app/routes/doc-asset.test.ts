@@ -5,8 +5,8 @@ import { beforeEach, expect, test, vi } from 'vitest';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import { OpenAssetError } from '~/services/asset';
 import { userFixture } from '~/test/fixtures/user';
-import { loader } from './user-assets';
-import type { Route } from './+types/user-assets';
+import { loader } from './doc-asset';
+import type { Route } from './+types/doc-asset';
 
 const openAssetMock = vi.fn();
 vi.mock('~/services/asset', async (importOriginal) => {
@@ -17,6 +17,7 @@ vi.mock('~/services/asset', async (importOriginal) => {
   };
 });
 
+const documentId = 'a1e0b1c3-0000-4000-8000-000000000000';
 const assetId = 'b3f1c2d4-0000-4000-8000-000000000000';
 
 beforeEach(() => {
@@ -24,15 +25,15 @@ beforeEach(() => {
 });
 
 function callLoader(signedIn = true) {
-  const request = new Request(`http://localhost/user-assets/${assetId}`);
+  const request = new Request(`http://localhost/doc/${documentId}/assets/${assetId}`);
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, signedIn ? userFixture : null);
 
   return loader({
     request,
     url: new URL(request.url),
-    pattern: '/user-assets/:assetId',
-    params: { assetId },
+    pattern: '/doc/:id/assets/:assetId',
+    params: { id: documentId, assetId },
     context,
   } as Route.LoaderArgs);
 }
@@ -46,7 +47,7 @@ test('streams the asset privately cacheable', async () => {
 
   const response = await callLoader();
 
-  expect(openAssetMock).toHaveBeenCalledWith(assetId, userFixture);
+  expect(openAssetMock).toHaveBeenCalledWith(documentId, assetId, userFixture);
   expect(await response.text()).toBe('image');
   expect(Object.fromEntries(response.headers)).toMatchObject({
     'content-type': 'image/webp',
@@ -61,7 +62,7 @@ test('opens the asset without a viewer when signed out', async () => {
 
   await callLoader(false).catch(() => {});
 
-  expect(openAssetMock).toHaveBeenCalledWith(assetId, undefined);
+  expect(openAssetMock).toHaveBeenCalledWith(documentId, assetId, undefined);
 });
 
 test('responds with 404 when the asset is not for the viewer', async () => {

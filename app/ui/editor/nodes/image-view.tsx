@@ -19,7 +19,7 @@ import { listenForEditableTap, TAP_SLOP } from '~/utils/editable-tap';
  * are loaded: anything else would have every reader's browser call out to
  * a server of the author's choosing.
  */
-const ASSET_SRC = /^\/user-assets\/[0-9a-f-]{36}$/;
+const ASSET_SRC = /^\/doc\/[0-9a-f-]{36}\/assets\/[0-9a-f-]{36}$/;
 
 export interface ImageViewProps {
   nodeKey: NodeKey;

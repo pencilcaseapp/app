@@ -5,7 +5,8 @@ import { createEditor } from 'lexical';
 import { ImageNode } from './image-node';
 import { ImageView } from './image-view';
 
-const src = '/user-assets/b3f1c2d4-0000-4000-8000-000000000000';
+const src = '/doc/a1e0b1c3-0000-4000-8000-000000000000/assets/'
+  + 'b3f1c2d4-0000-4000-8000-000000000000';
 
 function importImage(json: Record<string, unknown>) {
   const editor = createEditor({ nodes: [ImageNode] });

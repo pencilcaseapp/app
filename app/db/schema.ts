@@ -208,7 +208,7 @@ export const emailLogs = pgTable('email_logs', {
  * while signed out. `width` and `height` are the stored image's own size,
  * which lets the editor reserve its box before it loads.
  */
-export const assets = pgTable('assets', {
+export const documentAssets = pgTable('document_assets', {
   id: uuid('id').primaryKey().defaultRandom(),
   documentId: uuid('document_id').notNull().references(() => documents.id),
   userId: uuid('user_id').references(() => users.id),
@@ -219,7 +219,7 @@ export const assets = pgTable('assets', {
   height: integer('height').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, table => [
-  uniqueIndex('assets_storage_key_idx').on(table.storageKey),
-  index('assets_document_id_idx').on(table.documentId),
-  index('assets_user_id_idx').on(table.userId),
+  uniqueIndex('document_assets_storage_key_idx').on(table.storageKey),
+  index('document_assets_document_id_idx').on(table.documentId),
+  index('document_assets_user_id_idx').on(table.userId),
 ]);

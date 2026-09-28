@@ -140,7 +140,7 @@ test('a pasted image is stored and stays across a reload', async ({
 
   const image = images(userA.page);
   await expect(image).toHaveCount(1);
-  await expect(image).toHaveAttribute('src', /^\/user-assets\//);
+  await expect(image).toHaveAttribute('src', /^\/doc\/[0-9a-f-]+\/assets\//);
   await expect(image).toHaveAttribute('width', '800');
   await expectLoaded(image);
 

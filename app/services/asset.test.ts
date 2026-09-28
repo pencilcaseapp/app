@@ -13,7 +13,7 @@ vi.mock('~/services/document', () => ({
 
 const createAssetMock = vi.fn();
 const getAssetMock = vi.fn();
-vi.mock('~/repos/asset', () => ({
+vi.mock('~/repos/document-asset', () => ({
   createAsset: (...args: unknown[]) => createAssetMock(...args),
   getAsset: (...args: unknown[]) => getAssetMock(...args),
 }));
@@ -151,7 +151,7 @@ describe('openAsset', () => {
     getLiveAccessMock.mockResolvedValue({ readOnly: true });
     getObjectStreamMock.mockResolvedValue(body);
 
-    const result = await openAsset(asset.id, viewer);
+    const result = await openAsset(documentId, asset.id, viewer);
 
     expect(result).toEqual([null, {
       contentType: 'image/webp',
@@ -166,16 +166,32 @@ describe('openAsset', () => {
     getAssetMock.mockResolvedValue(asset);
     getLiveAccessMock.mockResolvedValue(undefined);
 
-    const result = await openAsset(asset.id, viewer);
+    const result = await openAsset(documentId, asset.id, viewer);
 
     expect(result).toEqual([OpenAssetError.NotFound]);
+    expect(getObjectStreamMock).not.toHaveBeenCalled();
+  });
+
+  it('does not exist under another document', async () => {
+    getAssetMock.mockResolvedValue(asset);
+    getLiveAccessMock.mockResolvedValue({ readOnly: false });
+
+    const result = await openAsset(
+      'c4a2d3e5-0000-4000-8000-000000000000',
+      asset.id,
+      viewer,
+    );
+
+    expect(result).toEqual([OpenAssetError.NotFound]);
+    expect(getLiveAccessMock).not.toHaveBeenCalled();
     expect(getObjectStreamMock).not.toHaveBeenCalled();
   });
 
   it('does not exist when there is no such asset', async () => {
     getAssetMock.mockResolvedValue(undefined);
 
-    expect(await openAsset(asset.id)).toEqual([OpenAssetError.NotFound]);
+    expect(await openAsset(documentId, asset.id))
+      .toEqual([OpenAssetError.NotFound]);
   });
 
   it('does not exist when the bucket has lost the file', async () => {
@@ -183,6 +199,7 @@ describe('openAsset', () => {
     getLiveAccessMock.mockResolvedValue({ readOnly: false });
     getObjectStreamMock.mockResolvedValue(undefined);
 
-    expect(await openAsset(asset.id)).toEqual([OpenAssetError.NotFound]);
+    expect(await openAsset(documentId, asset.id))
+      .toEqual([OpenAssetError.NotFound]);
   });
 });

@@ -5,8 +5,8 @@ import {
   deleteAssetsOfDocuments,
   getAsset,
   getAssetsOfDocuments,
-} from './asset';
-import { createTestAsset } from '~/test/data-factories/asset';
+} from './document-asset';
+import { createTestAsset } from '~/test/data-factories/document-asset';
 import { createDocumentWithTitle } from '~/test/data-factories/document';
 import { createTestUser } from '~/test/data-factories/user';
 

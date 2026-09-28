@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker';
 import { db } from '~/db';
-import { assets } from '~/db/schema';
+import { documentAssets } from '~/db/schema';
 
 export async function createTestAsset(documentId: string, userId?: string) {
   const id = faker.string.uuid();
-  const [asset] = await db.insert(assets).values({
+  const [asset] = await db.insert(documentAssets).values({
     id,
     documentId,
     userId,

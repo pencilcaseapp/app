@@ -59,7 +59,7 @@ vi.mock('~/repos/document', () => ({
 
 const getAssetsOfDocumentsMock = vi.fn();
 const deleteAssetsOfDocumentsMock = vi.fn();
-vi.mock('~/repos/asset', () => ({
+vi.mock('~/repos/document-asset', () => ({
   getAssetsOfDocuments: (...args: unknown[]) =>
     getAssetsOfDocumentsMock(...args),
   deleteAssetsOfDocuments: (...args: unknown[]) =>

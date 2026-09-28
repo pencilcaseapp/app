@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { IMAGE_CONTENT_TYPE, MAX_ASSET_UPLOAD_BYTES } from '~/constants/asset';
-import { createAsset, getAsset } from '~/repos/asset';
+import { createAsset, getAsset } from '~/repos/document-asset';
 import { getLiveAccess, type DocumentViewer } from '~/services/document';
 import { getObjectStream, putObject } from '~/services/storage';
 import { processImage } from '~/utils/image';
@@ -90,16 +90,21 @@ export type OpenAssetResult = [OpenAssetError] | [null, OpenAsset];
 
 /**
  * An asset is for whoever may open its document, by the same rules as the
- * document itself. Anybody else is told it does not exist, whether it does
- * or not.
+ * document itself, and only under that document. Anybody else is told it
+ * does not exist, whether it does or not.
  */
 export async function openAsset(
+  documentId: string,
   assetId: string,
   viewer?: DocumentViewer,
 ): Promise<OpenAssetResult> {
   const asset = await getAsset(assetId);
 
-  if (!asset || !await getLiveAccess(asset.documentId, viewer)) {
+  if (
+    !asset
+    || asset.documentId !== documentId
+    || !await getLiveAccess(documentId, viewer)
+  ) {
     return [OpenAssetError.NotFound];
   }
 

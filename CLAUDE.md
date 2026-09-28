@@ -233,9 +233,11 @@ link); `processImage` (`app/utils/image.ts`) reads the type from the
 bytes (JPEG, PNG, WebP, GIF, AVIF — never SVG), turns it upright, drops
 the metadata, scales it to `MAX_IMAGE_WIDTH` and stores WebP, never the
 upload itself: lossless for a PNG (mostly screenshots, whose text a lossy
-encoder smears) unless that runs past a megabyte, lossy otherwise. An `assets` row belongs to the document, not the
-uploader. The bucket stays private: `/user-assets/:assetId` checks
-access with `getLiveAccess`, the same rules as the document, and
+encoder smears) unless that runs past a megabyte, lossy otherwise. A `document_assets` row belongs to the document, not the
+uploader (a file that belongs to a user, like an avatar, would get its
+own table). The bucket stays private: `/doc/:id/assets/:assetId` checks
+that the asset is that document's and access with `getLiveAccess`, the
+same rules as the document, and
 streams the object through the app, so unsharing a document takes its
 images along. Soft delete leaves them alone (the Deleted view and a
 restore still need them); `purgeDeletedDocuments` deletes the objects,
@@ -255,7 +257,7 @@ posting, `shrinkImage` (`app/utils/shrink-image.ts`) scales a photo down
 to `MAX_IMAGE_WIDTH` in the browser (not a PNG or GIF), which cuts the upload to a fraction;
 it is only a speed-up, the server processes whatever arrives the same way.
 Nodes come from other people through Yjs and pastes, so `ImageView` only loads
-`/user-assets/…` sources and nothing else. The node's constructor needs
+`/doc/:id/assets/…` sources and nothing else. The node's constructor needs
 defaults — the Yjs binding builds every node type without arguments to
 learn its properties, and throws on sync if that fails.
 

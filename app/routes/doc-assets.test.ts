@@ -88,7 +88,7 @@ test('adds the image and answers with where it is served', async () => {
   expect(result).toStrictEqual({
     ok: true,
     id: assetId,
-    src: `/user-assets/${assetId}`,
+    src: `/doc/${documentFixture.id}/assets/${assetId}`,
     width: 800,
     height: 600,
   });

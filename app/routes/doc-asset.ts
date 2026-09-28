@@ -1,7 +1,7 @@
 import { data } from 'react-router';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import { openAsset } from '~/services/asset';
-import type { Route } from './+types/user-assets';
+import type { Route } from './+types/doc-asset';
 
 /**
  * Streams a file of a document out of the bucket to whoever may open the
@@ -11,7 +11,11 @@ import type { Route } from './+types/user-assets';
  */
 export async function loader({ params, context }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
-  const [error, asset] = await openAsset(params.assetId, user ?? undefined);
+  const [error, asset] = await openAsset(
+    params.id,
+    params.assetId,
+    user ?? undefined,
+  );
 
   if (error !== null) {
     throw data('Not Found', { status: 404 });
