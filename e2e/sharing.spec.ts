@@ -1,4 +1,5 @@
 import { expect, test } from './fixtures';
+import { createPng, expectLoaded, images, sendImage } from './utils';
 
 test('edits from an invited user reach the owner live', async ({
   userA,
@@ -134,4 +135,27 @@ test('a free account is offered the upgrade over inviting', async ({
   await expect(
     userA.page.getByRole('switch', { name: 'Anyone with the link' }),
   ).toBeHidden();
+});
+
+test('an image is only served to people who may open the document', async ({
+  userA,
+  userB,
+}) => {
+  await userA.createDocument();
+  await userA.typeLines(`Private image ${Date.now()}`);
+  await sendImage(userA.editor, 'paste', await createPng(50, 50));
+
+  const src = await images(userA.page).getAttribute('src');
+  expect(src).toMatch(/^\/user-assets\//);
+
+  const denied = await userB.page.request.get(src!);
+  expect(denied.status()).toBe(404);
+
+  const shareUrl = await userA.shareDocument();
+  await userB.openDocument(shareUrl);
+  await expectLoaded(images(userB.page));
+
+  await userA.unshareDocument();
+  const revoked = await userB.page.request.get(src!);
+  expect(revoked.status()).toBe(404);
 });

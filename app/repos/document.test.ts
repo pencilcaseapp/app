@@ -11,7 +11,8 @@ import {
   getDocumentTitle,
   getInvitedCollaborators,
   inviteCollaborator,
-  purgeDocumentsDeletedBefore,
+  getDocumentIdsDeletedBefore,
+  hardDeleteDocuments,
   removeCollaborator,
   removeLinkCollaborators,
   restoreDocument,
@@ -1091,10 +1092,10 @@ describe('removeCollaborator', () => {
   });
 });
 
-describe('purgeDocumentsDeletedBefore', () => {
+describe('getDocumentIdsDeletedBefore', () => {
   const days = 24 * 60 * 60 * 1000;
 
-  it('hard deletes documents deleted before the given date', async () => {
+  it('lists documents deleted before the given date', async () => {
     const user = await createTestUser();
     const old = await createDeletedDocument(
       user.id, new Date(Date.now() - 40 * days),
@@ -1104,29 +1105,46 @@ describe('purgeDocumentsDeletedBefore', () => {
     );
     const live = await createDocumentWithTitle(user.id);
 
-    const deletedCount = await purgeDocumentsDeletedBefore(
-      new Date(Date.now() - 30 * days),
+    const ids = await getDocumentIdsDeletedBefore(
+      new Date(Date.now() - 30 * days), 1000,
     );
 
-    expect(deletedCount).toBeGreaterThanOrEqual(1);
-    expect(await getDocument(old.id)).toBeUndefined();
-    expect(await getDocument(recent.id)).toBeDefined();
-    expect(await getDocument(live.id)).toBeDefined();
+    expect(ids).toContain(old.id);
+    expect(ids).not.toContain(recent.id);
+    expect(ids).not.toContain(live.id);
   });
 
-  it('clears leftover collaborators along with the document', async () => {
+  it('lists no more than the limit', async () => {
+    const user = await createTestUser();
+    await createDeletedDocument(user.id, new Date(Date.now() - 40 * days));
+    await createDeletedDocument(user.id, new Date(Date.now() - 41 * days));
+
+    const ids = await getDocumentIdsDeletedBefore(
+      new Date(Date.now() - 30 * days), 1,
+    );
+
+    expect(ids).toHaveLength(1);
+  });
+});
+
+describe('hardDeleteDocuments', () => {
+  it('deletes the documents and their collaborators', async () => {
     const owner = await createTestUser();
     const collaborator = await createTestUser();
-    const old = await createDeletedDocument(
-      owner.id, new Date(Date.now() - 40 * days),
-    );
-    await connectDocumentCollaborator(old.id, collaborator.id);
+    const deleted = await createDeletedDocument(owner.id);
+    const other = await createDocumentWithTitle(owner.id);
+    await connectDocumentCollaborator(deleted.id, collaborator.id);
 
-    await purgeDocumentsDeletedBefore(new Date(Date.now() - 30 * days));
+    await hardDeleteDocuments([deleted.id]);
 
-    expect(await getDocument(old.id)).toBeUndefined();
+    expect(await getDocument(deleted.id)).toBeUndefined();
+    expect(await getDocument(other.id)).toBeDefined();
     expect(await db.query.documentCollaborators.findMany({
-      where: { documentId: old.id },
+      where: { documentId: deleted.id },
     })).toHaveLength(0);
+  });
+
+  it('does nothing without ids', async () => {
+    await expect(hardDeleteDocuments([])).resolves.toBeUndefined();
   });
 });

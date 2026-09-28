@@ -21,6 +21,14 @@ export function getConfigTest(): Config {
 
     jobs: {},
 
+    storage: {
+      endpoint: 'http://localhost:9090',
+      region: 'us-east-1',
+      bucket: 'pencil-case-test',
+      accessKeyId: 's3mock',
+      secretAccessKey: 's3mock',
+    },
+
     email: {
       from: {
         name: 'pencil case',

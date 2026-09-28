@@ -1,6 +1,6 @@
 import type { JobDefinition } from '../job';
 import { DELETED_DOCUMENT_RETENTION_DAYS } from '~/constants/document';
-import { purgeDocumentsDeletedBefore } from '~/repos/document';
+import { purgeDeletedDocuments as purge } from '~/services/document';
 
 const RETENTION = DELETED_DOCUMENT_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
@@ -13,7 +13,7 @@ export const purgeDeletedDocuments: JobDefinition = {
   schedule: '0 4 * * *',
   run: async () => {
     const before = new Date(Date.now() - RETENTION);
-    const deletedCount = await purgeDocumentsDeletedBefore(before);
+    const deletedCount = await purge(before);
 
     console.log(`🧹 Purged ${deletedCount} deleted documents`);
   },

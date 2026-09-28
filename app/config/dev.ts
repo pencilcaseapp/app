@@ -34,6 +34,14 @@ export function getConfigDev(): Config {
       },
     },
 
+    storage: {
+      endpoint: 'http://localhost:9090',
+      region: 'us-east-1',
+      bucket: 'pencil-case-dev',
+      accessKeyId: 's3mock',
+      secretAccessKey: 's3mock',
+    },
+
     email: {
       apiToken: env.get('EMAIL_API_TOKEN').asString(),
       from: {

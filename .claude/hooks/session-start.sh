@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Prepares a Claude Code on the web session: the Docker daemon, the Postgres
-# and Redis containers from docker-compose.yml, and the npm dependencies.
+# Prepares a Claude Code on the web session: the Docker daemon, the Postgres,
+# Redis and S3 containers from docker-compose.yml, and the npm dependencies.
 # Without this the cloud container has the docker binaries but no running
 # daemon, so `npm run docker:up` — and with it every test and e2e run —
 # fails before it starts.
@@ -55,7 +55,7 @@ start_docker_daemon() {
   return 1
 }
 
-# The first run pulls three images through the proxy, which is the one step
+# The first run pulls four images through the proxy, which is the one step
 # here flaky enough to be worth a second attempt.
 start_containers() {
   npm run docker:up || {

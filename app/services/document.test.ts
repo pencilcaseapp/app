@@ -11,6 +11,7 @@ import {
   getLiveAccess,
   openDocument,
   OpenDocumentError,
+  purgeDeletedDocuments,
   restoreDocument,
   shareDocument,
   ShareDocumentError,
@@ -33,6 +34,8 @@ const softDeleteDocumentMock = vi.fn();
 const restoreDocumentRowMock = vi.fn();
 const countOwnedDocumentsMock = vi.fn();
 const createDocumentRowMock = vi.fn();
+const getDocumentIdsDeletedBeforeMock = vi.fn();
+const hardDeleteDocumentsMock = vi.fn();
 vi.mock('~/repos/document', () => ({
   countOwnedDocuments: (...args: unknown[]) => countOwnedDocumentsMock(...args),
   createDocument: (...args: unknown[]) => createDocumentRowMock(...args),
@@ -48,6 +51,24 @@ vi.mock('~/repos/document', () => ({
     removeLinkCollaboratorsMock(...args),
   softDeleteDocument: (...args: unknown[]) => softDeleteDocumentMock(...args),
   restoreDocument: (...args: unknown[]) => restoreDocumentRowMock(...args),
+  getDocumentIdsDeletedBefore: (...args: unknown[]) =>
+    getDocumentIdsDeletedBeforeMock(...args),
+  hardDeleteDocuments: (...args: unknown[]) =>
+    hardDeleteDocumentsMock(...args),
+}));
+
+const getAssetsOfDocumentsMock = vi.fn();
+const deleteAssetsOfDocumentsMock = vi.fn();
+vi.mock('~/repos/asset', () => ({
+  getAssetsOfDocuments: (...args: unknown[]) =>
+    getAssetsOfDocumentsMock(...args),
+  deleteAssetsOfDocuments: (...args: unknown[]) =>
+    deleteAssetsOfDocumentsMock(...args),
+}));
+
+const deleteObjectsMock = vi.fn();
+vi.mock('~/services/storage', () => ({
+  deleteObjects: (...args: unknown[]) => deleteObjectsMock(...args),
 }));
 
 const closeDocumentConnectionsMock = vi.fn();
@@ -719,5 +740,61 @@ describe('createDocument', () => {
     });
 
     expect(result).toEqual([null, { id: documentFixture.id }]);
+  });
+});
+
+describe('purgeDeletedDocuments', () => {
+  const before = new Date('2026-08-29T04:00:00Z');
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('deletes the files, then the assets, then the documents', async () => {
+    const ids = [documentFixture.id];
+    const calls: string[] = [];
+    getDocumentIdsDeletedBeforeMock.mockResolvedValueOnce(ids);
+    getAssetsOfDocumentsMock.mockResolvedValue([
+      { storageKey: 'documents/a/1.webp' },
+      { storageKey: 'documents/a/2.webp' },
+    ]);
+    deleteObjectsMock.mockImplementation(() => calls.push('objects'));
+    deleteAssetsOfDocumentsMock.mockImplementation(() => calls.push('assets'));
+    hardDeleteDocumentsMock.mockImplementation(() => calls.push('documents'));
+
+    const deletedCount = await purgeDeletedDocuments(before);
+
+    expect(deletedCount).toBe(1);
+    expect(getDocumentIdsDeletedBeforeMock).toHaveBeenCalledWith(
+      before, 1000,
+    );
+    expect(deleteObjectsMock).toHaveBeenCalledWith([
+      'documents/a/1.webp',
+      'documents/a/2.webp',
+    ]);
+    expect(deleteAssetsOfDocumentsMock).toHaveBeenCalledWith(ids);
+    expect(hardDeleteDocumentsMock).toHaveBeenCalledWith(ids);
+    expect(calls).toEqual(['objects', 'assets', 'documents']);
+  });
+
+  it('keeps going while a batch comes back full', async () => {
+    const fullBatch = Array.from({ length: 1000 }, (_, i) => `id-${i}`);
+    getDocumentIdsDeletedBeforeMock
+      .mockResolvedValueOnce(fullBatch)
+      .mockResolvedValueOnce(['last']);
+    getAssetsOfDocumentsMock.mockResolvedValue([]);
+
+    const deletedCount = await purgeDeletedDocuments(before);
+
+    expect(deletedCount).toBe(1001);
+    expect(hardDeleteDocumentsMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('does nothing when no document is due', async () => {
+    getDocumentIdsDeletedBeforeMock.mockResolvedValueOnce([]);
+
+    expect(await purgeDeletedDocuments(before)).toBe(0);
+    expect(deleteObjectsMock).not.toHaveBeenCalled();
+    expect(hardDeleteDocumentsMock).not.toHaveBeenCalled();
   });
 });
