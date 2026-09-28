@@ -1,9 +1,15 @@
 import { randomUUID } from 'node:crypto';
-import { IMAGE_CONTENT_TYPE, MAX_ASSET_UPLOAD_BYTES } from '~/constants/asset';
+import {
+  IMAGE_CONTENT_TYPE,
+  MAX_ASSET_UPLOAD_BYTES,
+  SIGNED_ASSET_URL_WINDOW_SECONDS,
+} from '~/constants/asset';
+import { getConfig, type Config } from '~/config';
 import { createAsset, getAsset } from '~/repos/document-asset';
 import { getLiveAccess, type DocumentViewer } from '~/services/document';
 import { copyObject, getObjectStream, putObject } from '~/services/storage';
 import { parseAssetSrc } from '~/utils/asset-src';
+import { signBunnyUrl } from '~/utils/bunny-token';
 import { processImage } from '~/utils/image';
 
 export enum AddImageError {
@@ -146,11 +152,19 @@ export enum OpenAssetError {
   NotFound,
 }
 
-export interface OpenAsset {
+export interface StreamedAsset {
   contentType: string;
   byteSize: number;
   body: ReadableStream<Uint8Array>;
 }
+
+export interface SignedAsset {
+  url: string;
+  /** How long, in seconds, a browser may keep redirecting to `url`. */
+  maxAge: number;
+}
+
+export type OpenAsset = StreamedAsset | SignedAsset;
 
 export type OpenAssetResult = [OpenAssetError] | [null, OpenAsset];
 
@@ -174,6 +188,12 @@ export async function openAsset(
     return [OpenAssetError.NotFound];
   }
 
+  const { cdn } = getConfig().storage;
+
+  if (cdn) {
+    return [null, signAssetUrl(asset.storageKey, cdn)];
+  }
+
   const body = await getObjectStream(asset.storageKey);
 
   if (!body) {
@@ -185,4 +205,26 @@ export async function openAsset(
     byteSize: asset.byteSize,
     body,
   }];
+}
+
+/**
+ * A URL of the object on the CDN that loads until the end of the window
+ * after the current one (see `SIGNED_ASSET_URL_WINDOW_SECONDS`), and may be
+ * redirected to until the current one ends.
+ */
+export function signAssetUrl(
+  storageKey: string,
+  cdn: NonNullable<Config['storage']['cdn']>,
+  now = Date.now(),
+): SignedAsset {
+  const window = SIGNED_ASSET_URL_WINDOW_SECONDS;
+  const seconds = Math.floor(now / 1000);
+  const windowEnd = (Math.floor(seconds / window) + 1) * window;
+
+  const url = new URL(storageKey, cdn.url);
+
+  return {
+    url: signBunnyUrl(url, cdn.tokenKey, windowEnd + window),
+    maxAge: windowEnd - seconds,
+  };
 }

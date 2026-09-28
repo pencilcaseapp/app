@@ -56,9 +56,9 @@ export interface Config {
   };
 
   /**
-   * S3-compatible object storage for what people add to documents, Cellar
-   * in prod. The bucket stays private: the app streams objects out after
-   * checking access to the document.
+   * S3-compatible object storage for what people add to documents, a Bunny
+   * storage zone in prod. The bucket stays private: the app checks access
+   * to the document before handing an object out.
    */
   storage: {
     endpoint: string;
@@ -66,6 +66,16 @@ export interface Config {
     bucket: string;
     accessKeyId: string;
     secretAccessKey: string;
+
+    /**
+     * The Bunny pull zone in front of the storage zone, with token
+     * authentication on. The app redirects to a signed URL there; without
+     * it (dev and test) the app streams the object itself.
+     */
+    cdn?: {
+      url: string;
+      tokenKey: string;
+    };
   };
 
   email: {

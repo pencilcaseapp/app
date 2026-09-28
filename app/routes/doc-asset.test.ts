@@ -57,6 +57,19 @@ test('streams the asset privately cacheable', async () => {
   });
 });
 
+test('redirects to the signed URL for as long as it may be kept', async () => {
+  const url = 'https://cdn.example/documents/a/b.webp?token=t&expires=1';
+  openAssetMock.mockResolvedValue([null, { url, maxAge: 120 }]);
+
+  const response = await callLoader();
+
+  expect(response.status).toBe(302);
+  expect(Object.fromEntries(response.headers)).toStrictEqual({
+    'location': url,
+    'cache-control': 'private, max-age=120',
+  });
+});
+
 test('opens the asset without a viewer when signed out', async () => {
   openAssetMock.mockResolvedValue([OpenAssetError.NotFound]);
 

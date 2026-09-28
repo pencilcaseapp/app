@@ -9,9 +9,24 @@ import {
   CopyImageError,
   openAsset,
   OpenAssetError,
+  signAssetUrl,
 } from './asset';
+import type { Config } from '~/config';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
+
+type CdnConfig = Config['storage']['cdn'];
+const cdn = vi.hoisted(() => ({ config: undefined as CdnConfig }));
+vi.mock('~/config', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('~/config')>();
+  return {
+    ...actual,
+    getConfig: () => {
+      const config = actual.getConfig();
+      return { ...config, storage: { ...config.storage, cdn: cdn.config } };
+    },
+  };
+});
 
 const getLiveAccessMock = vi.fn();
 vi.mock('~/services/document', () => ({
@@ -47,6 +62,7 @@ async function createPng(width: number, height: number) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  cdn.config = undefined;
 });
 
 describe('addImage', () => {
@@ -261,6 +277,22 @@ describe('openAsset', () => {
     expect(getObjectStreamMock).toHaveBeenCalledWith(asset.storageKey);
   });
 
+  it('signs a CDN URL instead of streaming when there is a CDN', async () => {
+    cdn.config = { url: 'https://cdn.example', tokenKey: 'key' };
+    getAssetMock.mockResolvedValue(asset);
+    getLiveAccessMock.mockResolvedValue({ readOnly: true });
+
+    const [error, opened] = await openAsset(documentId, asset.id, viewer);
+
+    expect(error).toBeNull();
+    expect(opened).toMatchObject({
+      url: expect.stringMatching(
+        `^https://cdn.example/${asset.storageKey}\\?token=HS256-`,
+      ),
+    });
+    expect(getObjectStreamMock).not.toHaveBeenCalled();
+  });
+
   it('does not exist for somebody who may not open the document', async () => {
     getAssetMock.mockResolvedValue(asset);
     getLiveAccessMock.mockResolvedValue(undefined);
@@ -300,5 +332,29 @@ describe('openAsset', () => {
 
     expect(await openAsset(documentId, asset.id))
       .toEqual([OpenAssetError.NotFound]);
+  });
+});
+
+describe('signAssetUrl', () => {
+  const cdnConfig = { url: 'https://cdn.example', tokenKey: 'key' };
+  const key = 'documents/a/b.webp';
+
+  it('hands out the same URL for the whole window', () => {
+    const start = signAssetUrl(key, cdnConfig, 1_800_000_000_000);
+    const end = signAssetUrl(key, cdnConfig, 1_800_000_299_000);
+
+    expect(end.url).toBe(start.url);
+    expect(start.url).toMatch(/&expires=1800000600$/);
+  });
+
+  it('may be kept until the window ends', () => {
+    expect(signAssetUrl(key, cdnConfig, 1_800_000_000_000).maxAge).toBe(300);
+    expect(signAssetUrl(key, cdnConfig, 1_800_000_299_000).maxAge).toBe(1);
+  });
+
+  it('hands out a new URL in the next window', () => {
+    const next = signAssetUrl(key, cdnConfig, 1_800_000_300_000);
+
+    expect(next.url).toMatch(/&expires=1800000900$/);
   });
 });

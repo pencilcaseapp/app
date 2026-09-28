@@ -223,9 +223,9 @@ pipeline across React Email upgrades. The OTP template's copy is load bearing
 for iOS one-time-code detection — read `docs/emails.md` before rewording it.
 
 **Assets — `app/services/asset.ts`.** Files people add to a document
-(images, for now) live in S3-compatible object storage: Cellar on Clever
-Cloud in prod (`CELLAR_ADDON_*`, set when the add-on is linked, plus
-`STORAGE_BUCKET`), the `s3` container from `docker-compose.yml`
+(images, for now) live in S3-compatible object storage: a Bunny storage
+zone (Frankfurt, S3 compatibility on) in prod (`STORAGE_ZONE`,
+`STORAGE_PASSWORD`), the `s3` container from `docker-compose.yml`
 (adobe/s3mock, one bucket per environment) everywhere else, including
 the tests, which hit it for real like Postgres. The editor posts an
 image to `/doc/:id/assets` (whoever may edit, signed in or through the
@@ -237,9 +237,16 @@ encoder smears) unless that runs past a megabyte, lossy otherwise. A `document_a
 uploader (a file that belongs to a user, like an avatar, would get its
 own table). The bucket stays private: `/doc/:id/assets/:assetId` checks
 that the asset is that document's and access with `getLiveAccess`, the
-same rules as the document, and
-streams the object through the app, so unsharing a document takes its
-images along. Soft delete leaves them alone (the Deleted view and a
+same rules as the document. In prod it then redirects to a URL on the
+Bunny pull zone in front of the storage zone (`STORAGE_CDN_URL`), signed
+with the zone's token authentication key (`STORAGE_CDN_TOKEN_KEY`,
+`signBunnyUrl`), so the bytes come from Bunny's edge cache and never pass
+through the app. `signAssetUrl` hands out one URL per five-minute window,
+valid until the end of the next one, and the redirect may be cached until
+the current window ends: everybody gets the same URL for a while, so the
+browser and the edge keep their copies, and unsharing a document takes its
+images along within ten minutes. Without `storage.cdn` (dev and test) the
+route streams the object itself. Soft delete leaves them alone (the Deleted view and a
 restore still need them); `purgeDeletedDocuments` deletes the objects,
 then the rows, then the documents. In the editor an image is an
 `ImageNode` (`app/ui/editor/nodes/`), a block of its own.
