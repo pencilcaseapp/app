@@ -145,6 +145,30 @@ test('a pasted image is stored and stays across a reload', async ({
   await expectLoaded(images(userA.page));
 });
 
+test('a large image is shrunk before it is uploaded', async ({ userA }) => {
+  await userA.createDocument();
+  await userA.typeLines(`Large image doc ${Date.now()}`, 'A photo.');
+  const png = await createPng(2400, 1200, { noise: true });
+
+  // The body of a multipart upload is out of Playwright's reach.
+  await userA.page.evaluate(() => {
+    const { fetch } = window;
+    window.fetch = (input, init) => {
+      const file = init?.body instanceof FormData && init.body.get('file');
+      document.body.dataset.uploadSize = String(file && (file as File).size);
+      return fetch(input, init);
+    };
+  });
+  await sendImage(userA.editor, 'paste', png);
+
+  await expect(images(userA.page)).toHaveCount(1);
+  const uploadSize = await userA.page.locator('body')
+    .getAttribute('data-upload-size');
+  expect(Number(uploadSize)).toBeLessThan(png.length / 2);
+  await expect(images(userA.page)).toHaveAttribute('width', '1600');
+  await expectLoaded(images(userA.page));
+});
+
 test('a dropped image lands in the document', async ({ userA }) => {
   await userA.createDocument();
   await userA.typeLines(`Drop doc ${Date.now()}`, 'Drop below me.');
