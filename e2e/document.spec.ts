@@ -188,3 +188,25 @@ test('a dropped image lands in the document', async ({ userA }) => {
   await expect(images(userA.page)).toHaveCount(1);
   await expectLoaded(images(userA.page));
 });
+
+test('a dragged image moves between the blocks', async ({ userA }) => {
+  const { page, editor } = userA;
+  await userA.createDocument();
+  await userA.typeLines(`Drag doc ${Date.now()}`, 'First', 'Second');
+  await editor.getByText('First').click();
+  await sendImage(editor, 'paste', await createPng(300, 200));
+  await expectLoaded(images(page));
+
+  const image = (await images(page).boundingBox())!;
+  const second = (await editor.getByText('Second').boundingBox())!;
+  await page.mouse.move(image.x + 10, image.y + 10);
+  await page.mouse.down();
+  await page.mouse.move(image.x + 20, image.y + 20, { steps: 5 });
+  await page.mouse.move(second.x + 10, second.y + second.height, {
+    steps: 5,
+  });
+  await page.mouse.up();
+
+  await expect(editor.locator('> *').nth(3).locator('img')).toBeVisible();
+  await expect(editor.locator('> *').nth(2)).toHaveText('Second');
+});

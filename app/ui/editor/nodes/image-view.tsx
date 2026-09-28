@@ -1,4 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import classNames from 'classnames';
 import {
@@ -39,6 +40,7 @@ export const ImageView: React.FC<ImageViewProps> = ({
   height,
 }) => {
   const [editor] = useLexicalComposerContext();
+  const isEditable = useLexicalEditable();
   const [isSelected, setSelected, clearSelection]
     = useLexicalNodeSelection(nodeKey);
   const ref = useRef<HTMLImageElement>(null);
@@ -149,7 +151,7 @@ export const ImageView: React.FC<ImageViewProps> = ({
       alt=""
       loading="lazy"
       decoding="async"
-      draggable={false}
+      draggable={isEditable}
       className={classNames(
         'mx-auto block h-auto max-w-full rounded-sm',
         isSelected && 'outline-2 outline-offset-2 outline-pca-yellow-500',

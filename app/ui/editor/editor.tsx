@@ -26,6 +26,7 @@ import {
   type UploadImage,
 } from './plugins/editor-plugin-images';
 import { ImageNode } from './nodes/image-node';
+import { EditorPluginImageDrag } from './plugins/editor-plugin-image-drag';
 
 export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
 
@@ -97,6 +98,7 @@ export const Editor: React.FC<EditorProps> = ({
         {editable && uploadImage && (
           <EditorPluginImages uploadImage={uploadImage} />
         )}
+        {editable && <EditorPluginImageDrag />}
         <EditorPluginCheckList />
         <ListPlugin />
         <ClickableLinkPlugin newTab />

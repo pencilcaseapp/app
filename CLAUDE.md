@@ -248,7 +248,9 @@ the moment it finished would leave everybody an empty image. The image
 button of the top bar and of the slash menu dispatches
 `PICK_IMAGES_COMMAND`, which clicks the plugin's hidden file input and
 inserts the same way; it has to run inside the click or key press, or
-the browser keeps the picker shut. Before
+the browser keeps the picker shut. `EditorPluginImageDrag` moves an image
+by native drag and drop (desktop): it marks the gap it would land in
+with a bar and moves the node in one update on drop. Before
 posting, `shrinkImage` (`app/utils/shrink-image.ts`) scales a photo down
 to `MAX_IMAGE_WIDTH` in the browser (not a PNG or GIF), which cuts the upload to a fraction;
 it is only a speed-up, the server processes whatever arrives the same way.
