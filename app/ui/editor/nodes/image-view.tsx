@@ -57,7 +57,10 @@ export const ImageView: React.FC<ImageViewProps> = ({
     return (
       <div
         style={{ aspectRatio: `${width} / ${height}`, width }}
-        className="max-w-full rounded-sm bg-pca-grey-100 dark:bg-pca-grey-800"
+        className={classNames(
+          'mx-auto max-w-full rounded-sm',
+          'bg-pca-grey-100 dark:bg-pca-grey-800',
+        )}
       />
     );
   }
@@ -71,7 +74,7 @@ export const ImageView: React.FC<ImageViewProps> = ({
       alt=""
       draggable={false}
       className={classNames(
-        'block h-auto max-w-full rounded-sm',
+        'mx-auto block h-auto max-w-full rounded-sm',
         isSelected && 'outline-2 outline-offset-2 outline-pca-yellow-500',
       )}
     />
