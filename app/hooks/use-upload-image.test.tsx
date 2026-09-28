@@ -34,7 +34,7 @@ describe('useUploadImage', () => {
     fetchMock.mockResolvedValue(Response.json({
       ok: true,
       id: 'b3f1c2d4',
-      src: '/user-assets/b3f1c2d4',
+      src: '/doc/a1e0b1c3/assets/b3f1c2d4',
       width: 800,
       height: 600,
     }));
@@ -43,7 +43,7 @@ describe('useUploadImage', () => {
     const image = await act(() => result.current(png()));
 
     expect(image).toEqual({
-      src: '/user-assets/b3f1c2d4',
+      src: '/doc/a1e0b1c3/assets/b3f1c2d4',
       width: 800,
       height: 600,
     });

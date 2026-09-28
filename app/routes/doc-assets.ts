@@ -42,7 +42,10 @@ export async function action({ request, params, context }: Route.ActionArgs) {
       return {
         ok: true as const,
         id: image.id,
-        src: href('/user-assets/:assetId', { assetId: image.id }),
+        src: href('/doc/:id/assets/:assetId', {
+          id: params.id,
+          assetId: image.id,
+        }),
         width: image.width,
         height: image.height,
       };

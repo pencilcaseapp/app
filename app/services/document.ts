@@ -14,7 +14,7 @@ import {
   type DocumentForViewer,
   type DocumentViewer,
 } from '~/repos/document';
-import { deleteAssetsOfDocuments, getAssetsOfDocuments } from '~/repos/asset';
+import { deleteAssetsOfDocuments, getAssetsOfDocuments } from '~/repos/document-asset';
 import { closeDocumentConnections } from '~/live/connections';
 import { deleteObjects } from '~/services/storage';
 import type { DocumentLinkAccess } from '~/constants/document';

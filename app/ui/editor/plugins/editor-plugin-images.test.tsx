@@ -28,7 +28,8 @@ const EditorRef: React.FC = () => {
 };
 
 const image = {
-  src: '/user-assets/b3f1c2d4-0000-4000-8000-000000000000',
+  src: '/doc/a1e0b1c3-0000-4000-8000-000000000000/assets/'
+    + 'b3f1c2d4-0000-4000-8000-000000000000',
   width: 800,
   height: 600,
 };

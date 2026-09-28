@@ -146,7 +146,7 @@ test('an image is only served to people who may open the document', async ({
   await sendImage(userA.editor, 'paste', await createPng(50, 50));
 
   const src = await images(userA.page).getAttribute('src');
-  expect(src).toMatch(/^\/user-assets\//);
+  expect(src).toMatch(/^\/doc\/[0-9a-f-]+\/assets\//);
 
   const denied = await userB.page.request.get(src!);
   expect(denied.status()).toBe(404);
