@@ -12,18 +12,26 @@ function importImage(json: Record<string, unknown>) {
   let exported: unknown;
 
   editor.update(() => {
-    exported = ImageNode.importJSON(json).exportJSON();
+    exported = ImageNode.importJSON(
+      json as Parameters<typeof ImageNode.importJSON>[0],
+    ).exportJSON();
   }, { discrete: true });
 
   return exported;
 }
 
-function renderView(viewSrc: string) {
+function renderView(viewSrc: string, displayWidth: number | null = null) {
   return render(
     <LexicalComposer
       initialConfig={{ namespace: 'test', onError: console.error }}
     >
-      <ImageView nodeKey="1" src={viewSrc} width={800} height={600} />
+      <ImageView
+        nodeKey="1"
+        src={viewSrc}
+        width={800}
+        height={600}
+        displayWidth={displayWidth}
+      />
     </LexicalComposer>,
   );
 }
@@ -35,12 +43,27 @@ describe('ImageNode', () => {
       src,
       width: 800,
       height: 600,
+      displayWidth: null,
     });
   });
 
+  test('keeps the display width as a share of the column', () => {
+    expect(importImage({ src, width: 800, height: 600, displayWidth: 0.5 }))
+      .toMatchObject({ displayWidth: 0.5 });
+  });
+
+  test('never makes an image wider than the column', () => {
+    expect(importImage({ src, width: 800, height: 600, displayWidth: 3 }))
+      .toMatchObject({ displayWidth: 1 });
+  });
+
   test('makes do with a malformed payload', () => {
-    expect(importImage({ src: 42, width: 'wide', height: -3 }))
-      .toMatchObject({ src: '', width: 1, height: 1 });
+    expect(importImage({
+      src: 42,
+      width: 'wide',
+      height: -3,
+      displayWidth: 'half',
+    })).toMatchObject({ src: '', width: 1, height: 1, displayWidth: null });
   });
 });
 
@@ -49,6 +72,21 @@ describe('ImageView', () => {
     renderView(src);
 
     expect(screen.getByRole('presentation')).toHaveAttribute('src', src);
+  });
+
+  test('shows an image at its own width, capped at the column', () => {
+    renderView(src);
+
+    const frame = screen.getByRole('presentation').parentElement!;
+    expect(frame.style.width).toBe('800px');
+    expect(frame.style.maxWidth).toBe('min(100%, 800px)');
+  });
+
+  test('shows a resized image at its share of the column', () => {
+    renderView(src, 0.5);
+
+    const frame = screen.getByRole('presentation').parentElement!;
+    expect(frame.style.width).toBe('50%');
   });
 
   test('never loads an image from anywhere else', () => {

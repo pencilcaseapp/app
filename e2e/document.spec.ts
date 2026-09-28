@@ -188,3 +188,32 @@ test('a dropped image lands in the document', async ({ userA }) => {
   await expect(images(userA.page)).toHaveCount(1);
   await expectLoaded(images(userA.page));
 });
+
+test('a resized image keeps its share of the column', async ({ userA }) => {
+  await userA.createDocument();
+  await userA.typeLines(`Resize doc ${Date.now()}`);
+  await sendImage(userA.editor, 'paste', await createPng(1600, 800));
+
+  const image = images(userA.page);
+  await expectLoaded(image);
+  const before = await image.boundingBox();
+
+  await image.click();
+  const handle = userA.page.locator('[data-resize-handle="right"]');
+  const box = (await handle.boundingBox())!;
+  await userA.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await userA.page.mouse.down();
+  await userA.page.mouse.move(box.x - before!.width / 2, box.y, { steps: 5 });
+  await userA.page.mouse.up();
+
+  const frame = image.locator('..');
+  await expect(frame).toHaveAttribute('style', /width: [45]\d(\.\d+)?%/);
+  const after = (await image.boundingBox())!;
+  expect(after.height / after.width).toBeCloseTo(0.5, 1);
+
+  await expect(async () => {
+    await userA.page.reload();
+    await expect(images(userA.page).locator('..'))
+      .toHaveAttribute('style', /width: [45]\d(\.\d+)?%/, { timeout: 3000 });
+  }).toPass();
+});

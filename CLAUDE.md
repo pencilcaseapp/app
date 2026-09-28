@@ -241,6 +241,10 @@ images along. Soft delete leaves them alone (the Deleted view and a
 restore still need them); `purgeDeletedDocuments` deletes the objects,
 then the rows, then the documents. In the editor an image is an
 `ImageNode` (`app/ui/editor/nodes/`), a block of its own.
+Its width is `displayWidth`, a share of the column (`null` is the
+natural width, and it never grows past that or the column), so it reads
+the same on every screen. `ImageView` keeps a resize in local state and
+writes the node once on release: one change for the others, one undo.
 `EditorPluginImages` answers `DRAG_DROP_PASTE` by uploading first
 (`useUploadImage`, which also owns the toasts) and inserting after: a
 node waiting on its upload would be in the shared document, and undoing

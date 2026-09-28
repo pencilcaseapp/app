@@ -16,6 +16,11 @@ export interface ImagePayload {
   /** The stored image's own size, which reserves its box before it loads. */
   width: number;
   height: number;
+  /**
+   * The width it is shown at, as a share of the column, so it keeps its
+   * proportion on every screen. `null` shows it at its own width.
+   */
+  displayWidth?: number | null;
 }
 
 export type SerializedImageNode = Spread<
@@ -31,6 +36,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   __src: string;
   __width: number;
   __height: number;
+  __displayWidth: number | null;
 
   static getType() {
     return 'image';
@@ -38,18 +44,24 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   static clone(node: ImageNode) {
     return new ImageNode(
-      { src: node.__src, width: node.__width, height: node.__height },
+      {
+        src: node.__src,
+        width: node.__width,
+        height: node.__height,
+        displayWidth: node.__displayWidth,
+      },
       node.__key,
     );
   }
 
   static importJSON(serializedNode: LexicalParseJSON<SerializedImageNode>) {
-    const { src, width, height } = serializedNode;
+    const { src, width, height, displayWidth } = serializedNode;
 
     return $createImageNode({
       src: typeof src === 'string' ? src : '',
       width: toDimension(width),
       height: toDimension(height),
+      displayWidth: toDisplayWidth(displayWidth),
     });
   }
 
@@ -63,6 +75,14 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     this.__src = payload.src;
     this.__width = payload.width;
     this.__height = payload.height;
+    this.__displayWidth = payload.displayWidth ?? null;
+  }
+
+  setDisplayWidth(displayWidth: number | null) {
+    const writable = this.getWritable();
+    writable.__displayWidth = toDisplayWidth(displayWidth);
+
+    return writable;
   }
 
   exportJSON(): SerializedImageNode {
@@ -71,6 +91,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
       src: this.__src,
       width: this.__width,
       height: this.__height,
+      displayWidth: this.__displayWidth,
     };
   }
 
@@ -106,6 +127,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
         src={this.__src}
         width={this.__width}
         height={this.__height}
+        displayWidth={this.__displayWidth}
       />
     );
   }
@@ -125,4 +147,14 @@ function toDimension(value: unknown) {
   const number = Number(value);
 
   return Number.isFinite(number) && number > 0 ? Math.round(number) : 1;
+}
+
+export function toDisplayWidth(value: unknown) {
+  const number = Number(value);
+
+  if (value === null || !Number.isFinite(number) || number <= 0) {
+    return null;
+  }
+
+  return Math.min(Math.round(number * 1000) / 1000, 1);
 }
