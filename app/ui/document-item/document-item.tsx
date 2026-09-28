@@ -124,14 +124,14 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
         the padding the action area sits in navigate too instead of
         swallowing the click. The action area is positioned to stay on top
         of it, which keeps the two apart without nesting a button in the
-        link. The overlay covers the title, so the truncation tooltip moves
-        to the link itself.
+        link. The overlay covers the title, so the tooltip with the full
+        title moves to the link itself.
       */}
       <Component
         {...rest}
         ref={ref}
         title={title}
-        className="flex items-center gap-2 min-w-0 flex-1 pl-3 h-12 lg:h-10 focus:outline-none before:content-[''] before:absolute before:inset-0 before:rounded-xl"
+        className="flex items-center gap-2 min-w-0 flex-1 pl-3 pr-2 h-12 lg:h-10 focus:outline-none before:content-[''] before:absolute before:inset-0 before:rounded-xl"
       >
         {shareMark && (
           <Icon
@@ -142,7 +142,18 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
         <Typography
           variant="bodySmall"
           as="span"
-          className="block truncate min-w-0 flex-1 group-has-aria-[current=page]:font-semibold! dark:group-has-aria-[current=page]:text-pca-grey-900!"
+          className={classNames([
+            'block end-fade min-w-0 flex-1 group-has-aria-[current=page]:font-semibold! dark:group-has-aria-[current=page]:text-pca-grey-900!',
+            // The title runs underneath the action area, so the fade makes
+            // room for it whenever it shows.
+            actionArea && [
+              '[--action-inset:2.25rem] lg:[--action-inset:1.75rem]',
+              'group-hover:[--fade-inset:var(--action-inset)]',
+              'group-focus-within:[--fade-inset:var(--action-inset)]',
+              'group-has-data-[state=open]:[--fade-inset:var(--action-inset)]',
+              'touch-screen:[--fade-inset:var(--action-inset)]',
+            ],
+          ])}
         >
           {title}
         </Typography>
@@ -158,7 +169,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
       </Component>
       {actionArea && (
         <div className={classNames([
-          'relative shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity',
+          'absolute inset-y-0 right-1 lg:right-0.5 flex items-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity',
           'group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700',
           'dark:group-has-aria-[current=page]:[&_button:hover]:bg-pca-yellow-700',
           'group-has-aria-[current=page]:[&_button[data-state=open]]:bg-pca-yellow-700!',
