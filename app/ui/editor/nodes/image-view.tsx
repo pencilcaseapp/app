@@ -235,7 +235,7 @@ export const ImageView: React.FC<ImageViewProps> = ({
             'absolute top-1/2 h-12 max-h-[50%] w-3 -translate-y-1/2',
             'cursor-ew-resize touch-none rounded-full',
             'bg-pca-yellow-500',
-            side === 'left' ? 'left-1' : 'right-1',
+            side === 'left' ? '-left-2.25' : '-right-2.25',
           )}
         />
       ))}
