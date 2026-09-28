@@ -3,6 +3,7 @@ import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import classNames from 'classnames';
 import { CLICK_COMMAND, COMMAND_PRIORITY_LOW, type NodeKey } from 'lexical';
 import { useEffect, useRef } from 'react';
+import { TAP_SLOP } from '~/utils/editable-tap';
 
 /*
  * Image nodes reach the editor from other people, through the live
@@ -52,6 +53,53 @@ export const ImageView: React.FC<ImageViewProps> = ({
     },
     COMMAND_PRIORITY_LOW,
   ), [editor, setSelected, clearSelection]);
+
+  /*
+   * A tap would otherwise go on to focus the editor, which opens the
+   * keyboard and scrolls the page to make room for it. Selecting an image
+   * needs neither, so the tap stops here and only selects it.
+   */
+  useEffect(() => {
+    const image = ref.current;
+
+    if (!image) {
+      return;
+    }
+
+    let start: { x: number; y: number } | null = null;
+
+    const onTouchStart = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      start = event.touches.length === 1 && touch
+        ? { x: touch.clientX, y: touch.clientY }
+        : null;
+    };
+
+    const onTouchEnd = (event: TouchEvent) => {
+      const touch = event.changedTouches[0];
+      const isTap = !!start && !!touch
+        && Math.hypot(touch.clientX - start.x, touch.clientY - start.y)
+        < TAP_SLOP;
+      start = null;
+
+      if (!isTap || !editor.isEditable()) {
+        return;
+      }
+
+      event.preventDefault();
+      editor.getRootElement()?.blur();
+      clearSelection();
+      setSelected(true);
+    };
+
+    image.addEventListener('touchstart', onTouchStart, { passive: true });
+    image.addEventListener('touchend', onTouchEnd);
+
+    return () => {
+      image.removeEventListener('touchstart', onTouchStart);
+      image.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [editor, src, setSelected, clearSelection]);
 
   if (!ASSET_SRC.test(src)) {
     return (
