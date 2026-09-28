@@ -1,5 +1,5 @@
 /** How far a finger may travel before a touch counts as a scroll. */
-const TAP_SLOP = 10;
+export const TAP_SLOP = 10;
 
 /**
  * Calls `onTap` for a tap on editable content — the one touch that opens the
