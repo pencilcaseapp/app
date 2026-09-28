@@ -27,7 +27,8 @@ test('upgrading to pro through the Creem checkout', async ({ userA }) => {
   // The sidebar opens the subscription settings over the document.
   await page.getByRole('link', { name: 'Upgrade to Pro' }).click();
   await expect(page).toHaveURL(`${documentUrl}/settings/subscription`);
-  await page.getByRole('button', { name: 'Upgrade to Pro' }).click();
+  const settings = page.getByRole('dialog');
+  await settings.getByRole('link', { name: 'Upgrade to Pro' }).click();
 
   await page.waitForURL('**creem.io/**', { timeout: 30_000 });
   await payWithTestCard(page);
@@ -42,7 +43,7 @@ test('upgrading to pro through the Creem checkout', async ({ userA }) => {
     page.getByRole('heading', { name: 'You’re on Pencil Case Pro.' }),
   ).toBeVisible();
   await expect(page.getByText('Active', { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Upgrade to Pro' }))
+  await expect(settings.getByRole('link', { name: 'Upgrade to Pro' }))
     .not.toBeVisible();
 
   const manage = page.getByRole('link', { name: 'Manage subscription' });

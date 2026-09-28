@@ -159,9 +159,10 @@ own straight away, and the echo of its own message is a no-op.
 The pro subscription is sold through Creem (merchant of record): the
 subscription section of the settings dialog
 (`/doc/:id/settings/subscription`) shows the upgrade offer or the
-running subscription; its action starts their hosted checkout with
-the section's own URL as the success URL and its loader verifies the
-signed redirect Creem comes back with, `/upgrade` redirects into the
+running subscription; its upgrade button links to `/doc/:id/checkout`,
+which starts their hosted checkout with the section's URL as the
+success URL, and the section's loader verifies the signed redirect
+Creem comes back with, `/upgrade` redirects into the
 section over the latest document (emails link there),
 `/webhooks/creem` keeps the `subscriptions` table in sync (events
 recorded in `creem_webhook_events` for idempotency), and

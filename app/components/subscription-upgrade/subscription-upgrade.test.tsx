@@ -1,24 +1,23 @@
 import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
 import { createRoutesStub } from 'react-router';
-import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
-import { expect, test, vi } from 'vitest';
+import { expect, test } from 'vitest';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import {
   SubscriptionUpgrade,
   SubscriptionUpgradeFooter,
 } from './subscription-upgrade';
 
-function renderUpgrade(documentCount = 2, action = vi.fn()) {
+const DOC_ID = '11111111-2222-4333-8444-555555555555';
+
+function renderUpgrade(documentCount = 2) {
   const Stub = createRoutesStub([
     {
       path: '/settings/subscription',
-      action,
       Component: () => (
-        <AuthenticityTokenProvider token="test-token">
+        <>
           <SubscriptionUpgrade documentCount={documentCount} />
-          <SubscriptionUpgradeFooter />
-        </AuthenticityTokenProvider>
+          <SubscriptionUpgradeFooter documentId={DOC_ID} />
+        </>
       ),
     },
   ]);
@@ -38,8 +37,8 @@ test('compares the free plan against pro', () => {
   expect(screen.getByText('Secure checkout by Creem.')).toBeInTheDocument();
   expect(screen.getByRole('rowheader', { name: 'Docs' })).toBeInTheDocument();
   expect(screen.getAllByTitle('Not included')).toHaveLength(2);
-  expect(screen.getByRole('button', { name: 'Upgrade to Pro' }))
-    .toBeEnabled();
+  expect(screen.getByRole('link', { name: 'Upgrade to Pro' }))
+    .toBeInTheDocument();
   expect(container).toMatchSnapshot();
 });
 
@@ -51,14 +50,9 @@ test('tells a user at the limit that all docs are in use', () => {
   })).toBeInTheDocument();
 });
 
-test('posts to the route to start the checkout', async () => {
-  const action = vi.fn().mockResolvedValue(null);
-  renderUpgrade(2, action);
-  const person = userEvent.setup();
+test('links to the checkout over the same document', () => {
+  renderUpgrade();
 
-  await person.click(screen.getByRole('button', { name: 'Upgrade to Pro' }));
-
-  await vi.waitFor(() => {
-    expect(action).toHaveBeenCalledTimes(1);
-  });
+  expect(screen.getByRole('link', { name: 'Upgrade to Pro' }))
+    .toHaveAttribute('href', `/doc/${DOC_ID}/checkout`);
 });

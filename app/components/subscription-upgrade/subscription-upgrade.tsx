@@ -1,6 +1,5 @@
 import type { FC } from 'react';
-import { Form, useNavigation } from 'react-router';
-import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
+import { href } from 'react-router';
 import { PLAN_MATRIX_PLANS, PLAN_MATRIX_ROWS } from '~/constants/plans';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { Button } from '~/ui/button/button';
@@ -52,26 +51,30 @@ export const SubscriptionUpgrade: FC<SubscriptionUpgradeProps> = ({
   </PlanOverview>
 );
 
-/*
- * The offer's footer, pinned below the section: the button that posts
- * to the route's action, which starts the checkout on Creem's side —
- * hence the external link icon.
- */
-export const SubscriptionUpgradeFooter: FC = () => {
-  const navigation = useNavigation();
+export interface SubscriptionUpgradeFooterProps {
+  /** The document the settings are open over, which the checkout
+   * returns to. */
+  documentId: string;
+}
 
-  return (
-    <Form method="post" className="flex justify-end">
-      <AuthenticityTokenInput />
-      <Button
-        type="submit"
-        isLoading={navigation.state !== 'idle'}
-        colorLight="yellow-500"
-        colorDark="yellow-500"
-        icon="externalLink"
-      >
-        Upgrade to Pro
-      </Button>
-    </Form>
-  );
-};
+/*
+ * The offer's footer, pinned below the section: a plain link to the
+ * route that starts the checkout on Creem's side — hence the external
+ * link icon. A link rather than a form, so the button is not left
+ * loading when the user comes back from Creem with the back button.
+ */
+export const SubscriptionUpgradeFooter: FC<SubscriptionUpgradeFooterProps> = ({
+  documentId,
+}) => (
+  <div className="flex justify-end">
+    <Button
+      as="a"
+      href={href('/doc/:id/checkout', { id: documentId })}
+      colorLight="yellow-500"
+      colorDark="yellow-500"
+      icon="externalLink"
+    >
+      Upgrade to Pro
+    </Button>
+  </div>
+);
