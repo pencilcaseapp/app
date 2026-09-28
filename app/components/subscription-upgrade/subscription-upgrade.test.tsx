@@ -2,10 +2,9 @@ import { render, screen } from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { expect, test } from 'vitest';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
-import {
-  SubscriptionUpgrade,
-  SubscriptionUpgradeFooter,
-} from './subscription-upgrade';
+import { ResponsiveDialog } from '~/ui/responsive-dialog/responsive-dialog';
+import { SettingsDialogContent } from '../settings-dialog/settings-dialog';
+import { SubscriptionUpgrade } from './subscription-upgrade';
 
 const DOC_ID = '11111111-2222-4333-8444-555555555555';
 
@@ -14,10 +13,14 @@ function renderUpgrade(documentCount = 2) {
     {
       path: '/settings/subscription',
       Component: () => (
-        <>
-          <SubscriptionUpgrade documentCount={documentCount} />
-          <SubscriptionUpgradeFooter documentId={DOC_ID} />
-        </>
+        <ResponsiveDialog open>
+          <SettingsDialogContent>
+            <SubscriptionUpgrade
+              documentCount={documentCount}
+              documentId={DOC_ID}
+            />
+          </SettingsDialogContent>
+        </ResponsiveDialog>
       ),
     },
   ]);
@@ -26,7 +29,7 @@ function renderUpgrade(documentCount = 2) {
 }
 
 test('compares the free plan against pro', () => {
-  const { container } = renderUpgrade(2);
+  renderUpgrade(2);
 
   expect(screen.getByRole('heading', {
     name: `You’ve used 2 of your ${FREE_DOCUMENT_LIMIT} free docs.`,
@@ -39,7 +42,7 @@ test('compares the free plan against pro', () => {
   expect(screen.getAllByTitle('Not included')).toHaveLength(2);
   expect(screen.getByRole('link', { name: 'Upgrade to Pro' }))
     .toBeInTheDocument();
-  expect(container).toMatchSnapshot();
+  expect(screen.getByRole('dialog')).toMatchSnapshot();
 });
 
 test('tells a user at the limit that all docs are in use', () => {

@@ -4,10 +4,7 @@ import {
   CurrentSubscriptionFooter,
 } from '~/components/current-subscription/current-subscription';
 import { SettingsDialogContentInner } from '~/components/settings-dialog/settings-dialog';
-import {
-  SubscriptionUpgrade,
-  SubscriptionUpgradeFooter,
-} from '~/components/subscription-upgrade/subscription-upgrade';
+import { SubscriptionUpgrade } from '~/components/subscription-upgrade/subscription-upgrade';
 import { SearchParamToast } from '~/constants/search-params';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
@@ -83,12 +80,10 @@ export default function SettingsSubscriptionRoute({
 }: Route.ComponentProps) {
   if (overview.kind === 'none') {
     return (
-      <SettingsDialogContentInner
-        section="subscription"
-        footerArea={<SubscriptionUpgradeFooter documentId={documentId} />}
-      >
-        <SubscriptionUpgrade documentCount={documentCount} />
-      </SettingsDialogContentInner>
+      <SubscriptionUpgrade
+        documentCount={documentCount}
+        documentId={documentId}
+      />
     );
   }
 

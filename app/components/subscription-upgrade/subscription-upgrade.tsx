@@ -6,10 +6,14 @@ import { Button } from '~/ui/button/button';
 import { PlanMatrix } from '~/ui/plan-matrix/plan-matrix';
 import { Typography } from '~/ui/typography/typography';
 import { PlanOverview } from '../plan-overview/plan-overview';
+import { SettingsDialogContentInner } from '../settings-dialog/settings-dialog';
 
 export interface SubscriptionUpgradeProps {
   /** The user's docs, counted against the free limit. */
   documentCount: number;
+  /** The document the settings are open over, which the checkout
+   * returns to. */
+  documentId: string;
 }
 
 const headlineFor = (documentCount: number) => {
@@ -23,58 +27,51 @@ const headlineFor = (documentCount: number) => {
 /*
  * The upgrade offer of the subscription settings: the free plan the
  * user is on next to pro, under a headline about their own usage, and
- * what the two plans include below.
+ * what the two plans include below. The footer links to the route that
+ * starts the checkout on Creem's side — a link rather than a form, so
+ * the button is not left loading when the user comes back from Creem
+ * with the back button.
  */
 export const SubscriptionUpgrade: FC<SubscriptionUpgradeProps> = ({
   documentCount,
-}) => (
-  <PlanOverview
-    image="flying-docs"
-    headline={headlineFor(documentCount)}
-    subheadline="Unlimited docs, and you decide who gets in."
-    currentPlan="free"
-  >
-    <Typography
-      variant="bodyTiny"
-      textAlign="center"
-      textColorLight="grey-600"
-      textColorDark="grey-400"
-      className="-mt-2"
-    >
-      Secure checkout by Creem.
-    </Typography>
-    <PlanMatrix
-      caption="What the free and the pro plan include"
-      plans={PLAN_MATRIX_PLANS}
-      rows={PLAN_MATRIX_ROWS}
-    />
-  </PlanOverview>
-);
-
-export interface SubscriptionUpgradeFooterProps {
-  /** The document the settings are open over, which the checkout
-   * returns to. */
-  documentId: string;
-}
-
-/*
- * The offer's footer, pinned below the section: a plain link to the
- * route that starts the checkout on Creem's side — hence the external
- * link icon. A link rather than a form, so the button is not left
- * loading when the user comes back from Creem with the back button.
- */
-export const SubscriptionUpgradeFooter: FC<SubscriptionUpgradeFooterProps> = ({
   documentId,
 }) => (
-  <div className="flex justify-end">
-    <Button
-      as="a"
-      href={href('/doc/:id/checkout', { id: documentId })}
-      colorLight="yellow-500"
-      colorDark="yellow-500"
-      icon="externalLink"
+  <SettingsDialogContentInner
+    section="subscription"
+    footerArea={(
+      <div className="flex justify-end">
+        <Button
+          as="a"
+          href={href('/doc/:id/checkout', { id: documentId })}
+          colorLight="yellow-500"
+          colorDark="yellow-500"
+          icon="externalLink"
+        >
+          Upgrade to Pro
+        </Button>
+      </div>
+    )}
+  >
+    <PlanOverview
+      image="flying-docs"
+      headline={headlineFor(documentCount)}
+      subheadline="Unlimited docs, and you decide who gets in."
+      currentPlan="free"
     >
-      Upgrade to Pro
-    </Button>
-  </div>
+      <Typography
+        variant="bodyTiny"
+        textAlign="center"
+        textColorLight="grey-600"
+        textColorDark="grey-400"
+        className="-mt-2"
+      >
+        Secure checkout by Creem.
+      </Typography>
+      <PlanMatrix
+        caption="What the free and the pro plan include"
+        plans={PLAN_MATRIX_PLANS}
+        rows={PLAN_MATRIX_ROWS}
+      />
+    </PlanOverview>
+  </SettingsDialogContentInner>
 );
