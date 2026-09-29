@@ -11,14 +11,22 @@ import { EDITOR_NODES } from '~/ui/editor/editor-nodes';
 import editorTheme from '~/ui/editor/editor-theme';
 import { ImageNode } from '~/ui/editor/nodes/image-node';
 
+/** How many images at the top of the preview load before the page lays out. */
+export const PREVIEW_EAGER_IMAGES = 2;
+
 /**
  * The document's content as the editor draws it, for the page to show
  * before the live connection has synced. It goes through the editor's own
  * DOM rendering rather than Lexical's HTML export, so the markup and the
  * classes are the ones the editor puts in their place. Only the images,
- * which React draws, come from their node's `exportDOM`.
+ * which React draws, come from their node's `exportDOM`, with their source
+ * handed to `resolveImageSrc` (the signed URL on the CDN, to skip the
+ * redirect) and kept in `data-src` for the editor's image to be matched by.
  */
-export function renderDocumentPreview(content: Uint8Array): string {
+export function renderDocumentPreview(
+  content: Uint8Array,
+  resolveImageSrc: (src: string) => string = src => src,
+): string {
   return withDOM((window) => {
     const doc = new Y.Doc();
     const editor = createEditor({
@@ -43,13 +51,27 @@ export function renderDocumentPreview(content: Uint8Array): string {
 
     // An image is drawn by React into the box the editor leaves for it.
     editor.getEditorState().read(() => {
-      for (const node of $nodesOfType(ImageNode)) {
+      $nodesOfType(ImageNode).forEach((node, index) => {
         const { element } = node.exportDOM();
 
-        if (element) {
-          editor.getElementByKey(node.getKey())?.append(element);
+        if (!element) {
+          return;
         }
-      }
+
+        const image = (element as HTMLElement).querySelector('img');
+
+        if (image) {
+          const src = image.getAttribute('src') ?? '';
+          image.dataset.src = src;
+          image.setAttribute('src', resolveImageSrc(src));
+
+          if (index < PREVIEW_EAGER_IMAGES) {
+            image.loading = 'eager';
+          }
+        }
+
+        editor.getElementByKey(node.getKey())?.append(element);
+      });
     });
 
     const html = root.innerHTML;

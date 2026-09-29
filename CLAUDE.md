@@ -118,12 +118,18 @@ to HTML by a Lexical editor on a happy-dom root (`withDOM`), through the
 editor's own DOM rendering rather than Lexical's HTML export, so markup and
 classes match. Images, which React draws, come from `ImageNode.exportDOM`,
 which draws what `ImageView` does (ours only, `parseAssetSrc`) but decodes
-before the page paints, or the image would blink on every reload. `EditorPreview` (`app/ui/editor/editor-preview.tsx`)
+before the page paints, or the image would blink on every reload. With a
+CDN the preview's images point at their signed URL (the original source
+stays in `data-src`), which saves the redirect on the first paint, and
+the first `PREVIEW_EAGER_IMAGES` of them load eagerly. `EditorPreview` (`app/ui/editor/editor-preview.tsx`)
 is the server render (topbar plus content; the formatting buttons are
 `EditorToolbar`, drawn without handlers and shown from `lg` by CSS), and `EditorPluginRichText`
 keeps showing the same content, with the editor hidden behind it, until
 the first sync (`CollaborativeEditor`'s `hasSynced`), so nobody edits
-before the live document is there. The preview carries
+before the live document is there, and a moment longer while
+`useLiveImagesReady` has the editor decode the images the preview shows
+(a second at most): Safari only loads a lazy image once it is shown, so
+the swap would blank every image. The preview carries
 `contenteditable="false"` because `editor.css` selects on
 `[contenteditable]`; tests find the editor itself by `[data-lexical-editor]`.
 A document nobody has written in has no preview. The Y.Doc only ever comes

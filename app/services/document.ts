@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { href } from 'react-router';
 import {
   IMAGE_CONTENT_TYPE,
   MAX_ASSET_UPLOAD_BYTES,
@@ -135,7 +136,8 @@ export async function openDocument(
 /**
  * Drawn from what was last stored, which the live document may be a few
  * seconds ahead of; the editor catches up when it syncs. A preview is only
- * a head start, so one that cannot be drawn is left out.
+ * a head start, so one that cannot be drawn is left out. Its images point
+ * straight at the CDN, which saves the redirect on the first paint.
  */
 async function getDocumentPreview(documentId: string) {
   const content = (await getDocument(documentId))?.content;
@@ -144,14 +146,35 @@ async function getDocumentPreview(documentId: string) {
     return null;
   }
 
+  const signedUrls = await getSignedAssetUrls(documentId);
+
   try {
-    return renderDocumentPreview(content);
+    return renderDocumentPreview(
+      content,
+      src => signedUrls.get(src) ?? src,
+    );
   }
   catch (error) {
     console.error('Could not draw the document preview', error);
 
     return null;
   }
+}
+
+/** The document's own assets by their `src`, signed for the CDN. */
+async function getSignedAssetUrls(documentId: string) {
+  const { cdn } = getConfig().storage;
+
+  if (!cdn) {
+    return new Map<string, string>();
+  }
+
+  const assets = await getDocumentAssets([documentId]);
+
+  return new Map(assets.map(asset => [
+    href('/doc/:id/assets/:assetId', { id: documentId, assetId: asset.id }),
+    signAssetUrl(asset.storageKey, cdn).url,
+  ]));
 }
 
 export interface LiveAccess {
