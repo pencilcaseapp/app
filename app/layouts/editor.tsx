@@ -51,6 +51,7 @@ import { DocumentLimitDialog } from '~/components/document-limit-dialog/document
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import type { DocumentShareState } from '~/constants/document';
 import { useIsMobile } from '~/hooks/use-is-mobile';
+import { PullToRefresh } from '~/components/pull-to-refresh/pull-to-refresh';
 
 export const handle = {
   bodyClassName: 'w-full',
@@ -139,6 +140,7 @@ export default function LayoutEditor({
                   </EditorSidebar>
                 )
               : <Outlet />}
+            <PullToRefresh />
           </SidebarProvider>
         </SocketClientProvider>
       </EditedDocumentProvider>

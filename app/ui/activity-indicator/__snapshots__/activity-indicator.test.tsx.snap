@@ -1,0 +1,106 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ActivityIndicator > renders activity indicator 1`] = `
+<div>
+  <div
+    aria-label="loading"
+    class="size-5"
+    role="status"
+  >
+    <svg
+      aria-hidden="true"
+      class="size-full animate-activity-spin"
+      viewBox="0 0 20 20"
+    >
+      <line
+        opacity="1"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-width="2.2"
+        transform="rotate(0 10 10)"
+        x1="10"
+        x2="10"
+        y1="1.5"
+        y2="5.5"
+      />
+      <line
+        opacity="0.29999999999999993"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-width="2.2"
+        transform="rotate(45 10 10)"
+        x1="10"
+        x2="10"
+        y1="1.5"
+        y2="5.5"
+      />
+      <line
+        opacity="0.3999999999999999"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-width="2.2"
+        transform="rotate(90 10 10)"
+        x1="10"
+        x2="10"
+        y1="1.5"
+        y2="5.5"
+      />
+      <line
+        opacity="0.5"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-width="2.2"
+        transform="rotate(135 10 10)"
+        x1="10"
+        x2="10"
+        y1="1.5"
+        y2="5.5"
+      />
+      <line
+        opacity="0.6"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-width="2.2"
+        transform="rotate(180 10 10)"
+        x1="10"
+        x2="10"
+        y1="1.5"
+        y2="5.5"
+      />
+      <line
+        opacity="0.7"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-width="2.2"
+        transform="rotate(225 10 10)"
+        x1="10"
+        x2="10"
+        y1="1.5"
+        y2="5.5"
+      />
+      <line
+        opacity="0.8"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-width="2.2"
+        transform="rotate(270 10 10)"
+        x1="10"
+        x2="10"
+        y1="1.5"
+        y2="5.5"
+      />
+      <line
+        opacity="0.9"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-width="2.2"
+        transform="rotate(315 10 10)"
+        x1="10"
+        x2="10"
+        y1="1.5"
+        y2="5.5"
+      />
+    </svg>
+  </div>
+</div>
+`;

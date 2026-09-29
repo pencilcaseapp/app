@@ -124,6 +124,15 @@
   --animate-row-shift: rowShift 0.18s ease-out;
   --animate-row-settle: rowSettle 0.18s ease-out;
 
+  /* The iOS activity indicator ticks round a spoke at a time. */
+  --animate-activity-spin: activitySpin 0.8s steps(8) infinite;
+
+  @keyframes activitySpin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   @keyframes slideDownAndFadeIn {
     from {
       opacity: 0;
