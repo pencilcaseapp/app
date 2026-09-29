@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { createEditor } from 'lexical';
 import { ImageNode } from './image-node';
@@ -46,36 +46,10 @@ describe('ImageNode', () => {
 });
 
 describe('ImageView', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   test('shows one of our assets', () => {
     renderView(src);
 
     expect(screen.getByRole('presentation')).toHaveAttribute('src', src);
-  });
-
-  test('keeps the image hidden over a placeholder until it loads', () => {
-    // happy-dom reports every image complete, a browser one still loading.
-    vi.spyOn(HTMLImageElement.prototype, 'complete', 'get')
-      .mockReturnValue(false);
-    renderView(src);
-    const image = screen.getByRole('presentation');
-
-    expect(image).toHaveClass('opacity-0');
-    expect(image.parentElement).toHaveClass('bg-pca-grey-100');
-
-    fireEvent.load(image);
-
-    expect(image).not.toHaveClass('opacity-0');
-    expect(image.parentElement).not.toHaveClass('bg-pca-grey-100');
-  });
-
-  test('shows an image the browser already has without a fade', () => {
-    renderView(src);
-
-    expect(screen.getByRole('presentation')).not.toHaveClass('opacity-0');
   });
 
   test('never loads an image from anywhere else', () => {

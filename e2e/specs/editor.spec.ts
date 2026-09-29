@@ -146,7 +146,7 @@ test.describe('documents', () => {
   test('a reloaded document comes back where the reader left off', async ({
     user,
   }) => {
-    await user.createDocument();
+    const url = await user.createDocument();
     await user.typeLines(
       `Scroll doc ${Date.now()}`,
       ...Array.from({ length: 45 }, (_, index) => `Line ${index + 1}`),
@@ -157,8 +157,11 @@ test.describe('documents', () => {
       .poll(() => user.page.evaluate(() => window.scrollY))
       .toBe(400);
 
-    // The content only arrives over the websocket after the page has
-    // loaded, so the scroll position is taken once the editor has it.
+    // The page is drawn from what was last stored, so the content has to
+    // be stored before the reload for the page to be that tall.
+    await expect
+      .poll(async () => (await user.page.request.get(url)).text())
+      .toContain('Line 45');
     await user.page.reload();
     await expect(user.editor).toContainText('Line 45');
     await expect

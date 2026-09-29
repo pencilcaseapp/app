@@ -10,9 +10,6 @@ import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
 import { useFirstLocalEdit } from '~/hooks/use-first-local-edit';
 import { useAccessRevoked } from '~/hooks/use-access-revoked';
 import { useCollaborators } from '~/hooks/use-collaborators';
-import {
-  useDocumentScrollRestoration,
-} from '~/hooks/use-document-scroll-restoration';
 import { useCursorNameBounds } from '~/hooks/use-cursor-name-bounds';
 import { useRemoteCursorPositions } from '~/hooks/use-remote-cursor-positions';
 import { useCopyImage } from '~/hooks/use-copy-image';
@@ -51,7 +48,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     notification,
     preview,
   }) => {
-    const [isSynced, setIsSynced] = useState(false);
     // Only the first sync: after a dropped connection the editor keeps what
     // it has, which is newer than the preview.
     const [hasSynced, setHasSynced] = useState(false);
@@ -75,7 +71,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
       websocketProvider: socketClient,
       document: doc,
       onSynced: ({ state }) => {
-        setIsSynced(state);
         if (state) {
           setHasSynced(true);
         }
@@ -83,10 +78,6 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     }));
 
     const collaborators = useCollaborators(provider);
-
-    // The content is only in the page once the live connection has synced,
-    // so the reader can only be put back where they were after that.
-    useDocumentScrollRestoration(id, isSynced);
 
     useCursorNameBounds(ref);
     const syncCursorPositionsFn = useRemoteCursorPositions(ref);

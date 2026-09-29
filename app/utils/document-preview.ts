@@ -58,16 +58,16 @@ export function renderDocumentPreview(content: Uint8Array): string {
   });
 }
 
-/** What `ImageView` draws for an image that has loaded. */
+/** What `ImageView` draws. */
 function createImage(document: Document, node: ImageNode) {
   const { src, width, height } = node.exportJSON();
   const frame = document.createElement('div');
-  frame.className = 'mx-auto max-w-full rounded-sm'
-    + ' bg-pca-grey-100 dark:bg-pca-grey-800';
+  frame.className = 'mx-auto max-w-full rounded-sm';
   frame.style.width = `${width}px`;
 
   // Like the view, only our own assets are loaded.
   if (!parseAssetSrc(src)) {
+    frame.className += ' bg-pca-grey-100 dark:bg-pca-grey-800';
     frame.style.aspectRatio = `${width} / ${height}`;
 
     return frame;
