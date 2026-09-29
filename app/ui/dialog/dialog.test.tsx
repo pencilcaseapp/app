@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Dialog as BaseDialog } from '@base-ui/react/dialog';
+import { Drawer } from '~/ui/drawer/drawer';
 import { Dialog } from './dialog';
 import { DialogContent } from './dialog-content';
 import type { DialogContentProps } from './dialog-content';
@@ -316,5 +317,21 @@ describe('DialogTopbar', () => {
 
     expect(screen.getByRole('heading', { name: 'Settings' }).parentElement)
       .toHaveClass('border-b');
+  });
+});
+
+describe('DialogContent in the sidebar drawer', () => {
+  test('keeps its backdrop inside the root of a closed drawer', () => {
+    render(
+      <Drawer open={false}>
+        <Dialog defaultOpen>
+          <DialogContent>
+            <BaseDialog.Title>Settings</BaseDialog.Title>
+          </DialogContent>
+        </Dialog>
+      </Drawer>,
+    );
+
+    expect(document.querySelector('.bg-pca-grey-700')).toBeInTheDocument();
   });
 });

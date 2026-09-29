@@ -42,9 +42,12 @@ export const DialogContent: FC<DialogContentProps>
     isFullHeight = false,
     className,
   }) => {
+    // The page sits inside the root of the sidebar's drawer, so Base UI
+    // counts every dialog as nested and would leave its backdrop to a
+    // drawer that is never open at the widths a dialog is shown at.
     return (
       <BaseDialog.Portal {...dialogPortalProps}>
-        <BaseDialog.Backdrop {...dialogBackdropProps} className="[--backdrop-opacity:0.2] fixed inset-0 z-50 min-h-dvh bg-pca-grey-700 opacity-(--backdrop-opacity) transition-opacity duration-150 dark:[--backdrop-opacity:0.7] data-starting-style:opacity-0 data-ending-style:opacity-0 motion-reduce:transition-none" />
+        <BaseDialog.Backdrop forceRender {...dialogBackdropProps} className="[--backdrop-opacity:0.2] fixed inset-0 z-50 min-h-dvh bg-pca-grey-700 opacity-(--backdrop-opacity) transition-opacity duration-150 dark:[--backdrop-opacity:0.7] data-starting-style:opacity-0 data-ending-style:opacity-0 motion-reduce:transition-none" />
         <BaseDialog.Viewport {...dialogViewportProps} className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <BaseDialog.Popup
             {...dialogPopupProps}
