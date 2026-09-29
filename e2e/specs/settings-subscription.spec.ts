@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { expect, test } from './fixtures';
+import { expect, test } from '../fixtures/test';
 
 /**
  * The paid flow runs against Creem's real test-mode checkout, so it

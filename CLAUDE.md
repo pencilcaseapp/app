@@ -500,3 +500,8 @@ passed.
 - End-to-end tests are Playwright specs in `e2e/` against the dev server and
   its Postgres/Redis; they sign in through `POST /e2e/auth` (enabled by
   `config.e2e`, absent in prod) instead of the OTP flow. See `docs/e2e.md`.
+  `e2e/specs/` holds one spec per domain of the app (`editor`, `auth`,
+  `settings-overview`, `settings-subscription`, …): a new test joins the
+  spec of its domain, under a `test.describe` for its feature, rather than
+  starting a spec of its own. Fixtures go in `e2e/fixtures/`, helpers in
+  `e2e/utils/`, the setup project in `e2e/setup/`.

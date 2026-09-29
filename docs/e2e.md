@@ -17,6 +17,25 @@ Compose services as local dev. The browser binaries are cached keyed on
 the Playwright version, so Chromium is only downloaded again when
 Playwright (and with it its pinned browser build) is upgraded.
 
+## Layout
+
+```
+e2e/
+  setup/     the Playwright setup project (auth.setup.ts)
+  fixtures/  the `test` fixtures and the AppUser flows they hand out
+  utils/     helpers that are not fixtures (images to paste or drop)
+  specs/     one spec per domain of the app
+```
+
+A spec covers one domain, not one feature: everything that happens in
+the editor (documents, images, collaboration, sharing, deletion) lives
+in `specs/editor.spec.ts`, each feature in a `test.describe` of its own,
+and signing in and out in `specs/auth.spec.ts`. The settings dialog
+and its account section are `specs/settings-overview.spec.ts`; a flow
+with its own steps in there (the subscription, changing the email) is
+a domain of its own, `specs/settings-<flow>.spec.ts`. A new test joins the spec and the
+describe block of its domain; only a new domain starts a new spec.
+
 ## Authentication
 
 Signing in through the real magic-code flow would need an inbox, so the
@@ -33,14 +52,14 @@ cookie. Three guards keep it out of production:
   the resulting login is special, so revocation and expiry behave as in
   production.
 
-`e2e/auth.setup.ts` runs once as a Playwright "setup" project: it calls
-the endpoint and saves the cookie to `e2e/.auth/user.json`
+`e2e/setup/auth.setup.ts` runs once as a Playwright "setup" project: it
+calls the endpoint and saves the cookie to `e2e/.auth/user.json`
 (gitignored), which every test then loads via `storageState` — tests
 start signed in without repeating the request.
 
 ## Fixtures and shared flows
 
-Specs import `test` and `expect` from `e2e/fixtures.ts` instead of
+Specs import `test` and `expect` from `e2e/fixtures/test.ts` instead of
 `@playwright/test`. The base test is extended with signed in users:
 
 - `user` — the storage-state user from the setup project above.
@@ -62,8 +81,8 @@ expected to be gone).
 
 ## The Creem checkout
 
-`e2e/subscription.spec.ts` drives Creem's real test-mode checkout:
-open the subscription settings from the sidebar, upgrade, pay with the
+`e2e/specs/settings-subscription.spec.ts` drives Creem's real test-mode
+checkout: open the subscription settings from the sidebar, upgrade, pay with the
 always-succeeding test card on their hosted page, follow the signed
 redirect back into the settings, see pro switched on and the customer
 portal open. That buys real end-to-end confidence at the
