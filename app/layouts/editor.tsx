@@ -51,6 +51,7 @@ import { DocumentLimitDialog } from '~/components/document-limit-dialog/document
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import type { DocumentShareState } from '~/constants/document';
 import { useIsMobile } from '~/hooks/use-is-mobile';
+import { readSidebarOpen, storeSidebarOpen } from '~/utils/sidebar-cookie';
 
 export const handle = {
   bodyClassName: 'w-full',
@@ -75,7 +76,7 @@ function getShareState(
   return 'private';
 }
 
-export async function loader({ context }: Route.LoaderArgs) {
+export async function loader({ context, request }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
   // The navigation also lists the documents shared with the user, which
   // none of their free allowance is spent on, so the usage meter counts
@@ -103,6 +104,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 
   return {
     user,
+    sidebarOpen: await readSidebarOpen(request),
     navigation,
     deletedNavigation,
     ownedDocumentCount,
@@ -115,6 +117,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 export default function LayoutEditor({
   loaderData: {
     user,
+    sidebarOpen,
     navigation,
     deletedNavigation,
     ownedDocumentCount,
@@ -125,7 +128,10 @@ export default function LayoutEditor({
     <DocumentTitleProvider>
       <EditedDocumentProvider>
         <SocketClientProvider>
-          <SidebarProvider>
+          <SidebarProvider
+            defaultDesktopOpen={sidebarOpen}
+            onDesktopOpenChange={storeSidebarOpen}
+          >
             {user
               ? (
                   <EditorSidebar

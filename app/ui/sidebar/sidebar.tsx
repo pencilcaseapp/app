@@ -35,57 +35,66 @@ export const Sidebar: FC<SidebarProps> = ({
   reservedFooterHeight = 123,
   children,
 }) => {
-  const { isSidebarOpen, setIsSidebarOpen } = useSidebarContext();
+  const {
+    isSidebarOpen,
+    isDesktopSidebarOpen,
+    setIsSidebarOpen,
+  } = useSidebarContext();
   const isMobile = useMedia('(max-width: 640px)', false);
 
-  if (isMobile) {
-    return (
-      <Drawer open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <DrawerContent isFullHeight maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}>
-          <DrawerContentInner
-            reservedFooterHeight={reservedFooterHeight}
-            gutterClassName="px-3"
-            contentClassName="px-3 pb-6"
-            footerArea={bottomArea && (
-              <div className="flex flex-col gap-1.5">
-                {bottomArea}
-              </div>
-            )}
-          >
-            {/* <Drawer.Title className="sr-only">Navigation</Drawer.Title> */}
-            <nav>
-              <ul className="flex flex-col gap-2">
-                {items.map(({ key, content }) => {
-                  return <li key={key}>{content}</li>;
-                })}
-              </ul>
-            </nav>
-          </DrawerContentInner>
-        </DrawerContent>
-        {children}
-      </Drawer>
-    );
-  }
-
+  // The page stays inside the drawer's root at every width: moving it in
+  // once the width is known would mount it all over again.
   return (
-    <>
-      <SidebarPortal
-        tabletChildren={(
-          <SidebarMenu
-            initialState="close"
-            bottomArea={bottomArea}
-            items={items}
-          />
-        )}
-        desktopChildren={(
-          <SidebarMenu
-            showSlimSidebar
-            bottomArea={bottomArea}
-            items={items}
-          />
-        )}
-      />
+    <Drawer
+      open={isMobile && isSidebarOpen}
+      onOpenChange={setIsSidebarOpen}
+    >
+      {isMobile
+        ? (
+            <DrawerContent
+              isFullHeight
+              maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
+            >
+              <DrawerContentInner
+                reservedFooterHeight={reservedFooterHeight}
+                gutterClassName="px-3"
+                contentClassName="px-3 pb-6"
+                footerArea={bottomArea && (
+                  <div className="flex flex-col gap-1.5">
+                    {bottomArea}
+                  </div>
+                )}
+              >
+                <nav>
+                  <ul className="flex flex-col gap-2">
+                    {items.map(({ key, content }) => {
+                      return <li key={key}>{content}</li>;
+                    })}
+                  </ul>
+                </nav>
+              </DrawerContentInner>
+            </DrawerContent>
+          )
+        : (
+            <SidebarPortal
+              tabletChildren={(
+                <SidebarMenu
+                  initialState="close"
+                  bottomArea={bottomArea}
+                  items={items}
+                />
+              )}
+              desktopChildren={(
+                <SidebarMenu
+                  showSlimSidebar
+                  isOpen={isDesktopSidebarOpen}
+                  bottomArea={bottomArea}
+                  items={items}
+                />
+              )}
+            />
+          )}
       {children}
-    </>
+    </Drawer>
   );
 };

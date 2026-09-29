@@ -5,27 +5,23 @@ import { SidebarContext } from './sidebar-context';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const useMediaMock = vi.fn();
-const useLocalStorageMock = vi.fn();
 
 vi.mock('react-use', async () => {
   const actual = await vi.importActual('react-use');
   return {
     ...actual,
     useMedia: () => useMediaMock(),
-    useLocalStorage: () => useLocalStorageMock(),
   };
 });
 
 afterEach(() => {
   vi.clearAllMocks();
-  localStorage.clear();
 });
 
 describe('SidebarProvider', () => {
   describe('rendering and context provision', () => {
     it('should render children', () => {
       useMediaMock.mockReturnValue(false);
-      useLocalStorageMock.mockReturnValue([false, vi.fn()]);
 
       const { getByText, container } = render(
         <SidebarProvider>child</SidebarProvider>,
@@ -41,7 +37,6 @@ describe('SidebarProvider', () => {
 
     it('should provide isSidebarOpen, setIsSidebarOpen, and triggerRef', () => {
       useMediaMock.mockReturnValue(false);
-      useLocalStorageMock.mockReturnValue([false, vi.fn()]);
 
       const { result } = renderHook(() => use(SidebarContext), {
         wrapper: SidebarProvider,
@@ -56,7 +51,6 @@ describe('SidebarProvider', () => {
   describe('mobile viewport behavior', () => {
     beforeEach(() => {
       useMediaMock.mockReturnValue(false); // mobile
-      useLocalStorageMock.mockReturnValue([true, vi.fn()]);
     });
 
     it('should start with sidebar closed on mobile', () => {
@@ -82,11 +76,13 @@ describe('SidebarProvider', () => {
     });
 
     it('should keep mobile state ephemeral (not persist)', async () => {
-      const setDesktopSidebarOpen = vi.fn();
-      useLocalStorageMock.mockReturnValue([true, setDesktopSidebarOpen]);
-
+      const onDesktopOpenChange = vi.fn();
       const { result } = renderHook(() => use(SidebarContext), {
-        wrapper: SidebarProvider,
+        wrapper: ({ children }) => (
+          <SidebarProvider onDesktopOpenChange={onDesktopOpenChange}>
+            {children}
+          </SidebarProvider>
+        ),
       });
 
       act(() => {
@@ -97,21 +93,16 @@ describe('SidebarProvider', () => {
         expect(result.current?.isSidebarOpen).toBe(true);
       });
 
-      // setDesktopSidebarOpen should not be called on mobile
-      expect(setDesktopSidebarOpen).not.toHaveBeenCalled();
+      expect(onDesktopOpenChange).not.toHaveBeenCalled();
     });
   });
 
   describe('desktop viewport behavior', () => {
-    let setDesktopSidebarOpen: ReturnType<typeof vi.fn>;
-
     beforeEach(() => {
       useMediaMock.mockReturnValue(true); // desktop
-      setDesktopSidebarOpen = vi.fn();
-      useLocalStorageMock.mockReturnValue([true, setDesktopSidebarOpen]);
     });
 
-    it('should read persisted desktop state', () => {
+    it('should start open by default', () => {
       const { result } = renderHook(() => use(SidebarContext), {
         wrapper: SidebarProvider,
       });
@@ -119,9 +110,27 @@ describe('SidebarProvider', () => {
       expect(result.current?.isSidebarOpen).toBe(true);
     });
 
-    it('should persist desktop state changes to storage', async () => {
+    it('should start the way the server says', () => {
       const { result } = renderHook(() => use(SidebarContext), {
-        wrapper: SidebarProvider,
+        wrapper: ({ children }) => (
+          <SidebarProvider defaultDesktopOpen={false}>
+            {children}
+          </SidebarProvider>
+        ),
+      });
+
+      expect(result.current?.isSidebarOpen).toBe(false);
+      expect(result.current?.isDesktopSidebarOpen).toBe(false);
+    });
+
+    it('should hand desktop state changes on to be kept', async () => {
+      const onDesktopOpenChange = vi.fn();
+      const { result } = renderHook(() => use(SidebarContext), {
+        wrapper: ({ children }) => (
+          <SidebarProvider onDesktopOpenChange={onDesktopOpenChange}>
+            {children}
+          </SidebarProvider>
+        ),
       });
 
       act(() => {
@@ -129,18 +138,22 @@ describe('SidebarProvider', () => {
       });
 
       await waitFor(() => {
-        expect(setDesktopSidebarOpen).toHaveBeenCalledWith(false);
+        expect(result.current?.isSidebarOpen).toBe(false);
       });
+      expect(onDesktopOpenChange).toHaveBeenCalledWith(false);
     });
+  });
 
-    it('should normalize non-boolean stored values to true', () => {
-      useLocalStorageMock.mockReturnValue([undefined, setDesktopSidebarOpen]);
+  describe('before the width is known', () => {
+    it('should know the desktop state', () => {
+      useMediaMock.mockReturnValue(false);
 
       const { result } = renderHook(() => use(SidebarContext), {
         wrapper: SidebarProvider,
       });
 
-      expect(result.current?.isSidebarOpen).toBe(true);
+      expect(result.current?.isSidebarOpen).toBe(false);
+      expect(result.current?.isDesktopSidebarOpen).toBe(true);
     });
   });
 });

@@ -1,35 +1,39 @@
 import { useCallback, useRef, useState, type FC, type PropsWithChildren } from 'react';
-import { useLocalStorage, useMedia } from 'react-use';
+import { useMedia } from 'react-use';
 import { SidebarContext } from './sidebar-context';
 
-const SIDEBAR_STORAGE_KEY = 'sidebar:is-open';
+export type SidebarProviderProps = PropsWithChildren & {
+  /**
+   * Whether the desktop sidebar starts open. It comes from the server, so
+   * the page is rendered with the sidebar the way the reader left it.
+   */
+  defaultDesktopOpen?: boolean;
+  /** Keeps the desktop choice for the next page load. */
+  onDesktopOpenChange?: (isOpen: boolean) => void;
+};
 
-export const SidebarProvider: FC<PropsWithChildren> = ({
+export const SidebarProvider: FC<SidebarProviderProps> = ({
+  defaultDesktopOpen = true,
+  onDesktopOpenChange,
   children,
 }) => {
   const isDesktop = useMedia('(min-width: 1280px)', false);
-  const [desktopSidebarOpen, setDesktopSidebarOpen] = useLocalStorage(
-    SIDEBAR_STORAGE_KEY,
-    true,
-  );
+  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen]
+    = useState(defaultDesktopOpen);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const normalizedDesktopSidebarOpen = typeof desktopSidebarOpen === 'boolean'
-    ? desktopSidebarOpen
-    : true;
 
-  const isSidebarOpen = isDesktop
-    ? normalizedDesktopSidebarOpen
-    : mobileSidebarOpen;
+  const isSidebarOpen = isDesktop ? isDesktopSidebarOpen : mobileSidebarOpen;
 
   const setIsSidebarOpen = useCallback((next: boolean) => {
     if (isDesktop) {
-      setDesktopSidebarOpen(next);
+      setIsDesktopSidebarOpen(next);
+      onDesktopOpenChange?.(next);
       return;
     }
 
     setMobileSidebarOpen(next);
-  }, [isDesktop, setDesktopSidebarOpen]);
+  }, [isDesktop, onDesktopOpenChange]);
 
   const closeOnNavigate = useCallback(() => {
     if (!isDesktop) setMobileSidebarOpen(false);
@@ -39,6 +43,7 @@ export const SidebarProvider: FC<PropsWithChildren> = ({
     <SidebarContext
       value={{
         isSidebarOpen,
+        isDesktopSidebarOpen,
         setIsSidebarOpen,
         triggerRef,
         closeOnNavigate,

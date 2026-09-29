@@ -8,42 +8,46 @@ exports[`Sidebar > matches the snapshot on desktop 1`] = `
     Toggle
   </button>
   <div
-    class="fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-dvh bg-pca-white dark:bg-pca-grey-900 transition-shadow ease-in-out duration-200 sm:max-xl:shadow-md sm:max-xl:ring-1 ring-pca-grey-200 sm:max-xl:dark:ring-pca-grey-800"
-    style="transform: none;"
+    class="hidden xl:block"
   >
-    <nav
-      class="top-0 left-0 h-[100dvh-56px] flex justify-between flex-col w-full max-w-none sm:max-w-62.5 overflow-hidden overscroll-y-none overflow-x-hidden"
+    <div
+      class="fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-dvh bg-pca-white dark:bg-pca-grey-900 transition-shadow ease-in-out duration-200 sm:max-xl:shadow-md sm:max-xl:ring-1 ring-pca-grey-200 sm:max-xl:dark:ring-pca-grey-800"
+      style="transform: none;"
     >
-      <ul
-        class="flex gap-2 flex-col px-1.5 pt-4 grow overflow-scroll scrollbar-none pb-56"
+      <nav
+        class="top-0 left-0 h-[100dvh-56px] flex justify-between flex-col w-full max-w-none sm:max-w-62.5 overflow-hidden overscroll-y-none overflow-x-hidden"
       >
-        <li>
-          Documents
-        </li>
-        <li>
-          Settings
-        </li>
-      </ul>
-      <div
-        class="absolute w-full bottom-0 left-0 flex gap-1.5 flex-col glass-surface border-white dark:border-pca-grey-900 border px-1.5 pb-3 pt-1.5 z-10 rounded-t-xl"
-      >
-        Create Doc
-      </div>
-    </nav>
-  </div>
-  <div
-    class="fixed top-0 left-0 flex flex-col pointer-events-auto z-10 pt-14 h-screen w-16"
-    style="transform: translateX(-100%);"
-  >
-    <nav
-      class=" relative flex flex-col grow"
+        <ul
+          class="flex gap-2 flex-col px-1.5 pt-4 grow overflow-scroll scrollbar-none pb-56"
+        >
+          <li>
+            Documents
+          </li>
+          <li>
+            Settings
+          </li>
+        </ul>
+        <div
+          class="absolute w-full bottom-0 left-0 flex gap-1.5 flex-col glass-surface border-white dark:border-pca-grey-900 border px-1.5 pb-3 pt-1.5 z-10 rounded-t-xl"
+        >
+          Create Doc
+        </div>
+      </nav>
+    </div>
+    <div
+      class="fixed top-0 left-0 flex flex-col pointer-events-auto z-10 pt-14 h-screen w-16"
+      style="transform: translateX(-100%);"
     >
-      <div
-        class="absolute w-full bottom-0 left-0 flex gap-1.5 flex-col glass-surface border-white dark:border-pca-grey-900 border px-1.5 pb-3 pt-1.5 z-10 rounded-t-xl"
+      <nav
+        class=" relative flex flex-col grow"
       >
-        Create Doc
-      </div>
-    </nav>
+        <div
+          class="absolute w-full bottom-0 left-0 flex gap-1.5 flex-col glass-surface border-white dark:border-pca-grey-900 border px-1.5 pb-3 pt-1.5 z-10 rounded-t-xl"
+        >
+          Create Doc
+        </div>
+      </nav>
+    </div>
   </div>
 </div>
 `;

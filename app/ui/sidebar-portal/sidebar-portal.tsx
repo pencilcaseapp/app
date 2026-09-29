@@ -21,43 +21,47 @@ export const SidebarPortal: FC<SidebarPortalProps> = ({
 
   return (
     <>
-      {!isDesktop
-        ? (
-            <AnimatePresence>
-              {isSidebarOpen && (
-                <Root open={isSidebarOpen} modal={false}>
-                  <Overlay />
-                  <Content
-                    onOpenAutoFocus={event => event.preventDefault()}
-                    className="outline-hidden"
-                    onInteractOutside={(event) => {
-                      /*
-                        We need this to close the sidebar
-                        when clicking outside of it (¯\_(ツ)_/¯)
-                      */
-                      if (triggerRef.current?.contains(
-                        event.target as Node,
-                      )) {
-                        return;
-                      }
+      {!isDesktop && (
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <Root open={isSidebarOpen} modal={false}>
+              <Overlay />
+              <Content
+                onOpenAutoFocus={event => event.preventDefault()}
+                className="outline-hidden"
+                onInteractOutside={(event) => {
+                  /*
+                    We need this to close the sidebar
+                    when clicking outside of it (¯\_(ツ)_/¯)
+                  */
+                  if (triggerRef.current?.contains(
+                    event.target as Node,
+                  )) {
+                    return;
+                  }
 
-                      setIsSidebarOpen(false);
-                    }}
-                    onEscapeKeyDown={() => setIsSidebarOpen(false)}
-                    aria-describedby={undefined}
-                  >
-                    <VisuallyHidden>
-                      <Title>{a11yTitle}</Title>
-                    </VisuallyHidden>
-                    {tabletChildren}
-                  </Content>
-                </Root>
-              )}
-            </AnimatePresence>
-          )
-        : (
-            <>{desktopChildren}</>
+                  setIsSidebarOpen(false);
+                }}
+                onEscapeKeyDown={() => setIsSidebarOpen(false)}
+                aria-describedby={undefined}
+              >
+                <VisuallyHidden>
+                  <Title>{a11yTitle}</Title>
+                </VisuallyHidden>
+                {tabletChildren}
+              </Content>
+            </Root>
           )}
+        </AnimatePresence>
+      )}
+      {/*
+        Shown by the breakpoint rather than the media query, which the
+        server cannot answer: the server renders the desktop sidebar, and
+        it is there before the scripts are.
+      */}
+      <div className="hidden xl:block">
+        {desktopChildren}
+      </div>
     </>
   );
 };
