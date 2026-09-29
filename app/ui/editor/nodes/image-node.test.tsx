@@ -19,6 +19,18 @@ function importImage(json: Record<string, unknown>) {
   return exported;
 }
 
+function exportImage(imageSrc: string) {
+  const editor = createEditor({ nodes: [ImageNode] });
+  let element: unknown;
+
+  editor.update(() => {
+    element = new ImageNode({ src: imageSrc, width: 800, height: 600 })
+      .exportDOM().element;
+  }, { discrete: true });
+
+  return element as HTMLElement;
+}
+
 function renderView(viewSrc: string) {
   return render(
     <LexicalComposer
@@ -42,6 +54,21 @@ describe('ImageNode', () => {
   test('makes do with a malformed payload', () => {
     expect(importImage({ src: 42, width: 'wide', height: -3 }))
       .toMatchObject({ src: '', width: 1, height: 1 });
+  });
+
+  test('exports one of our assets as HTML, decoded before it is shown', () => {
+    const image = exportImage(src).querySelector('img');
+
+    expect(image).toHaveAttribute('src', src);
+    expect(image).toHaveAttribute('width', '800');
+    expect(image).not.toHaveAttribute('decoding');
+  });
+
+  test('never exports an image from anywhere else', () => {
+    const element = exportImage('https://example.com/tracker.png');
+
+    expect(element.querySelector('img')).toBeNull();
+    expect(element).toHaveClass('bg-pca-grey-100');
   });
 });
 

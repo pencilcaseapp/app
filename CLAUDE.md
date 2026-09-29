@@ -116,8 +116,9 @@ is client only and its content arrives over the websocket, so the doc
 loader hands along a `preview`: the last stored `documents.content` drawn
 to HTML by a Lexical editor on a happy-dom root (`withDOM`), through the
 editor's own DOM rendering rather than Lexical's HTML export, so markup and
-classes match. Images are appended by hand like `ImageView` draws them
-(ours only, `parseAssetSrc`). `EditorPreview` (`app/ui/editor/editor-preview.tsx`)
+classes match. Images, which React draws, come from `ImageNode.exportDOM`,
+which draws what `ImageView` does (ours only, `parseAssetSrc`) but decodes
+before the page paints, or the image would blink on every reload. `EditorPreview` (`app/ui/editor/editor-preview.tsx`)
 is the server render (topbar plus content), and `EditorPluginRichText`
 keeps showing the same content, with the editor hidden behind it, until
 the first sync (`CollaborativeEditor`'s `hasSynced`), so nobody edits

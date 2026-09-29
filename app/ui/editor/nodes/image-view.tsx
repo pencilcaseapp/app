@@ -14,6 +14,11 @@ import { useEffect, useRef } from 'react';
 import { parseAssetSrc } from '~/utils/asset-src';
 import { listenForEditableTap, TAP_SLOP } from '~/utils/editable-tap';
 
+export const IMAGE_FRAME_CLASS_NAME = 'mx-auto max-w-full rounded-sm';
+export const IMAGE_PLACEHOLDER_CLASS_NAME
+  = 'bg-pca-grey-100 dark:bg-pca-grey-800';
+export const IMAGE_CLASS_NAME = 'block h-auto w-full rounded-sm';
+
 export interface ImageViewProps {
   nodeKey: NodeKey;
   src: string;
@@ -132,15 +137,15 @@ export const ImageView: React.FC<ImageViewProps> = ({
       <div
         style={{ aspectRatio: `${width} / ${height}`, width }}
         className={classNames(
-          'mx-auto max-w-full rounded-sm',
-          'bg-pca-grey-100 dark:bg-pca-grey-800',
+          IMAGE_FRAME_CLASS_NAME,
+          IMAGE_PLACEHOLDER_CLASS_NAME,
         )}
       />
     );
   }
 
   return (
-    <div style={{ width }} className="mx-auto max-w-full rounded-sm">
+    <div style={{ width }} className={IMAGE_FRAME_CLASS_NAME}>
       <img
         ref={ref}
         src={src}
@@ -151,7 +156,7 @@ export const ImageView: React.FC<ImageViewProps> = ({
         decoding="async"
         draggable={isEditable}
         className={classNames(
-          'block h-auto w-full rounded-sm',
+          IMAGE_CLASS_NAME,
           isSelected && 'outline-2 outline-offset-2 outline-pca-yellow-500',
         )}
       />

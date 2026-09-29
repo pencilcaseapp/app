@@ -10,13 +10,13 @@ import * as Y from 'yjs';
 import { EDITOR_NODES } from '~/ui/editor/editor-nodes';
 import editorTheme from '~/ui/editor/editor-theme';
 import { ImageNode } from '~/ui/editor/nodes/image-node';
-import { parseAssetSrc } from '~/utils/asset-src';
 
 /**
  * The document's content as the editor draws it, for the page to show
  * before the live connection has synced. It goes through the editor's own
  * DOM rendering rather than Lexical's HTML export, so the markup and the
- * classes are the ones the editor puts in their place.
+ * classes are the ones the editor puts in their place. Only the images,
+ * which React draws, come from their node's `exportDOM`.
  */
 export function renderDocumentPreview(content: Uint8Array): string {
   return withDOM((window) => {
@@ -44,9 +44,11 @@ export function renderDocumentPreview(content: Uint8Array): string {
     // An image is drawn by React into the box the editor leaves for it.
     editor.getEditorState().read(() => {
       for (const node of $nodesOfType(ImageNode)) {
-        editor.getElementByKey(node.getKey())?.append(
-          createImage(window.document, node),
-        );
+        const { element } = node.exportDOM();
+
+        if (element) {
+          editor.getElementByKey(node.getKey())?.append(element);
+        }
       }
     });
 
@@ -56,34 +58,6 @@ export function renderDocumentPreview(content: Uint8Array): string {
 
     return html;
   });
-}
-
-/** What `ImageView` draws. */
-function createImage(document: Document, node: ImageNode) {
-  const { src, width, height } = node.exportJSON();
-  const frame = document.createElement('div');
-  frame.className = 'mx-auto max-w-full rounded-sm';
-  frame.style.width = `${width}px`;
-
-  // Like the view, only our own assets are loaded.
-  if (!parseAssetSrc(src)) {
-    frame.className += ' bg-pca-grey-100 dark:bg-pca-grey-800';
-    frame.style.aspectRatio = `${width} / ${height}`;
-
-    return frame;
-  }
-
-  const img = document.createElement('img');
-  img.src = src;
-  img.width = width;
-  img.height = height;
-  img.alt = '';
-  img.loading = 'lazy';
-  img.decoding = 'async';
-  img.className = 'block h-auto w-full rounded-sm';
-  frame.append(img);
-
-  return frame;
 }
 
 const emptyProvider: Provider = {
