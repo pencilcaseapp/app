@@ -281,9 +281,14 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
     let reveal: ReturnType<typeof setTimeout>;
     let showToKeyboard = () => {};
 
-    const onCaretPlaced = () => {
+    const stopWaitingForCaret = () => {
       document.removeEventListener('selectionchange', onCaretPlaced);
+      element.removeEventListener('focusin', onCaretPlaced);
       clearTimeout(placement);
+    };
+
+    const onCaretPlaced = () => {
+      stopWaitingForCaret();
       requestAnimationFrame(() => {
         const before = getCaretBottom();
         enterEditLayout(frame, element);
@@ -312,11 +317,12 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
         return;
       }
 
+      // A tap on the spot the caret was left at changes no selection, and
+      // the keyboard comes up all the same; the focus it gets tells.
+      stopWaitingForCaret();
       document.addEventListener('selectionchange', onCaretPlaced);
-      clearTimeout(placement);
-      placement = setTimeout(() => {
-        document.removeEventListener('selectionchange', onCaretPlaced);
-      }, CARET_PLACEMENT_WINDOW);
+      element.addEventListener('focusin', onCaretPlaced);
+      placement = setTimeout(stopWaitingForCaret, CARET_PLACEMENT_WINDOW);
     });
 
     // The page stays put while editing, yet iOS scrolls it when it reckons
@@ -355,6 +361,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
       window.removeEventListener('scroll', onPageScroll);
       window.removeEventListener('touchstart', onTouchStart);
       document.removeEventListener('selectionchange', onCaretPlaced);
+      element.removeEventListener('focusin', onCaretPlaced);
       clearTimeout(placement);
       clearTimeout(reveal);
       showToKeyboard();
