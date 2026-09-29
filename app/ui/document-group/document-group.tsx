@@ -16,7 +16,7 @@ export type DocumentGroupProps = {
 
 export const DocumentGroup: FC<DocumentGroupProps>
   = ({ title, value, children, icon, actionArea, iconTitle }) => {
-    const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
+    const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
 
     return (
       <AccordionItem value={value}>

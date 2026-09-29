@@ -51,7 +51,7 @@ export function NavigationItem<C extends React.ElementType = 'a'>(
   ]);
 
   const Component = as as React.ElementType;
-  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
+  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
 
   // The `::before` stretches the link over the whole row, so the padding,
   // the gap and the space the action area sits in navigate too instead of
