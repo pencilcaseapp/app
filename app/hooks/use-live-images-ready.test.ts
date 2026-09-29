@@ -70,6 +70,18 @@ describe('useLiveImagesReady', () => {
     await waitFor(() => expect(result.current).toBe(true));
   });
 
+  test('matches a preview image on the CDN by its original source', async () => {
+    const liveImage = createImage();
+    const container = createContainer(liveImage);
+    const previewImage = container.querySelector('img')!;
+    previewImage.dataset.src = src;
+    previewImage.setAttribute('src', 'https://cdn.example/a');
+    const { result } = renderReady(container, true);
+
+    await waitFor(() => expect(result.current).toBe(true));
+    expect(liveImage.decode).toHaveBeenCalled();
+  });
+
   test('stops waiting for an image that never decodes', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     const liveImage = createImage(() => new Promise(() => {}));

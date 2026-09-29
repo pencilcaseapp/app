@@ -44,6 +44,8 @@ import { userFixture } from '~/test/fixtures/user';
 import { createHeadlessEditorState } from '~/utils/headless';
 import { $createTextNode, $getRoot } from 'lexical';
 import { $createHeadingNode } from '@lexical/rich-text';
+import { EDITOR_NODES } from '~/ui/editor/editor-nodes';
+import { $createImageNode } from '~/ui/editor/nodes/image-node';
 
 type CdnConfig = Config['storage']['cdn'];
 const cdn = vi.hoisted(() => ({ config: undefined as CdnConfig }));
@@ -315,6 +317,30 @@ describe('openDocument', () => {
 
     expect(getDocumentMock).toHaveBeenCalledWith(documentFixture.id);
     expect(document?.preview).toContain('Groceries</span></h1>');
+  });
+
+  it('points the preview\'s images at the CDN', async () => {
+    cdn.config = { url: 'https://cdn.example', tokenKey: 'key' };
+    const assetId = 'b3f1c2d4-0000-4000-8000-000000000000';
+    const src = `/doc/${documentFixture.id}/assets/${assetId}`;
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument());
+    getDocumentAssetsMock.mockResolvedValue([
+      { id: assetId, documentId: documentFixture.id, storageKey: 'a.webp' },
+    ]);
+    getDocumentMock.mockResolvedValue({
+      ...documentFixture,
+      content: createHeadlessEditorState(() => {
+        $getRoot().append($createImageNode({ src, width: 800, height: 600 }));
+      }, EDITOR_NODES),
+    });
+
+    const [, document] = await openDocument(documentFixture.id, viewer);
+
+    expect(getDocumentAssetsMock).toHaveBeenCalledWith([documentFixture.id]);
+    expect(document?.preview).toMatch(
+      /<img src="https:\/\/cdn\.example\/a\.webp\?token=HS256-/,
+    );
+    expect(document?.preview).toContain(`data-src="${src}"`);
   });
 
   it('opens read-only for a visitor a link only lets read', async () => {

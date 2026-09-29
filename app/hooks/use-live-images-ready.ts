@@ -33,7 +33,9 @@ export function useLiveImagesReady(
     const shownSources = [...container.querySelectorAll('img')]
       .filter(image => !image.closest(LIVE))
       .filter(image => image.complete && image.naturalWidth > 0)
-      .map(image => image.getAttribute('src'));
+      // The preview's image may point at the CDN; `data-src` is the source
+      // the editor's image has.
+      .map(image => image.dataset.src ?? image.getAttribute('src'));
 
     const finish = () => {
       if (!isCancelled) {
