@@ -422,7 +422,11 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
     <>
       {topArea && <EditorTopArea>{topArea}</EditorTopArea>}
       {typeof preview === 'string' && (
-        <EditorPreviewContent html={preview} hasTopArea={Boolean(topArea)} />
+        <EditorPreviewContent
+          html={preview}
+          hasTopArea={Boolean(topArea)}
+          adoptServerPreview
+        />
       )}
       <RichTextPlugin
         contentEditable={(
