@@ -41,6 +41,9 @@ import { EmailTemplate } from '~/constants/email';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
+import { createHeadlessEditorState } from '~/utils/headless';
+import { $createTextNode, $getRoot } from 'lexical';
+import { $createHeadingNode } from '@lexical/rich-text';
 
 type CdnConfig = Config['storage']['cdn'];
 const cdn = vi.hoisted(() => ({ config: undefined as CdnConfig }));
@@ -56,6 +59,7 @@ vi.mock('~/config', async (importOriginal) => {
 });
 
 const getDocumentForViewerMock = vi.fn();
+const getDocumentMock = vi.fn();
 const connectCollaboratorMock = vi.fn();
 const acceptInviteMock = vi.fn();
 const setDocumentLinkSharedMock = vi.fn();
@@ -80,6 +84,7 @@ vi.mock('~/repos/document', () => ({
   createDocument: (...args: unknown[]) => createDocumentRowMock(...args),
   getDocumentForViewer: (...args: unknown[]) =>
     getDocumentForViewerMock(...args),
+  getDocument: (...args: unknown[]) => getDocumentMock(...args),
   connectCollaborator: (...args: unknown[]) => connectCollaboratorMock(...args),
   acceptInvite: (...args: unknown[]) => acceptInviteMock(...args),
   setDocumentLinkShared: (...args: unknown[]) =>
@@ -290,8 +295,26 @@ describe('openDocument', () => {
       deleted: false,
       readOnly: false,
       hasJoined: false,
+      preview: null,
     });
     expect(connectCollaboratorMock).not.toHaveBeenCalled();
+  });
+
+  it('comes with a preview of what was last stored', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument());
+    getDocumentMock.mockResolvedValue({
+      ...documentFixture,
+      content: createHeadlessEditorState(() => {
+        const heading = $createHeadingNode('h1');
+        heading.append($createTextNode('Groceries'));
+        $getRoot().clear().append(heading);
+      }),
+    });
+
+    const [, document] = await openDocument(documentFixture.id, viewer);
+
+    expect(getDocumentMock).toHaveBeenCalledWith(documentFixture.id);
+    expect(document?.preview).toContain('Groceries</span></h1>');
   });
 
   it('opens read-only for a visitor a link only lets read', async () => {

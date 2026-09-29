@@ -111,6 +111,23 @@ reported for a document until the loader lists a label other than the one it
 listed when the title was reported. `app/utils/headless.ts` uses a headless
 Lexical editor to produce valid Yjs updates on the server.
 
+**Server-rendered preview — `app/utils/document-preview.ts`.** The editor
+is client only and its content arrives over the websocket, so the doc
+loader hands along a `preview`: the last stored `documents.content` drawn
+to HTML by a Lexical editor on a happy-dom root (`withDOM`), through the
+editor's own DOM rendering rather than Lexical's HTML export, so markup and
+classes match. Images are appended by hand like `ImageView` draws them
+(ours only, `parseAssetSrc`). `EditorPreview` (`app/ui/editor/editor-preview.tsx`)
+is the server render (topbar plus content), and `EditorPluginRichText`
+keeps showing the same content, with the editor hidden behind it, until
+the first sync (`CollaborativeEditor`'s `hasSynced`), so nobody edits
+before the live document is there. The preview carries
+`contenteditable="false"` because `editor.css` selects on
+`[contenteditable]`; tests find the editor itself by `[data-lexical-editor]`.
+A document nobody has written in has no preview. The Y.Doc only ever comes
+from the socket — never seed it from the preview, which would duplicate
+the content on sync.
+
 **Scaling out — `app/live/redis.ts`, `docs/scaling.md`.** A Y.Doc lives in the
 process that loaded it, so every instance past the first needs
 `@hocuspocus/extension-redis` to fan updates and awareness out to the others,

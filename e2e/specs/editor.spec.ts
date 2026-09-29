@@ -34,6 +34,34 @@ test.describe('documents', () => {
     await expect(user.editor).toContainText(heading);
   });
 
+  test('a stored document is on the page before the scripts run', async ({
+    userA,
+    browser,
+    baseURL,
+  }) => {
+    const url = await userA.createDocument();
+    const heading = `Server drawn ${Date.now()}`;
+    await userA.typeLines(heading, 'Drawn before the websocket connects.');
+
+    const context = await browser.newContext({
+      baseURL,
+      javaScriptEnabled: false,
+      storageState: await userA.page.context().storageState(),
+    });
+    const page = await context.newPage();
+
+    // The server draws what was last stored, which trails the typing by
+    // the live server's store debounce.
+    await expect(async () => {
+      await page.goto(url);
+      await expect(page.locator('h1')).toHaveText(heading, { timeout: 1000 });
+    }).toPass();
+    await expect(page.getByText('Drawn before the websocket connects.'))
+      .toBeVisible();
+
+    await context.close();
+  });
+
   test('a new document appears in the navigation under All Docs', async ({
     userA,
   }) => {
@@ -180,7 +208,7 @@ test.describe('images', () => {
 
     // Lexical keeps a caret helper <img> next to an image at the end of the
     // document, which has no src.
-    const pasted = page.locator('[contenteditable] img[src]');
+    const pasted = page.locator('[data-lexical-editor] img[src]');
     const documentIdB = new URL(urlB).pathname.split('/').pop();
     await expect(pasted).toHaveCount(1);
     await expect(pasted)
@@ -459,8 +487,8 @@ test.describe('deletion', () => {
     // The document stays open, now read-only with the notice on top.
     await expect(userA.page).toHaveURL(url);
     await expect(userA.deletedNotice).toBeVisible();
-    await expect(userA.page.locator('[contenteditable="false"]'))
-      .toContainText(heading);
+    await expect(userA.content).toHaveAttribute('contenteditable', 'false');
+    await expect(userA.content).toContainText(heading);
 
     // It opens the same way from the Deleted group after a reload.
     await userA.page.reload();

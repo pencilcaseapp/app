@@ -27,6 +27,7 @@ import {
   createDocument as createDocumentRow,
   createDocumentAsset,
   deleteDocumentAssets,
+  getDocument,
   getDocumentAsset,
   getDocumentAssets,
   getDocumentForViewer,
@@ -48,6 +49,7 @@ import { countEmailLogsByUser } from '~/repos/email-log';
 import { getUserByEmail, type User } from '~/repos/user';
 import { parseAssetSrc } from '~/utils/asset-src';
 import { signBunnyUrl } from '~/utils/bunny-token';
+import { renderDocumentPreview } from '~/utils/document-preview';
 import { normalizeEmail } from '~/utils/email';
 import { processImage } from '~/utils/image';
 import { sendEmailDocumentInvite } from './email-templates';
@@ -72,6 +74,11 @@ export interface OpenDocument {
   readOnly: boolean;
   /** True when this open connected the viewer as a new collaborator. */
   hasJoined: boolean;
+  /**
+   * The content as HTML, shown until the live connection has synced; null
+   * for a document nobody has written in yet.
+   */
+  preview: string | null;
 }
 
 export type OpenDocumentResult
@@ -121,7 +128,30 @@ export async function openDocument(
     deleted: document.deletedAt !== null,
     readOnly: isReadOnlyFor(document, viewer),
     hasJoined,
+    preview: await getDocumentPreview(document.id),
   }];
+}
+
+/**
+ * Drawn from what was last stored, which the live document may be a few
+ * seconds ahead of; the editor catches up when it syncs. A preview is only
+ * a head start, so one that cannot be drawn is left out.
+ */
+async function getDocumentPreview(documentId: string) {
+  const content = (await getDocument(documentId))?.content;
+
+  if (!content) {
+    return null;
+  }
+
+  try {
+    return renderDocumentPreview(content);
+  }
+  catch (error) {
+    console.error('Could not draw the document preview', error);
+
+    return null;
+  }
 }
 
 export interface LiveAccess {

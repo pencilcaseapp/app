@@ -9,6 +9,7 @@ import {
   OpenDocumentError,
 } from '~/services/document';
 import { ClientOnly } from '~/ui/client-only/client-only';
+import { EditorPreview } from '~/ui/editor/editor-preview';
 import { href } from 'react-router';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import { getSignInUrl } from '~/services/auth';
@@ -108,6 +109,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     linkAccess: document.linkAccess,
     deleted: document.deleted,
     readOnly: document.readOnly,
+    preview: document.preview,
     presence: user ? getUserPresenceIdentity(user) : null,
     shareUrl: new URL(documentUrl, request.url).toString(),
   };
@@ -211,10 +213,42 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
     );
   }
 
+  const notification = deleted && (
+    <Notification variant="warning" title={DELETED_DOCUMENT_NOTICE} />
+  );
+  const topbarLeft = (
+    <MenuOrSignInButton
+      signInUrl={loaderData.ok ? loaderData.signInUrl : null}
+    />
+  );
+  const topbarRight = loaderData.ok && loaderData.owner && !deleted
+    ? (
+        <SharePanel
+          documentId={params.id}
+          linkShared={loaderData.linkShared}
+          linkAccess={loaderData.linkAccess}
+          shareUrl={loaderData.shareUrl}
+          owner={loaderData.owner}
+          invited={loaderData.invited}
+          showUpgrade={!loaderData.hasSubscription}
+        />
+      )
+    : null;
+  const preview = loaderData.ok ? loaderData.preview : null;
+
   return (
     <>
       <PageTitle>{title}</PageTitle>
-      <ClientOnly>
+      <ClientOnly
+        fallback={(
+          <EditorPreview
+            html={preview ?? ''}
+            topbarLeft={topbarLeft}
+            topbarRight={topbarRight}
+            notification={notification}
+          />
+        )}
+      >
         <CollaborativeEditor
           // Deleting, restoring or a change of access changes what the
           // live server grants, so the editor reconnects.
@@ -225,30 +259,10 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
           onFirstEdit={onFirstEdit}
           onAccessRevoked={onAccessRevoked}
           editable={!readOnly}
-          notification={deleted && (
-            <Notification
-              variant="warning"
-              title={DELETED_DOCUMENT_NOTICE}
-            />
-          )}
-          topbarLeft={(
-            <MenuOrSignInButton
-              signInUrl={loaderData.ok ? loaderData.signInUrl : null}
-            />
-          )}
-          topbarRight={loaderData.ok && loaderData.owner && !deleted
-            ? (
-                <SharePanel
-                  documentId={params.id}
-                  linkShared={loaderData.linkShared}
-                  linkAccess={loaderData.linkAccess}
-                  shareUrl={loaderData.shareUrl}
-                  owner={loaderData.owner}
-                  invited={loaderData.invited}
-                  showUpgrade={!loaderData.hasSubscription}
-                />
-              )
-            : null}
+          preview={preview}
+          notification={notification}
+          topbarLeft={topbarLeft}
+          topbarRight={topbarRight}
         />
       </ClientOnly>
       <Outlet />

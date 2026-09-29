@@ -34,6 +34,8 @@ export interface CollaborativeEditorProps {
   topbarRight?: React.ReactNode;
   editable?: boolean;
   notification?: React.ReactNode;
+  /** The content as the server drew it, shown until the first sync. */
+  preview?: string | null;
 }
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
@@ -47,8 +49,12 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     topbarRight,
     editable,
     notification,
+    preview,
   }) => {
     const [isSynced, setIsSynced] = useState(false);
+    // Only the first sync: after a dropped connection the editor keeps what
+    // it has, which is newer than the preview.
+    const [hasSynced, setHasSynced] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const socketClient = useSocketClient();
     // A signed out visitor is identified by a guest id kept in their browser,
@@ -70,6 +76,9 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
       document: doc,
       onSynced: ({ state }) => {
         setIsSynced(state);
+        if (state) {
+          setHasSynced(true);
+        }
       },
     }));
 
@@ -122,6 +131,9 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
           notification={notification}
           uploadImage={uploadImage}
           copyImage={copyImage}
+          // Editing only starts once the live document is here: until then
+          // the reader sees what the server drew.
+          preview={hasSynced ? null : preview}
           // Inside the content, so the cursors scroll along with it — also
           // while typing, when the content scrolls in the editor rather
           // than the page.
