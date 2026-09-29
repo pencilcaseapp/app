@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures';
+import { expect, test } from '../fixtures/test';
 
 test.describe('the account settings', () => {
   test('save the name and the newsletter preference',

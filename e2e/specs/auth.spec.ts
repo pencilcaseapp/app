@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures';
+import { expect, test } from '../fixtures/test';
 
 test.describe('signing out', () => {
   test('ends the session and sends the user back to sign in',

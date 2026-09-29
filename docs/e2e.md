@@ -33,14 +33,14 @@ cookie. Three guards keep it out of production:
   the resulting login is special, so revocation and expiry behave as in
   production.
 
-`e2e/auth.setup.ts` runs once as a Playwright "setup" project: it calls
-the endpoint and saves the cookie to `e2e/.auth/user.json`
+`e2e/setup/auth.setup.ts` runs once as a Playwright "setup" project: it
+calls the endpoint and saves the cookie to `e2e/.auth/user.json`
 (gitignored), which every test then loads via `storageState` — tests
 start signed in without repeating the request.
 
 ## Fixtures and shared flows
 
-Specs import `test` and `expect` from `e2e/fixtures.ts` instead of
+Specs import `test` and `expect` from `e2e/fixtures/test.ts` instead of
 `@playwright/test`. The base test is extended with signed in users:
 
 - `user` — the storage-state user from the setup project above.
@@ -62,8 +62,8 @@ expected to be gone).
 
 ## The Creem checkout
 
-`e2e/subscription.spec.ts` drives Creem's real test-mode checkout:
-open the subscription settings from the sidebar, upgrade, pay with the
+`e2e/specs/settings-subscription.spec.ts` drives Creem's real test-mode
+checkout: open the subscription settings from the sidebar, upgrade, pay with the
 always-succeeding test card on their hosted page, follow the signed
 redirect back into the settings, see pro switched on and the customer
 portal open. That buys real end-to-end confidence at the
