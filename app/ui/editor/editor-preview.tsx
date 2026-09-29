@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Topbar } from '~/ui/topbar/topbar';
 import { EditorToolbar } from './editor-toolbar';
 
@@ -24,6 +25,43 @@ export interface EditorPreviewContentProps {
   /** The content as the editor draws it (`renderDocumentPreview`). */
   html: string;
   hasTopArea: boolean;
+  /**
+   * Takes over the elements of the preview the server drew instead of
+   * drawing them again; see `useServerPreviewNodes`.
+   */
+  adoptServerPreview?: boolean;
+}
+
+const SERVER_PREVIEW_ATTRIBUTE = 'data-server-preview';
+
+/**
+ * The editor replaces the server's preview as soon as the page hydrates.
+ * Drawn again, every image would be a new element, which Safari leaves
+ * empty for a moment even when it has the image, so the new preview swaps
+ * its own elements for the server's before the page paints. It draws its
+ * own first all the same, or the page would be short for a moment and the
+ * browser would scroll a reader back up. The server's preview is looked up
+ * while it is still on the page, before the editor replaces it.
+ */
+function useServerPreviewNodes(
+  ref: React.RefObject<HTMLDivElement | null>,
+  isEnabled: boolean,
+) {
+  const [serverPreview] = useState(() => (isEnabled
+    ? document.querySelector(`[${SERVER_PREVIEW_ATTRIBUTE}]`)
+    : null));
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+
+    if (!isEnabled || !element) {
+      return;
+    }
+
+    if (serverPreview?.hasChildNodes()) {
+      element.replaceChildren(...serverPreview.childNodes);
+    }
+  }, [ref, isEnabled, serverPreview]);
 }
 
 /**
@@ -35,21 +73,29 @@ export interface EditorPreviewContentProps {
 export const EditorPreviewContent: React.FC<EditorPreviewContentProps> = ({
   html,
   hasTopArea,
-}) => (
-  <div
-    contentEditable={false}
-    className={getEditorContentClassName(hasTopArea)}
-    style={{
-      userSelect: 'text',
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'break-word',
-    }}
-    // Drawn by the editor's own nodes on the server, which escape the text
-    // and sanitise links as they do in the browser.
-    // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
-    dangerouslySetInnerHTML={{ __html: html }}
-  />
-);
+  adoptServerPreview = false,
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useServerPreviewNodes(ref, adoptServerPreview);
+
+  return (
+    <div
+      ref={ref}
+      {...(!adoptServerPreview && { [SERVER_PREVIEW_ATTRIBUTE]: '' })}
+      contentEditable={false}
+      className={getEditorContentClassName(hasTopArea)}
+      style={{
+        userSelect: 'text',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+      }}
+      // Drawn by the editor's own nodes on the server, which escape the text
+      // and sanitise links as they do in the browser.
+      // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+};
 
 export interface EditorPreviewProps {
   html: string;
