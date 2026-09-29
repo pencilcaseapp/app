@@ -62,8 +62,8 @@ const createBillingPortalSessionMock = vi.fn();
 const updateCustomerEmailMock = vi.fn();
 const verifyRedirectSignatureMock = vi.fn();
 const verifyWebhookSignatureMock = vi.fn();
-vi.mock('./creem', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('./creem')>();
+vi.mock('~/clients/creem', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('~/clients/creem')>();
   return {
     ...actual,
     createCheckoutSession:

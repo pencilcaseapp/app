@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { DOCUMENT_ACCESS } from '~/constants/document';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
-import { changeCollaboratorAccess } from '~/services/document-invite';
+import { changeCollaboratorAccess } from '~/services/document';
 import { validateForm } from '~/utils/form';
 import type { Route } from './+types/doc-collaborator-access';
 

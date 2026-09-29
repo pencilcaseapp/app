@@ -7,7 +7,7 @@ import {
 import { getConfig, type Config } from '~/config';
 import { createAsset, getAsset } from '~/repos/document-asset';
 import { getLiveAccess, type DocumentViewer } from '~/services/document';
-import { copyObject, getObjectStream, putObject } from '~/services/storage';
+import { copyObject, getObjectStream, putObject } from '~/clients/storage';
 import { parseAssetSrc } from '~/utils/asset-src';
 import { signBunnyUrl } from '~/utils/bunny-token';
 import { processImage } from '~/utils/image';

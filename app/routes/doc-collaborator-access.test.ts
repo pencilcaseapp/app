@@ -3,16 +3,16 @@
 import { RouterContextProvider } from 'react-router';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { userSessionContext } from '~/contexts/user-session';
-import { ChangeCollaboratorAccessError } from '~/services/document-invite';
+import { ChangeCollaboratorAccessError } from '~/services/document';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 import { action } from './doc-collaborator-access';
 import type { Route } from './+types/doc-collaborator-access';
 
 const changeCollaboratorAccessMock = vi.fn();
-vi.mock('~/services/document-invite', async (importOriginal) => {
+vi.mock('~/services/document', async (importOriginal) => {
   const actual
-    = await importOriginal<typeof import('~/services/document-invite')>();
+    = await importOriginal<typeof import('~/services/document')>();
   return {
     ...actual,
     changeCollaboratorAccess: (...args: unknown[]) =>

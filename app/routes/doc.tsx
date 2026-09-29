@@ -1,12 +1,13 @@
 import type { Route } from './+types/doc';
 import { Link, Outlet, redirect, data, useRevalidator } from 'react-router';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
-import { openDocument, OpenDocumentError } from '~/services/document';
 import {
   inviteCollaborator,
   InviteCollaboratorError,
   listInvitedCollaborators,
-} from '~/services/document-invite';
+  openDocument,
+  OpenDocumentError,
+} from '~/services/document';
 import { ClientOnly } from '~/ui/client-only/client-only';
 import { href } from 'react-router';
 import { optionalUserSessionContext } from '~/contexts/user-session';

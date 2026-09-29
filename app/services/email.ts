@@ -1,6 +1,6 @@
 import { render } from 'react-email';
-import { Lettermint } from 'lettermint';
 import type React from 'react';
+import { sendLettermintEmail } from '~/clients/lettermint';
 import { getConfig } from '~/config';
 import {
   emailIdempotencyKey,
@@ -74,24 +74,18 @@ export async function sendEmail(input: SendEmailInput) {
     render(email, { plainText: true }),
   ]);
 
-  const lettermint = new Lettermint({
-    apiToken,
-  });
-
   try {
-    const response = await lettermint.email
-      .idempotencyKey(idempotencyKey)
-      .from(formatEmailData(config.email.from))
-      .to(formatEmailData(to))
-      .subject(subject)
-      .html(html)
-      .text(text)
-      .send();
-
-    await markEmailLogSent({
-      id: log.id,
-      providerMessageId: response?.message_id,
+    const providerMessageId = await sendLettermintEmail({
+      apiToken,
+      idempotencyKey,
+      from: formatEmailData(config.email.from),
+      to: formatEmailData(to),
+      subject,
+      html,
+      text,
     });
+
+    await markEmailLogSent({ id: log.id, providerMessageId });
   }
   catch (error) {
     await markEmailLogFailed({

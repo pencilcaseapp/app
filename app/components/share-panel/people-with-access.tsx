@@ -2,7 +2,7 @@ import type { FC, ReactNode } from 'react';
 import { href, useFetcher } from 'react-router';
 import { useAuthenticityToken } from 'remix-utils/csrf/react';
 import type { DocumentAccess } from '~/constants/document';
-import type { InvitedCollaborator } from '~/services/document-invite';
+import type { InvitedCollaborator } from '~/services/document';
 import { Avatar } from '~/ui/avatar/avatar';
 import { Badge } from '~/ui/badge/badge';
 import { ChoiceTrigger } from '~/ui/choice-trigger/choice-trigger';
