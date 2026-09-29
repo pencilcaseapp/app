@@ -298,6 +298,7 @@ describe('openDocument', () => {
       readOnly: false,
       hasJoined: false,
       preview: null,
+      assetUrls: {},
     });
     expect(connectCollaboratorMock).not.toHaveBeenCalled();
   });
@@ -341,6 +342,9 @@ describe('openDocument', () => {
       /<img src="https:\/\/cdn\.example\/a\.webp\?token=HS256-/,
     );
     expect(document?.preview).toContain(`data-src="${src}"`);
+    expect(document?.assetUrls[src]).toMatch(
+      /^https:\/\/cdn\.example\/a\.webp\?token=HS256-/,
+    );
   });
 
   it('opens read-only for a visitor a link only lets read', async () => {

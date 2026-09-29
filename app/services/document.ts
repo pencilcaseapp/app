@@ -80,6 +80,11 @@ export interface OpenDocument {
    * for a document nobody has written in yet.
    */
   preview: string | null;
+  /**
+   * The signed CDN URL of each of the document's own images by its `src`,
+   * so the editor loads what the preview already did; empty without a CDN.
+   */
+  assetUrls: Record<string, string>;
 }
 
 export type OpenDocumentResult
@@ -121,6 +126,8 @@ export async function openDocument(
     hasJoined = true;
   }
 
+  const assetUrls = await getSignedAssetUrls(document.id);
+
   return [null, {
     title: document.title,
     linkShared: document.linkShared,
@@ -129,7 +136,8 @@ export async function openDocument(
     deleted: document.deletedAt !== null,
     readOnly: isReadOnlyFor(document, viewer),
     hasJoined,
-    preview: await getDocumentPreview(document.id),
+    preview: await getDocumentPreview(document.id, assetUrls),
+    assetUrls,
   }];
 }
 
@@ -139,20 +147,18 @@ export async function openDocument(
  * a head start, so one that cannot be drawn is left out. Its images point
  * straight at the CDN, which saves the redirect on the first paint.
  */
-async function getDocumentPreview(documentId: string) {
+async function getDocumentPreview(
+  documentId: string,
+  assetUrls: Record<string, string>,
+) {
   const content = (await getDocument(documentId))?.content;
 
   if (!content) {
     return null;
   }
 
-  const signedUrls = await getSignedAssetUrls(documentId);
-
   try {
-    return renderDocumentPreview(
-      content,
-      src => signedUrls.get(src) ?? src,
-    );
+    return renderDocumentPreview(content, src => assetUrls[src] ?? src);
   }
   catch (error) {
     console.error('Could not draw the document preview', error);
@@ -162,16 +168,18 @@ async function getDocumentPreview(documentId: string) {
 }
 
 /** The document's own assets by their `src`, signed for the CDN. */
-async function getSignedAssetUrls(documentId: string) {
+async function getSignedAssetUrls(
+  documentId: string,
+): Promise<Record<string, string>> {
   const { cdn } = getConfig().storage;
 
   if (!cdn) {
-    return new Map<string, string>();
+    return {};
   }
 
   const assets = await getDocumentAssets([documentId]);
 
-  return new Map(assets.map(asset => [
+  return Object.fromEntries(assets.map(asset => [
     href('/doc/:id/assets/:assetId', { id: documentId, assetId: asset.id }),
     signAssetUrl(asset.storageKey, cdn).url,
   ]));
