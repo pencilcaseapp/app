@@ -13,9 +13,12 @@ export class AppUser {
     return this.page.locator('[contenteditable="true"]');
   }
 
-  /** The document's content, whether or not the viewer may change it. */
+  /**
+   * The document's content in the editor, whether or not the viewer may
+   * change it — not the preview the server drew, which it replaces.
+   */
   get content(): Locator {
-    return this.page.locator('[contenteditable]');
+    return this.page.locator('[data-lexical-editor]');
   }
 
   /** A document link inside the sidebar's "All Docs" group. */

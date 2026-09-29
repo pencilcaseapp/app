@@ -2,7 +2,6 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useEffect, useRef } from 'react';
-import classNames from 'classnames';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { BLUR_COMMAND, COMMAND_PRIORITY_CRITICAL } from 'lexical';
 import { useMedia } from 'react-use';
@@ -10,6 +9,11 @@ import { useReducedMotion } from 'motion/react';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 import { listenForEditableTap } from '~/utils/editable-tap';
 import { CONTENT_SCROLL_COMMAND } from '../commands/editor-content-scroll';
+import {
+  EditorPreviewContent,
+  EditorTopArea,
+  getEditorContentClassName,
+} from '../editor-preview';
 
 export interface EditorPluginRichTextProps {
   /** Rendered above the content, taking over the topbar clearance. */
@@ -19,6 +23,11 @@ export interface EditorPluginRichTextProps {
    * against the text, like the cursors of the other people in it.
    */
   contentOverlay?: React.ReactNode;
+  /**
+   * Shown in place of the content while there is none yet; the editor
+   * stays hidden behind it.
+   */
+  preview?: string | null;
 }
 
 /**
@@ -214,6 +223,7 @@ const keepCaretAbove = (
 export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   topArea,
   contentOverlay,
+  preview,
 }) => {
   const frameRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -410,14 +420,13 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
 
   return (
     <>
-      {topArea && (
-        <div className="pt-15 md:pt-27 px-4 md:px-[calc((100%-730px)/2)]">
-          {topArea}
-        </div>
+      {topArea && <EditorTopArea>{topArea}</EditorTopArea>}
+      {typeof preview === 'string' && (
+        <EditorPreviewContent html={preview} hasTopArea={Boolean(topArea)} />
       )}
       <RichTextPlugin
         contentEditable={(
-          <div ref={frameRef}>
+          <div ref={frameRef} hidden={typeof preview === 'string'}>
             <div
               ref={scrollerRef}
               className="group/scroller data-editing:overflow-y-auto data-editing:overscroll-y-contain"
@@ -426,10 +435,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
                 <ContentEditable
                   aria-placeholder="Type something …"
                   placeholder={<span />}
-                  className={classNames([
-                    topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
-                    'pb-3 md:pb-12 touch-screen:pb-[55svh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
-                  ])}
+                  className={getEditorContentClassName(Boolean(topArea))}
                 />
                 {contentOverlay}
               </div>

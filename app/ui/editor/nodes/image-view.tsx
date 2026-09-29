@@ -10,9 +10,14 @@ import {
   COMMAND_PRIORITY_LOW,
   type NodeKey,
 } from 'lexical';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { parseAssetSrc } from '~/utils/asset-src';
 import { listenForEditableTap, TAP_SLOP } from '~/utils/editable-tap';
+
+export const IMAGE_FRAME_CLASS_NAME = 'mx-auto max-w-full rounded-sm';
+export const IMAGE_PLACEHOLDER_CLASS_NAME
+  = 'bg-pca-grey-100 dark:bg-pca-grey-800';
+export const IMAGE_CLASS_NAME = 'block h-auto w-full rounded-sm';
 
 export interface ImageViewProps {
   nodeKey: NodeKey;
@@ -24,8 +29,7 @@ export interface ImageViewProps {
 /**
  * Shown at its own width, but never wider than the column. The width and
  * height attributes give the browser the aspect ratio up front, so the box
- * is there before the image has loaded: grey while it loads, then the
- * image fades in over it.
+ * is there before the image has loaded.
  */
 export const ImageView: React.FC<ImageViewProps> = ({
   nodeKey,
@@ -38,16 +42,6 @@ export const ImageView: React.FC<ImageViewProps> = ({
   const [isSelected, setSelected, clearSelection]
     = useLexicalNodeSelection(nodeKey);
   const ref = useRef<HTMLImageElement>(null);
-  const [loadedSrc, setLoadedSrc] = useState<string>();
-  const isLoaded = loadedSrc === src;
-
-  // A cached image is complete before React listens for `load`, and is
-  // shown straight away rather than faded in.
-  useLayoutEffect(() => {
-    if (ref.current?.complete) {
-      setLoadedSrc(src);
-    }
-  }, [src]);
 
   useEffect(() => editor.registerCommand(
     CLICK_COMMAND,
@@ -143,22 +137,15 @@ export const ImageView: React.FC<ImageViewProps> = ({
       <div
         style={{ aspectRatio: `${width} / ${height}`, width }}
         className={classNames(
-          'mx-auto max-w-full rounded-sm',
-          'bg-pca-grey-100 dark:bg-pca-grey-800',
+          IMAGE_FRAME_CLASS_NAME,
+          IMAGE_PLACEHOLDER_CLASS_NAME,
         )}
       />
     );
   }
 
   return (
-    <div
-      style={{ width }}
-      className={classNames(
-        'mx-auto max-w-full rounded-sm',
-        'transition-colors duration-200 motion-reduce:transition-none',
-        !isLoaded && 'bg-pca-grey-100 dark:bg-pca-grey-800',
-      )}
-    >
+    <div style={{ width }} className={IMAGE_FRAME_CLASS_NAME}>
       <img
         ref={ref}
         src={src}
@@ -168,11 +155,8 @@ export const ImageView: React.FC<ImageViewProps> = ({
         loading="lazy"
         decoding="async"
         draggable={isEditable}
-        onLoad={() => setLoadedSrc(src)}
         className={classNames(
-          'block h-auto w-full rounded-sm',
-          'transition-opacity duration-200 motion-reduce:transition-none',
-          !isLoaded && 'opacity-0',
+          IMAGE_CLASS_NAME,
           isSelected && 'outline-2 outline-offset-2 outline-pca-yellow-500',
         )}
       />

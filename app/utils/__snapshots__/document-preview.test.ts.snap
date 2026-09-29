@@ -1,0 +1,3 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderDocumentPreview > draws the content the way the editor does 1`] = `"<h1 class="editor-heading-h1" dir="auto"><span data-lexical-text="true">Hello</span></h1><p class="editor-paragraph" dir="auto"><strong class="editor-text-bold" data-lexical-text="true">bold</strong></p><ul class="editor-list-ul editor-checklist" dir="auto"><li role="checkbox" tabindex="-1" aria-checked="true" value="1" class="editor-listitem editor-listitem-checked"><span data-lexical-text="true">done</span></li></ul>"`;

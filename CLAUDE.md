@@ -111,6 +111,25 @@ reported for a document until the loader lists a label other than the one it
 listed when the title was reported. `app/utils/headless.ts` uses a headless
 Lexical editor to produce valid Yjs updates on the server.
 
+**Server-rendered preview — `app/utils/document-preview.ts`.** The editor
+is client only and its content arrives over the websocket, so the doc
+loader hands along a `preview`: the last stored `documents.content` drawn
+to HTML by a Lexical editor on a happy-dom root (`withDOM`), through the
+editor's own DOM rendering rather than Lexical's HTML export, so markup and
+classes match. Images, which React draws, come from `ImageNode.exportDOM`,
+which draws what `ImageView` does (ours only, `parseAssetSrc`) but decodes
+before the page paints, or the image would blink on every reload. `EditorPreview` (`app/ui/editor/editor-preview.tsx`)
+is the server render (topbar plus content; the formatting buttons are
+`EditorToolbar`, drawn without handlers and shown from `lg` by CSS), and `EditorPluginRichText`
+keeps showing the same content, with the editor hidden behind it, until
+the first sync (`CollaborativeEditor`'s `hasSynced`), so nobody edits
+before the live document is there. The preview carries
+`contenteditable="false"` because `editor.css` selects on
+`[contenteditable]`; tests find the editor itself by `[data-lexical-editor]`.
+A document nobody has written in has no preview. The Y.Doc only ever comes
+from the socket — never seed it from the preview, which would duplicate
+the content on sync.
+
 **Scaling out — `app/live/redis.ts`, `docs/scaling.md`.** A Y.Doc lives in the
 process that loaded it, so every instance past the first needs
 `@hocuspocus/extension-redis` to fan updates and awareness out to the others,
@@ -400,21 +419,12 @@ originate from the Hocuspocus provider, and `EditedDocumentProvider`
 (`app/contexts/edited-document.tsx`) carries that from `routes/doc.tsx` up to
 the sidebar, which renders below the same layout but outside its `<Outlet />`.
 
-**Scroll restoration — `app/hooks/use-document-scroll-restoration.ts`.** The
-page itself scrolls the document, and `<ScrollRestoration />` cannot put a
-reader back where they were after a reload: the content arrives over the
-websocket well after the page has loaded, so at the point React Router
-restores there is nothing to scroll through. The hook therefore keeps the
-window position per document id in `sessionStorage` and waits for the
-provider's `onSynced` before taking it, then for the page to actually grow
-that far — Lexical renders the content over several frames, and a document
-that lost content while the reader was away never reaches the saved offset,
-so the restore is capped at what the page reaches and gives up after a
-couple of seconds. A stored position also carries the id of the page load
-that wrote it: the editor remounts whenever access changes (`reconnects` in
-the doc route's `key`), and a remount must not move a reader who never left
-— nor undo the jump to the notice `useScrollToTopOn` makes when the open
-document is deleted.
+**Scroll restoration.** React Router's `<ScrollRestoration />` puts a
+reader back where they were after a reload or on back and forward: the
+server-rendered preview gives the page its full height before the scripts
+run, and the editor takes over at the same height. Nothing on top of that
+is needed, so keep the preview and the editor drawing the same boxes (the
+width and height of an image reserve its box before it loads).
 
 **Layering.** `app/routes/` and `app/layouts/` (loaders/actions) → `app/services/`
 (business logic) → `app/repos/` (Drizzle queries, one module per table) →
@@ -444,7 +454,10 @@ tokens (`bg-pca-grey-900`, `text-pca-white`, …), never raw Tailwind palette
 colors. Components take explicit `colorLight`/`colorDark`, `textColorLight`/
 `textColorDark` props and emit both light and `dark:` classes rather than
 relying on a runtime theme. Polymorphism goes through the `as` prop and
-`PolymorphicComponentPropWithRef`. A new component with real mechanics behind
+`PolymorphicComponentPropWithRef`. Anything the page looks like per screen goes
+through CSS (`max-sm:`, `lg:`, `touch-screen:`), never `useMedia`: the
+server cannot know the screen, so a hook would draw the wrong thing until
+hydration. `useMedia` is for behaviour, with a `false` default. A new component with real mechanics behind
 it — an overlay, a menu, a form control with its own focus and keyboard
 handling — is built on Base UI (`@base-ui/react`), which owns the behaviour
 while `app/ui/` owns the look; the dialog, drawer, select, switch, meter and

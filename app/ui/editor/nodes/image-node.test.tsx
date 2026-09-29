@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { createEditor } from 'lexical';
 import { ImageNode } from './image-node';
@@ -17,6 +17,18 @@ function importImage(json: Record<string, unknown>) {
   }, { discrete: true });
 
   return exported;
+}
+
+function exportImage(imageSrc: string) {
+  const editor = createEditor({ nodes: [ImageNode] });
+  let element: unknown;
+
+  editor.update(() => {
+    element = new ImageNode({ src: imageSrc, width: 800, height: 600 })
+      .exportDOM().element;
+  }, { discrete: true });
+
+  return element as HTMLElement;
 }
 
 function renderView(viewSrc: string) {
@@ -43,39 +55,28 @@ describe('ImageNode', () => {
     expect(importImage({ src: 42, width: 'wide', height: -3 }))
       .toMatchObject({ src: '', width: 1, height: 1 });
   });
+
+  test('exports one of our assets as HTML, decoded before it is shown', () => {
+    const image = exportImage(src).querySelector('img');
+
+    expect(image).toHaveAttribute('src', src);
+    expect(image).toHaveAttribute('width', '800');
+    expect(image).not.toHaveAttribute('decoding');
+  });
+
+  test('never exports an image from anywhere else', () => {
+    const element = exportImage('https://example.com/tracker.png');
+
+    expect(element.querySelector('img')).toBeNull();
+    expect(element).toHaveClass('bg-pca-grey-100');
+  });
 });
 
 describe('ImageView', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   test('shows one of our assets', () => {
     renderView(src);
 
     expect(screen.getByRole('presentation')).toHaveAttribute('src', src);
-  });
-
-  test('keeps the image hidden over a placeholder until it loads', () => {
-    // happy-dom reports every image complete, a browser one still loading.
-    vi.spyOn(HTMLImageElement.prototype, 'complete', 'get')
-      .mockReturnValue(false);
-    renderView(src);
-    const image = screen.getByRole('presentation');
-
-    expect(image).toHaveClass('opacity-0');
-    expect(image.parentElement).toHaveClass('bg-pca-grey-100');
-
-    fireEvent.load(image);
-
-    expect(image).not.toHaveClass('opacity-0');
-    expect(image.parentElement).not.toHaveClass('bg-pca-grey-100');
-  });
-
-  test('shows an image the browser already has without a fade', () => {
-    renderView(src);
-
-    expect(screen.getByRole('presentation')).not.toHaveClass('opacity-0');
   });
 
   test('never loads an image from anywhere else', () => {

@@ -62,7 +62,7 @@ export async function sendImage(
 }
 
 export function images(page: Page) {
-  return page.locator('[contenteditable] img');
+  return page.locator('[data-lexical-editor] img');
 }
 
 export async function expectLoaded(image: Locator) {

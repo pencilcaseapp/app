@@ -2,7 +2,7 @@ import { createHeadlessEditor } from '@lexical/headless';
 import { $createHeadingNode, HeadingNode } from '@lexical/rich-text';
 import { createBinding, syncLexicalUpdateToYjs } from '@lexical/yjs';
 import type { Provider, ProviderAwareness } from '@lexical/yjs';
-import { $getRoot } from 'lexical';
+import { $getRoot, type Klass, type LexicalNode } from 'lexical';
 import { $createTextNode } from 'lexical';
 import * as Y from 'yjs';
 
@@ -17,9 +17,12 @@ export function createInitialDocumentContent(): Uint8Array {
   });
 }
 
-export function createHeadlessEditorState(updateFn: () => void): Uint8Array {
+export function createHeadlessEditorState(
+  updateFn: () => void,
+  nodes: Klass<LexicalNode>[] = [HeadingNode],
+): Uint8Array {
   const ydoc = new Y.Doc();
-  const editor = createHeadlessEditor({ nodes: [HeadingNode] });
+  const editor = createHeadlessEditor({ nodes });
 
   const binding = createBinding(editor, emptyProvider, 'root', ydoc, new Map());
 

@@ -6,12 +6,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { $getFormatBlock } from '../utils/node';
 import { Button } from '~/ui/button/button';
 import { Topbar } from '~/ui/topbar/topbar';
-import { Toolbar } from '~/ui/toolbar/toolbar';
-import { ToolbarGroup } from '~/ui/toolbar/toolbar-group';
-import { ToolbarToggle } from '~/ui/toolbar/toolbar-toggle';
-import { ToolbarButton } from '~/ui/toolbar/toolbar-button';
-import { ToolbarSeparator } from '~/ui/toolbar/toolbar-separator';
 import type { EditorFormatBlock } from '../editor.types';
+import { EditorToolbar } from '../editor-toolbar';
 import { useMedia, useWindowScroll } from 'react-use';
 import { useVirtualKeyboard } from '~/hooks/use-virtual-keyboard';
 import {
@@ -152,10 +148,6 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
       editor.dispatchCommand(PICK_IMAGES_COMMAND, undefined);
     }, [editor]);
 
-    const handleEditorFocus = useCallback((e: React.MouseEvent) => {
-      e.preventDefault();
-    }, []);
-
     return (
       <Topbar
         ref={topbarRef}
@@ -174,33 +166,16 @@ export const EditorPluginToolbar: React.FC<EditorPluginToolbarProps>
         )}
         center={(
           editable && (isWide || isVirtualKeyboardOpen) && (
-            <Toolbar isScrolling={isScrolling}>
-              <ToolbarGroup>
-                <ToolbarToggle isActive={formatBlock === 'h1'} onMouseDown={handleEditorFocus} onClick={() => toggleHeadline('h1')} icon="h1" tooltipLabel="Heading 1" />
-                <ToolbarToggle isActive={formatBlock === 'h2'} onMouseDown={handleEditorFocus} onClick={() => toggleHeadline('h2')} icon="h2" tooltipLabel="Heading 2" />
-                <ToolbarToggle isActive={formatBlock === 'h3'} onMouseDown={handleEditorFocus} onClick={() => toggleHeadline('h3')} icon="h3" tooltipLabel="Heading 3" />
-              </ToolbarGroup>
-              <ToolbarSeparator />
-              <ToolbarGroup>
-                <ToolbarToggle isActive={textStyle.bold} onMouseDown={handleEditorFocus} onClick={() => toggleTextStyle('bold')} icon="bold" tooltipLabel="Bold" />
-                <ToolbarToggle isActive={textStyle.italic} onMouseDown={handleEditorFocus} onClick={() => toggleTextStyle('italic')} icon="italic" tooltipLabel="Italic" />
-                <ToolbarToggle isActive={textStyle.underline} onMouseDown={handleEditorFocus} onClick={() => toggleTextStyle('underline')} icon="underline" tooltipLabel="Underline" />
-              </ToolbarGroup>
-              <ToolbarSeparator />
-              <ToolbarGroup>
-                <ToolbarToggle isActive={formatBlock === 'bullet'} onMouseDown={handleEditorFocus} onClick={() => toggleList('bullet')} icon="listUl" tooltipLabel="Bulleted list" />
-                <ToolbarToggle isActive={formatBlock === 'number'} onMouseDown={handleEditorFocus} onClick={() => toggleList('number')} icon="listOl" tooltipLabel="Numbered list" />
-                <ToolbarToggle isActive={formatBlock === 'check'} onMouseDown={handleEditorFocus} onClick={() => toggleList('check')} icon="listCheck" tooltipLabel="Checklist" />
-              </ToolbarGroup>
-              {canInsertImages && (
-                <>
-                  <ToolbarSeparator />
-                  <ToolbarGroup>
-                    <ToolbarButton onMouseDown={handleEditorFocus} onClick={pickImages} icon="image" tooltipLabel="Image" />
-                  </ToolbarGroup>
-                </>
-              )}
-            </Toolbar>
+            <EditorToolbar
+              formatBlock={formatBlock}
+              textStyle={textStyle}
+              isScrolling={isScrolling}
+              canInsertImages={canInsertImages}
+              onToggleHeadline={toggleHeadline}
+              onToggleTextStyle={toggleTextStyle}
+              onToggleList={toggleList}
+              onPickImages={pickImages}
+            />
           )
         )}
       />

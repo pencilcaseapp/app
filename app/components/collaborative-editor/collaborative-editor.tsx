@@ -10,9 +10,6 @@ import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
 import { useFirstLocalEdit } from '~/hooks/use-first-local-edit';
 import { useAccessRevoked } from '~/hooks/use-access-revoked';
 import { useCollaborators } from '~/hooks/use-collaborators';
-import {
-  useDocumentScrollRestoration,
-} from '~/hooks/use-document-scroll-restoration';
 import { useCursorNameBounds } from '~/hooks/use-cursor-name-bounds';
 import { useRemoteCursorPositions } from '~/hooks/use-remote-cursor-positions';
 import { useCopyImage } from '~/hooks/use-copy-image';
@@ -34,6 +31,8 @@ export interface CollaborativeEditorProps {
   topbarRight?: React.ReactNode;
   editable?: boolean;
   notification?: React.ReactNode;
+  /** The content as the server drew it, shown until the first sync. */
+  preview?: string | null;
 }
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
@@ -47,8 +46,11 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     topbarRight,
     editable,
     notification,
+    preview,
   }) => {
-    const [isSynced, setIsSynced] = useState(false);
+    // Only the first sync: after a dropped connection the editor keeps what
+    // it has, which is newer than the preview.
+    const [hasSynced, setHasSynced] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const socketClient = useSocketClient();
     // A signed out visitor is identified by a guest id kept in their browser,
@@ -69,15 +71,13 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
       websocketProvider: socketClient,
       document: doc,
       onSynced: ({ state }) => {
-        setIsSynced(state);
+        if (state) {
+          setHasSynced(true);
+        }
       },
     }));
 
     const collaborators = useCollaborators(provider);
-
-    // The content is only in the page once the live connection has synced,
-    // so the reader can only be put back where they were after that.
-    useDocumentScrollRestoration(id, isSynced);
 
     useCursorNameBounds(ref);
     const syncCursorPositionsFn = useRemoteCursorPositions(ref);
@@ -122,6 +122,9 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
           notification={notification}
           uploadImage={uploadImage}
           copyImage={copyImage}
+          // Editing only starts once the live document is here: until then
+          // the reader sees what the server drew.
+          preview={hasSynced ? null : preview}
           // Inside the content, so the cursors scroll along with it — also
           // while typing, when the content scrolls in the editor rather
           // than the page.

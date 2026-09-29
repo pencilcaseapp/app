@@ -110,20 +110,14 @@ export const SharePanel: React.FC<SharePanelProps> = ({
   return (
     <ResponsivePanel open={isOpen} onOpenChange={setIsOpen}>
       <ResponsivePanelTrigger>
-        {isMobile
-          ? (
-              <Button
-                type="button"
-                icon="share"
-                iconTitle="Share"
-                colorLight="glass"
-              />
-            )
-          : (
-              <Button type="button" icon="share" colorLight="glass">
-                Share
-              </Button>
-            )}
+        <Button
+          type="button"
+          icon="share"
+          colorLight="glass"
+          hideLabelOnMobile
+        >
+          Share
+        </Button>
       </ResponsivePanelTrigger>
       <ResponsivePanelContent
         title="Share document"

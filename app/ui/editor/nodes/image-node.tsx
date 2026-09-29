@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import type {
   DOMExportOutput,
   EditorConfig,
@@ -9,7 +10,13 @@ import type {
 } from 'lexical';
 import { DecoratorNode } from 'lexical';
 import type { JSX } from 'react';
-import { ImageView } from './image-view';
+import { parseAssetSrc } from '~/utils/asset-src';
+import {
+  IMAGE_CLASS_NAME,
+  IMAGE_FRAME_CLASS_NAME,
+  IMAGE_PLACEHOLDER_CLASS_NAME,
+  ImageView,
+} from './image-view';
 
 export interface ImagePayload {
   src: string;
@@ -74,14 +81,38 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     };
   }
 
+  /**
+   * What `ImageView` draws, as plain HTML: the server's preview of the
+   * document and the HTML the clipboard carries. Like the view, only our
+   * own assets are loaded. Unlike the view, the image decodes before the
+   * page paints: in the server's HTML it would otherwise leave a blank box
+   * for a frame on every reload.
+   */
   exportDOM(): DOMExportOutput {
+    const frame = document.createElement('div');
+    frame.className = IMAGE_FRAME_CLASS_NAME;
+    frame.style.width = `${this.__width}px`;
+
+    if (!parseAssetSrc(this.__src)) {
+      frame.className = classNames(
+        IMAGE_FRAME_CLASS_NAME,
+        IMAGE_PLACEHOLDER_CLASS_NAME,
+      );
+      frame.style.aspectRatio = `${this.__width} / ${this.__height}`;
+
+      return { element: frame };
+    }
+
     const img = document.createElement('img');
     img.src = this.__src;
     img.width = this.__width;
     img.height = this.__height;
     img.alt = '';
+    img.loading = 'lazy';
+    img.className = IMAGE_CLASS_NAME;
+    frame.append(img);
 
-    return { element: img };
+    return { element: frame };
   }
 
   createDOM(config: EditorConfig) {
