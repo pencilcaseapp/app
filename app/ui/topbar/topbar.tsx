@@ -59,25 +59,27 @@ export const Topbar: React.FC<TopbarProps>
         <div ref={leftRef} className="col-start-1 row-start-1 justify-self-start z-10 flex min-w-max">
           {left}
         </div>
-        <div
-          className="col-start-1 row-start-1 justify-self-center max-w-full"
-          style={{
-            paddingLeft: leftWidth,
-            paddingRight: rightWidth,
-          }}
-        >
-          <HorizontalOverflow className="md:block">
-            <div
-              className="flex gap-4 md:gap-2 flex-nowrap h-14 items-center"
-              style={{
-                paddingLeft: Math.max(leftWidth, rightWidth) - leftWidth,
-                paddingRight: Math.max(leftWidth, rightWidth) - rightWidth,
-              }}
-            >
-              {center}
-            </div>
-          </HorizontalOverflow>
-        </div>
+        {center && (
+          <div
+            className="col-start-1 row-start-1 justify-self-center max-w-full"
+            style={{
+              paddingLeft: leftWidth,
+              paddingRight: rightWidth,
+            }}
+          >
+            <HorizontalOverflow className="md:block">
+              <div
+                className="flex gap-4 md:gap-2 flex-nowrap h-14 items-center"
+                style={{
+                  paddingLeft: Math.max(leftWidth, rightWidth) - leftWidth,
+                  paddingRight: Math.max(leftWidth, rightWidth) - rightWidth,
+                }}
+              >
+                {center}
+              </div>
+            </HorizontalOverflow>
+          </div>
+        )}
 
         <div ref={rightRef} className="col-start-1 row-start-1 justify-self-end z-10 flex min-w-max items-center">
           <div className="inline-flex min-w-max items-center gap-2">
