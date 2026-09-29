@@ -33,9 +33,7 @@ export function useLiveImagesReady(
     const shownSources = [...container.querySelectorAll('img')]
       .filter(image => !image.closest(LIVE))
       .filter(image => image.complete && image.naturalWidth > 0)
-      // The preview's image may point at the CDN; `data-src` is the source
-      // the editor's image has.
-      .map(image => image.dataset.src ?? image.getAttribute('src'));
+      .map(getSource);
 
     const finish = () => {
       if (!isCancelled) {
@@ -47,7 +45,7 @@ export function useLiveImagesReady(
     const waitForImages = () => {
       const images = [...container.querySelectorAll<HTMLImageElement>(
         `${LIVE} img`,
-      )].filter(image => shownSources.includes(image.getAttribute('src')));
+      )].filter(image => shownSources.includes(getSource(image)));
 
       if (
         images.length < shownSources.length
@@ -75,4 +73,9 @@ export function useLiveImagesReady(
   }, [containerRef, isSynced]);
 
   return isReady;
+}
+
+/** An image may point at the CDN; `data-src` is the node's own source. */
+function getSource(image: HTMLImageElement) {
+  return image.dataset.src ?? image.getAttribute('src');
 }

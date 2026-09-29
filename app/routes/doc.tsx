@@ -110,6 +110,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     deleted: document.deleted,
     readOnly: document.readOnly,
     preview: document.preview,
+    assetUrls: document.assetUrls,
     presence: user ? getUserPresenceIdentity(user) : null,
     shareUrl: new URL(documentUrl, request.url).toString(),
   };
@@ -261,6 +262,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
           onAccessRevoked={onAccessRevoked}
           editable={!readOnly}
           preview={preview}
+          assetUrls={loaderData.ok ? loaderData.assetUrls : undefined}
           notification={notification}
           topbarLeft={topbarLeft}
           topbarRight={topbarRight}

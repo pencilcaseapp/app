@@ -121,7 +121,11 @@ which draws what `ImageView` does (ours only, `parseAssetSrc`) but decodes
 before the page paints, or the image would blink on every reload. With a
 CDN the preview's images point at their signed URL (the original source
 stays in `data-src`), which saves the redirect on the first paint, and
-the first `PREVIEW_EAGER_IMAGES` of them load eagerly. `EditorPreview` (`app/ui/editor/editor-preview.tsx`)
+the first `PREVIEW_EAGER_IMAGES` of them load eagerly. The doc loader
+hands the same URLs to the editor as `assetUrls` (`AssetUrlsContext`),
+so `ImageView` shows what the preview already loaded; the editor keeps
+the ones it mounted with, and an image whose URL has expired falls back
+to its own `src`, the redirect. `EditorPreview` (`app/ui/editor/editor-preview.tsx`)
 is the server render (topbar plus content; the formatting buttons are
 `EditorToolbar`, drawn without handlers and shown from `lg` by CSS), and `EditorPluginRichText`
 keeps showing the same content, with the editor hidden behind it, until

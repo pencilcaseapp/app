@@ -4,6 +4,7 @@ import * as Y from 'yjs';
 import { type Provider } from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui/editor/editor';
+import { AssetUrlsContext } from '~/ui/editor/nodes/asset-urls-context';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSocketClient } from '~/contexts/socket-client';
 import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
@@ -34,7 +35,11 @@ export interface CollaborativeEditorProps {
   notification?: React.ReactNode;
   /** The content as the server drew it, shown until the first sync. */
   preview?: string | null;
+  /** The signed CDN URLs of the document's images, by their `src`. */
+  assetUrls?: Record<string, string>;
 }
+
+const NO_ASSET_URLS: Record<string, string> = {};
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
   = ({
@@ -48,10 +53,14 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     editable,
     notification,
     preview,
+    assetUrls = NO_ASSET_URLS,
   }) => {
     // Only the first sync: after a dropped connection the editor keeps what
     // it has, which is newer than the preview.
     const [hasSynced, setHasSynced] = useState(false);
+    // The ones the page loaded with: a revalidation signs new URLs, which
+    // would load every image again.
+    const [initialAssetUrls] = useState(assetUrls);
     const containerRef = useRef<HTMLDivElement>(null);
     const hasImagesReady = useLiveImagesReady(containerRef, hasSynced);
     const ref = useRef<HTMLDivElement>(null);
@@ -117,36 +126,38 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
 
     return (
       <div ref={containerRef} className="contents">
-        <LexicalCollaboration>
-          <Editor
-            avatars={collaborators}
-            topbarLeft={topbarLeft}
-            topbarRight={topbarRight}
-            editable={editable}
-            notification={notification}
-            uploadImage={uploadImage}
-            copyImage={copyImage}
-            // Editing only starts once the live document is here: until then
-            // the reader sees what the server drew.
-            preview={hasImagesReady ? null : preview}
-            // Inside the content, so the cursors scroll along with it — also
-            // while typing, when the content scrolls in the editor rather
-            // than the page.
-            contentOverlay={<div ref={ref} />}
-          >
-            <CollaborationPlugin
-              id={id}
-              providerFactory={providerFactory}
-              shouldBootstrap={true}
-              username={identity.name}
-              cursorColor={identity.color}
-              awarenessData={awarenessData}
-              cursorsContainerRef={ref}
-              selectionHighlight
-              syncCursorPositionsFn={syncCursorPositionsFn}
-            />
-          </Editor>
-        </LexicalCollaboration>
+        <AssetUrlsContext value={initialAssetUrls}>
+          <LexicalCollaboration>
+            <Editor
+              avatars={collaborators}
+              topbarLeft={topbarLeft}
+              topbarRight={topbarRight}
+              editable={editable}
+              notification={notification}
+              uploadImage={uploadImage}
+              copyImage={copyImage}
+              // Editing only starts once the live document is here: until then
+              // the reader sees what the server drew.
+              preview={hasImagesReady ? null : preview}
+              // Inside the content, so the cursors scroll along with it — also
+              // while typing, when the content scrolls in the editor rather
+              // than the page.
+              contentOverlay={<div ref={ref} />}
+            >
+              <CollaborationPlugin
+                id={id}
+                providerFactory={providerFactory}
+                shouldBootstrap={true}
+                username={identity.name}
+                cursorColor={identity.color}
+                awarenessData={awarenessData}
+                cursorsContainerRef={ref}
+                selectionHighlight
+                syncCursorPositionsFn={syncCursorPositionsFn}
+              />
+            </Editor>
+          </LexicalCollaboration>
+        </AssetUrlsContext>
       </div>
     );
   };

@@ -10,9 +10,10 @@ import {
   COMMAND_PRIORITY_LOW,
   type NodeKey,
 } from 'lexical';
-import { useEffect, useRef } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import { parseAssetSrc } from '~/utils/asset-src';
 import { listenForEditableTap, TAP_SLOP } from '~/utils/editable-tap';
+import { AssetUrlsContext } from './asset-urls-context';
 
 export const IMAGE_FRAME_CLASS_NAME = 'mx-auto max-w-full rounded-sm';
 export const IMAGE_PLACEHOLDER_CLASS_NAME
@@ -42,6 +43,11 @@ export const ImageView: React.FC<ImageViewProps> = ({
   const [isSelected, setSelected, clearSelection]
     = useLexicalNodeSelection(nodeKey);
   const ref = useRef<HTMLImageElement>(null);
+  const assetUrls = use(AssetUrlsContext);
+  // A signed URL expires, so an image drawn long after the page loaded
+  // falls back to the redirect.
+  const [hasSignedUrlFailed, setHasSignedUrlFailed] = useState(false);
+  const signedUrl = hasSignedUrlFailed ? undefined : assetUrls[src];
 
   useEffect(() => editor.registerCommand(
     CLICK_COMMAND,
@@ -148,12 +154,13 @@ export const ImageView: React.FC<ImageViewProps> = ({
     <div style={{ width }} className={IMAGE_FRAME_CLASS_NAME}>
       <img
         ref={ref}
-        src={src}
+        src={signedUrl ?? src}
+        data-src={src}
+        onError={signedUrl ? () => setHasSignedUrlFailed(true) : undefined}
         width={width}
         height={height}
         alt=""
         loading="lazy"
-        decoding="async"
         draggable={isEditable}
         className={classNames(
           IMAGE_CLASS_NAME,

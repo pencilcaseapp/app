@@ -1,8 +1,9 @@
 import { describe, expect, test } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { createEditor } from 'lexical';
 import { ImageNode } from './image-node';
+import { AssetUrlsContext } from './asset-urls-context';
 import { ImageView } from './image-view';
 
 const src = '/doc/a1e0b1c3-0000-4000-8000-000000000000/assets/'
@@ -31,13 +32,15 @@ function exportImage(imageSrc: string) {
   return element as HTMLElement;
 }
 
-function renderView(viewSrc: string) {
+function renderView(viewSrc: string, assetUrls: Record<string, string> = {}) {
   return render(
-    <LexicalComposer
-      initialConfig={{ namespace: 'test', onError: console.error }}
-    >
-      <ImageView nodeKey="1" src={viewSrc} width={800} height={600} />
-    </LexicalComposer>,
+    <AssetUrlsContext value={assetUrls}>
+      <LexicalComposer
+        initialConfig={{ namespace: 'test', onError: console.error }}
+      >
+        <ImageView nodeKey="1" src={viewSrc} width={800} height={600} />
+      </LexicalComposer>
+    </AssetUrlsContext>,
   );
 }
 
@@ -75,6 +78,22 @@ describe('ImageNode', () => {
 describe('ImageView', () => {
   test('shows one of our assets', () => {
     renderView(src);
+
+    expect(screen.getByRole('presentation')).toHaveAttribute('src', src);
+  });
+
+  test('loads the signed URL the page came with', () => {
+    renderView(src, { [src]: 'https://cdn.example/a' });
+
+    const image = screen.getByRole('presentation');
+    expect(image).toHaveAttribute('src', 'https://cdn.example/a');
+    expect(image).toHaveAttribute('data-src', src);
+  });
+
+  test('falls back to its own source once the signed URL fails', () => {
+    renderView(src, { [src]: 'https://cdn.example/a' });
+
+    fireEvent.error(screen.getByRole('presentation'));
 
     expect(screen.getByRole('presentation')).toHaveAttribute('src', src);
   });
