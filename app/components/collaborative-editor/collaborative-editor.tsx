@@ -14,6 +14,7 @@ import { useCursorNameBounds } from '~/hooks/use-cursor-name-bounds';
 import { useRemoteCursorPositions } from '~/hooks/use-remote-cursor-positions';
 import { useCopyImage } from '~/hooks/use-copy-image';
 import { useUploadImage } from '~/hooks/use-upload-image';
+import { useLiveImagesReady } from '~/hooks/use-live-images-ready';
 import { getGuestId } from '~/utils/guest-id';
 import {
   getGuestPresenceIdentity,
@@ -51,6 +52,8 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     // Only the first sync: after a dropped connection the editor keeps what
     // it has, which is newer than the preview.
     const [hasSynced, setHasSynced] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const hasImagesReady = useLiveImagesReady(containerRef, hasSynced);
     const ref = useRef<HTMLDivElement>(null);
     const socketClient = useSocketClient();
     // A signed out visitor is identified by a guest id kept in their browser,
@@ -113,35 +116,37 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps>
     }, [provider]);
 
     return (
-      <LexicalCollaboration>
-        <Editor
-          avatars={collaborators}
-          topbarLeft={topbarLeft}
-          topbarRight={topbarRight}
-          editable={editable}
-          notification={notification}
-          uploadImage={uploadImage}
-          copyImage={copyImage}
-          // Editing only starts once the live document is here: until then
-          // the reader sees what the server drew.
-          preview={hasSynced ? null : preview}
-          // Inside the content, so the cursors scroll along with it — also
-          // while typing, when the content scrolls in the editor rather
-          // than the page.
-          contentOverlay={<div ref={ref} />}
-        >
-          <CollaborationPlugin
-            id={id}
-            providerFactory={providerFactory}
-            shouldBootstrap={true}
-            username={identity.name}
-            cursorColor={identity.color}
-            awarenessData={awarenessData}
-            cursorsContainerRef={ref}
-            selectionHighlight
-            syncCursorPositionsFn={syncCursorPositionsFn}
-          />
-        </Editor>
-      </LexicalCollaboration>
+      <div ref={containerRef} className="contents">
+        <LexicalCollaboration>
+          <Editor
+            avatars={collaborators}
+            topbarLeft={topbarLeft}
+            topbarRight={topbarRight}
+            editable={editable}
+            notification={notification}
+            uploadImage={uploadImage}
+            copyImage={copyImage}
+            // Editing only starts once the live document is here: until then
+            // the reader sees what the server drew.
+            preview={hasImagesReady ? null : preview}
+            // Inside the content, so the cursors scroll along with it — also
+            // while typing, when the content scrolls in the editor rather
+            // than the page.
+            contentOverlay={<div ref={ref} />}
+          >
+            <CollaborationPlugin
+              id={id}
+              providerFactory={providerFactory}
+              shouldBootstrap={true}
+              username={identity.name}
+              cursorColor={identity.color}
+              awarenessData={awarenessData}
+              cursorsContainerRef={ref}
+              selectionHighlight
+              syncCursorPositionsFn={syncCursorPositionsFn}
+            />
+          </Editor>
+        </LexicalCollaboration>
+      </div>
     );
   };

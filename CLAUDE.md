@@ -123,7 +123,10 @@ is the server render (topbar plus content; the formatting buttons are
 `EditorToolbar`, drawn without handlers and shown from `lg` by CSS), and `EditorPluginRichText`
 keeps showing the same content, with the editor hidden behind it, until
 the first sync (`CollaborativeEditor`'s `hasSynced`), so nobody edits
-before the live document is there. The preview carries
+before the live document is there, and a moment longer while
+`useLiveImagesReady` has the editor decode the images the preview shows
+(a second at most): Safari only loads a lazy image once it is shown, so
+the swap would blank every image. The preview carries
 `contenteditable="false"` because `editor.css` selects on
 `[contenteditable]`; tests find the editor itself by `[data-lexical-editor]`.
 A document nobody has written in has no preview. The Y.Doc only ever comes
