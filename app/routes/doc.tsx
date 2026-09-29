@@ -246,6 +246,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
             topbarLeft={topbarLeft}
             topbarRight={topbarRight}
             notification={notification}
+            editable={!readOnly}
           />
         )}
       >

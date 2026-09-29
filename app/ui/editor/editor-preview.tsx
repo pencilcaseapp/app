@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import { Topbar } from '~/ui/topbar/topbar';
+import { EditorToolbar } from './editor-toolbar';
 
 import './editor.css';
 
@@ -55,20 +56,32 @@ export interface EditorPreviewProps {
   topbarLeft?: React.ReactNode;
   topbarRight?: React.ReactNode;
   notification?: React.ReactNode;
+  /** Draws the formatting buttons, idle until the editor is there. */
+  editable?: boolean;
 }
 
 /**
  * The page the editor draws, without the editor: what the server renders,
- * so the content is there before the scripts are.
+ * so the content is there before the scripts are. The editor shows its
+ * formatting buttons from 1024 pixels up, which CSS decides here.
  */
 export const EditorPreview: React.FC<EditorPreviewProps> = ({
   html,
   topbarLeft,
   topbarRight,
   notification,
+  editable = false,
 }) => (
   <div className="w-full relative">
-    <Topbar left={topbarLeft} right={topbarRight} />
+    <Topbar
+      left={topbarLeft}
+      right={topbarRight}
+      center={editable && (
+        <div className="hidden lg:contents">
+          <EditorToolbar canInsertImages />
+        </div>
+      )}
+    />
     {notification && <EditorTopArea>{notification}</EditorTopArea>}
     <EditorPreviewContent html={html} hasTopArea={Boolean(notification)} />
   </div>

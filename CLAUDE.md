@@ -119,7 +119,8 @@ editor's own DOM rendering rather than Lexical's HTML export, so markup and
 classes match. Images, which React draws, come from `ImageNode.exportDOM`,
 which draws what `ImageView` does (ours only, `parseAssetSrc`) but decodes
 before the page paints, or the image would blink on every reload. `EditorPreview` (`app/ui/editor/editor-preview.tsx`)
-is the server render (topbar plus content), and `EditorPluginRichText`
+is the server render (topbar plus content; the formatting buttons are
+`EditorToolbar`, drawn without handlers and shown from `lg` by CSS), and `EditorPluginRichText`
 keeps showing the same content, with the editor hidden behind it, until
 the first sync (`CollaborativeEditor`'s `hasSynced`), so nobody edits
 before the live document is there. The preview carries
