@@ -224,7 +224,7 @@ with `npm run email`. Email components snapshot the *inlined* CSS through
 pipeline across React Email upgrades. The OTP template's copy is load bearing
 for iOS one-time-code detection — read `docs/emails.md` before rewording it.
 
-**Assets — `app/services/asset.ts`.** Files people add to a document
+**Assets — `app/services/document.ts`.** Files people add to a document
 (images, for now) live in S3-compatible object storage: a Bunny storage
 zone (Frankfurt, S3 compatibility on, reached through
 `app/clients/storage.ts`) in prod (`STORAGE_ZONE`,

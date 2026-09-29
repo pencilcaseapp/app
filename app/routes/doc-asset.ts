@@ -1,6 +1,6 @@
 import { data } from 'react-router';
 import { optionalUserSessionContext } from '~/contexts/user-session';
-import { openAsset } from '~/services/asset';
+import { openAsset } from '~/services/document';
 import type { Route } from './+types/doc-asset';
 
 /**

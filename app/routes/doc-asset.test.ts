@@ -3,14 +3,14 @@
 import { RouterContextProvider } from 'react-router';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { optionalUserSessionContext } from '~/contexts/user-session';
-import { OpenAssetError } from '~/services/asset';
+import { OpenAssetError } from '~/services/document';
 import { userFixture } from '~/test/fixtures/user';
 import { loader } from './doc-asset';
 import type { Route } from './+types/doc-asset';
 
 const openAssetMock = vi.fn();
-vi.mock('~/services/asset', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('~/services/asset')>();
+vi.mock('~/services/document', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('~/services/document')>();
   return {
     ...actual,
     openAsset: (...args: unknown[]) => openAssetMock(...args),
