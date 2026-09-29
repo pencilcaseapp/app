@@ -21,6 +21,7 @@ import { ToastProvider } from './ui/toast/toast-provider';
 import { useToast } from './hooks/use-toast';
 
 import './app.css';
+import fontsHref from './fonts.css?url';
 
 export const middleware = [sessionMiddleware];
 
@@ -29,6 +30,10 @@ export const links: Route.LinksFunction = () => [
   { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
   { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
   { rel: 'manifest', href: '/site.webmanifest' },
+  // A link of their own rather than part of app.css: Vite injects app.css
+  // again once the page has hydrated in development, which registers the
+  // fonts a second time and flashes the fallback while they reload.
+  { rel: 'stylesheet', href: fontsHref },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
