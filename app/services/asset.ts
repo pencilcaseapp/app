@@ -5,7 +5,7 @@ import {
   SIGNED_ASSET_URL_WINDOW_SECONDS,
 } from '~/constants/asset';
 import { getConfig, type Config } from '~/config';
-import { createAsset, getAsset } from '~/repos/document-asset';
+import { createDocumentAsset, getDocumentAsset } from '~/repos/document';
 import { getLiveAccess, type DocumentViewer } from '~/services/document';
 import { copyObject, getObjectStream, putObject } from '~/clients/storage';
 import { parseAssetSrc } from '~/utils/asset-src';
@@ -69,7 +69,7 @@ export async function addImage(input: AddImageInput): Promise<AddImageResult> {
     contentType: IMAGE_CONTENT_TYPE,
   });
 
-  await createAsset({
+  await createDocumentAsset({
     id,
     documentId,
     userId: viewer?.id,
@@ -119,7 +119,7 @@ export async function copyImage(
   }
 
   const source = parseAssetSrc(src);
-  const asset = source && await getAsset(source.assetId);
+  const asset = source && await getDocumentAsset(source.assetId);
 
   if (
     !asset
@@ -134,7 +134,7 @@ export async function copyImage(
 
   await copyObject(asset.storageKey, storageKey);
 
-  await createAsset({
+  await createDocumentAsset({
     id,
     documentId,
     userId: viewer?.id,
@@ -178,7 +178,7 @@ export async function openAsset(
   assetId: string,
   viewer?: DocumentViewer,
 ): Promise<OpenAssetResult> {
-  const asset = await getAsset(assetId);
+  const asset = await getDocumentAsset(assetId);
 
   if (
     !asset

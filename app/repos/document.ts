@@ -20,12 +20,19 @@ import {
   type DocumentLinkAccess,
 } from '~/constants/document';
 import { db } from '~/db';
-import { documentCollaborators, documents, users } from '~/db/schema';
+import {
+  documentAssets,
+  documentCollaborators,
+  documents,
+  users,
+} from '~/db/schema';
 
 export type Document = InferSelectModel<typeof documents>;
 
 export type DocumentCollaborator
   = InferSelectModel<typeof documentCollaborators>;
+
+export type DocumentAsset = InferSelectModel<typeof documentAssets>;
 
 /** Who is looking at a document: the id and address of the session's user. */
 export interface DocumentViewer {
@@ -634,4 +641,50 @@ export async function removeCollaborator(input: OwnedCollaboratorInput) {
     });
 
   return collaborator;
+}
+
+export interface CreateDocumentAssetInput {
+  id: string;
+  documentId: string;
+  userId?: string;
+  storageKey: string;
+  contentType: string;
+  byteSize: number;
+  width: number;
+  height: number;
+}
+
+export async function createDocumentAsset(input: CreateDocumentAssetInput) {
+  const [asset] = await db.insert(documentAssets).values(input).returning();
+
+  return asset;
+}
+
+export async function getDocumentAsset(id: string) {
+  if (!isUuid(id)) {
+    return undefined;
+  }
+
+  return db.query.documentAssets.findFirst({ where: { id } });
+}
+
+export async function getDocumentAssets(documentIds: string[]) {
+  if (documentIds.length === 0) {
+    return [];
+  }
+
+  return db
+    .select()
+    .from(documentAssets)
+    .where(inArray(documentAssets.documentId, documentIds));
+}
+
+export async function deleteDocumentAssets(documentIds: string[]) {
+  if (documentIds.length === 0) {
+    return;
+  }
+
+  await db
+    .delete(documentAssets)
+    .where(inArray(documentAssets.documentId, documentIds));
 }

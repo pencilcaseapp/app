@@ -1,11 +1,16 @@
+import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import {
   acceptInvite,
   connectCollaborator,
   countOwnedDocuments,
   createDocument,
+  createDocumentAsset,
+  deleteDocumentAssets,
   getDeletedDocumentList,
   getDocument,
+  getDocumentAsset,
+  getDocumentAssets,
   getDocumentForViewer,
   getDocumentList,
   getDocumentTitle,
@@ -31,6 +36,7 @@ import {
   createSharedDocument,
   inviteDocumentCollaborator,
 } from '~/test/data-factories/document';
+import { createTestAsset } from '~/test/data-factories/document-asset';
 import { createTestUser } from '~/test/data-factories/user';
 
 function viewerOf(user: { id: string; email: string }) {
@@ -1146,5 +1152,96 @@ describe('hardDeleteDocuments', () => {
 
   it('does nothing without ids', async () => {
     await expect(hardDeleteDocuments([])).resolves.toBeUndefined();
+  });
+});
+
+describe('createDocumentAsset', () => {
+  it('stores an asset of a document', async () => {
+    const user = await createTestUser();
+    const document = await createDocumentWithTitle(user.id);
+    const id = randomUUID();
+
+    const asset = await createDocumentAsset({
+      id,
+      documentId: document.id,
+      userId: user.id,
+      storageKey: `documents/${document.id}/${id}.webp`,
+      contentType: 'image/webp',
+      byteSize: 1234,
+      width: 800,
+      height: 600,
+    });
+
+    expect(asset).toMatchObject({
+      id,
+      documentId: document.id,
+      userId: user.id,
+      width: 800,
+      height: 600,
+    });
+  });
+
+  it('stores an asset without an uploader', async () => {
+    const user = await createTestUser();
+    const document = await createDocumentWithTitle(user.id);
+    const id = randomUUID();
+
+    const asset = await createDocumentAsset({
+      id,
+      documentId: document.id,
+      storageKey: `documents/${document.id}/${id}.webp`,
+      contentType: 'image/webp',
+      byteSize: 1234,
+      width: 800,
+      height: 600,
+    });
+
+    expect(asset.userId).toBeNull();
+  });
+});
+
+describe('getDocumentAsset', () => {
+  it('finds an asset by id', async () => {
+    const user = await createTestUser();
+    const document = await createDocumentWithTitle(user.id);
+    const asset = await createTestAsset(document.id, user.id);
+
+    expect(await getDocumentAsset(asset.id)).toEqual(asset);
+  });
+
+  it('returns undefined for an unknown or malformed id', async () => {
+    expect(await getDocumentAsset(randomUUID())).toBeUndefined();
+    expect(await getDocumentAsset('not-a-uuid')).toBeUndefined();
+  });
+});
+
+describe('getDocumentAssets', () => {
+  it('lists the assets of the given documents only', async () => {
+    const user = await createTestUser();
+    const document = await createDocumentWithTitle(user.id);
+    const other = await createDocumentWithTitle(user.id);
+    const asset = await createTestAsset(document.id);
+    await createTestAsset(other.id);
+
+    expect(await getDocumentAssets([document.id])).toEqual([asset]);
+  });
+
+  it('returns nothing without ids', async () => {
+    expect(await getDocumentAssets([])).toEqual([]);
+  });
+});
+
+describe('deleteDocumentAssets', () => {
+  it('deletes the assets of the given documents only', async () => {
+    const user = await createTestUser();
+    const document = await createDocumentWithTitle(user.id);
+    const other = await createDocumentWithTitle(user.id);
+    const asset = await createTestAsset(document.id);
+    const kept = await createTestAsset(other.id);
+
+    await deleteDocumentAssets([document.id]);
+
+    expect(await getDocumentAsset(asset.id)).toBeUndefined();
+    expect(await getDocumentAsset(kept.id)).toEqual(kept);
   });
 });

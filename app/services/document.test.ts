@@ -49,6 +49,8 @@ const getInvitedCollaboratorsMock = vi.fn();
 const insertInviteMock = vi.fn();
 const setCollaboratorAccessMock = vi.fn();
 const deleteCollaboratorMock = vi.fn();
+const getDocumentAssetsMock = vi.fn();
+const deleteDocumentAssetsMock = vi.fn();
 vi.mock('~/repos/document', () => ({
   countOwnedDocuments: (...args: unknown[]) => countOwnedDocumentsMock(...args),
   createDocument: (...args: unknown[]) => createDocumentRowMock(...args),
@@ -74,15 +76,9 @@ vi.mock('~/repos/document', () => ({
   setCollaboratorAccess: (...args: unknown[]) =>
     setCollaboratorAccessMock(...args),
   removeCollaborator: (...args: unknown[]) => deleteCollaboratorMock(...args),
-}));
-
-const getAssetsOfDocumentsMock = vi.fn();
-const deleteAssetsOfDocumentsMock = vi.fn();
-vi.mock('~/repos/document-asset', () => ({
-  getAssetsOfDocuments: (...args: unknown[]) =>
-    getAssetsOfDocumentsMock(...args),
-  deleteAssetsOfDocuments: (...args: unknown[]) =>
-    deleteAssetsOfDocumentsMock(...args),
+  getDocumentAssets: (...args: unknown[]) => getDocumentAssetsMock(...args),
+  deleteDocumentAssets: (...args: unknown[]) =>
+    deleteDocumentAssetsMock(...args),
 }));
 
 const deleteObjectsMock = vi.fn();
@@ -790,12 +786,12 @@ describe('purgeDeletedDocuments', () => {
     const ids = [documentFixture.id];
     const calls: string[] = [];
     getDocumentIdsDeletedBeforeMock.mockResolvedValueOnce(ids);
-    getAssetsOfDocumentsMock.mockResolvedValue([
+    getDocumentAssetsMock.mockResolvedValue([
       { storageKey: 'documents/a/1.webp' },
       { storageKey: 'documents/a/2.webp' },
     ]);
     deleteObjectsMock.mockImplementation(() => calls.push('objects'));
-    deleteAssetsOfDocumentsMock.mockImplementation(() => calls.push('assets'));
+    deleteDocumentAssetsMock.mockImplementation(() => calls.push('assets'));
     hardDeleteDocumentsMock.mockImplementation(() => calls.push('documents'));
 
     const deletedCount = await purgeDeletedDocuments(before);
@@ -808,7 +804,7 @@ describe('purgeDeletedDocuments', () => {
       'documents/a/1.webp',
       'documents/a/2.webp',
     ]);
-    expect(deleteAssetsOfDocumentsMock).toHaveBeenCalledWith(ids);
+    expect(deleteDocumentAssetsMock).toHaveBeenCalledWith(ids);
     expect(hardDeleteDocumentsMock).toHaveBeenCalledWith(ids);
     expect(calls).toEqual(['objects', 'assets', 'documents']);
   });
@@ -818,7 +814,7 @@ describe('purgeDeletedDocuments', () => {
     getDocumentIdsDeletedBeforeMock
       .mockResolvedValueOnce(fullBatch)
       .mockResolvedValueOnce(['last']);
-    getAssetsOfDocumentsMock.mockResolvedValue([]);
+    getDocumentAssetsMock.mockResolvedValue([]);
 
     const deletedCount = await purgeDeletedDocuments(before);
 

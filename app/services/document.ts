@@ -13,6 +13,8 @@ import {
   connectCollaborator,
   countOwnedDocuments,
   createDocument as createDocumentRow,
+  deleteDocumentAssets,
+  getDocumentAssets,
   getDocumentForViewer,
   getDocumentIdsDeletedBefore,
   getInvitedCollaborators,
@@ -28,7 +30,6 @@ import {
   type DocumentForViewer,
   type DocumentViewer,
 } from '~/repos/document';
-import { deleteAssetsOfDocuments, getAssetsOfDocuments } from '~/repos/document-asset';
 import { countEmailLogsByUser } from '~/repos/email-log';
 import { getUserByEmail, type User } from '~/repos/user';
 import { normalizeEmail } from '~/utils/email';
@@ -569,9 +570,9 @@ export async function purgeDeletedDocuments(before: Date) {
       return deletedCount;
     }
 
-    const assets = await getAssetsOfDocuments(ids);
+    const assets = await getDocumentAssets(ids);
     await deleteObjects(assets.map(asset => asset.storageKey));
-    await deleteAssetsOfDocuments(ids);
+    await deleteDocumentAssets(ids);
     await hardDeleteDocuments(ids);
 
     deletedCount += ids.length;

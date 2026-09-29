@@ -33,11 +33,12 @@ vi.mock('~/services/document', () => ({
   getLiveAccess: (...args: unknown[]) => getLiveAccessMock(...args),
 }));
 
-const createAssetMock = vi.fn();
-const getAssetMock = vi.fn();
-vi.mock('~/repos/document-asset', () => ({
-  createAsset: (...args: unknown[]) => createAssetMock(...args),
-  getAsset: (...args: unknown[]) => getAssetMock(...args),
+const createDocumentAssetMock = vi.fn();
+const getDocumentAssetMock = vi.fn();
+vi.mock('~/repos/document', () => ({
+  createDocumentAsset: (...args: unknown[]) =>
+    createDocumentAssetMock(...args),
+  getDocumentAsset: (...args: unknown[]) => getDocumentAssetMock(...args),
 }));
 
 const putObjectMock = vi.fn();
@@ -85,7 +86,7 @@ describe('addImage', () => {
       body: expect.any(Uint8Array),
       contentType: 'image/webp',
     });
-    expect(createAssetMock).toHaveBeenCalledWith({
+    expect(createDocumentAssetMock).toHaveBeenCalledWith({
       id: image!.id,
       documentId,
       userId: viewer.id,
@@ -102,7 +103,7 @@ describe('addImage', () => {
 
     await addImage({ documentId, file: await createPng(10, 10) });
 
-    expect(createAssetMock).toHaveBeenCalledWith(
+    expect(createDocumentAssetMock).toHaveBeenCalledWith(
       expect.objectContaining({ userId: undefined }),
     );
   });
@@ -157,7 +158,7 @@ describe('addImage', () => {
 
     expect(result).toEqual([AddImageError.UnsupportedType]);
     expect(putObjectMock).not.toHaveBeenCalled();
-    expect(createAssetMock).not.toHaveBeenCalled();
+    expect(createDocumentAssetMock).not.toHaveBeenCalled();
   });
 });
 
@@ -176,7 +177,7 @@ describe('copyImage', () => {
 
   it('copies the image into the document and records it', async () => {
     getLiveAccessMock.mockResolvedValue({ readOnly: false });
-    getAssetMock.mockResolvedValue(source);
+    getDocumentAssetMock.mockResolvedValue(source);
 
     const [error, image] = await copyImage({ documentId, viewer, src });
 
@@ -187,7 +188,7 @@ describe('copyImage', () => {
 
     const storageKey = `documents/${documentId}/${image!.id}.webp`;
     expect(copyObjectMock).toHaveBeenCalledWith(source.storageKey, storageKey);
-    expect(createAssetMock).toHaveBeenCalledWith({
+    expect(createDocumentAssetMock).toHaveBeenCalledWith({
       id: image!.id,
       documentId,
       userId: viewer.id,
@@ -212,7 +213,7 @@ describe('copyImage', () => {
     getLiveAccessMock
       .mockResolvedValueOnce({ readOnly: false })
       .mockResolvedValueOnce(undefined);
-    getAssetMock.mockResolvedValue(source);
+    getDocumentAssetMock.mockResolvedValue(source);
 
     const result = await copyImage({ documentId, viewer, src });
 
@@ -222,7 +223,7 @@ describe('copyImage', () => {
 
   it('does not copy an asset under another document', async () => {
     getLiveAccessMock.mockResolvedValue({ readOnly: false });
-    getAssetMock.mockResolvedValue({ ...source, documentId });
+    getDocumentAssetMock.mockResolvedValue({ ...source, documentId });
 
     const result = await copyImage({ documentId, viewer, src });
 
@@ -240,7 +241,7 @@ describe('copyImage', () => {
     });
 
     expect(result).toEqual([CopyImageError.NotFound]);
-    expect(getAssetMock).not.toHaveBeenCalled();
+    expect(getDocumentAssetMock).not.toHaveBeenCalled();
   });
 
   it('does not exist for somebody who may not open the document', async () => {
@@ -262,7 +263,7 @@ describe('openAsset', () => {
   const body = new ReadableStream();
 
   it('streams the asset to somebody who may open its document', async () => {
-    getAssetMock.mockResolvedValue(asset);
+    getDocumentAssetMock.mockResolvedValue(asset);
     getLiveAccessMock.mockResolvedValue({ readOnly: true });
     getObjectStreamMock.mockResolvedValue(body);
 
@@ -279,7 +280,7 @@ describe('openAsset', () => {
 
   it('signs a CDN URL instead of streaming when there is a CDN', async () => {
     cdn.config = { url: 'https://cdn.example', tokenKey: 'key' };
-    getAssetMock.mockResolvedValue(asset);
+    getDocumentAssetMock.mockResolvedValue(asset);
     getLiveAccessMock.mockResolvedValue({ readOnly: true });
 
     const [error, opened] = await openAsset(documentId, asset.id, viewer);
@@ -294,7 +295,7 @@ describe('openAsset', () => {
   });
 
   it('does not exist for somebody who may not open the document', async () => {
-    getAssetMock.mockResolvedValue(asset);
+    getDocumentAssetMock.mockResolvedValue(asset);
     getLiveAccessMock.mockResolvedValue(undefined);
 
     const result = await openAsset(documentId, asset.id, viewer);
@@ -304,7 +305,7 @@ describe('openAsset', () => {
   });
 
   it('does not exist under another document', async () => {
-    getAssetMock.mockResolvedValue(asset);
+    getDocumentAssetMock.mockResolvedValue(asset);
     getLiveAccessMock.mockResolvedValue({ readOnly: false });
 
     const result = await openAsset(
@@ -319,14 +320,14 @@ describe('openAsset', () => {
   });
 
   it('does not exist when there is no such asset', async () => {
-    getAssetMock.mockResolvedValue(undefined);
+    getDocumentAssetMock.mockResolvedValue(undefined);
 
     expect(await openAsset(documentId, asset.id))
       .toEqual([OpenAssetError.NotFound]);
   });
 
   it('does not exist when the bucket has lost the file', async () => {
-    getAssetMock.mockResolvedValue(asset);
+    getDocumentAssetMock.mockResolvedValue(asset);
     getLiveAccessMock.mockResolvedValue({ readOnly: false });
     getObjectStreamMock.mockResolvedValue(undefined);
 
