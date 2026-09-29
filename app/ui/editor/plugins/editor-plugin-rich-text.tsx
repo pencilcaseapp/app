@@ -421,7 +421,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
                   placeholder={<span />}
                   className={classNames([
                     topArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
-                    'pb-3 md:pb-12 touch-screen:pb-[55dvh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
+                    'pb-3 md:pb-12 touch-screen:pb-[55svh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
                   ])}
                 />
                 {contentOverlay}
