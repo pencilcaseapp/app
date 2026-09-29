@@ -5,7 +5,6 @@ import { Icon } from '../icon/icon';
 import type { IconName } from '../icon/icons';
 import { Tooltip } from '../tooltip/tooltip';
 import { useIconOnly } from './icon-only-context';
-import { useMedia } from 'react-use';
 
 type TypographyColorProps
   = Pick<React.ComponentProps<typeof Typography>,
@@ -51,7 +50,6 @@ export function NavigationItem<C extends React.ElementType = 'a'>(
   ]);
 
   const Component = as as React.ElementType;
-  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
 
   // The `::before` stretches the link over the whole row, so the padding,
   // the gap and the space the action area sits in navigate too instead of
@@ -97,8 +95,8 @@ export function NavigationItem<C extends React.ElementType = 'a'>(
               </Component>
               {actionArea && (
                 <div className={classNames([
-                  'relative shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 transition-opacity',
-                  (isTouchDevice || isActionAreaVisible) && 'opacity-100',
+                  'relative shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-data-[state=open]:opacity-100 touch-screen:opacity-100 transition-opacity',
+                  isActionAreaVisible && 'opacity-100',
                 ])}
                 >
                   {actionArea}

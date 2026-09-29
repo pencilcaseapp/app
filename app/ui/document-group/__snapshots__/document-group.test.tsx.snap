@@ -45,7 +45,7 @@ exports[`DocumentGroup > actionArea > should match snapshot 1`] = `
             Work
           </span>
           <div
-            class="shrink-0 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:has-data-[state=open]:opacity-100 transition-opacity"
+            class="shrink-0 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:has-data-[state=open]:opacity-100 lg:touch-screen:opacity-100 transition-opacity"
           >
             <span
               data-testid="action-area"

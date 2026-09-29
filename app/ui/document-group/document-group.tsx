@@ -4,7 +4,6 @@ import type { FC, PropsWithChildren } from 'react';
 import { Icon } from '../icon/icon';
 import { Typography } from '../typography/typography';
 import classNames from 'classnames';
-import { useMedia } from 'react-use';
 
 export type DocumentGroupProps = {
   title: string;
@@ -16,8 +15,6 @@ export type DocumentGroupProps = {
 
 export const DocumentGroup: FC<DocumentGroupProps>
   = ({ title, value, children, icon, actionArea, iconTitle }) => {
-    const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
-
     return (
       <AccordionItem value={value}>
         <AccordionHeader asChild>
@@ -41,7 +38,7 @@ export const DocumentGroup: FC<DocumentGroupProps>
                 {title}
               </Typography>
               {actionArea && (
-                <div className={classNames(['shrink-0 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:has-data-[state=open]:opacity-100 transition-opacity', isTouchDevice && 'lg:opacity-100'])}>
+                <div className="shrink-0 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:has-data-[state=open]:opacity-100 lg:touch-screen:opacity-100 transition-opacity">
                   {actionArea}
                 </div>
               )}

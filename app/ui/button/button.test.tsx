@@ -147,4 +147,12 @@ describe('Button', () => {
       expect(screen.getByRole('button').className).toMatch(pattern);
     });
   });
+
+  test('keeps only the icon on mobile, with the label for screen readers', () => {
+    render(<Button icon="share" hideLabelOnMobile>Share</Button>);
+
+    expect(screen.getByRole('button', { name: 'Share' }))
+      .toHaveClass('max-sm:w-11', 'max-sm:p-0');
+    expect(screen.getByText('Share')).toHaveClass('max-sm:sr-only');
+  });
 });

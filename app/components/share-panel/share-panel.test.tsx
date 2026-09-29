@@ -155,15 +155,13 @@ describe('SharePanel', () => {
     ).toBeInTheDocument();
   });
 
-  test('renders the trigger without its label on phones', () => {
-    vi.mocked(useIsMobile).mockReturnValue(true);
+  test('hides the label of the trigger on phones with CSS', () => {
     renderSharePanel({ defaultOpen: false });
 
-    const trigger = screen.getByRole('button', { name: 'Share' });
-
-    // The label lives in the icon, so the button keeps its accessible name.
-    expect(screen.getByTitle('Share')).toBeInTheDocument();
-    expect(trigger.querySelector('span')).toBeNull();
+    // The server cannot tell a phone, so CSS drops the label there and
+    // leaves it for screen readers.
+    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
+    expect(screen.getByText('Share')).toHaveClass('max-sm:sr-only');
   });
 
   test('opens the panel from the trigger', async () => {

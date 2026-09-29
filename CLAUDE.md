@@ -454,7 +454,10 @@ tokens (`bg-pca-grey-900`, `text-pca-white`, …), never raw Tailwind palette
 colors. Components take explicit `colorLight`/`colorDark`, `textColorLight`/
 `textColorDark` props and emit both light and `dark:` classes rather than
 relying on a runtime theme. Polymorphism goes through the `as` prop and
-`PolymorphicComponentPropWithRef`. A new component with real mechanics behind
+`PolymorphicComponentPropWithRef`. Anything the page looks like per screen goes
+through CSS (`max-sm:`, `lg:`, `touch-screen:`), never `useMedia`: the
+server cannot know the screen, so a hook would draw the wrong thing until
+hydration. `useMedia` is for behaviour, with a `false` default. A new component with real mechanics behind
 it — an overlay, a menu, a form control with its own focus and keyboard
 handling — is built on Base UI (`@base-ui/react`), which owns the behaviour
 while `app/ui/` owns the look; the dialog, drawer, select, switch, meter and

@@ -104,6 +104,11 @@ export type ButtonProps<C extends React.ElementType>
       iconPosition?: 'start' | 'end';
       icon?: IconName;
       iconTitle?: string;
+      /**
+       * Shows only the icon below Tailwind's `sm` breakpoint, keeping the
+       * label for screen readers. CSS decides, so the server draws it too.
+       */
+      hideLabelOnMobile?: boolean;
       className?: string;
     }
   >;
@@ -120,6 +125,7 @@ export function Button<C extends React.ElementType = 'button'>(
     iconPosition = 'end',
     className,
     iconTitle,
+    hideLabelOnMobile = false,
     onClick,
     ref,
     ...props
@@ -147,6 +153,7 @@ export function Button<C extends React.ElementType = 'button'>(
     'px-0',
   ]);
   const isOnlyIcon = !children && icon;
+  const isOnlyIconOnMobile = hideLabelOnMobile && !!children && !!icon;
 
   const classes = classNames([
     'relative overflow-hidden',
@@ -154,6 +161,7 @@ export function Button<C extends React.ElementType = 'button'>(
     'flex items-center justify-center',
     'gap-2',
     isOnlyIcon ? iconOnlyClasses : baseShapeClasses,
+    isOnlyIconOnMobile && 'max-sm:w-11 max-sm:p-0',
     iconPosition === 'start' && 'flex-row-reverse',
     iconPosition === 'end' && 'flex-row',
     colorClasses,
@@ -191,7 +199,11 @@ export function Button<C extends React.ElementType = 'button'>(
     >
       {children && (
         <Typography
-          className={classNames('text-inherit! leading-none', hideClasses)}
+          className={classNames(
+            'text-inherit! leading-none',
+            hideClasses,
+            isOnlyIconOnMobile && 'max-sm:sr-only',
+          )}
           variant="bodySmall"
           fontWeight="medium"
           as="span"
@@ -207,6 +219,7 @@ export function Button<C extends React.ElementType = 'button'>(
           className={classNames([hideClasses, [
             'shrink-0',
             isOnlyIcon ? 'w-6 h-6' : 'w-4.5 h-4.5',
+            isOnlyIconOnMobile && 'max-sm:w-6 max-sm:h-6',
           ]])}
         />
       )}

@@ -4,7 +4,6 @@ import type { IconName } from '../icon/icons';
 import type { PolymorphicComponentPropWithRef } from '../polymorphic-types/polymorphic-types';
 import type { DocumentShareState } from '~/constants/document';
 import classNames from 'classnames';
-import { useMedia } from 'react-use';
 import { useReducedMotion } from 'motion/react';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { REORDER_DURATION_MS } from './reorder-animation';
@@ -41,7 +40,6 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
     ref,
     ...rest }: DocumentItemProps<C>,
 ) {
-  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
   const shouldReduceMotion = useReducedMotion();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const previousTopRef = useRef<number | null>(null);
@@ -167,7 +165,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
           'dark:group-has-aria-[current=page]:[&_button:focus]:ring-pca-yellow-700',
           // Force dark text/icon on the yellow active surface in dark mode.
           'dark:group-has-aria-[current=page]:[&_button]:text-pca-grey-900!',
-          isTouchDevice && 'opacity-100',
+          'touch-screen:opacity-100',
         ])}
         >
           {actionArea}
