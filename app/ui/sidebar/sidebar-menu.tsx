@@ -13,15 +13,19 @@ import type { SidebarBaseProps } from './types';
 
 export type SidebarMenuProps = {
   initialState?: 'open' | 'close';
+  /** Whether it is open; left out, the sidebar's at the current width. */
+  isOpen?: boolean;
 } & SidebarBaseProps;
 
 export const SidebarMenu: FC<SidebarMenuProps> = ({
   bottomArea,
   initialState,
+  isOpen,
   items,
   showSlimSidebar = false,
 }) => {
-  const { isSidebarOpen } = useSidebarContext();
+  const context = useSidebarContext();
+  const isSidebarOpen = isOpen ?? context.isSidebarOpen;
 
   return (
     <>

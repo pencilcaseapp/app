@@ -57,7 +57,7 @@ exports[`DocumentGroup > actionArea > should match snapshot 1`] = `
       </div>
       <div
         aria-labelledby="radix-_r_l_"
-        class="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up"
+        class="overflow-hidden in-data-animated:data-[state=open]:animate-accordion-down in-data-animated:data-[state=closed]:animate-accordion-up"
         data-orientation="vertical"
         data-state="closed"
         hidden=""

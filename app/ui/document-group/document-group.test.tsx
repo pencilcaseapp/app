@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Root as AccordionRoot } from '@radix-ui/react-accordion';
 import { DocumentGroup } from './document-group';
+import { DocumentGroupRoot } from './document-root';
 
 function renderInAccordion(
   ui: React.ReactNode,
@@ -119,5 +120,24 @@ describe('DocumentGroup', () => {
       );
       expect(container).toMatchSnapshot();
     });
+  });
+});
+
+describe('DocumentGroupRoot', () => {
+  test('only animates the groups once one is toggled', async () => {
+    const { container } = render(
+      <DocumentGroupRoot defaultValue={['personal']}>
+        <DocumentGroup title="Personal" icon="space" value="personal">
+          body content
+        </DocumentGroup>
+      </DocumentGroupRoot>,
+    );
+    const root = container.firstElementChild;
+
+    expect(root).not.toHaveAttribute('data-animated');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Personal' }));
+
+    expect(root).toHaveAttribute('data-animated');
   });
 });

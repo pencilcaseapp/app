@@ -11,12 +11,10 @@ const DESKTOP_QUERY = '(min-width: 1280px)';
 const MOBILE_QUERY = '(max-width: 640px)';
 
 const useMediaMock = vi.fn();
-const useLocalStorageMock = vi.fn();
 
 vi.mock('react-use', async () => {
   return {
     useMedia: (query: string) => useMediaMock(query),
-    useLocalStorage: () => useLocalStorageMock(),
   };
 });
 
@@ -30,7 +28,6 @@ const mockViewport = (viewport: 'mobile' | 'tablet' | 'desktop') => {
 
 afterEach(() => {
   vi.clearAllMocks();
-  localStorage.clear();
 });
 
 const ToggleButton = () => {
@@ -48,10 +45,10 @@ const items: SidebarMenuItem[] = [
   { key: '2', content: 'Settings' },
 ];
 
-const renderSidebar = () =>
+const renderSidebar = (defaultDesktopOpen = true) =>
   render(
     <MemoryRouter>
-      <SidebarProvider>
+      <SidebarProvider defaultDesktopOpen={defaultDesktopOpen}>
         <ToggleButton />
         <Sidebar items={items} bottomArea="Create Doc" />
       </SidebarProvider>
@@ -61,7 +58,6 @@ const renderSidebar = () =>
 describe('Sidebar', () => {
   it('renders the navigation items open by default on desktop', () => {
     mockViewport('desktop');
-    useLocalStorageMock.mockReturnValue([true, () => {}]);
 
     const { getByText } = renderSidebar();
 
@@ -69,29 +65,61 @@ describe('Sidebar', () => {
     expect(getByText('Settings')).toBeInTheDocument();
   });
 
+  it('renders the desktop sidebar closed when the reader closed it', () => {
+    mockViewport('desktop');
+
+    const { container } = renderSidebar(false);
+
+    expect(container.querySelector('.fixed')).toHaveStyle({
+      transform: 'translateX(-100%)',
+    });
+  });
+
   it('keeps the sidebar closed by default on tablet', () => {
     mockViewport('tablet');
-    useLocalStorageMock.mockReturnValue([false, () => {}]);
 
-    const { queryByText } = renderSidebar();
+    const { queryByRole } = renderSidebar();
 
-    expect(queryByText('Documents')).not.toBeInTheDocument();
+    expect(queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('opens the sidebar on tablet when toggled', async () => {
     mockViewport('tablet');
-    useLocalStorageMock.mockReturnValue([false, () => {}]);
 
-    const { getByText, findByText } = renderSidebar();
+    const { getByText, findByRole } = renderSidebar();
 
     await userEvent.click(getByText('Toggle'));
 
-    expect(await findByText('Documents')).toBeInTheDocument();
+    expect(await findByRole('dialog')).toHaveTextContent('Documents');
+  });
+
+  it('keeps the page mounted when the width turns out to be mobile', () => {
+    mockViewport('desktop');
+    const page = vi.fn(() => <main>Page</main>);
+    const Page = () => page();
+    const { rerender } = render(
+      <MemoryRouter>
+        <SidebarProvider>
+          <Sidebar items={items}><Page /></Sidebar>
+        </SidebarProvider>
+      </MemoryRouter>,
+    );
+    const main = document.querySelector('main');
+
+    mockViewport('mobile');
+    rerender(
+      <MemoryRouter>
+        <SidebarProvider>
+          <Sidebar items={items}><Page /></Sidebar>
+        </SidebarProvider>
+      </MemoryRouter>,
+    );
+
+    expect(document.querySelector('main')).toBe(main);
   });
 
   it('keeps the drawer closed by default on mobile', () => {
     mockViewport('mobile');
-    useLocalStorageMock.mockReturnValue([false, () => {}]);
 
     const { queryByRole, queryByText } = renderSidebar();
 
@@ -101,7 +129,6 @@ describe('Sidebar', () => {
 
   it('opens a drawer with the navigation items on mobile', async () => {
     mockViewport('mobile');
-    useLocalStorageMock.mockReturnValue([false, () => {}]);
 
     const { getByText, findByRole } = renderSidebar();
 
@@ -116,7 +143,6 @@ describe('Sidebar', () => {
 
   it('matches the snapshot on desktop', () => {
     mockViewport('desktop');
-    useLocalStorageMock.mockReturnValue([true, () => {}]);
 
     const { container } = renderSidebar();
 

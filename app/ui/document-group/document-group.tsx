@@ -16,7 +16,7 @@ export type DocumentGroupProps = {
 
 export const DocumentGroup: FC<DocumentGroupProps>
   = ({ title, value, children, icon, actionArea, iconTitle }) => {
-    const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
+    const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
 
     return (
       <AccordionItem value={value}>
@@ -48,7 +48,7 @@ export const DocumentGroup: FC<DocumentGroupProps>
             </AccordionTrigger>
           </div>
         </AccordionHeader>
-        <AccordionContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
+        <AccordionContent className="overflow-hidden in-data-animated:data-[state=open]:animate-accordion-down in-data-animated:data-[state=closed]:animate-accordion-up">
           <div className="flex flex-col gap-1.5 mt-1.5">
             {children}
           </div>

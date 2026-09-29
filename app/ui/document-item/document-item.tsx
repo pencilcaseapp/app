@@ -41,7 +41,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
     ref,
     ...rest }: DocumentItemProps<C>,
 ) {
-  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
+  const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
   const shouldReduceMotion = useReducedMotion();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const previousTopRef = useRef<number | null>(null);
