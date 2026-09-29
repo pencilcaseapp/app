@@ -17,6 +17,25 @@ Compose services as local dev. The browser binaries are cached keyed on
 the Playwright version, so Chromium is only downloaded again when
 Playwright (and with it its pinned browser build) is upgraded.
 
+## Layout
+
+```
+e2e/
+  setup/     the Playwright setup project (auth.setup.ts)
+  fixtures/  the `test` fixtures and the AppUser flows they hand out
+  utils/     helpers that are not fixtures (images to paste or drop)
+  specs/     one spec per domain of the app
+```
+
+A spec covers one domain, not one feature: everything that happens in
+the editor (documents, images, collaboration, sharing, deletion) lives
+in `specs/editor.spec.ts`, each feature in a `test.describe` of its own,
+and signing in and out in `specs/auth.spec.ts`. The settings dialog
+and its account section are `specs/settings-overview.spec.ts`; a flow
+with its own steps in there (the subscription, changing the email) is
+a domain of its own, `specs/settings-<flow>.spec.ts`. A new test joins the spec and the
+describe block of its domain; only a new domain starts a new spec.
+
 ## Authentication
 
 Signing in through the real magic-code flow would need an inbox, so the
