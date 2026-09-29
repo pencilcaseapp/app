@@ -34,6 +34,18 @@ describe('Topbar', () => {
     expect(container.querySelector('header')?.className).toMatch(/border-b/);
   });
 
+  test('leaves out the center column and its edge fades without a center', () => {
+    const { container } = render(
+      <Topbar
+        left={<button>Menu</button>}
+        center={false}
+        right={<button>Share</button>}
+      />,
+    );
+
+    expect(container.querySelector('.overflow-clip')).toBeNull();
+  });
+
   test('matches snapshot', () => {
     const { container } = render(
       <Topbar
