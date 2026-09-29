@@ -2,7 +2,7 @@ import { data, type MiddlewareFunction } from 'react-router';
 import { z } from 'zod';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
-import { removeCollaborator } from '~/services/document-invite';
+import { removeCollaborator } from '~/services/document';
 import { validateForm } from '~/utils/form';
 import type { Route } from './+types/doc-collaborator-remove';
 

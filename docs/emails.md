@@ -123,7 +123,8 @@ public/emails/             images the templates link to
 The layering carries on from the rest of the app: `app/routes/` and
 `app/layouts/` → `app/services/` → `app/emails/`. A route never renders a
 template. `app/services/email-templates.tsx` picks the template and the subject,
-and `app/services/email.ts` renders it and hands it to Lettermint.
+and `app/services/email.ts` renders it and hands it to Lettermint
+(`app/clients/lettermint.ts`).
 
 `app/emails/ui/` is to emails what `app/ui/` is to the app: presentational, no
 data access. It sits outside `templates/` because that is the only directory the
@@ -296,7 +297,7 @@ On the receiving end the input needs `autocomplete="one-time-code"`.
 `document-invite` is the e-mail behind sharing a document by address, a
 feature of the paid plan. The invite is a `document_collaborators` row
 with the address and the access the owner chose (`app/services/
-document-invite.ts`), and the e-mail's idempotency scope is that row's
+document.ts`), and the e-mail's idempotency scope is that row's
 id. There is no invite screen: the link in the e-mail is the document
 URL, and opening it while signed in with the invited address is what
 accepting means — `openDocument` (`app/services/document.ts`) finds the

@@ -5,8 +5,10 @@ import {
   optionalUserSessionContext,
   userSessionContext,
 } from '~/contexts/user-session';
-import { OpenDocumentError } from '~/services/document';
-import { InviteCollaboratorError } from '~/services/document-invite';
+import {
+  InviteCollaboratorError,
+  OpenDocumentError,
+} from '~/services/document';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
@@ -26,22 +28,14 @@ vi.mock('react-router', async () => {
 });
 
 const openDocumentMock = vi.fn();
+const inviteCollaboratorMock = vi.fn();
+const listInvitedCollaboratorsMock = vi.fn();
 vi.mock('~/services/document', async (importOriginal) => {
   const actual = await importOriginal();
 
   return {
     ...actual as object,
     openDocument: (...args: unknown[]) => openDocumentMock(...args),
-  };
-});
-
-const inviteCollaboratorMock = vi.fn();
-const listInvitedCollaboratorsMock = vi.fn();
-vi.mock('~/services/document-invite', async (importOriginal) => {
-  const actual = await importOriginal();
-
-  return {
-    ...actual as object,
     inviteCollaborator: (...args: unknown[]) =>
       inviteCollaboratorMock(...args),
     listInvitedCollaborators: (...args: unknown[]) =>

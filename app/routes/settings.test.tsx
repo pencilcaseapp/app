@@ -20,12 +20,6 @@ vi.mock('~/services/document', async (importOriginal) => {
   return {
     ...await importOriginal<typeof import('~/services/document')>(),
     openDocument: (...args: unknown[]) => openDocumentMock(...args),
-  };
-});
-
-vi.mock('~/services/document-invite', async (importOriginal) => {
-  return {
-    ...await importOriginal<typeof import('~/services/document-invite')>(),
     listInvitedCollaborators: vi.fn().mockResolvedValue([]),
   };
 });

@@ -8,8 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   maintain and understand this code. Favour the readable, obvious solution
   over the clever one.
 - **Thin loaders and actions.** Loaders and actions control the route and
-  nothing more. Push business logic into `app/services/` and data access into
-  `app/repos/` (see **Layering** below).
+  nothing more. Push business logic into `app/services/`, data access into
+  `app/repos/` and third-party APIs into `app/clients/` (see **Layering**
+  below).
 - **Few comments.** Let the code explain itself; only comment genuinely
   complex business logic.
 - **Pull requests and commits.** Follow the `pull-request` skill
@@ -168,7 +169,7 @@ section over the latest document (emails link there),
 recorded in `creem_webhook_events` for idempotency), and
 `/billing-portal` opens Creem's self-service portal. Access control is
 only ever `users.has_subscription`, recomputed from the stored statuses
-on every sync. `app/services/creem.ts` wraps the official `creem` SDK;
+on every sync. `app/clients/creem.ts` wraps the official `creem` SDK;
 `config.creem` switches between test and live mode. The e2e tests
 drive Creem's real test-mode checkout and skip without
 `CREEM_API_KEY`. Read
@@ -205,8 +206,9 @@ through `SearchParamToast`.
 **Emails — `app/emails/`.** Transactional emails are React Email components.
 `app/services/email-templates.tsx` picks the template and subject,
 `app/services/email.ts` renders it to HTML *and* plain text and hands both to
-Lettermint. `app/emails/templates/` holds one template per file (the only
-directory the preview server reads) and `app/emails/ui/` the shared email UI.
+Lettermint (`app/clients/lettermint.ts`). `app/emails/templates/` holds one
+template per file (the only directory the preview server reads) and
+`app/emails/ui/` the shared email UI.
 Every send is logged in `email_logs` and claimed by an idempotency key first
 (`<template>:<scope>` from `app/constants/email.ts`), so the same e-mail never
 goes out twice; the key also rides along to Lettermint. Delivery events are
@@ -224,7 +226,8 @@ for iOS one-time-code detection — read `docs/emails.md` before rewording it.
 
 **Assets — `app/services/asset.ts`.** Files people add to a document
 (images, for now) live in S3-compatible object storage: a Bunny storage
-zone (Frankfurt, S3 compatibility on) in prod (`STORAGE_ZONE`,
+zone (Frankfurt, S3 compatibility on, reached through
+`app/clients/storage.ts`) in prod (`STORAGE_ZONE`,
 `STORAGE_PASSWORD`), the `s3` container from `docker-compose.yml`
 (adobe/s3mock, one bucket per environment) everywhere else, including
 the tests, which hit it for real like Postgres. The editor posts an
@@ -332,7 +335,7 @@ by which of `email` and `access` happen to be set, and three check
 constraints hold each kind to its shape. Every query that means one kind
 filters on `source`; nothing reads emptiness as meaning.
 
-**Inviting by e-mail — `app/services/document-invite.ts`.** The share
+**Inviting by e-mail — `app/services/document.ts`.** The share
 panel's invite form (`app/components/share-panel/invite-form.tsx`, the
 paid plan only) posts to the doc route's action, which is why the link
 switch posts to `/doc/:id/share` instead. An invite is a
@@ -416,7 +419,13 @@ document is deleted.
 **Layering.** `app/routes/` and `app/layouts/` (loaders/actions) → `app/services/`
 (business logic) → `app/repos/` (Drizzle queries, one module per table) →
 `app/db/`. Repos validate UUIDs before querying and return `undefined`/`[]`
-rather than throwing.
+rather than throwing. Next to the repos, `app/clients/` holds one module per
+third party (`creem`, `lettermint`, `storage` for S3): it builds the SDK
+client from the config and turns our calls into theirs, with no business
+logic. Only services import clients. Services are grouped by domain, not
+by feature: everything a document does (opening, sharing, invites,
+deletion, the limit) lives in `app/services/document.ts`, so a new document
+feature joins it rather than starting a file of its own.
 
 **Forms.** TanStack Form via `useAppForm` (`app/hooks/use-app-form.ts`), which
 wires the field/form component registry (`ControlledTextField`, `Checkbox`,

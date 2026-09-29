@@ -30,7 +30,7 @@ import {
   verifyRedirectSignature,
   verifyWebhookSignature,
   type CreemSubscription,
-} from './creem';
+} from '~/clients/creem';
 import {
   sendEmailSubscriptionCanceled,
   sendEmailSubscriptionPaymentFailed,
