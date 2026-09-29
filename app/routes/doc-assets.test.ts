@@ -3,15 +3,15 @@
 import { RouterContextProvider } from 'react-router';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { optionalUserSessionContext } from '~/contexts/user-session';
-import { AddImageError } from '~/services/asset';
+import { AddImageError } from '~/services/document';
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 import { action } from './doc-assets';
 import type { Route } from './+types/doc-assets';
 
 const addImageMock = vi.fn();
-vi.mock('~/services/asset', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('~/services/asset')>();
+vi.mock('~/services/document', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('~/services/document')>();
   return {
     ...actual,
     addImage: (...args: unknown[]) => addImageMock(...args),

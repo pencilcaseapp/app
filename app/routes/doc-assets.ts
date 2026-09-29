@@ -2,7 +2,7 @@ import { data, href } from 'react-router';
 import { z } from 'zod';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import { MAX_ASSET_UPLOAD_BYTES } from '~/constants/asset';
-import { addImage, AddImageError } from '~/services/asset';
+import { addImage, AddImageError } from '~/services/document';
 import { validateForm } from '~/utils/form';
 import type { Route } from './+types/doc-assets';
 

@@ -1,7 +1,7 @@
 import { data, href } from 'react-router';
 import { z } from 'zod';
 import { optionalUserSessionContext } from '~/contexts/user-session';
-import { copyImage, CopyImageError } from '~/services/asset';
+import { copyImage, CopyImageError } from '~/services/document';
 import { validateForm } from '~/utils/form';
 import type { Route } from './+types/doc-asset-copies';
 
