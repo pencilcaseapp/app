@@ -13,7 +13,7 @@ import {
 import { use, useEffect, useRef, useState } from 'react';
 import { parseAssetSrc } from '~/utils/asset-src';
 import { listenForEditableTap, TAP_SLOP } from '~/utils/editable-tap';
-import { AssetUrlsContext } from './asset-urls-context';
+import { AssetUrlsContext } from '~/contexts/asset-urls';
 
 export const IMAGE_FRAME_CLASS_NAME = 'mx-auto max-w-full rounded-sm';
 export const IMAGE_PLACEHOLDER_CLASS_NAME

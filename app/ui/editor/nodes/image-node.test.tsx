@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { createEditor } from 'lexical';
 import { ImageNode } from './image-node';
-import { AssetUrlsContext } from './asset-urls-context';
+import { AssetUrlsContext } from '~/contexts/asset-urls';
 import { ImageView } from './image-view';
 
 const src = '/doc/a1e0b1c3-0000-4000-8000-000000000000/assets/'

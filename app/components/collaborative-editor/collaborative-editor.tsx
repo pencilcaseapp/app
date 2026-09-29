@@ -4,7 +4,7 @@ import * as Y from 'yjs';
 import { type Provider } from '@lexical/yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { Editor } from '~/ui/editor/editor';
-import { AssetUrlsContext } from '~/ui/editor/nodes/asset-urls-context';
+import { AssetUrlsContext } from '~/contexts/asset-urls';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSocketClient } from '~/contexts/socket-client';
 import { useExtractDocumentTitle } from '~/hooks/use-extract-document-title';
