@@ -6,6 +6,8 @@ export default {
   appId: 'app.pencilcase',
   appName: 'pencil case',
   webDir: 'native/www',
+  // Lets the server tell the app from a browser (`isNativeAppRequest`).
+  appendUserAgent: 'PencilCaseApp',
   server: {
     url,
     cleartext: url.startsWith('http://'),
