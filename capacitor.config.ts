@@ -12,4 +12,11 @@ export default {
     url,
     cleartext: url.startsWith('http://'),
   },
+  plugins: {
+    // The page hides it once it has hydrated (`hideNativeSplashScreen`);
+    // the duration only caps how long it stays up if that never happens.
+    SplashScreen: {
+      launchShowDuration: 3000,
+    },
+  },
 } satisfies CapacitorConfig;
