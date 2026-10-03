@@ -20,7 +20,8 @@ import { Typography } from './ui/typography/typography';
 import { PageTitle } from './components/page-title/page-title';
 import { ToastProvider } from './ui/toast/toast-provider';
 import { useToast } from './hooks/use-toast';
-import { isNativeAppRequest } from './utils/native-app';
+import { hideNativeSplashScreen, isNativeAppRequest } from './utils/native-app';
+import { useEffect } from 'react';
 
 import './app.css';
 import fontsHref from './fonts.css?url';
@@ -100,6 +101,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 export default function App({ loaderData }: Route.ComponentProps) {
   useToast();
+  useEffect(hideNativeSplashScreen, []);
 
   return (
     <AuthenticityTokenProvider token={loaderData.token}>
