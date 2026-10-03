@@ -8,7 +8,7 @@ export const handle = {
 export default function LayoutAuth() {
   return (
     <>
-      <header className="h-13 md:h-23.75 flex items-center justify-center">
+      <header className="box-content pt-(--safe-area-top) h-13 md:h-23.75 flex items-center justify-center">
         <Logo />
       </header>
       <main className="px-4 md:px-0 pt-12 md:pt-0 md:max-w-74 mx-auto md:min-h-[calc(100dvh-95px)] md:flex md:items-center">

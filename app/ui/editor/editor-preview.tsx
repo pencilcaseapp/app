@@ -5,10 +5,13 @@ import { EditorToolbar } from './editor-toolbar';
 
 import './editor.css';
 
+const TOPBAR_CLEARANCE = 'pt-[calc(3.75rem+var(--safe-area-top))]'
+  + ' md:pt-[calc(6.75rem+var(--safe-area-top))]';
+
 /** The room around the content, the same for the editor and the preview. */
 export const getEditorContentClassName = (hasTopArea: boolean) =>
   classNames([
-    hasTopArea ? 'pt-4 md:pt-6' : 'pt-15 md:pt-27',
+    hasTopArea ? 'pt-4 md:pt-6' : TOPBAR_CLEARANCE,
     'pb-3 md:pb-12 touch-screen:pb-[55svh] w-full min-h-dvh px-4 md:px-[calc((100%-730px)/2)]',
   ]);
 
@@ -16,7 +19,7 @@ export const getEditorContentClassName = (hasTopArea: boolean) =>
 export const EditorTopArea: React.FC<React.PropsWithChildren> = ({
   children,
 }) => (
-  <div className="pt-15 md:pt-27 px-4 md:px-[calc((100%-730px)/2)]">
+  <div className={classNames(TOPBAR_CLEARANCE, 'px-4 md:px-[calc((100%-730px)/2)]')}>
     {children}
   </div>
 );

@@ -35,7 +35,7 @@ export const SidebarMenu: FC<SidebarMenuProps> = ({
         exit="close"
         initial={initialState ?? (isSidebarOpen ? 'open' : 'close')}
         className={classNames([
-          'fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-dvh bg-pca-white dark:bg-pca-grey-900',
+          'fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-[calc(3.5rem+var(--safe-area-top))] h-dvh bg-pca-white dark:bg-pca-grey-900',
           'transition-shadow ease-in-out duration-200 sm:max-xl:shadow-md sm:max-xl:ring-1 ring-pca-grey-200 sm:max-xl:dark:ring-pca-grey-800',
         ])}
       >
@@ -57,7 +57,7 @@ export const SidebarMenu: FC<SidebarMenuProps> = ({
           variants={slimNavigation}
           animate={isSidebarOpen ? 'open' : 'close'}
           initial={false}
-          className="fixed top-0 left-0 flex flex-col pointer-events-auto z-10 pt-14 h-screen w-16"
+          className="fixed top-0 left-0 flex flex-col pointer-events-auto z-10 pt-[calc(3.5rem+var(--safe-area-top))] h-screen w-16"
         >
           <IconOnlyContext value={true}>
             <nav className=" relative flex flex-col grow">

@@ -3,7 +3,7 @@
 exports[`LayoutAuth > matches snapshot 1`] = `
 <div>
   <header
-    class="h-13 md:h-23.75 flex items-center justify-center"
+    class="box-content pt-(--safe-area-top) h-13 md:h-23.75 flex items-center justify-center"
   >
     <svg
       class="text-pca-grey-900 dark:text-white"
