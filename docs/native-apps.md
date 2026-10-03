@@ -1,7 +1,7 @@
 # Native apps
 
 The iOS and Android apps are a Capacitor shell around the web app: the
-native web view loads `https://pencilcase.app` (`server.url` in
+native web view loads `https://docs.pencilcase.app` (`server.url` in
 `capacitor.config.ts`), so sessions, the live server and images work exactly
 as in the browser. Nothing of the web app is bundled; `native/www` only holds
 the page Capacitor needs as its `webDir`.
