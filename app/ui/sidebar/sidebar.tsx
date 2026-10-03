@@ -25,7 +25,7 @@ export type SidebarProps = SidebarBaseProps & PropsWithChildren & {
  * The height of the sidebar's mobile drawer, shared with overlays that
  * stack a nested drawer on top of it so both line up.
  */
-export const SIDEBAR_DRAWER_MAX_HEIGHT = 'calc(100dvh - 56px)';
+export const SIDEBAR_DRAWER_MAX_HEIGHT = 'calc(100dvh - 56px - var(--safe-area-top))';
 
 export const Sidebar: FC<SidebarProps> = ({
   bottomArea,

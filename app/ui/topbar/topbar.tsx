@@ -46,14 +46,14 @@ export const Topbar: React.FC<TopbarProps>
       <header
         ref={ref}
         className={classNames(
-          'fixed z-50 w-full top-0 left-0 h-14 px-2 grid grid-cols-1 grid-rows-1 items-center',
+          'fixed z-50 w-full top-0 left-0 h-[calc(3.5rem+var(--safe-area-top))] pt-(--safe-area-top) px-2 grid grid-cols-1 grid-rows-1 items-center',
           hasSolidBackground && 'bg-pca-white dark:bg-pca-grey-900 border-b border-pca-grey-200 dark:border-pca-grey-800 lg:bg-transparent dark:lg:bg-transparent lg:border-none',
         )}
       >
         {!hasSolidBackground && (
           <div
             aria-hidden
-            className="absolute top-0 left-0 w-full h-20 pointer-events-none lg:hidden bg-linear-to-b from-pca-white to-pca-white/0 dark:from-pca-grey-900 dark:to-pca-grey-900/0"
+            className="absolute top-0 left-0 w-full h-[calc(5rem+var(--safe-area-top))] pointer-events-none lg:hidden bg-linear-to-b from-pca-white to-pca-white/0 dark:from-pca-grey-900 dark:to-pca-grey-900/0"
           />
         )}
         <div ref={leftRef} className="col-start-1 row-start-1 justify-self-start z-10 flex min-w-max">

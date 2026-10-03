@@ -3,11 +3,11 @@
 exports[`Topbar > matches snapshot 1`] = `
 <div>
   <header
-    class="fixed z-50 w-full top-0 left-0 h-14 px-2 grid grid-cols-1 grid-rows-1 items-center"
+    class="fixed z-50 w-full top-0 left-0 h-[calc(3.5rem+var(--safe-area-top))] pt-(--safe-area-top) px-2 grid grid-cols-1 grid-rows-1 items-center"
   >
     <div
       aria-hidden="true"
-      class="absolute top-0 left-0 w-full h-20 pointer-events-none lg:hidden bg-linear-to-b from-pca-white to-pca-white/0 dark:from-pca-grey-900 dark:to-pca-grey-900/0"
+      class="absolute top-0 left-0 w-full h-[calc(5rem+var(--safe-area-top))] pointer-events-none lg:hidden bg-linear-to-b from-pca-white to-pca-white/0 dark:from-pca-grey-900 dark:to-pca-grey-900/0"
     />
     <div
       class="col-start-1 row-start-1 justify-self-start z-10 flex min-w-max"

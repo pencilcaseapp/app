@@ -8,6 +8,7 @@ import {
   useMatches,
   type UIMatch,
   data,
+  useRouteLoaderData,
 } from 'react-router';
 import type { Route } from './+types/root';
 import classNames from 'classnames';
@@ -19,9 +20,12 @@ import { Typography } from './ui/typography/typography';
 import { PageTitle } from './components/page-title/page-title';
 import { ToastProvider } from './ui/toast/toast-provider';
 import { useToast } from './hooks/use-toast';
+import { isNativeAppRequest } from './utils/native-app';
 
 import './app.css';
 import fontsHref from './fonts.css?url';
+
+const VIEWPORT = 'width=device-width, initial-scale=1, maximum-scale=1';
 
 export const middleware = [sessionMiddleware];
 
@@ -41,12 +45,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const routeBodyClassNames = matches
     .filter(match => match.handle?.bodyClassName)
     .map(match => match.handle?.bodyClassName);
+  const isNativeApp = useRouteLoaderData<typeof loader>('root')?.isNativeApp;
 
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        {/* Only the native apps draw under the status bar; `--safe-area-top`
+            stays zero everywhere else. */}
+        <meta
+          name="viewport"
+          content={isNativeApp
+            ? `${VIEWPORT}, viewport-fit=cover`
+            : VIEWPORT}
+        />
         {/* The title bar of the installed app: pca-white and pca-grey-900,
             the page background, as hex because not every browser reads
             oklch here. */}
@@ -79,7 +91,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     headers.append('set-cookie', sessionCookieHeader);
   }
 
-  return data({ token }, {
+  return data({ token, isNativeApp: isNativeAppRequest(request) }, {
     headers: headers.has('set-cookie')
       ? headers
       : undefined,

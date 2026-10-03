@@ -334,6 +334,13 @@ body {
   }
 }
 
+/* The gap anything sitting on the top edge of the screen keeps clear: the
+   status bar and the notch in the native apps, which draw under them, and
+   zero everywhere else, where the viewport is not `viewport-fit=cover`. */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+}
+
 /* The gap anything sitting on the bottom edge of the screen keeps clear.
    In a browser tab that is whatever the toolbar below already reserves.
    The installed app has no toolbar and draws right through the home

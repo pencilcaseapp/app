@@ -11,7 +11,7 @@ exports[`Sidebar > matches the snapshot on desktop 1`] = `
     class="hidden xl:block"
   >
     <div
-      class="fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-14 h-dvh bg-pca-white dark:bg-pca-grey-900 transition-shadow ease-in-out duration-200 sm:max-xl:shadow-md sm:max-xl:ring-1 ring-pca-grey-200 sm:max-xl:dark:ring-pca-grey-800"
+      class="fixed flex max-w-none sm:max-w-62.5 pointer-events-auto overscroll-y-contain z-20 overflow-hidden w-full pt-[calc(3.5rem+var(--safe-area-top))] h-dvh bg-pca-white dark:bg-pca-grey-900 transition-shadow ease-in-out duration-200 sm:max-xl:shadow-md sm:max-xl:ring-1 ring-pca-grey-200 sm:max-xl:dark:ring-pca-grey-800"
       style="transform: none;"
     >
       <nav
@@ -35,7 +35,7 @@ exports[`Sidebar > matches the snapshot on desktop 1`] = `
       </nav>
     </div>
     <div
-      class="fixed top-0 left-0 flex flex-col pointer-events-auto z-10 pt-14 h-screen w-16"
+      class="fixed top-0 left-0 flex flex-col pointer-events-auto z-10 pt-[calc(3.5rem+var(--safe-area-top))] h-screen w-16"
       style="transform: translateX(-100%);"
     >
       <nav

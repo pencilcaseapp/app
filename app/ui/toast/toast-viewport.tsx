@@ -16,7 +16,7 @@ export const ToastViewport: FC = () => {
 
   return (
     <BaseToast.Portal>
-      <BaseToast.Viewport className="fixed top-4 left-1/2 z-70 h-(--toast-frontmost-height) w-full lg:w-md max-w-[calc(100vw-1rem)] -translate-x-1/2 outline-hidden">
+      <BaseToast.Viewport className="fixed top-[calc(1rem+var(--safe-area-top))] left-1/2 z-70 h-(--toast-frontmost-height) w-full lg:w-md max-w-[calc(100vw-1rem)] -translate-x-1/2 outline-hidden">
         {toasts.map(toast => (
           <Toast key={toast.id} toast={toast} />
         ))}
