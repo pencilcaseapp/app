@@ -1,6 +1,6 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
-const url = process.env.CAPACITOR_SERVER_URL ?? 'https://pencilcase.app';
+const url = process.env.CAPACITOR_SERVER_URL ?? 'https://docs.pencilcase.app';
 
 export default {
   appId: 'app.pencilcase',
