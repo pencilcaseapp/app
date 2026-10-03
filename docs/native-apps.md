@@ -11,10 +11,14 @@ the page Capacitor needs as its `webDir`.
 Install Xcode (iOS) or Android Studio (Android), then:
 
 ```bash
-npx cap sync          # after changing capacitor.config.ts or adding plugins
+npx cap sync          # first, and after changing capacitor.config.ts or plugins
 npx cap open ios      # opens Xcode, run on a simulator or device from there
 npx cap open android  # opens Android Studio
 ```
+
+`npx cap sync` writes files the native projects need but git ignores
+(`capacitor.config.json`, `config.xml`, the `public` folder), so a fresh
+checkout does not build until it has run once.
 
 To point the shell at a dev server instead of production, set
 `CAPACITOR_SERVER_URL` while syncing, e.g. with the address `npm run dev`
