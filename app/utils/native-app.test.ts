@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { hideNativeSplashScreen, isNativeAppRequest } from './native-app';
+import {
+  HIDE_NATIVE_SPLASH_SCREEN_SCRIPT,
+  isNativeAppRequest,
+} from './native-app';
 
 const requestWithUserAgent = (userAgent?: string) =>
   new Request('http://localhost/', {
@@ -24,21 +27,30 @@ describe('isNativeAppRequest', () => {
   });
 });
 
-describe('hideNativeSplashScreen', () => {
+describe('HIDE_NATIVE_SPLASH_SCREEN_SCRIPT', () => {
+  const runScript = () => new Function(HIDE_NATIVE_SPLASH_SCREEN_SCRIPT)();
+
   afterEach(() => {
-    delete window.Capacitor;
+    Reflect.deleteProperty(window, 'Capacitor');
   });
 
   it('hides the splash screen of the native apps', async () => {
     const hide = vi.fn().mockResolvedValue(undefined);
-    window.Capacitor = { Plugins: { SplashScreen: { hide } } };
+    Object.assign(window, {
+      Capacitor: { Plugins: { SplashScreen: { hide } } },
+    });
 
-    hideNativeSplashScreen();
+    runScript();
 
     await vi.waitFor(() => expect(hide).toHaveBeenCalledOnce());
   });
 
-  it('does nothing in a browser', () => {
-    expect(() => hideNativeSplashScreen()).not.toThrow();
+  it('cleans up after itself without the native bridge', async () => {
+    const childCount = document.body.childElementCount;
+
+    runScript();
+
+    await vi.waitFor(() =>
+      expect(document.body.childElementCount).toBe(childCount));
   });
 });

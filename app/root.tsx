@@ -20,8 +20,10 @@ import { Typography } from './ui/typography/typography';
 import { PageTitle } from './components/page-title/page-title';
 import { ToastProvider } from './ui/toast/toast-provider';
 import { useToast } from './hooks/use-toast';
-import { hideNativeSplashScreen, isNativeAppRequest } from './utils/native-app';
-import { useEffect } from 'react';
+import {
+  HIDE_NATIVE_SPLASH_SCREEN_SCRIPT,
+  isNativeAppRequest,
+} from './utils/native-app';
 
 import './app.css';
 import fontsHref from './fonts.css?url';
@@ -29,6 +31,13 @@ import fontsHref from './fonts.css?url';
 const VIEWPORT = 'width=device-width, initial-scale=1, maximum-scale=1';
 
 export const middleware = [sessionMiddleware];
+
+const NativeSplashScreenScript = () => (
+  <script
+    // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
+    dangerouslySetInnerHTML={{ __html: HIDE_NATIVE_SPLASH_SCREEN_SCRIPT }}
+  />
+);
 
 export const links: Route.LinksFunction = () => [
   { rel: 'icon', href: '/favicon.ico', sizes: '48x48' },
@@ -73,6 +82,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </ToastProvider>
         <ScrollRestoration />
+        {isNativeApp && <NativeSplashScreenScript />}
         <Scripts />
       </body>
     </html>
@@ -101,7 +111,6 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 export default function App({ loaderData }: Route.ComponentProps) {
   useToast();
-  useEffect(hideNativeSplashScreen, []);
 
   return (
     <AuthenticityTokenProvider token={loaderData.token}>
