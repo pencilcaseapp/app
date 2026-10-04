@@ -233,7 +233,7 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
   const leftRef = useRef({ top: 0, until: 0 });
   const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)', false);
   const shouldReduceMotion = useReducedMotion();
-  const [isVirtualKeyboardOpen] = useVirtualKeyboard();
+  const [isVirtualKeyboardOpen, visibleHeight] = useVirtualKeyboard();
   const [editor] = useLexicalComposerContext();
 
   useEffect(
@@ -378,45 +378,45 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
     };
   }, [isTouchDevice, shouldReduceMotion]);
 
-  // Fitted to the area above the keyboard, and back to the whole page when
-  // the keyboard goes away while the content keeps its focus — a hardware
-  // keyboard does that. The viewport reports the keyboard as soon as it
-  // starts to slide in, so the area follows it up rather than giving up the
-  // content below in one go: cut off right away, it vanishes in front of the
-  // keyboard; cut off once the keyboard is in, it vanishes behind the
-  // translucent bar above it.
+  // Fitted to the area above the keyboard. The viewport reports the keyboard
+  // as soon as it starts to slide in, so the area follows it up rather than
+  // giving up the content below in one go: cut off right away, it vanishes
+  // in front of the keyboard; cut off once the keyboard is in, it vanishes
+  // behind the translucent bar above it.
   useEffect(() => {
     const frame = frameRef.current;
     const element = scrollerRef.current;
     const content = canvasRef.current;
-    const viewport = window.visualViewport;
-    if (!frame || !element || !content || !viewport) {
+    if (!frame || !element || !content) {
       return;
     }
 
-    if (isVirtualKeyboardOpen) {
-      enterEditLayout(frame, element);
-    }
-    else if (!('editing' in element.dataset)) {
+    if (!isVirtualKeyboardOpen) {
+      // Android puts the keyboard away on the back gesture and leaves the
+      // content focused; editing is over all the same.
+      if ('editing' in element.dataset) {
+        editor.blur();
+      }
       return;
     }
 
-    const bottom = element.getBoundingClientRect().top + viewport.height;
+    enterEditLayout(frame, element);
+    const bottom = element.getBoundingClientRect().top + visibleHeight;
     keepCaretAbove(element, content, bottom - CARET_MARGIN);
 
-    if (!isVirtualKeyboardOpen || shouldReduceMotion) {
-      element.style.height = `${viewport.height}px`;
+    const from = element.style.height;
+    element.style.height = `${visibleHeight}px`;
+    if (shouldReduceMotion) {
       return;
     }
 
     const follow = element.animate(
-      [{ height: element.style.height }, { height: `${viewport.height}px` }],
+      [{ height: from }, { height: element.style.height }],
       { duration: KEYBOARD_SLIDE_DURATION, easing: ENTER_EASING },
     );
-    element.style.height = `${viewport.height}px`;
 
     return () => follow.cancel();
-  }, [isVirtualKeyboardOpen, shouldReduceMotion]);
+  }, [editor, isVirtualKeyboardOpen, visibleHeight, shouldReduceMotion]);
 
   return (
     <>

@@ -21,6 +21,7 @@ const hasEditableFocus = () => {
 export const useVirtualKeyboard = () => {
   const isTouchDevice = useMedia('(pointer: coarse) and (hover: none)');
   const [isOpen, setIsOpen] = useState(false);
+  const [visibleHeight, setVisibleHeight] = useState(0);
 
   useEffect(() => {
     if (!isTouchDevice) {
@@ -32,16 +33,39 @@ export const useVirtualKeyboard = () => {
     // itself opens no keyboard. Only a tap on the content does.
     let tapped = false;
 
+    // iOS and Chrome leave the page its height and only shrink the visual
+    // viewport, but the Android web view shrinks the page along with it, so
+    // the height the page had before is what the keyboard is measured
+    // against; per width, as turning the phone changes it. While the page
+    // shrinks, Android takes the keyboard off the visual viewport a second
+    // time for a moment, so there the page is what is left above it.
+    const fullHeights = new Map<number, number>();
+    const getFullHeight = () => {
+      const { clientWidth, clientHeight } = document.documentElement;
+      const height = Math.max(clientHeight, fullHeights.get(clientWidth) ?? 0);
+      fullHeights.set(clientWidth, height);
+
+      return height;
+    };
+    getFullHeight();
+
     const listener = () => {
       const viewport = window.visualViewport;
+      if (!viewport) {
+        return;
+      }
 
-      setIsOpen(
-        tapped
-        && !!viewport
-        && document.documentElement.clientHeight - viewport.height
-        > KEYBOARD_HEIGHT_THRESHOLD
-        && hasEditableFocus(),
-      );
+      const { clientHeight } = document.documentElement;
+      const fullHeight = getFullHeight();
+      const height = clientHeight < fullHeight ? clientHeight : viewport.height;
+      const open = tapped
+        && fullHeight - height > KEYBOARD_HEIGHT_THRESHOLD
+        && hasEditableFocus();
+
+      setIsOpen(open);
+      if (open) {
+        setVisibleHeight(height);
+      }
     };
 
     const stopListeningForTaps = listenForEditableTap(window, () => {
@@ -71,5 +95,5 @@ export const useVirtualKeyboard = () => {
     };
   }, [isTouchDevice]);
 
-  return [isOpen];
+  return [isOpen, visibleHeight] as const;
 };

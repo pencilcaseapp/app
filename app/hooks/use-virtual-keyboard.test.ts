@@ -105,6 +105,43 @@ describe('useVirtualKeyboard', () => {
     expect(result.current[0]).toBe(true);
   });
 
+  it('should report the keyboard open when the page shrinks with it', () => {
+    // The Android web view resizes the page itself for the keyboard.
+    const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
+    Object.defineProperty(document.documentElement, 'clientHeight', {
+      value: 400,
+      configurable: true,
+    });
+
+    setViewportHeight(400);
+
+    expect(result.current[0]).toBe(true);
+  });
+
+  it('should report the height of the viewport above the keyboard', () => {
+    const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
+
+    setViewportHeight(400);
+
+    expect(result.current[1]).toBe(400);
+  });
+
+  it('should report the height of a page that shrinks with the keyboard', () => {
+    // On the way in, Android takes the keyboard off the viewport twice.
+    const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
+    Object.defineProperty(document.documentElement, 'clientHeight', {
+      value: 400,
+      configurable: true,
+    });
+
+    setViewportHeight(100);
+
+    expect(result.current[1]).toBe(400);
+  });
+
   it('should ignore a shrinking viewport around content nobody tapped', () => {
     // A focus the page moves there itself, with the pull-to-refresh
     // spinner shrinking the viewport.
