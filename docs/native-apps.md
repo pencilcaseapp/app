@@ -31,3 +31,22 @@ CAPACITOR_SERVER_URL=http://192.168.1.10:3000 npx cap sync
 ```
 
 Sync again without it before building anything you hand to someone else.
+
+## Icons and launch screen
+
+The app icon is the yellow tile of the PWA icons, drawn from the SVGs in
+`assets/` (`icon-only` for iOS, `icon-foreground` and `icon-background` for
+Android's adaptive icon). After changing them, regenerate every size with:
+
+```bash
+npx @capacitor/assets@3 generate --ios --android
+```
+
+The launch screen is only the page background, so opening the app never
+flashes: `systemBackgroundColor` in `LaunchScreen.storyboard` on iOS (the
+splash screen plugin draws the same storyboard), `splash_background` in
+`values` and `values-night` on Android. Two iOS limits shaped this: a launch
+screen whose snapshot is estimated over 25 MB is dropped for a black screen,
+which any image does on an iPhone 17, and a colour from the asset catalog
+renders with its light value in dark mode, which is why it is a system
+colour and dark mode starts on black rather than `#101010`.
