@@ -18,7 +18,9 @@ npx cap open android  # opens Android Studio
 
 `npx cap sync` writes files the native projects need but git ignores
 (`capacitor.config.json`, `config.xml`, the `public` folder), so a fresh
-checkout does not build until it has run once.
+checkout does not build until it has run once. Run `npm install` before
+syncing: a plugin missing from `node_modules` is dropped from the native
+projects without a warning.
 
 To point the shell at a dev server instead of production, set
 `CAPACITOR_SERVER_URL` while syncing, e.g. with the address `npm run dev`
