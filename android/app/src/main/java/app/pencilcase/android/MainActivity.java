@@ -1,4 +1,4 @@
-package app.pencilcase;
+package app.pencilcase.android;
 
 import com.getcapacitor.BridgeActivity;
 
