@@ -32,6 +32,38 @@ CAPACITOR_SERVER_URL=http://192.168.1.10:3000 npx cap sync
 
 Sync again without it before building anything you hand to someone else.
 
+## Bounce and pull to refresh
+
+Capacitor turns the web view's bounce off on iOS; `BridgeViewController`
+(`ios/App/App/MainViewController.swift`) turns it back on. Pulling the page
+down past its top moves the whole web view, top bar and all, and reloads the
+page once it has come down far enough. The spinner is drawn in front of the
+page, in the empty band between the status bar and the top bar's buttons,
+which the page comes down with. The gap above the page, and the web view
+where the page bounces past its end (which Capacitor paints in the system
+background), have the page's own background, which WebKit reports as
+`underPageBackgroundColor` (the yellow of the sign in page, say). Its ticks come in one by one as in Mail
+(`RefreshIndicator`): a `UIRefreshControl` only draws them that way for a
+finger dragging its own scroll view, so they are drawn to its measure and the
+turning is the system spinner's. `MainViewController`, which `SceneDelegate` puts in the window,
+holds the web view for that: Capacitor makes the web view its controller's
+own view, so the gap needs a controller around it. Not a
+`UIRefreshControl`: that pulls the page within the web view, where WebKit
+keeps the fixed top bar in place while it is pulled and lowers it in one go
+while it refreshes (`obscuredContentInsets` does not change that). The web
+view reports the window's safe area wherever it is moved
+(`WindowSafeAreaWebView`), or the page would drop the room it keeps for the
+status bar as it comes down. A reload throws the page away a few frames
+before the new one paints, so a snapshot of the page as it was covers the
+web view until the new one has loaded. Inside a `WKWebView` an element with its own
+scrolling (the editor while editing, a drawer) is a scroll view of its own
+and never pulls the page along.
+
+Android's web view has neither, so `PullToRefreshPlugin` wraps it in a
+`SwipeRefreshLayout`, which cannot see into the page: at the start of every
+touch the page tells it whether a pull would pull the page itself down
+(`useNativePullToRefresh`, `canPullToRefresh` in `app/utils/native-app.ts`).
+
 ## Icons and launch screen
 
 The app icon is the yellow tile of the PWA icons, drawn from the SVGs in
