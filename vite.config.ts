@@ -14,6 +14,29 @@ export default defineConfig({
     !isStorybook && reactRouter(),
     devtoolsJson(),
   ],
+  css: {
+    postcss: {
+      plugins: [
+        /*
+         * The @fontsource packages declare their faces with
+         * `font-display: swap`, which draws the text in the fallback font
+         * and swaps it once the font is there: a visible jump on any load
+         * the font is not cached for. `block` keeps the text back until the
+         * font is there instead (three seconds at most).
+         */
+        {
+          postcssPlugin: 'font-display-block',
+          AtRule: {
+            'font-face': (rule) => {
+              rule.walkDecls('font-display', (declaration) => {
+                declaration.value = 'block';
+              });
+            },
+          },
+        },
+      ],
+    },
+  },
   optimizeDeps: {
     entries: [
       'app/root.tsx',
