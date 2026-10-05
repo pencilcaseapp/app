@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  canPullToRefresh,
   HIDE_NATIVE_SPLASH_SCREEN_SCRIPT,
   isNativeAppRequest,
 } from './native-app';
@@ -52,5 +53,43 @@ describe('HIDE_NATIVE_SPLASH_SCREEN_SCRIPT', () => {
 
     await vi.waitFor(() =>
       expect(document.body.childElementCount).toBe(childCount));
+  });
+});
+
+describe('canPullToRefresh', () => {
+  const append = (parent: HTMLElement, style = '') => {
+    const element = document.createElement('div');
+    element.style.cssText = style;
+    parent.append(element);
+
+    return element;
+  };
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+    document.body.style.cssText = '';
+  });
+
+  it('pulls the page down', () => {
+    expect(canPullToRefresh(append(document.body))).toBe(true);
+  });
+
+  it('leaves a scrolled element to scroll back up', () => {
+    const scroller = append(document.body, 'overflow-y: auto');
+    scroller.scrollTop = 100;
+
+    expect(canPullToRefresh(append(scroller))).toBe(false);
+  });
+
+  it('leaves an element that keeps its scrolling to itself alone', () => {
+    const dialog = append(document.body, 'overscroll-behavior-y: contain');
+
+    expect(canPullToRefresh(append(dialog))).toBe(false);
+  });
+
+  it('leaves a page that does not scroll alone', () => {
+    document.body.style.overflowY = 'hidden';
+
+    expect(canPullToRefresh(append(document.body))).toBe(false);
   });
 });
