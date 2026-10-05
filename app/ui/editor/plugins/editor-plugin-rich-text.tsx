@@ -241,6 +241,12 @@ export const EditorPluginRichText: React.FC<EditorPluginRichTextProps> = ({
       return editor.registerCommand(
         BLUR_COMMAND,
         () => {
+          // Switching to another app blurs the window, not the content:
+          // it keeps the focus, and iOS brings the keyboard back with it.
+          if (document.activeElement === editor.getRootElement()) {
+            return false;
+          }
+
           const frame = frameRef.current;
           const scroller = scrollerRef.current;
           if (frame && scroller && 'editing' in scroller.dataset) {
