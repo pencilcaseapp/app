@@ -27,3 +27,46 @@ export const HIDE_NATIVE_SPLASH_SCREEN_SCRIPT = `(() => {
   };
   requestAnimationFrame(hideOnceLaidOut);
 })();`;
+
+/** The pull to refresh the Android app wraps the page in. */
+interface NativePullToRefresh {
+  allow: (options: { allowed: boolean }) => Promise<void>;
+}
+
+declare global {
+  interface Window {
+    Capacitor?: { Plugins?: { PullToRefresh?: NativePullToRefresh } };
+  }
+}
+
+export const getNativePullToRefresh = () =>
+  window.Capacitor?.Plugins?.PullToRefresh;
+
+/**
+ * Whether a pull starting on `target` pulls the page itself down, the way a
+ * browser decides it for its own pull to refresh: not when it scrolls
+ * something inside the page back up or starts in an element that keeps its
+ * scrolling to itself (the editor while editing, a dialog, a drawer), and
+ * not on a page that does not scroll at all, like one under a dialog.
+ */
+export const canPullToRefresh = (target: EventTarget | null) => {
+  const page: Element[] = [document.documentElement, document.body];
+
+  for (
+    let element = target instanceof Element ? target : null;
+    element;
+    element = element.parentElement
+  ) {
+    const { overflowY, overscrollBehaviorY } = getComputedStyle(element);
+    if (
+      element.scrollTop > 0
+      || overscrollBehaviorY === 'contain'
+      || overscrollBehaviorY === 'none'
+      || (page.includes(element) && overflowY === 'hidden')
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+};

@@ -20,6 +20,7 @@ import { Typography } from './ui/typography/typography';
 import { PageTitle } from './components/page-title/page-title';
 import { ToastProvider } from './ui/toast/toast-provider';
 import { useToast } from './hooks/use-toast';
+import { useNativePullToRefresh } from './hooks/use-native-pull-to-refresh';
 import {
   HIDE_NATIVE_SPLASH_SCREEN_SCRIPT,
   isNativeAppRequest,
@@ -56,6 +57,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     .filter(match => match.handle?.bodyClassName)
     .map(match => match.handle?.bodyClassName);
   const isNativeApp = useRouteLoaderData<typeof loader>('root')?.isNativeApp;
+  useNativePullToRefresh();
 
   return (
     <html lang="en">
