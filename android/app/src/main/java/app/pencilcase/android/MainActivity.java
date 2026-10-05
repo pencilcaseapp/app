@@ -68,7 +68,15 @@ public class MainActivity extends BridgeActivity {
         });
     }
 
+    /*
+     * The window keeps the navigation bar colour of the theme the app started
+     * in, and Android forces dark icons onto a bar whose colour is light, even
+     * though it no longer paints that colour: hollow ones on the dark theme.
+     */
+    @SuppressWarnings("deprecation")
     private void paintNavigationBarBackground() {
-        navigationBarBackground.setBackgroundColor(ContextCompat.getColor(this, R.color.navigation_bar_background));
+        int color = ContextCompat.getColor(this, R.color.navigation_bar_background);
+        navigationBarBackground.setBackgroundColor(color);
+        getWindow().setNavigationBarColor(color);
     }
 }
