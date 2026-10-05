@@ -36,16 +36,27 @@ Sync again without it before building anything you hand to someone else.
 
 The app icon is the yellow tile of the PWA icons, drawn from the SVGs in
 `assets/` (`icon-only` for iOS, `icon-foreground` and `icon-background` for
-Android's adaptive icon). After changing them, regenerate every size with:
+Android's adaptive icon). After changing them, regenerate the iOS icon and
+Android's legacy `ic_launcher` PNGs with:
 
 ```bash
 npx @capacitor/assets@3 generate --ios --android
 ```
 
+Android's adaptive icon is not generated: its foreground is a vector drawable
+(`drawable/ic_launcher_foreground.xml`) written from `icon-foreground.svg`,
+and its background the `ic_launcher_background` colour. The generator writes
+foreground PNGs at the 48dp of a legacy icon, which blur wherever the icon is
+drawn larger, so put back `mipmap-anydpi-v26` and delete the
+`ic_launcher_foreground` and `ic_launcher_background` PNGs after running it,
+and update the vector by hand when the artwork changes.
+
 The launch screen is only the page background, so opening the app never
 flashes: `systemBackgroundColor` in `LaunchScreen.storyboard` on iOS (the
 splash screen plugin draws the same storyboard), `splash_background` in
-`values` and `values-night` on Android. Two iOS limits shaped this: a launch
+`values` and `values-night` on Android, whose splash screen would otherwise
+show the launcher icon and is handed a transparent one in
+`AppTheme.NoActionBarLaunch`. Two iOS limits shaped this: a launch
 screen whose snapshot is estimated over 25 MB is dropped for a black screen,
 which any image does on an iPhone 17, and a colour from the asset catalog
 renders with its light value in dark mode, which is why it is a system
