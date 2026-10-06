@@ -4,6 +4,9 @@ import { listenForEditableTap } from '~/utils/editable-tap';
 
 const KEYBOARD_HEIGHT_THRESHOLD = 50;
 
+/** How long iOS may take to bring the keyboard back to a returning page. */
+const KEYBOARD_RETURN_WINDOW = 1000;
+
 /*
  * A shrinking viewport is not proof of our own keyboard: iOS resizes the page
  * behind the native share sheet when the app it hands the link to opens a
@@ -49,6 +52,11 @@ export const useVirtualKeyboard = () => {
     };
     getFullHeight();
 
+    // Switching apps or locking the phone takes the keyboard away with the
+    // page, and iOS brings it back a moment after the page returns; the
+    // viewport it reports in between is not the reader closing it.
+    let returning: ReturnType<typeof setTimeout> | undefined;
+
     const listener = () => {
       const viewport = window.visualViewport;
       if (!viewport) {
@@ -62,6 +70,14 @@ export const useVirtualKeyboard = () => {
         && fullHeight - height > KEYBOARD_HEIGHT_THRESHOLD
         && hasEditableFocus();
 
+      const away = document.visibilityState === 'hidden'
+        || returning !== undefined;
+      if (away && !open) {
+        return;
+      }
+
+      clearTimeout(returning);
+      returning = undefined;
       setIsOpen(open);
       if (open) {
         setVisibleHeight(height);
@@ -84,10 +100,23 @@ export const useVirtualKeyboard = () => {
 
       listener();
     };
+    const onVisibilityChange = () => {
+      clearTimeout(returning);
+      returning = undefined;
+      if (document.visibilityState === 'visible') {
+        returning = setTimeout(() => {
+          returning = undefined;
+          listener();
+        }, KEYBOARD_RETURN_WINDOW);
+      }
+    };
     window.addEventListener('focusin', listener);
     window.addEventListener('focusout', onFocusOut);
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
+      clearTimeout(returning);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       stopListeningForTaps();
       window.visualViewport?.removeEventListener('resize', listener);
       window.removeEventListener('focusin', listener);

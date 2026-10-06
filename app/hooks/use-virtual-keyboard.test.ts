@@ -32,6 +32,15 @@ const blur = (element: HTMLElement) =>
     element.blur();
   });
 
+const setVisibility = (state: DocumentVisibilityState) =>
+  act(() => {
+    Object.defineProperty(document, 'visibilityState', {
+      value: state,
+      configurable: true,
+    });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+
 const createEditable = () => {
   const element = document.createElement('div');
   element.contentEditable = 'true';
@@ -73,6 +82,10 @@ describe('useVirtualKeyboard', () => {
     });
     Object.defineProperty(viewport, 'height', {
       value: VIEWPORT_HEIGHT,
+      configurable: true,
+    });
+    Object.defineProperty(document, 'visibilityState', {
+      value: 'visible',
       configurable: true,
     });
   });
@@ -220,6 +233,42 @@ describe('useVirtualKeyboard', () => {
     setViewportHeight(VIEWPORT_HEIGHT);
 
     expect(result.current[0]).toBe(false);
+  });
+
+  it('should keep the keyboard open while the page returns from another app', () => {
+    const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
+    setViewportHeight(400);
+
+    // iOS takes the keyboard away with the page and brings it back a
+    // moment after the page returns.
+    setVisibility('hidden');
+    setViewportHeight(VIEWPORT_HEIGHT);
+    setVisibility('visible');
+    setViewportHeight(VIEWPORT_HEIGHT);
+
+    expect(result.current[0]).toBe(true);
+
+    setViewportHeight(400);
+
+    expect(result.current[0]).toBe(true);
+  });
+
+  it('should report the keyboard closed when it does not come back to a returning page', () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() => useVirtualKeyboard());
+    tap(createEditable());
+    setViewportHeight(400);
+    setVisibility('hidden');
+    setViewportHeight(VIEWPORT_HEIGHT);
+    setVisibility('visible');
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(result.current[0]).toBe(false);
+    vi.useRealTimers();
   });
 
   it('should ignore the viewport on a device without a virtual keyboard', () => {
