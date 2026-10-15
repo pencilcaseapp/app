@@ -540,6 +540,22 @@ describe('SharePanel', () => {
     expect(action).not.toHaveBeenCalled();
   });
 
+  test('leaves an address alone until it is submitted', async () => {
+    drawerPanel();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+
+    renderSharePanel();
+
+    await user.type(
+      screen.getByRole('textbox', { name: 'Email address' }),
+      'grace',
+    );
+    await user.tab();
+
+    expect(screen.queryByText('Enter a valid email address'))
+      .not.toBeInTheDocument();
+  });
+
   test('lists the invited people with their access', () => {
     renderSharePanel({ invited: invitedPeople });
 
