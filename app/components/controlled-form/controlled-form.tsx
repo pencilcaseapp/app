@@ -8,10 +8,11 @@ export type ControlledFormProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: AnyFormApi & { AppForm: any };
   children: ReactNode;
+  noValidate?: boolean;
 };
 
 export const ControlledForm: React.FC<ControlledFormProps>
-  = ({ form, children }) => {
+  = ({ form, children, noValidate }) => {
     const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
       event.preventDefault();
       event.stopPropagation();
@@ -23,6 +24,7 @@ export const ControlledForm: React.FC<ControlledFormProps>
         id={getFormId(form)}
         method="post"
         onSubmit={handleSubmit}
+        noValidate={noValidate}
         className="block"
       >
         <form.AppForm>

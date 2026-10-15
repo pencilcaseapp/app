@@ -46,7 +46,7 @@ export const InviteForm: FC = () => {
       access: DEFAULT_DOCUMENT_INVITE_ACCESS as DocumentAccess,
     },
     validators: {
-      onBlur: inviteFormSchema,
+      onSubmit: inviteFormSchema,
     },
   }, { freshOnMount: true });
 
@@ -63,7 +63,9 @@ export const InviteForm: FC = () => {
   }, [actionData, form, emitToast]);
 
   return (
-    <ControlledForm form={form}>
+    // The schema checks the address on submit, which the browser's own
+    // check of an email input would otherwise get in before.
+    <ControlledForm form={form} noValidate>
       <div className="flex items-start gap-2">
         <form.AppField name="email">
           {field => (
