@@ -1,6 +1,5 @@
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { ListItemNode } from '@lexical/list';
 import { useEffect } from 'react';
 import { useMedia } from 'react-use';
 
@@ -30,15 +29,16 @@ export const EditorPluginCheckList: React.FC = () => {
       return;
     }
 
-    // Lexical sets the attribute again on every reconcile of the item, so
-    // it has to go after each one, not just once.
-    return editor.registerMutationListener(ListItemNode, (mutations) => {
-      for (const [key, mutation] of mutations) {
-        if (mutation !== 'destroyed') {
-          editor.getElementByKey(key)?.removeAttribute('tabindex');
-        }
-      }
-    }, { skipInitialization: false });
+    // Lexical sets the attribute again whenever it reconciles an item, which
+    // includes every change to the text inside it, so it has to go after
+    // each update, not just when the item itself changes.
+    const removeTabIndex = () => {
+      editor.getRootElement()?.querySelectorAll('li[tabindex]')
+        .forEach(item => item.removeAttribute('tabindex'));
+    };
+
+    removeTabIndex();
+    return editor.registerUpdateListener(removeTabIndex);
   }, [editor, isTouchDevice]);
 
   return <CheckListPlugin disableTakeFocusOnClick={isTouchDevice} />;

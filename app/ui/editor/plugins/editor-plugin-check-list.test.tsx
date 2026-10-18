@@ -14,7 +14,12 @@ import {
   ListItemNode,
   ListNode,
 } from '@lexical/list';
-import { $createTextNode, $getRoot, type LexicalEditor } from 'lexical';
+import {
+  $createTextNode,
+  $getRoot,
+  $isTextNode,
+  type LexicalEditor,
+} from 'lexical';
 import { EditorPluginCheckList } from './editor-plugin-check-list';
 
 const isTouchDevice = vi.hoisted(() => ({ value: false }));
@@ -71,6 +76,18 @@ const toggleFirstItem = () =>
     }, { discrete: true });
   });
 
+const typeIntoFirstItem = () =>
+  act(() => {
+    editor.update(() => {
+      const list = $getRoot().getFirstChild();
+      const item = $isListNode(list) ? list.getFirstChild() : null;
+      const text = $isListItemNode(item) ? item.getFirstChild() : null;
+      if ($isTextNode(text)) {
+        text.setTextContent(`${text.getTextContent()}!`);
+      }
+    }, { discrete: true });
+  });
+
 describe('EditorPluginCheckList', () => {
   beforeEach(() => {
     isTouchDevice.value = false;
@@ -101,6 +118,20 @@ describe('EditorPluginCheckList', () => {
 
     const [item] = screen.getAllByRole('checkbox');
     expect(item).toHaveAttribute('aria-checked', 'true');
+    expect(item).not.toHaveAttribute('tabindex');
+  });
+
+  test('keeps an item unfocusable after its text changed', () => {
+    isTouchDevice.value = true;
+    renderCheckList();
+
+    // The first edit also lets the list plugin normalise the items, which
+    // rewrites them; only the second leaves the item itself untouched.
+    typeIntoFirstItem();
+    typeIntoFirstItem();
+
+    const [item] = screen.getAllByRole('checkbox');
+    expect(item).toHaveTextContent('Save title!!');
     expect(item).not.toHaveAttribute('tabindex');
   });
 });
