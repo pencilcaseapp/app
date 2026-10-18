@@ -35,9 +35,19 @@ interface NativePullToRefresh {
 
 declare global {
   interface Window {
-    Capacitor?: { Plugins?: { PullToRefresh?: NativePullToRefresh } };
+    Capacitor?: {
+      getPlatform?: () => string;
+      Plugins?: { PullToRefresh?: NativePullToRefresh };
+    };
   }
 }
+
+/**
+ * The iOS app opens the keyboard for any focus on editable content, also one
+ * the page moves there itself, which a browser only does inside a tap.
+ */
+export const isNativeIosApp = () =>
+  window.Capacitor?.getPlatform?.() === 'ios';
 
 export const getNativePullToRefresh = () =>
   window.Capacitor?.Plugins?.PullToRefresh;
