@@ -17,8 +17,11 @@ import { Typography } from '~/ui/typography/typography';
 export interface DeleteDocumentDialogProps {
   documentId: string;
   documentTitle: string;
-  /** The document is published by link, so deleting it takes that away. */
-  linkShared: boolean;
+  /**
+   * Published by link or shared with invited people, who lose the
+   * document as well.
+   */
+  shared: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -31,7 +34,7 @@ export interface DeleteDocumentDialogProps {
 export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
   documentId,
   documentTitle,
-  linkShared,
+  shared,
   open,
   onOpenChange,
 }) => {
@@ -50,7 +53,7 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
     }
   }, [fetcher.state, fetcher.data, onOpenChange]);
 
-  const description = (linkShared
+  const description = (shared
     ? `“${documentTitle}” will be deleted for everyone it is shared with.`
     : `“${documentTitle}” will be moved to Deleted.`)
   + ` You can restore it from Deleted for ${DELETED_DOCUMENT_RETENTION_DAYS}`
