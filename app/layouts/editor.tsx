@@ -44,7 +44,10 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import { DeleteDocumentDialog } from '~/components/delete-document-dialog/delete-document-dialog';
+import {
+  DeleteDocumentDialog,
+  type DocumentToDelete,
+} from '~/components/delete-document-dialog/delete-document-dialog';
 import { RestoreDocumentMenu } from '~/components/restore-document-menu/restore-document-menu';
 import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
 import { DocumentLimitDialog } from '~/components/document-limit-dialog/document-limit-dialog';
@@ -159,12 +162,6 @@ type NavigationItemData = {
   isOwner: boolean;
 };
 type DeletedItemData = { id: string; label: string; to: string };
-type DocumentToDelete = {
-  id: string;
-  label: string;
-  shared: boolean;
-  isOwner: boolean;
-};
 
 export interface EditorSidebarProps extends PropsWithChildren {
   navigation: NavigationItemData[];
@@ -283,7 +280,7 @@ function EditorSidebar({
                                     onClick={() => {
                                       setDocumentToDelete({
                                         id: item.id,
-                                        label,
+                                        title: label,
                                         shared: item.shareState !== 'private',
                                         isOwner: item.isOwner,
                                       });
@@ -305,16 +302,11 @@ function EditorSidebar({
                     })}
                   </DocumentGroup>
                 </DocumentGroupRoot>
-                {documentToDelete && (
-                  <DeleteDocumentDialog
-                    documentId={documentToDelete.id}
-                    documentTitle={documentToDelete.label}
-                    shared={documentToDelete.shared}
-                    isOwner={documentToDelete.isOwner}
-                    open={isDeleteDialogOpen}
-                    onOpenChange={setIsDeleteDialogOpen}
-                  />
-                )}
+                <DeleteDocumentDialog
+                  document={documentToDelete}
+                  open={isDeleteDialogOpen}
+                  onOpenChange={setIsDeleteDialogOpen}
+                />
                 {/* Not in the bottom area, which the slim sidebar
                     renders a second time. */}
                 <DocumentLimitDialog

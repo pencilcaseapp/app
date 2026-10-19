@@ -35,10 +35,12 @@ function renderDialog({
       Component: () => (
         <AuthenticityTokenProvider token="test-token">
           <DeleteDocumentDialog
-            documentId={documentId}
-            documentTitle="Meeting notes"
-            shared={shared}
-            isOwner={isOwner}
+            document={{
+              id: documentId,
+              title: 'Meeting notes',
+              shared,
+              isOwner,
+            }}
             open={open}
             onOpenChange={onOpenChange}
           />
