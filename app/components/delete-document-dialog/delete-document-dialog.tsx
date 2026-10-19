@@ -12,6 +12,7 @@ import {
 } from '~/ui/responsive-dialog/responsive-dialog';
 import { ResponsiveDialogContent } from '~/ui/responsive-dialog/responsive-dialog-content';
 import { ResponsiveDialogContentInner } from '~/ui/responsive-dialog/responsive-dialog-content-inner';
+import { SIDEBAR_DRAWER_MAX_HEIGHT } from '~/ui/sidebar/sidebar';
 import { Typography } from '~/ui/typography/typography';
 
 export interface DeleteDocumentDialogProps {
@@ -33,8 +34,9 @@ export interface DeleteDocumentDialogProps {
 
 /*
  * Render it inside the sidebar's drawer tree: on mobile it then opens
- * as a drawer stacked on top of the sidebar, everywhere else as the
- * centered dialog.
+ * as a drawer stacked on top of the sidebar, as tall as the sidebar so
+ * the sheet behind does not resize, everywhere else as the centered
+ * dialog.
  */
 export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
   documentId,
@@ -76,7 +78,10 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent minHeight="40dvh">
+      <ResponsiveDialogContent
+        minHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
+        maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
+      >
         <ResponsiveDialogContentInner
           footerArea={(
             <fetcher.Form
