@@ -75,6 +75,7 @@ describe('useVirtualKeyboard', () => {
       value: VIEWPORT_HEIGHT,
       configurable: true,
     });
+    Reflect.deleteProperty(window, 'Capacitor');
   });
 
   it('should report the keyboard closed initially', () => {
@@ -145,6 +146,26 @@ describe('useVirtualKeyboard', () => {
   it('should ignore a shrinking viewport around content nobody tapped', () => {
     // A focus the page moves there itself, with the pull-to-refresh
     // spinner shrinking the viewport.
+    const { result } = renderHook(() => useVirtualKeyboard());
+    focus(createEditable());
+
+    setViewportHeight(400);
+
+    expect(result.current[0]).toBe(false);
+  });
+
+  it('should report the keyboard open when the iOS app focuses the content', () => {
+    window.Capacitor = { getPlatform: () => 'ios' };
+    const { result } = renderHook(() => useVirtualKeyboard());
+    focus(createEditable());
+
+    setViewportHeight(400);
+
+    expect(result.current[0]).toBe(true);
+  });
+
+  it('should ignore a focus the Android app moves to the content', () => {
+    window.Capacitor = { getPlatform: () => 'android' };
     const { result } = renderHook(() => useVirtualKeyboard());
     focus(createEditable());
 

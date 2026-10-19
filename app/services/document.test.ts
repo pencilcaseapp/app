@@ -320,6 +320,18 @@ describe('openDocument', () => {
     expect(document?.preview).toContain('Groceries</span></h1>');
   });
 
+  it('previews the empty heading of a document nobody has written in', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument());
+    getDocumentMock.mockResolvedValue({ ...documentFixture, content: null });
+
+    const [, document] = await openDocument(documentFixture.id, viewer);
+
+    expect(document?.preview).toBe(
+      '<h1 class="editor-heading-h1" dir="auto">'
+      + '<br data-lexical-managed-linebreak="true"></h1>',
+    );
+  });
+
   it('points the preview\'s images at the CDN', async () => {
     cdn.config = { url: 'https://cdn.example', tokenKey: 'key' };
     const assetId = 'b3f1c2d4-0000-4000-8000-000000000000';
