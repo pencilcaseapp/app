@@ -92,7 +92,6 @@ export async function loader({ context, request }: Route.LoaderArgs) {
     id: doc.id,
     label: doc.title ?? 'Untitled',
     to: href('/doc/:id', { id: doc.id }),
-    linkShared: doc.linkShared,
     shareState: getShareState(doc),
     isOwner: doc.userId === user?.id,
   }));
@@ -156,12 +155,11 @@ type NavigationItemData = {
   id: string;
   label: string;
   to: string;
-  linkShared: boolean;
   shareState: DocumentShareState;
   isOwner: boolean;
 };
 type DeletedItemData = { id: string; label: string; to: string };
-type DocumentToDelete = { id: string; label: string; linkShared: boolean };
+type DocumentToDelete = { id: string; label: string; shared: boolean };
 
 export interface EditorSidebarProps extends PropsWithChildren {
   navigation: NavigationItemData[];
@@ -283,7 +281,7 @@ function EditorSidebar({
                                       setDocumentToDelete({
                                         id: item.id,
                                         label,
-                                        linkShared: item.linkShared,
+                                        shared: item.shareState !== 'private',
                                       });
                                       setIsDeleteDialogOpen(true);
                                     }}
@@ -307,7 +305,7 @@ function EditorSidebar({
                   <DeleteDocumentDialog
                     documentId={documentToDelete.id}
                     documentTitle={documentToDelete.label}
-                    linkShared={documentToDelete.linkShared}
+                    shared={documentToDelete.shared}
                     open={isDeleteDialogOpen}
                     onOpenChange={setIsDeleteDialogOpen}
                   />

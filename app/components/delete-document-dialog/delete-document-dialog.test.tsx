@@ -11,11 +11,11 @@ const onOpenChange = vi.fn();
 
 function renderDialog({
   open = true,
-  linkShared = false,
+  shared = false,
   action = async () => ({ ok: true, id: documentId }),
 }: {
   open?: boolean;
-  linkShared?: boolean;
+  shared?: boolean;
   action?: (args: ActionFunctionArgs) => unknown;
 } = {}) {
   const Stub = createRoutesStub([
@@ -26,7 +26,7 @@ function renderDialog({
           <DeleteDocumentDialog
             documentId={documentId}
             documentTitle="Meeting notes"
-            linkShared={linkShared}
+            shared={shared}
             open={open}
             onOpenChange={onOpenChange}
           />
@@ -68,7 +68,7 @@ describe('DeleteDocumentDialog', () => {
   });
 
   test('warns that a shared document goes away for everyone', () => {
-    renderDialog({ linkShared: true });
+    renderDialog({ shared: true });
 
     expect(screen.getByText(
       '“Meeting notes” will be deleted for everyone it is shared with. You'
