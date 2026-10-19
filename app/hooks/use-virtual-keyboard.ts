@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMedia } from 'react-use';
 import { listenForEditableTap } from '~/utils/editable-tap';
+import { isNativeIosApp } from '~/utils/native-app';
 
 const KEYBOARD_HEIGHT_THRESHOLD = 50;
 
@@ -30,8 +31,11 @@ export const useVirtualKeyboard = () => {
 
     // Nor is a shrinking viewport with the content focused: the spinner of
     // a pull-to-refresh shrinks it as well, and a focus the page moved there
-    // itself opens no keyboard. Only a tap on the content does.
+    // itself opens no keyboard. Only a tap on the content does, except in
+    // the iOS app, where any focus there does, like the one a new document
+    // gets.
     let tapped = false;
+    const opensKeyboardOnFocus = isNativeIosApp();
 
     // iOS and Chrome leave the page its height and only shrink the visual
     // viewport, but the Android web view shrinks the page along with it, so
@@ -75,6 +79,13 @@ export const useVirtualKeyboard = () => {
     window.visualViewport?.addEventListener('resize', listener);
     // Focus moves before the viewport settles, and on the way out of the app
     // it is the only thing that moves at all.
+    const onFocusIn = () => {
+      if (opensKeyboardOnFocus && hasEditableFocus()) {
+        tapped = true;
+      }
+
+      listener();
+    };
     const onFocusOut = (event: FocusEvent) => {
       const next = event.relatedTarget;
 
@@ -84,13 +95,13 @@ export const useVirtualKeyboard = () => {
 
       listener();
     };
-    window.addEventListener('focusin', listener);
+    window.addEventListener('focusin', onFocusIn);
     window.addEventListener('focusout', onFocusOut);
 
     return () => {
       stopListeningForTaps();
       window.visualViewport?.removeEventListener('resize', listener);
-      window.removeEventListener('focusin', listener);
+      window.removeEventListener('focusin', onFocusIn);
       window.removeEventListener('focusout', onFocusOut);
     };
   }, [isTouchDevice]);
