@@ -22,6 +22,11 @@ export interface DeleteDocumentDialogProps {
    * document as well.
    */
   shared: boolean;
+  /**
+   * Somebody else's document is only removed from the user's own
+   * documents, it stays as it is for everybody else.
+   */
+  isOwner: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -35,6 +40,7 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
   documentId,
   documentTitle,
   shared,
+  isOwner,
   open,
   onOpenChange,
 }) => {
@@ -58,11 +64,15 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
     }
   }, [fetcher.data, onOpenChange, navigate, params.id]);
 
-  const description = (shared
+  const ownerDescription = (shared
     ? `“${documentTitle}” will be deleted for everyone it is shared with.`
     : `“${documentTitle}” will be moved to Deleted.`)
   + ` You can restore it from Deleted for ${DELETED_DOCUMENT_RETENTION_DAYS}`
   + ' days, after that it is permanently deleted.';
+  const description = isOwner
+    ? ownerDescription
+    : `“${documentTitle}” will be removed from your documents. It is not`
+      + ' deleted for the owner or anyone else it is shared with.';
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
@@ -71,7 +81,10 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
           footerArea={(
             <fetcher.Form
               method="post"
-              action={href('/doc/:id/delete', { id: documentId })}
+              action={href(
+                isOwner ? '/doc/:id/delete' : '/doc/:id/leave',
+                { id: documentId },
+              )}
               className="flex items-center justify-end gap-2"
             >
               <AuthenticityTokenInput />

@@ -520,10 +520,6 @@ test.describe('deletion', () => {
     await userB.openDocument(shareUrl);
     await expect(userB.content).toContainText(heading);
 
-    // The collaborator has no way to delete it.
-    await userB.documentInAllDocs(heading).hover();
-    await expect(userB.documentMenuTrigger('All Docs', heading)).toHaveCount(0);
-
     await userA.deleteDocument(heading);
 
     // User B is disconnected and the document is gone for them.
@@ -542,6 +538,36 @@ test.describe('deletion', () => {
     ).toBeVisible();
     await userB.openDeletedDocs();
     await expect(userB.documentInDeleted(heading)).toHaveCount(0);
+  });
+
+  test('a collaborator deletes a document only for themselves', async ({
+    userA,
+    userB,
+  }) => {
+    const url = await userA.createDocument();
+    const heading = `Left by User B ${Date.now()}`;
+    await userA.typeLines(heading);
+    const shareUrl = await userA.shareDocument();
+
+    await userB.openDocument(shareUrl);
+    await expect(userB.documentInAllDocs(heading)).toBeVisible();
+
+    await userB.deleteDocument(heading);
+
+    await expect(userB.page).not.toHaveURL(shareUrl);
+    await expect(userB.documentInAllDocs(heading)).toBeHidden();
+    await userB.page.reload();
+    await expect(userB.documentInAllDocs(heading)).toBeHidden();
+    await userB.openDeletedDocs();
+    await expect(userB.documentInDeleted(heading)).toHaveCount(0);
+
+    // Nothing changed for the owner: still listed, still shared.
+    await userA.page.reload();
+    await expect(userA.page).toHaveURL(url);
+    await expect(userA.documentInAllDocs(heading)).toBeVisible();
+    await expect(userA.deletedNotice).toBeHidden();
+    await userB.openDocument(shareUrl);
+    await expect(userB.content).toContainText(heading);
   });
 
   test('deleting the open document opens the last edited one', async ({

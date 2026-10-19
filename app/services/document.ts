@@ -38,6 +38,7 @@ import {
   inviteCollaborator as insertInvite,
   removeCollaborator as deleteCollaborator,
   removeLinkCollaborators,
+  removeViewerCollaborators,
   restoreDocument as restoreDocumentRow,
   setCollaboratorAccess,
   setDocumentLinkAccess,
@@ -542,6 +543,41 @@ export async function restoreDocument(
   }
 
   closeDocumentConnections({ documentId: document.id });
+
+  return [null, { id: document.id }];
+}
+
+export enum LeaveDocumentError {
+  PermissionDenied,
+}
+
+export type LeaveDocumentResult
+  = [LeaveDocumentError] | [null, { id: string }];
+
+/**
+ * What deleting is for somebody the document was shared with: they stop
+ * being one of its collaborators, so it leaves their navigation and the
+ * owner's share panel, while the document stays as it is for everybody
+ * else. The owner has no row to remove and is refused. With the link off
+ * their access goes with the row, so their live connections are closed;
+ * with it on they could open the document again anyway, and a close would
+ * have their own editor reconnect them through the link right away.
+ */
+export async function leaveDocument(
+  documentId: string,
+  viewer: DocumentViewer,
+): Promise<LeaveDocumentResult> {
+  const document = await getDocumentForViewer(documentId, viewer);
+
+  if (!document?.collaborator) {
+    return [LeaveDocumentError.PermissionDenied];
+  }
+
+  await removeViewerCollaborators({ documentId: document.id, viewer });
+
+  if (!document.linkShared) {
+    closeDocumentConnections({ documentId: document.id, userId: viewer.id });
+  }
 
   return [null, { id: document.id }];
 }

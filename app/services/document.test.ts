@@ -18,6 +18,8 @@ import {
   getLiveAccess,
   inviteCollaborator,
   InviteCollaboratorError,
+  leaveDocument,
+  LeaveDocumentError,
   listInvitedCollaborators,
   openAsset,
   OpenAssetError,
@@ -77,6 +79,7 @@ const getInvitedCollaboratorsMock = vi.fn();
 const insertInviteMock = vi.fn();
 const setCollaboratorAccessMock = vi.fn();
 const deleteCollaboratorMock = vi.fn();
+const removeViewerCollaboratorsMock = vi.fn();
 const createDocumentAssetMock = vi.fn();
 const getDocumentAssetMock = vi.fn();
 const getDocumentAssetsMock = vi.fn();
@@ -107,6 +110,8 @@ vi.mock('~/repos/document', () => ({
   setCollaboratorAccess: (...args: unknown[]) =>
     setCollaboratorAccessMock(...args),
   removeCollaborator: (...args: unknown[]) => deleteCollaboratorMock(...args),
+  removeViewerCollaborators: (...args: unknown[]) =>
+    removeViewerCollaboratorsMock(...args),
   createDocumentAsset: (...args: unknown[]) =>
     createDocumentAssetMock(...args),
   getDocumentAsset: (...args: unknown[]) => getDocumentAssetMock(...args),
@@ -803,6 +808,60 @@ describe('deleteDocument', () => {
     expect(error).toBe(DeleteDocumentError.PermissionDenied);
     expect(removeLinkCollaboratorsMock).not.toHaveBeenCalled();
     expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('leaveDocument', () => {
+  it('removes an invited person\'s rows and closes their connections',
+    async () => {
+      getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+        userId: otherUserId,
+        collaborator: invite('edit', { accepted: true }),
+      }));
+
+      const [error, result] = await leaveDocument(documentFixture.id, viewer);
+
+      expect(error).toBeNull();
+      expect(result).toStrictEqual({ id: documentFixture.id });
+      expect(removeViewerCollaboratorsMock).toHaveBeenCalledWith({
+        documentId: documentFixture.id,
+        viewer,
+      });
+      expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
+        documentId: documentFixture.id,
+        userId: viewer.id,
+      });
+    });
+
+  it('leaves the connections open while the link is on', async () => {
+    getDocumentForViewerMock.mockResolvedValue({
+      ...linkDocument('edit'),
+      collaborator: linkCollaborator(),
+    });
+
+    const [error] = await leaveDocument(documentFixture.id, viewer);
+
+    expect(error).toBeNull();
+    expect(removeViewerCollaboratorsMock).toHaveBeenCalled();
+    expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
+  });
+
+  it('denies the owner, who would have to delete it', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument());
+
+    const [error] = await leaveDocument(documentFixture.id, viewer);
+
+    expect(error).toBe(LeaveDocumentError.PermissionDenied);
+    expect(removeViewerCollaboratorsMock).not.toHaveBeenCalled();
+    expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
+  });
+
+  it('denies a document that does not exist', async () => {
+    getDocumentForViewerMock.mockResolvedValue(undefined);
+
+    const [error] = await leaveDocument(documentFixture.id, viewer);
+
+    expect(error).toBe(LeaveDocumentError.PermissionDenied);
   });
 });
 

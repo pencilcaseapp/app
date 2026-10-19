@@ -159,7 +159,12 @@ type NavigationItemData = {
   isOwner: boolean;
 };
 type DeletedItemData = { id: string; label: string; to: string };
-type DocumentToDelete = { id: string; label: string; shared: boolean };
+type DocumentToDelete = {
+  id: string;
+  label: string;
+  shared: boolean;
+  isOwner: boolean;
+};
 
 export interface EditorSidebarProps extends PropsWithChildren {
   navigation: NavigationItemData[];
@@ -266,9 +271,7 @@ function EditorSidebar({
                           to={item.to}
                           key={item.to}
                           onClick={closeOnNavigate}
-                          // Only the owner may delete, so a collaborator
-                          // gets no menu at all.
-                          actionArea={item.isOwner && (
+                          actionArea={(
                             <DropdownMenu>
                               <DropdownMenuTrigger iconTitle="Item options" />
                               <DropdownMenuPortal>
@@ -282,6 +285,7 @@ function EditorSidebar({
                                         id: item.id,
                                         label,
                                         shared: item.shareState !== 'private',
+                                        isOwner: item.isOwner,
                                       });
                                       setIsDeleteDialogOpen(true);
                                     }}
@@ -306,6 +310,7 @@ function EditorSidebar({
                     documentId={documentToDelete.id}
                     documentTitle={documentToDelete.label}
                     shared={documentToDelete.shared}
+                    isOwner={documentToDelete.isOwner}
                     open={isDeleteDialogOpen}
                     onOpenChange={setIsDeleteDialogOpen}
                   />
