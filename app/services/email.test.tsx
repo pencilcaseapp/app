@@ -3,18 +3,12 @@ import { EmailTemplate } from '~/constants/email';
 import { isTestEmailAddress, sendEmail } from './email';
 
 const lettermintEmailMock = {
-  idempotencyKey: vi.fn().mockReturnThis(),
-  from: vi.fn().mockReturnThis(),
-  to: vi.fn().mockReturnThis(),
-  subject: vi.fn().mockReturnThis(),
-  html: vi.fn().mockReturnThis(),
-  text: vi.fn().mockReturnThis(),
   send: vi.fn(),
 };
 
 vi.mock('lettermint', () => ({
   Lettermint: class {
-    email = lettermintEmailMock;
+    emails = lettermintEmailMock;
   },
 }));
 
@@ -73,17 +67,21 @@ describe('sendEmail', () => {
       },
     });
 
-    expect(lettermintEmailMock.from).toHaveBeenCalledWith('pencil case <inbox@pencilcaseapp.com>');
-    expect(lettermintEmailMock.to).toHaveBeenCalledWith('John Doe <john@doe.com>');
-    expect(lettermintEmailMock.subject).toHaveBeenCalledWith('Test Email');
     expect(lettermintEmailMock.send).toHaveBeenCalledTimes(1);
+    expect(lettermintEmailMock.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 'pencil case <inbox@pencilcaseapp.com>',
+        to: ['John Doe <john@doe.com>'],
+        subject: 'Test Email',
+      }),
+      expect.anything(),
+    );
   });
 
   it('renders the template to both an HTML and a plain text body', async () => {
     await sendEmail(input);
 
-    const [html] = lettermintEmailMock.html.mock.calls[0];
-    const [text] = lettermintEmailMock.text.mock.calls[0];
+    const [{ html, text }] = lettermintEmailMock.send.mock.calls[0];
 
     expect(html).toContain('<p>This is a test email.</p>');
     expect(text).toBe('This is a test email.');
@@ -119,8 +117,10 @@ describe('sendEmail', () => {
   it('hands the same key to Lettermint', async () => {
     await sendEmail(input);
 
-    expect(lettermintEmailMock.idempotencyKey)
-      .toHaveBeenCalledWith('otp-code:otp-id');
+    expect(lettermintEmailMock.send).toHaveBeenCalledWith(
+      expect.anything(),
+      { idempotencyKey: 'otp-code:otp-id' },
+    );
   });
 
   it('sends nothing when the key is already taken', async () => {
