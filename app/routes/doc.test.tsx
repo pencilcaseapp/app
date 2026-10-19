@@ -1,4 +1,7 @@
-import { RouterContextProvider } from 'react-router';
+import {
+  RouterContextProvider,
+  type ShouldRevalidateFunctionArgs,
+} from 'react-router';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { documentInviteCopies } from '~/constants/document';
 import {
@@ -12,7 +15,7 @@ import {
 import { documentFixture } from '~/test/fixtures/document';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
-import { action } from './doc';
+import { action, shouldRevalidate } from './doc';
 import type { Route } from './+types/doc';
 
 const redirectMock = vi.fn();
@@ -346,4 +349,28 @@ test('responds with 403 for an anonymous visitor', async () => {
   await expect(callAction({ email: 'grace@example.com', access: 'edit' }, null))
     .rejects.toMatchObject({ init: { status: 403 } });
   expect(inviteCollaboratorMock).not.toHaveBeenCalled();
+});
+
+function revalidates(formAction: string) {
+  const url = new URL(`http://localhost/doc/${documentFixture.id}`);
+  const params = { id: documentFixture.id };
+
+  return shouldRevalidate({
+    currentUrl: url,
+    currentParams: params,
+    nextUrl: url,
+    nextParams: params,
+    formAction,
+    defaultShouldRevalidate: true,
+  } as ShouldRevalidateFunctionArgs);
+}
+
+test('does not reopen the document the viewer just left', () => {
+  expect(revalidates(`/doc/${documentFixture.id}/leave`)).toBe(false);
+});
+
+test('revalidates after leaving another document', () => {
+  expect(revalidates('/doc/22222222-2222-2222-2222-222222222222/leave'))
+    .toBe(true);
+  expect(revalidates(`/doc/${documentFixture.id}/delete`)).toBe(true);
 });

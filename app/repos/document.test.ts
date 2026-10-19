@@ -20,6 +20,7 @@ import {
   hardDeleteDocuments,
   removeCollaborator,
   removeLinkCollaborators,
+  removeViewerCollaborators,
   restoreDocument,
   setCollaboratorAccess,
   setDocumentLinkAccess,
@@ -1095,6 +1096,62 @@ describe('removeCollaborator', () => {
       ownerId: 'not-a-uuid',
       collaboratorId: 'not-a-uuid',
     })).toBeUndefined();
+  });
+});
+
+describe('removeViewerCollaborators', () => {
+  it('drops the viewer\'s rows and nobody else\'s', async () => {
+    const owner = await createTestUser();
+    const viewer = await createTestUser();
+    const other = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const invite = await inviteDocumentCollaborator(
+      fixture.id, viewer.email, { userId: viewer.id, accepted: true },
+    );
+    const otherRow = await connectDocumentCollaborator(fixture.id, other.id);
+
+    expect(await removeViewerCollaborators({
+      documentId: fixture.id,
+      viewer,
+    })).toStrictEqual([{ id: invite.id }]);
+    expect(await db.query.documentCollaborators.findMany({
+      where: { documentId: fixture.id },
+      columns: { id: true },
+    })).toStrictEqual([{ id: otherRow.id }]);
+    expect(await getDocument(fixture.id)).toBeDefined();
+  });
+
+  it('drops a pending invite of the viewer\'s address too', async () => {
+    const owner = await createTestUser();
+    const viewer = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+    const link = await connectDocumentCollaborator(fixture.id, viewer.id);
+    const invite = await inviteDocumentCollaborator(fixture.id, viewer.email);
+
+    const removed = await removeViewerCollaborators({
+      documentId: fixture.id,
+      viewer,
+    });
+
+    expect(removed.map(row => row.id).sort())
+      .toStrictEqual([link.id, invite.id].sort());
+  });
+
+  it('removes nothing for the owner', async () => {
+    const owner = await createTestUser();
+    const fixture = await createDocumentWithTitle(owner.id);
+
+    expect(await removeViewerCollaborators({
+      documentId: fixture.id,
+      viewer: owner,
+    })).toStrictEqual([]);
+  });
+
+  it('returns an empty list for an invalid id', async () => {
+    expect(await removeViewerCollaborators({
+      documentId: 'not-a-uuid',
+      viewer: { id: 'not-a-uuid', email: 'someone@example.com' },
+    })).toStrictEqual([]);
   });
 });
 

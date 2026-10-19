@@ -422,7 +422,14 @@ one) and `/doc/:id/restore` (the row menu of the Deleted group, whose
 rows link to the read-only view). The
 `purge-deleted-documents` job hard deletes rows past
 `DELETED_DOCUMENT_RETENTION_DAYS` (`app/constants/document.ts`, also the
-number the dialog and the notice quote) every night.
+number the dialog and the notice quote) every night. Somebody the
+document is shared with gets the same Delete in its row menu, but it posts
+to `/doc/:id/leave` (`leaveDocument`), which only removes their own
+`document_collaborators` rows: the document leaves their navigation and the
+owner's share panel and stays as it is for everybody else, with no way back
+but the link or a new invite. Opening a shared document connects the viewer
+again, so the doc route's `shouldRevalidate` skips the reload after leaving
+the open one.
 
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader

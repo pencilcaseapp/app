@@ -84,13 +84,7 @@ export async function getDocumentForViewer(
   }
 
   const isViewer = viewer && isUuid(viewer.id)
-    ? or(
-        eq(documentCollaborators.userId, viewer.id),
-        and(
-          isNull(documentCollaborators.userId),
-          eq(documentCollaborators.email, viewer.email),
-        ),
-      )
+    ? isViewerCollaborator(viewer)
     : sql`FALSE`;
 
   const rows = await db.select({
@@ -117,6 +111,20 @@ export async function getDocumentForViewer(
     .where(eq(documents.id, id));
 
   return rows.find(row => row.collaborator?.source === 'invite') ?? rows[0];
+}
+
+/**
+ * The viewer's collaborator rows: theirs by user id, or by address for an
+ * invite nobody has accepted yet.
+ */
+function isViewerCollaborator(viewer: DocumentViewer) {
+  return or(
+    eq(documentCollaborators.userId, viewer.id),
+    and(
+      isNull(documentCollaborators.userId),
+      eq(documentCollaborators.email, viewer.email),
+    ),
+  );
 }
 
 export type DocumentForViewer
@@ -641,6 +649,34 @@ export async function removeCollaborator(input: OwnedCollaboratorInput) {
     });
 
   return collaborator;
+}
+
+export interface RemoveViewerCollaboratorsInput {
+  documentId: string;
+  viewer: DocumentViewer;
+}
+
+/**
+ * Drops every row that lists the viewer on the document, the invite and
+ * a connection made through the link alike, so it leaves their
+ * navigation and the owner's share panel. Returns the removed rows, none
+ * for the owner, who has no row.
+ */
+export async function removeViewerCollaborators(
+  input: RemoveViewerCollaboratorsInput,
+) {
+  const { documentId, viewer } = input;
+
+  if (!isUuid(documentId) || !isUuid(viewer.id)) {
+    return [];
+  }
+
+  return db.delete(documentCollaborators)
+    .where(and(
+      eq(documentCollaborators.documentId, documentId),
+      isViewerCollaborator(viewer),
+    ))
+    .returning({ id: documentCollaborators.id });
 }
 
 export interface CreateDocumentAssetInput {

@@ -47,7 +47,10 @@ export class AppUser {
     }
   }
 
-  /** Deletes the document through its row menu and the confirmation. */
+  /**
+   * Deletes the document through its row menu and the confirmation, or
+   * removes it from the user's documents when somebody else owns it.
+   */
   async deleteDocument(title: string): Promise<void> {
     await this.openDocumentMenu('All Docs', title);
     await this.page.getByRole('menuitem', { name: 'Delete' }).click();
@@ -55,7 +58,7 @@ export class AppUser {
     const dialog = this.page.getByRole('dialog');
     await expect(dialog).toContainText(`“${title}” will be`);
 
-    const deleted = this.waitForPost('/delete');
+    const deleted = this.waitForPost('/delete', '/leave');
     await dialog.getByRole('button', { name: 'Delete' }).click();
     expect((await deleted).ok()).toBeTruthy();
   }
@@ -104,10 +107,11 @@ export class AppUser {
   }
 
   /** Fetcher submissions post to the route's `.data` URL. */
-  private waitForPost(routeSegment: string) {
+  private waitForPost(...routeSegments: string[]) {
     return this.page.waitForResponse(response =>
       response.request().method() === 'POST'
-      && new URL(response.url()).pathname.includes(routeSegment),
+      && routeSegments.some(segment =>
+        new URL(response.url()).pathname.includes(segment)),
     );
   }
 

@@ -13,13 +13,17 @@ const onOpenChange = vi.fn();
 function renderDialog({
   open = true,
   shared = false,
+  isOwner = true,
   action = async () => ({ ok: true, id: documentId }),
   openDocumentId = documentId,
+  leaveAction = async () => ({ ok: true, id: documentId }),
 }: {
   open?: boolean;
   shared?: boolean;
+  isOwner?: boolean;
   action?: (args: ActionFunctionArgs) => unknown;
   openDocumentId?: string;
+  leaveAction?: (args: ActionFunctionArgs) => unknown;
 } = {}) {
   const Stub = createRoutesStub([
     {
@@ -34,6 +38,7 @@ function renderDialog({
             documentId={documentId}
             documentTitle="Meeting notes"
             shared={shared}
+            isOwner={isOwner}
             open={open}
             onOpenChange={onOpenChange}
           />
@@ -43,6 +48,10 @@ function renderDialog({
     {
       path: '/doc/:id/delete',
       action,
+    },
+    {
+      path: '/doc/:id/leave',
+      action: leaveAction,
     },
   ]);
 
@@ -82,6 +91,28 @@ describe('DeleteDocumentDialog', () => {
       + ' can restore it from Deleted for 30 days, after that it is'
       + ' permanently deleted.',
     )).toBeInTheDocument();
+  });
+
+  test('tells a collaborator it stays for everybody else', () => {
+    renderDialog({ isOwner: false, shared: true });
+
+    expect(screen.getByText(
+      '“Meeting notes” will be removed from your documents. It is not'
+      + ' deleted for the owner or anyone else it is shared with.',
+    )).toBeInTheDocument();
+  });
+
+  test('posts a collaborator\'s delete to the leave route', async () => {
+    const user = userEvent.setup();
+    const action = vi.fn(async () => ({ ok: true, id: documentId }));
+    const leaveAction = vi.fn(async () => ({ ok: true, id: documentId }));
+    renderDialog({ isOwner: false, action, leaveAction });
+
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+
+    expect(await screen.findByText('Start page')).toBeInTheDocument();
+    expect(leaveAction).toHaveBeenCalledTimes(1);
+    expect(action).not.toHaveBeenCalled();
   });
 
   test('closes through the cancel button without deleting', async () => {

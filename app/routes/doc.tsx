@@ -1,5 +1,12 @@
 import type { Route } from './+types/doc';
-import { Link, Outlet, redirect, data, useRevalidator } from 'react-router';
+import {
+  Link,
+  Outlet,
+  redirect,
+  data,
+  useRevalidator,
+  type ShouldRevalidateFunctionArgs,
+} from 'react-router';
 import { CollaborativeEditor } from '~/components/collaborative-editor/collaborative-editor';
 import {
   inviteCollaborator,
@@ -50,6 +57,25 @@ const inviteErrorMessages = {
   [InviteCollaboratorError.AlreadyInvited]:
     documentInviteCopies.alreadyInvited,
 };
+
+/**
+ * Opening a shared document connects the viewer to it again, so leaving
+ * the open one must not reload it on the way to the start page.
+ */
+export function shouldRevalidate({
+  currentParams,
+  formAction,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs) {
+  if (
+    currentParams.id
+    && formAction === href('/doc/:id/leave', { id: currentParams.id })
+  ) {
+    return false;
+  }
+
+  return defaultShouldRevalidate;
+}
 
 export async function loader({ params, context, request }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
