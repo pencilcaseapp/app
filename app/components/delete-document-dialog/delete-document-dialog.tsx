@@ -1,5 +1,5 @@
 import { useEffect, useRef, type FC } from 'react';
-import { href, useFetcher } from 'react-router';
+import { href, useFetcher, useNavigate, useParams } from 'react-router';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { DELETED_DOCUMENT_RETENTION_DAYS } from '~/constants/document';
 import type { action as deleteAction } from '~/routes/doc-delete';
@@ -39,19 +39,24 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
   onOpenChange,
 }) => {
   const fetcher = useFetcher<typeof deleteAction>();
-  const previousStateRef = useRef(fetcher.state);
+  const navigate = useNavigate();
+  const params = useParams();
+  const handledRef = useRef(fetcher.data);
 
-  // Close once the submission comes back. The result itself is no signal:
-  // deleting a restored document again returns the very same id.
+  // Close once a result comes back. Each one is a new object, also when a
+  // restored document is deleted again and the id stays the same.
   useEffect(() => {
-    const submitted = previousStateRef.current === 'submitting'
-      && fetcher.state !== 'submitting';
-    previousStateRef.current = fetcher.state;
-
-    if (submitted && fetcher.data?.id) {
-      onOpenChange(false);
+    if (!fetcher.data || fetcher.data === handledRef.current) {
+      return;
     }
-  }, [fetcher.state, fetcher.data, onOpenChange]);
+    handledRef.current = fetcher.data;
+    onOpenChange(false);
+
+    // The start page opens the most recently edited document instead.
+    if (params.id === fetcher.data.id) {
+      void navigate(href('/'), { replace: true });
+    }
+  }, [fetcher.data, onOpenChange, navigate, params.id]);
 
   const description = (shared
     ? `“${documentTitle}” will be deleted for everyone it is shared with.`

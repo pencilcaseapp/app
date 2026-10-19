@@ -481,23 +481,21 @@ test.describe('deletion', () => {
 
     await userA.deleteDocument(heading);
 
+    // It was the only document, so the start page opens a new one.
+    await expect(userA.page).not.toHaveURL(url);
     await expect(userA.documentInAllDocs(heading)).toBeHidden();
-    // It was the only document, so All Docs shows its empty state.
-    await expect(userA.page.getByText('No documents')).toBeVisible();
     await userA.openDeletedDocs();
     await expect(userA.documentInDeleted(heading)).toBeVisible();
 
-    // The document stays open, now read-only with the notice on top.
+    // It opens read-only from Deleted, with the notice on top.
+    await userA.documentInDeleted(heading).click();
     await expect(userA.page).toHaveURL(url);
     await expect(userA.deletedNotice).toBeVisible();
     await expect(userA.content).toHaveAttribute('contenteditable', 'false');
     await expect(userA.content).toContainText(heading);
 
-    // It opens the same way from the Deleted group after a reload.
+    // It stays that way after a reload.
     await userA.page.reload();
-    await expect(userA.deletedNotice).toBeVisible();
-    await userA.openDeletedDocs();
-    await userA.documentInDeleted(heading).click();
     await expect(userA.deletedNotice).toBeVisible();
 
     await userA.restoreDocument(heading);
@@ -510,7 +508,7 @@ test.describe('deletion', () => {
     // Deleting the restored document again closes the dialog as before.
     await userA.deleteDocument(heading);
     await expect(userA.page.getByRole('dialog')).toBeHidden();
-    await expect(userA.deletedNotice).toBeVisible();
+    await expect(userA.page).not.toHaveURL(url);
   });
 
   test('deleting a shared document unshares it', async ({ userA, userB }) => {
@@ -546,31 +544,46 @@ test.describe('deletion', () => {
     await expect(userB.documentInDeleted(heading)).toHaveCount(0);
   });
 
-  test('deleting the open document scrolls up to the notice', async ({
+  test('deleting the open document opens the last edited one', async ({
     userA,
   }) => {
-    await userA.createDocument();
-    const heading = `Long doc ${Date.now()}`;
-    const lines = Array.from({ length: 60 }, (_, index) => `Line ${index}`);
-    await userA.typeLines(heading, ...lines);
+    // Each document is stored before the next one is created, which keeps
+    // the order they were edited in.
+    const createStored = async (heading: string) => {
+      const url = await userA.createDocument();
+      await userA.typeLines(heading);
+      await expect(async () => {
+        await userA.page.reload();
+        await expect(userA.documentInAllDocs(heading))
+          .toBeVisible({ timeout: 3000 });
+      }).toPass({ timeout: 15_000 });
 
-    await userA.page.evaluate(() =>
-      window.scrollTo(0, document.body.scrollHeight),
-    );
-    expect(await userA.page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+      return url;
+    };
+    const first = await createStored(`First ${Date.now()}`);
+    const second = `Second ${Date.now()}`;
+    await createStored(second);
+    const heading = `Third ${Date.now()}`;
+    const third = await createStored(heading);
+
+    // Deleting another document leaves the open one open.
+    await userA.deleteDocument(second);
+    await expect(userA.documentInAllDocs(second)).toBeHidden();
+    await expect(userA.page).toHaveURL(third);
 
     await userA.deleteDocument(heading);
-
-    await expect(userA.deletedNotice).toBeInViewport();
-    expect(await userA.page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(userA.page).toHaveURL(first);
+    await expect(userA.deletedNotice).toBeHidden();
   });
 
   test('edits after a restore are persisted', async ({ userA }) => {
-    await userA.createDocument();
+    const url = await userA.createDocument();
     const heading = `Restored doc ${Date.now()}`;
     await userA.typeLines(heading);
 
     await userA.deleteDocument(heading);
+    await expect(userA.page).not.toHaveURL(url);
+    await userA.page.goto(url);
     await expect(userA.deletedNotice).toBeVisible();
     await userA.restoreDocument(heading);
     await expect(userA.deletedNotice).toBeHidden();

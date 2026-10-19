@@ -7,18 +7,25 @@ import { setViewportWidth } from '~/utils/testing';
 import { DeleteDocumentDialog } from './delete-document-dialog';
 
 const documentId = '11111111-1111-1111-1111-111111111111';
+const otherDocumentId = '22222222-2222-2222-2222-222222222222';
 const onOpenChange = vi.fn();
 
 function renderDialog({
   open = true,
   shared = false,
   action = async () => ({ ok: true, id: documentId }),
+  openDocumentId = documentId,
 }: {
   open?: boolean;
   shared?: boolean;
   action?: (args: ActionFunctionArgs) => unknown;
+  openDocumentId?: string;
 } = {}) {
   const Stub = createRoutesStub([
+    {
+      path: '/',
+      Component: () => <p>Start page</p>,
+    },
     {
       path: '/doc/:id',
       Component: () => (
@@ -39,7 +46,7 @@ function renderDialog({
     },
   ]);
 
-  const element = <Stub initialEntries={[`/doc/${documentId}`]} />;
+  const element = <Stub initialEntries={[`/doc/${openDocumentId}`]} />;
 
   return { ...render(element), element };
 }
@@ -111,7 +118,7 @@ describe('DeleteDocumentDialog', () => {
   test('closes again when the same document is deleted again', async () => {
     const user = userEvent.setup();
     const action = vi.fn(async () => ({ ok: true, id: documentId }));
-    renderDialog({ action });
+    renderDialog({ action, openDocumentId: otherDocumentId });
 
     await user.click(screen.getByRole('button', { name: 'Delete' }));
     await vi.waitFor(() => {
@@ -139,5 +146,26 @@ describe('DeleteDocumentDialog', () => {
     rerender(element);
 
     expect(onOpenChange).toHaveBeenCalledTimes(1);
+  });
+
+  test('goes to the start page after deleting the open document', async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+
+    expect(await screen.findByText('Start page')).toBeInTheDocument();
+  });
+
+  test('stays on the open document when deleting another one', async () => {
+    const user = userEvent.setup();
+    renderDialog({ openDocumentId: otherDocumentId });
+
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+
+    await vi.waitFor(() => {
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+    expect(screen.queryByText('Start page')).not.toBeInTheDocument();
   });
 });

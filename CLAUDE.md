@@ -416,8 +416,10 @@ Neither delete nor restore touches `updatedAt`, and neither does sharing or
 unsharing: nothing was edited, so a restored document lands back where it
 was in the navigation and sharing one leaves it where it is. The sidebar
 posts to the resource routes `/doc/:id/delete` (from
-`DeleteDocumentDialog`'s fetcher form) and `/doc/:id/restore` (the row
-menu of the Deleted group, whose rows link to the read-only view). The
+`DeleteDocumentDialog`'s fetcher form, which then sends whoever deleted
+the open document to the start page and with it the most recently edited
+one) and `/doc/:id/restore` (the row menu of the Deleted group, whose
+rows link to the read-only view). The
 `purge-deleted-documents` job hard deletes rows past
 `DELETED_DOCUMENT_RETENTION_DAYS` (`app/constants/document.ts`, also the
 number the dialog and the notice quote) every night.
