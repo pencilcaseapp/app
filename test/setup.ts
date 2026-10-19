@@ -33,6 +33,18 @@ console.warn = (...args: Parameters<typeof console.warn>) => {
   nativeConsoleWarn(...args);
 };
 
+// Cancelling an animation rejects its `finished` promise, which the spec marks
+// as handled. happy-dom does not, so Motion cancelling the sidebar slide fails
+// the run with an unhandled AbortError.
+if (typeof Animation !== 'undefined') {
+  const nativeAnimationCancel = Animation.prototype.cancel;
+
+  Animation.prototype.cancel = function (this: Animation) {
+    this.finished.catch(() => {});
+    nativeAnimationCancel.call(this);
+  };
+}
+
 vi.mock('~/utils/csrf', async (importOriginal) => {
   const actual = await importOriginal<typeof import('~/utils/csrf')>();
   return {
