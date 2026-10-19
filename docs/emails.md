@@ -53,8 +53,8 @@ is what lets a resent code through.
 `sendEmail` claims the key in one statement before it calls the provider
 (`claimEmailLog`), so two processes racing on the same key cannot both send.
 A claim that comes back empty means the key is taken and the send is dropped.
-The same key also goes to Lettermint through `idempotencyKey()`, which covers
-the gap the table cannot: a request that reached them but whose answer we never
+The same key also goes to Lettermint as the `idempotencyKey` option of
+`emails.send()`, which covers the gap the table cannot: a request that reached them but whose answer we never
 recorded.
 
 A row ends up in one of four states. `sent` carries Lettermint's
