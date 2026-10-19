@@ -12,17 +12,16 @@ export interface LettermintEmail {
 
 export async function sendLettermintEmail(email: LettermintEmail) {
   const lettermint = new Lettermint({
-    apiToken: email.apiToken,
+    sendingToken: email.apiToken,
   });
 
-  const response = await lettermint.email
-    .idempotencyKey(email.idempotencyKey)
-    .from(email.from)
-    .to(email.to)
-    .subject(email.subject)
-    .html(email.html)
-    .text(email.text)
-    .send();
+  const response = await lettermint.emails.send({
+    from: email.from,
+    to: [email.to],
+    subject: email.subject,
+    html: email.html,
+    text: email.text,
+  }, { idempotencyKey: email.idempotencyKey });
 
   return response?.message_id;
 }
