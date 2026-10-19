@@ -4,11 +4,39 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createRoutesStub, type ActionFunctionArgs } from 'react-router';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 import { setViewportWidth } from '~/utils/testing';
-import { DeleteDocumentDialog } from './delete-document-dialog';
+import { useState, type FC } from 'react';
+import {
+  DeleteDocumentDialog,
+  type DeleteDocumentDialogProps,
+} from './delete-document-dialog';
 
 const documentId = '11111111-1111-1111-1111-111111111111';
 const otherDocumentId = '22222222-2222-2222-2222-222222222222';
 const onOpenChange = vi.fn();
+
+// Holds the open state like the sidebar does, with a button to open the
+// dialog again after it closed.
+const DialogHarness: FC<
+  Omit<DeleteDocumentDialogProps, 'open' | 'onOpenChange'> & {
+    defaultOpen: boolean;
+  }
+> = ({ defaultOpen, ...props }) => {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)}>Open</button>
+      <DeleteDocumentDialog
+        {...props}
+        open={open}
+        onOpenChange={(...args: Parameters<typeof onOpenChange>) => {
+          onOpenChange(...args);
+          setOpen(args[0] as boolean);
+        }}
+      />
+    </>
+  );
+};
 
 function renderDialog({
   open = true,
@@ -34,15 +62,14 @@ function renderDialog({
       path: '/doc/:id',
       Component: () => (
         <AuthenticityTokenProvider token="test-token">
-          <DeleteDocumentDialog
+          <DialogHarness
             document={{
               id: documentId,
               title: 'Meeting notes',
               shared,
               isOwner,
             }}
-            open={open}
-            onOpenChange={onOpenChange}
+            defaultOpen={open}
           />
         </AuthenticityTokenProvider>
       ),
@@ -158,8 +185,13 @@ describe('DeleteDocumentDialog', () => {
       expect(onOpenChange).toHaveBeenCalledTimes(1);
     });
 
+    await vi.waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
     // Restored in between, then deleted once more from the same dialog.
-    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await user.click(screen.getByRole('button', { name: 'Open' }));
+    await user.click(await screen.findByRole('button', { name: 'Delete' }));
 
     await vi.waitFor(() => {
       expect(onOpenChange).toHaveBeenCalledTimes(2);

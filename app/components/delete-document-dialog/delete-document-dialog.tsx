@@ -1,4 +1,4 @@
-import { useEffect, useRef, type FC } from 'react';
+import { useEffect, useRef, useState, type FC } from 'react';
 import { href, useFetcher, useNavigate, useParams } from 'react-router';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { DELETED_DOCUMENT_RETENTION_DAYS } from '~/constants/document';
@@ -54,10 +54,23 @@ export const DeleteDocumentDialog: FC<DeleteDocumentDialogProps> = ({
   open,
   onOpenChange,
 }) => {
+  const [closings, setClosings] = useState(0);
+
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      onOpenChangeComplete={(nextOpen) => {
+        if (!nextOpen) {
+          setClosings(count => count + 1);
+        }
+      }}
+    >
       {document && (
         <DeleteDocumentDialogContent
+          // Starts afresh each time, the last one stays busy until the
+          // sheet is gone.
+          key={closings}
           {...document}
           onOpenChange={onOpenChange}
         />
@@ -79,21 +92,30 @@ const DeleteDocumentDialogContent: FC<
   const navigate = useNavigate();
   const params = useParams();
   const handledRef = useRef(fetcher.data);
+  const [isClosing, setIsClosing] = useState(false);
 
-  // Close once a result comes back. Each one is a new object, also when a
-  // restored document is deleted again and the id stays the same.
+  // Close once the result is back and the navigation revalidated, so the
+  // list does not change behind the sheet.
   useEffect(() => {
-    if (!fetcher.data || fetcher.data === handledRef.current) {
+    if (
+      fetcher.state !== 'idle'
+      || !fetcher.data
+      || fetcher.data === handledRef.current
+    ) {
       return;
     }
     handledRef.current = fetcher.data;
-    onOpenChange(false);
+    setIsClosing(true);
+
+    if (params.id !== fetcher.data.id) {
+      onOpenChange(false);
+      return;
+    }
 
     // The start page opens the most recently edited document instead.
-    if (params.id === fetcher.data.id) {
-      void navigate(href('/'), { replace: true });
-    }
-  }, [fetcher.data, onOpenChange, navigate, params.id]);
+    void Promise.resolve(navigate(href('/'), { replace: true }))
+      .then(() => onOpenChange(false));
+  }, [fetcher.state, fetcher.data, onOpenChange, navigate, params.id]);
 
   const ownerDescription = (shared
     ? `“${documentTitle}” will be deleted for everyone it is shared with.`
@@ -131,7 +153,7 @@ const DeleteDocumentDialogContent: FC<
             <Button
               type="submit"
               colorLight="red-500"
-              isLoading={fetcher.state !== 'idle'}
+              isLoading={fetcher.state !== 'idle' || isClosing}
             >
               Delete
             </Button>
