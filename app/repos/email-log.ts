@@ -1,4 +1,11 @@
-import { and, eq, gt, type InferSelectModel } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  gt,
+  inArray,
+  lt,
+  type InferSelectModel,
+} from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
 import { emailLogs } from '~/db/schema';
@@ -140,4 +147,33 @@ export async function markEmailLogFailed(input: {
     .returning();
 
   return log;
+}
+
+const DELETE_BATCH_SIZE = 1000;
+
+/**
+ * Deletes in batches so a large backlog never turns into one long-running
+ * statement holding locks on a table every send writes to.
+ */
+export async function deleteEmailLogsCreatedBefore(before: Date) {
+  let deletedCount = 0;
+
+  while (true) {
+    const batch = db
+      .select({ id: emailLogs.id })
+      .from(emailLogs)
+      .where(lt(emailLogs.createdAt, before))
+      .limit(DELETE_BATCH_SIZE);
+
+    const deleted = await db
+      .delete(emailLogs)
+      .where(inArray(emailLogs.id, batch))
+      .returning({ id: emailLogs.id });
+
+    deletedCount += deleted.length;
+
+    if (deleted.length < DELETE_BATCH_SIZE) {
+      return deletedCount;
+    }
+  }
 }

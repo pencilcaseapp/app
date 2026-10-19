@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm';
 import {
   claimEmailLog,
   countEmailLogsByUser,
+  deleteEmailLogsCreatedBefore,
   getEmailLog,
   getEmailLogByIdempotencyKey,
   markEmailLogFailed,
@@ -201,5 +202,40 @@ describe('countEmailLogsByUser', () => {
     });
 
     expect(count).toBe(0);
+  });
+});
+
+// The cutoffs sit days in the past so these tests only ever see their own
+// rows — other test files write logs created around now, in parallel.
+describe('deleteEmailLogsCreatedBefore', () => {
+  const days = 24 * 60 * 60 * 1000;
+
+  async function claimCreatedAt(createdAt: Date) {
+    const log = await claimEmailLog(logInput());
+    await db
+      .update(emailLogs)
+      .set({ createdAt })
+      .where(eq(emailLogs.id, log!.id));
+
+    return log!;
+  }
+
+  it('deletes logs created before the given date', async () => {
+    const log = await claimCreatedAt(new Date(Date.now() - 10 * days));
+
+    const deletedCount = await deleteEmailLogsCreatedBefore(
+      new Date(Date.now() - 5 * days),
+    );
+
+    expect(deletedCount).toBeGreaterThanOrEqual(1);
+    expect(await getEmailLog(log.id)).toBeUndefined();
+  });
+
+  it('keeps logs created after the given date', async () => {
+    const log = await claimCreatedAt(new Date(Date.now() - 6 * days));
+
+    await deleteEmailLogsCreatedBefore(new Date(Date.now() - 7 * days));
+
+    expect(await getEmailLog(log.id)).toBeDefined();
   });
 });

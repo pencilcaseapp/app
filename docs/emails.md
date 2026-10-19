@@ -64,13 +64,14 @@ app decided; `failed` carries the error. **`failed` is the only state a key can
 be claimed out of** — a send that never reached the provider has to be
 retryable, everything else is final.
 
-There is no clean-up job for the table, unlike `otps` and
-`email_change_requests`. Deleting a row frees its key, and the subscription
-scopes are keyed to things that live as long as the account does — dropping a
-`subscription-started` row two years on would let that e-mail go out a second
-time. If the table ever needs trimming, trim it by template rather than by age
-alone: the code scopes are safe to delete once their own row is gone, the
-subscription ones are not.
+Rows are kept for a year: the `clean-up-old-email-logs` job hard deletes
+every row created before that, whatever its template, every night. Deleting a
+row frees its key, which is safe at that age because nothing sends under an
+old key any more. The codes and invites are keyed to rows that are long gone
+or never sent again, `subscription-started` only goes out when the
+subscription row is first inserted, and the Creem events behind the other
+subscription e-mails are deduped by `creem_webhook_events` before they get
+here.
 
 ## Delivery tracking
 

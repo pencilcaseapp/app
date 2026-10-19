@@ -246,7 +246,8 @@ template per file (the only directory the preview server reads) and
 `app/emails/ui/` the shared email UI.
 Every send is logged in `email_logs` and claimed by an idempotency key first
 (`<template>:<scope>` from `app/constants/email.ts`), so the same e-mail never
-goes out twice; the key also rides along to Lettermint. Delivery events are
+goes out twice; the key also rides along to Lettermint. Rows are kept for a
+year, then the `clean-up-old-email-logs` job deletes them. Delivery events are
 deliberately not consumed — `docs/emails.md` has the scopes, the states a log
 row moves through, and why there is no Lettermint webhook.
 Templates are styled with the same `pca-*` Tailwind classes as the app:
