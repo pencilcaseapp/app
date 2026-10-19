@@ -139,7 +139,10 @@ before the live document is there, and a moment longer while
 the swap would blank every image. The preview carries
 `contenteditable="false"` because `editor.css` selects on
 `[contenteditable]`; tests find the editor itself by `[data-lexical-editor]`.
-A document nobody has written in has no preview. The Y.Doc only ever comes
+A document nobody has written in yet previews the empty heading the live
+server seeds it with (`createInitialDocumentContent`), so a new document
+shows its placeholder from the first paint instead of drawing it once the
+socket syncs. The Y.Doc only ever comes
 from the socket — never seed it from the preview, which would duplicate
 the content on sync.
 

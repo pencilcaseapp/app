@@ -51,6 +51,7 @@ import { getUserByEmail, type User } from '~/repos/user';
 import { parseAssetSrc } from '~/utils/asset-src';
 import { signBunnyUrl } from '~/utils/bunny-token';
 import { renderDocumentPreview } from '~/utils/document-preview';
+import { createInitialDocumentContent } from '~/utils/headless';
 import { normalizeEmail } from '~/utils/email';
 import { processImage } from '~/utils/image';
 import { sendEmailDocumentInvite } from './email-templates';
@@ -77,7 +78,7 @@ export interface OpenDocument {
   hasJoined: boolean;
   /**
    * The content as HTML, shown until the live connection has synced; null
-   * for a document nobody has written in yet.
+   * when it cannot be drawn.
    */
   preview: string | null;
   /**
@@ -143,19 +144,23 @@ export async function openDocument(
 
 /**
  * Drawn from what was last stored, which the live document may be a few
- * seconds ahead of; the editor catches up when it syncs. A preview is only
- * a head start, so one that cannot be drawn is left out. Its images point
+ * seconds ahead of; the editor catches up when it syncs. A document nobody
+ * has written in yet shows the empty heading the live server seeds it with,
+ * so its placeholder is there from the first paint. A preview is only a
+ * head start, so one that cannot be drawn is left out. Its images point
  * straight at the CDN, which saves the redirect on the first paint.
  */
 async function getDocumentPreview(
   documentId: string,
   assetUrls: Record<string, string>,
 ) {
-  const content = (await getDocument(documentId))?.content;
+  const document = await getDocument(documentId);
 
-  if (!content) {
+  if (!document) {
     return null;
   }
+
+  const content = document.content ?? createInitialDocumentContent();
 
   try {
     return renderDocumentPreview(content, src => assetUrls[src] ?? src);
