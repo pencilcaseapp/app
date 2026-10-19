@@ -365,12 +365,15 @@ function revalidates(formAction: string) {
   } as ShouldRevalidateFunctionArgs);
 }
 
-test('does not reopen the document the viewer just left', () => {
+test('does not reload the document the viewer just left or deleted', () => {
   expect(revalidates(`/doc/${documentFixture.id}/leave`)).toBe(false);
+  expect(revalidates(`/doc/${documentFixture.id}/delete`)).toBe(false);
 });
 
-test('revalidates after leaving another document', () => {
+test('revalidates after leaving or deleting another document', () => {
   expect(revalidates('/doc/22222222-2222-2222-2222-222222222222/leave'))
     .toBe(true);
-  expect(revalidates(`/doc/${documentFixture.id}/delete`)).toBe(true);
+  expect(revalidates('/doc/22222222-2222-2222-2222-222222222222/delete'))
+    .toBe(true);
+  expect(revalidates(`/doc/${documentFixture.id}/restore`)).toBe(true);
 });

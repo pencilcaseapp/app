@@ -38,6 +38,7 @@ import {
   EditedDocumentProvider,
   useEditedDocument,
 } from '~/contexts/edited-document';
+import { LeavingDocumentProvider } from '~/contexts/leaving-document';
 import {
   useEffect,
   useMemo,
@@ -129,26 +130,28 @@ export default function LayoutEditor({
   return (
     <DocumentTitleProvider>
       <EditedDocumentProvider>
-        <SocketClientProvider>
-          <SidebarProvider
-            defaultDesktopOpen={sidebarOpen}
-            onDesktopOpenChange={storeSidebarOpen}
-          >
-            {user
-              ? (
-                  <EditorSidebar
-                    navigation={navigation}
-                    deletedNavigation={deletedNavigation}
-                    ownedDocumentCount={ownedDocumentCount}
-                    documentLimitReached={documentLimitReached}
-                    showUpgrade={!user.hasSubscription}
-                  >
-                    <Outlet />
-                  </EditorSidebar>
-                )
-              : <Outlet />}
-          </SidebarProvider>
-        </SocketClientProvider>
+        <LeavingDocumentProvider>
+          <SocketClientProvider>
+            <SidebarProvider
+              defaultDesktopOpen={sidebarOpen}
+              onDesktopOpenChange={storeSidebarOpen}
+            >
+              {user
+                ? (
+                    <EditorSidebar
+                      navigation={navigation}
+                      deletedNavigation={deletedNavigation}
+                      ownedDocumentCount={ownedDocumentCount}
+                      documentLimitReached={documentLimitReached}
+                      showUpgrade={!user.hasSubscription}
+                    >
+                      <Outlet />
+                    </EditorSidebar>
+                  )
+                : <Outlet />}
+            </SidebarProvider>
+          </SocketClientProvider>
+        </LeavingDocumentProvider>
       </EditedDocumentProvider>
     </DocumentTitleProvider>
   );

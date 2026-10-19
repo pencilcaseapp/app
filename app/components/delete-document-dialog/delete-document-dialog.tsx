@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FC } from 'react';
 import { href, useFetcher, useNavigate, useParams } from 'react-router';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { DELETED_DOCUMENT_RETENTION_DAYS } from '~/constants/document';
+import { useLeavingDocument } from '~/contexts/leaving-document';
 import type { action as deleteAction } from '~/routes/doc-delete';
 import { Button } from '~/ui/button/button';
 import {
@@ -93,6 +94,7 @@ const DeleteDocumentDialogContent: FC<
   const params = useParams();
   const handledRef = useRef(fetcher.data);
   const [isClosing, setIsClosing] = useState(false);
+  const { setLeavingDocument } = useLeavingDocument();
 
   // Close once the result is back and the navigation revalidated, so the
   // list does not change behind the sheet.
@@ -107,15 +109,26 @@ const DeleteDocumentDialogContent: FC<
     handledRef.current = fetcher.data;
     setIsClosing(true);
 
-    if (params.id !== fetcher.data.id) {
+    const close = () => {
+      setLeavingDocument(null);
       onOpenChange(false);
+    };
+
+    if (params.id !== fetcher.data.id) {
+      close();
       return;
     }
 
     // The start page opens the most recently edited document instead.
-    void Promise.resolve(navigate(href('/'), { replace: true }))
-      .then(() => onOpenChange(false));
-  }, [fetcher.state, fetcher.data, onOpenChange, navigate, params.id]);
+    void Promise.resolve(navigate(href('/'), { replace: true })).then(close);
+  }, [
+    fetcher.state,
+    fetcher.data,
+    onOpenChange,
+    navigate,
+    params.id,
+    setLeavingDocument,
+  ]);
 
   const ownerDescription = (shared
     ? `“${documentTitle}” will be deleted for everyone it is shared with.`
@@ -141,6 +154,7 @@ const DeleteDocumentDialogContent: FC<
               { id: documentId },
             )}
             className="flex items-center justify-end gap-2"
+            onSubmit={() => setLeavingDocument(documentId)}
           >
             <AuthenticityTokenInput />
             <ResponsiveDialogClose

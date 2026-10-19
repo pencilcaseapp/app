@@ -3,6 +3,7 @@ import { createRoutesStub, RouterContextProvider, type Register } from 'react-ro
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 import { DocumentTitleProvider } from '~/contexts/document-title';
 import { EditedDocumentProvider } from '~/contexts/edited-document';
+import { LeavingDocumentProvider } from '~/contexts/leaving-document';
 import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import { SocketClientProvider } from '~/contexts/socket-client';
 import { ToastProvider } from '~/ui/toast/toast-provider';
@@ -118,11 +119,13 @@ export async function renderRoute<P extends keyof Register['pages']>(
       <AuthenticityTokenProvider token="test-token">
         <DocumentTitleProvider>
           <EditedDocumentProvider>
-            <SidebarProvider>
-              <SocketClientProvider>
-                <Stub initialEntries={[replacedPath]} />
-              </SocketClientProvider>
-            </SidebarProvider>
+            <LeavingDocumentProvider>
+              <SidebarProvider>
+                <SocketClientProvider>
+                  <Stub initialEntries={[replacedPath]} />
+                </SocketClientProvider>
+              </SidebarProvider>
+            </LeavingDocumentProvider>
           </EditedDocumentProvider>
         </DocumentTitleProvider>
       </AuthenticityTokenProvider>

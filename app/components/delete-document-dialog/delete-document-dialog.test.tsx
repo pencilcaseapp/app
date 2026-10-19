@@ -3,6 +3,7 @@ import { userEvent } from '@testing-library/user-event';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createRoutesStub, type ActionFunctionArgs } from 'react-router';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
+import { LeavingDocumentProvider } from '~/contexts/leaving-document';
 import { setViewportWidth } from '~/utils/testing';
 import { useState, type FC } from 'react';
 import {
@@ -62,15 +63,17 @@ function renderDialog({
       path: '/doc/:id',
       Component: () => (
         <AuthenticityTokenProvider token="test-token">
-          <DialogHarness
-            document={{
-              id: documentId,
-              title: 'Meeting notes',
-              shared,
-              isOwner,
-            }}
-            defaultOpen={open}
-          />
+          <LeavingDocumentProvider>
+            <DialogHarness
+              document={{
+                id: documentId,
+                title: 'Meeting notes',
+                shared,
+                isOwner,
+              }}
+              defaultOpen={open}
+            />
+          </LeavingDocumentProvider>
         </AuthenticityTokenProvider>
       ),
     },
