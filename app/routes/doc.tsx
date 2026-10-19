@@ -23,6 +23,7 @@ import { getSignInUrl } from '~/services/auth';
 import { returnFormError, validateForm } from '~/utils/form';
 import { useDocumentTitle } from '~/contexts/document-title';
 import { useEditedDocument } from '~/contexts/edited-document';
+import { useLeavingDocument } from '~/contexts/leaving-document';
 import { useCallback, useState } from 'react';
 import { MenuOrSignInButton } from '~/components/menu-or-sign-in-button/menu-or-sign-in-button';
 import { SharePanel } from '~/components/share-panel/share-panel';
@@ -59,8 +60,10 @@ const inviteErrorMessages = {
 };
 
 /**
- * Opening a shared document connects the viewer to it again, so leaving
- * the open one must not reload it on the way to the start page.
+ * Deleting or leaving the open document heads to the start page, which
+ * opens another one. Reloading it on the way would flash the deleted
+ * notice first, and opening a shared document connects the viewer to it
+ * again.
  */
 export function shouldRevalidate({
   currentParams,
@@ -69,7 +72,10 @@ export function shouldRevalidate({
 }: ShouldRevalidateFunctionArgs) {
   if (
     currentParams.id
-    && formAction === href('/doc/:id/leave', { id: currentParams.id })
+    && (
+      formAction === href('/doc/:id/delete', { id: currentParams.id })
+      || formAction === href('/doc/:id/leave', { id: currentParams.id })
+    )
   ) {
     return false;
   }
@@ -197,10 +203,18 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
     () => reportDocumentEdit(params.id),
     [reportDocumentEdit, params.id],
   );
+  const { isLeavingDocument } = useLeavingDocument();
   const onAccessRevoked = useCallback(async () => {
+    // Deleting or leaving it from the sidebar closes the connection too,
+    // but another document opens right after, and a reload on the way
+    // would flash the deleted notice.
+    if (isLeavingDocument(params.id)) {
+      return;
+    }
+
     await revalidate();
     setReconnects(count => count + 1);
-  }, [revalidate]);
+  }, [revalidate, isLeavingDocument, params.id]);
   const deleted = loaderData.ok && loaderData.deleted;
   const readOnly = loaderData.ok && loaderData.readOnly;
 
