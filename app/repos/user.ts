@@ -1,6 +1,7 @@
-import { and, eq, gt, inArray, lt, ne, sql, type InferSelectModel } from 'drizzle-orm';
+import { and, eq, getColumns, gt, inArray, lt, ne, sql, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db } from '~/db';
+import { incrementDailyStat } from '~/repos/daily-stat';
 import { users } from '~/db/schema';
 import { sessions } from '~/db/schema';
 
@@ -47,21 +48,34 @@ export async function getUserByEmail(email: string) {
   });
 }
 
+/**
+ * `xmax` is 0 only on a row this very statement inserted, which is what
+ * tells a new account from a returning one for the daily stats.
+ */
 export async function getOrCreateUserByEmail(email: string) {
-  const [user] = await db
-    .insert(users)
-    .values({
-      email,
-    })
-    .onConflictDoUpdate({
-      target: users.email,
-      set: {
+  return db.transaction(async (tx) => {
+    const [{ created, ...user }] = await tx
+      .insert(users)
+      .values({
         email,
-      },
-    })
-    .returning();
+      })
+      .onConflictDoUpdate({
+        target: users.email,
+        set: {
+          email,
+        },
+      })
+      .returning({
+        ...getColumns(users),
+        created: sql<boolean>`xmax = 0`,
+      });
 
-  return user;
+    if (created) {
+      await incrementDailyStat('accountsCreated', 1, tx);
+    }
+
+    return user;
+  });
 }
 
 export async function updateUser(id: string, input: {

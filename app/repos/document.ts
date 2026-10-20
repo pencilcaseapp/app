@@ -20,6 +20,7 @@ import {
   type DocumentLinkAccess,
 } from '~/constants/document';
 import { db } from '~/db';
+import { incrementDailyStat } from '~/repos/daily-stat';
 import {
   documentAssets,
   documentCollaborators,
@@ -46,13 +47,18 @@ export interface CreateDocumentInput {
 
 export async function createDocument(input: CreateDocumentInput) {
   const { userId } = input;
-  const [document] = await db.insert(documents)
-    .values({
-      userId,
-    })
-    .returning();
 
-  return document;
+  return db.transaction(async (tx) => {
+    const [document] = await tx.insert(documents)
+      .values({
+        userId,
+      })
+      .returning();
+
+    await incrementDailyStat('documentsCreated', 1, tx);
+
+    return document;
+  });
 }
 
 export async function getDocument(id: string) {
@@ -416,7 +422,8 @@ export async function getDocumentIdsDeletedBefore(
 /**
  * Hard deletes documents. Deleting drops the collaborators already;
  * clearing them again here keeps the foreign key satisfied whatever state
- * a row is in. Their assets have to be gone first.
+ * a row is in. Their assets have to be gone first. This is the deletion the
+ * daily stats count: a soft deleted document can still come back.
  */
 export async function hardDeleteDocuments(ids: string[]) {
   if (ids.length === 0) {
@@ -426,7 +433,11 @@ export async function hardDeleteDocuments(ids: string[]) {
   await db.transaction(async (tx) => {
     await tx.delete(documentCollaborators)
       .where(inArray(documentCollaborators.documentId, ids));
-    await tx.delete(documents).where(inArray(documents.id, ids));
+    const deleted = await tx.delete(documents)
+      .where(inArray(documents.id, ids))
+      .returning({ id: documents.id });
+
+    await incrementDailyStat('documentsDeleted', deleted.length, tx);
   });
 }
 
