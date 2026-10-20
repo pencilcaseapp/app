@@ -362,7 +362,8 @@ a `transform` — the only property those rules leave alone.
 `daily_stats` keeps the only history: per UTC day, how many accounts and
 documents were created and deleted, as plain counts with nothing that
 points at a person or a document. The services count the event where it
-happens (`incrementDailyStat`), the repos stay out of it: `auth.ts` when
+happens (`incrementDailyStat`), in one `transaction` (`app/db`) with the
+write, and the repos only take that transaction: `auth.ts` when
 `getOrCreateUserByEmail` reports it inserted the row (`xmax = 0`), and
 `document.ts` in `createDocument` and `purgeDeletedDocuments`, so a
 document counts as deleted when it is purged, not when it is soft

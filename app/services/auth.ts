@@ -6,6 +6,7 @@ import argon2 from 'argon2';
 import { createHash, randomBytes, randomInt } from 'node:crypto';
 import { createCookieSessionStorage, href } from 'react-router';
 import { getConfig } from '~/config';
+import { transaction } from '~/db';
 import { getNormalizedReturnUrl, withSearchParams } from '~/utils/url';
 import { getCanonicalEmail, normalizeEmail } from '~/utils/email';
 import { SearchParamAuth } from '~/constants/search-params';
@@ -241,11 +242,14 @@ function hashUserSessionToken(token: string) {
 }
 
 async function getOrCreateUser(email: string) {
-  const { user, created } = await getOrCreateUserByEmail(normalizeEmail(email));
+  return transaction(async (tx) => {
+    const { user, created }
+      = await getOrCreateUserByEmail(normalizeEmail(email), tx);
 
-  if (created) {
-    await incrementDailyStat('accountsCreated');
-  }
+    if (created) {
+      await incrementDailyStat('accountsCreated', 1, tx);
+    }
 
-  return user;
+    return user;
+  });
 }

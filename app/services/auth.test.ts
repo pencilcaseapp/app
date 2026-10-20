@@ -51,6 +51,10 @@ vi.mock('~/repos/user', () => ({
   updateUser: (...args: unknown[]) => updateUserMock(...args),
 }));
 
+vi.mock('~/db', () => ({
+  transaction: (run: (tx: string) => unknown) => run('tx'),
+}));
+
 const incrementDailyStatMock = vi.fn();
 vi.mock('~/repos/daily-stat', () => ({
   incrementDailyStat: (...args: unknown[]) => incrementDailyStatMock(...args),
@@ -290,7 +294,7 @@ describe('initMagicCode', () => {
       await verifyMagicCode(otpFixture.id, 'John@Example.com', code);
 
       expect(getOrCreateUserByEmailMock)
-        .toHaveBeenCalledWith('john@example.com');
+        .toHaveBeenCalledWith('john@example.com', 'tx');
     });
 
     it('counts a new account in the daily stats', async () => {
@@ -302,7 +306,8 @@ describe('initMagicCode', () => {
 
       await verifyMagicCode(otpFixture.id, otpFixture.email, code);
 
-      expect(incrementDailyStatMock).toHaveBeenCalledWith('accountsCreated');
+      expect(incrementDailyStatMock)
+        .toHaveBeenCalledWith('accountsCreated', 1, 'tx');
     });
 
     it('does not count a returning account', async () => {

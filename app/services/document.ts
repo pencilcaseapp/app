@@ -14,6 +14,7 @@ import {
 import { EmailTemplate } from '~/constants/email';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { getConfig, type Config } from '~/config';
+import { transaction } from '~/db';
 import {
   copyObject,
   deleteObjects,
@@ -667,8 +668,12 @@ export async function createDocument(
     return [CreateDocumentError.LimitReached];
   }
 
-  const document = await createDocumentRow({ userId: user.id });
-  await incrementDailyStat('documentsCreated');
+  const document = await transaction(async (tx) => {
+    const row = await createDocumentRow({ userId: user.id }, tx);
+    await incrementDailyStat('documentsCreated', 1, tx);
+
+    return row;
+  });
 
   return [null, { id: document.id }];
 }
@@ -694,8 +699,10 @@ export async function purgeDeletedDocuments(before: Date) {
     const assets = await getDocumentAssets(ids);
     await deleteObjects(assets.map(asset => asset.storageKey));
     await deleteDocumentAssets(ids);
-    const purgedCount = await hardDeleteDocuments(ids);
-    await incrementDailyStat('documentsDeleted', purgedCount);
+    await transaction(async (tx) => {
+      const purgedCount = await hardDeleteDocuments(ids, tx);
+      await incrementDailyStat('documentsDeleted', purgedCount, tx);
+    });
 
     deletedCount += ids.length;
 

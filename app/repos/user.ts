@@ -1,6 +1,6 @@
 import { and, eq, getColumns, gt, inArray, lt, ne, sql, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
-import { db } from '~/db';
+import { db, type Executor } from '~/db';
 import { users } from '~/db/schema';
 import { sessions } from '~/db/schema';
 
@@ -51,8 +51,11 @@ export async function getUserByEmail(email: string) {
  * `xmax` is 0 only on a row this very statement inserted, which is what
  * tells a new account from a returning one.
  */
-export async function getOrCreateUserByEmail(email: string) {
-  const [{ created, ...user }] = await db
+export async function getOrCreateUserByEmail(
+  email: string,
+  executor: Executor = db,
+) {
+  const [{ created, ...user }] = await executor
     .insert(users)
     .values({
       email,
