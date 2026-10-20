@@ -55,7 +55,7 @@ import { DocumentLimitDialog } from '~/components/document-limit-dialog/document
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import type { DocumentShareState } from '~/constants/document';
 import { useIsMobile } from '~/hooks/use-is-mobile';
-import { readSidebarOpen, storeSidebarOpen } from '~/utils/sidebar-cookie';
+import { readUserPrefs, storeUserPrefs } from '~/utils/user-prefs-cookie';
 
 export const handle = {
   bodyClassName: 'w-full',
@@ -107,7 +107,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 
   return {
     user,
-    sidebarOpen: await readSidebarOpen(request),
+    sidebarOpen: (await readUserPrefs(request)).sidebarOpen,
     navigation,
     deletedNavigation,
     ownedDocumentCount,
@@ -134,7 +134,9 @@ export default function LayoutEditor({
           <SocketClientProvider>
             <SidebarProvider
               defaultDesktopOpen={sidebarOpen}
-              onDesktopOpenChange={storeSidebarOpen}
+              onDesktopOpenChange={
+                isOpen => storeUserPrefs({ sidebarOpen: isOpen })
+              }
             >
               {user
                 ? (
