@@ -231,7 +231,7 @@ account can flood an address), expires the user's earlier requests and
 sends the code to the new address; `verifyEmailChange` only accepts a
 request of the session's user, burns attempts like the sign-in OTP (five,
 then the request expires), checks the address is still free and only then
-writes `users.email`; the route then calls `signOutOtherSessions`, so
+writes `users.email`, in one transaction with `signOutOtherSessions`, so
 whoever could sign in through the old mailbox loses their sessions while
 the one doing the change keeps theirs. Requests expire after fifteen minutes and the
 `clean-up-expired-email-change-requests` job deletes them a day later,
@@ -286,8 +286,9 @@ the current window ends: everybody gets the same URL for a while, so the
 browser and the edge keep their copies, and unsharing a document takes its
 images along within ten minutes. Without `storage.cdn` (dev and test) the
 route streams the object itself. Soft delete leaves them alone (the Deleted view and a
-restore still need them); `purgeDeletedDocuments` deletes the objects,
-then the rows, then the documents. In the editor an image is an
+restore still need them); `purgeDeletedDocuments` locks a batch of
+documents, deletes their rows and only then their objects, right before
+the commit, so a failure in either rolls the rows back for the next run. In the editor an image is an
 `ImageNode` (`app/ui/editor/nodes/`), a block of its own.
 `EditorPluginImages` answers `DRAG_DROP_PASTE` by uploading first
 (`useUploadImage`, which also owns the toasts) and inserting after: a

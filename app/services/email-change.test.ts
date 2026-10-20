@@ -17,10 +17,12 @@ const expireAllValidEmailChangeRequestsMock = vi.fn();
 const expireEmailChangeRequestMock = vi.fn();
 const getValidEmailChangeRequestMock = vi.fn();
 const markEmailChangeRequestAsUsedMock = vi.fn();
-const recordFailedEmailChangeRequestAttemptMock = vi.fn();
+const claimEmailChangeRequestAttemptMock = vi.fn();
 vi.mock('~/repos/email-change-request', () => ({
   canRequestEmailChange: (...args: unknown[]) =>
     canRequestEmailChangeMock(...args),
+  claimEmailChangeRequestAttempt: (...args: unknown[]) =>
+    claimEmailChangeRequestAttemptMock(...args),
   createEmailChangeRequest: (...args: unknown[]) =>
     createEmailChangeRequestMock(...args),
   expireAllValidEmailChangeRequests: (...args: unknown[]) =>
@@ -31,8 +33,16 @@ vi.mock('~/repos/email-change-request', () => ({
     getValidEmailChangeRequestMock(...args),
   markEmailChangeRequestAsUsed: (...args: unknown[]) =>
     markEmailChangeRequestAsUsedMock(...args),
-  recordFailedEmailChangeRequestAttempt: (...args: unknown[]) =>
-    recordFailedEmailChangeRequestAttemptMock(...args),
+}));
+
+vi.mock('~/db', () => ({
+  transaction: (run: (tx: string) => unknown) => run('tx'),
+}));
+
+const signOutOtherSessionsMock = vi.fn();
+vi.mock('./auth', () => ({
+  signOutOtherSessions: (...args: unknown[]) =>
+    signOutOtherSessionsMock(...args),
 }));
 
 const getUserByEmailMock = vi.fn();
@@ -144,10 +154,14 @@ describe('verifyEmailChange', () => {
     userId: user.id,
     email: 'new@example.com',
   };
+  const httpRequest = new Request('http://localhost');
 
   beforeEach(async () => {
     request.codeHash = await argon2.hash(code.toString());
     getValidEmailChangeRequestMock.mockResolvedValue(request);
+    claimEmailChangeRequestAttemptMock
+      .mockResolvedValue({ ...request, attempts: 1 });
+    markEmailChangeRequestAsUsedMock.mockResolvedValue(request);
     updateUserMock.mockImplementation(
       (id: string, input: { email: string }) => ({ ...user, ...input }),
     );
@@ -156,7 +170,8 @@ describe('verifyEmailChange', () => {
   it('reports a missing request as expired', async () => {
     getValidEmailChangeRequestMock.mockResolvedValueOnce(undefined);
 
-    const [error] = await verifyEmailChange(user, request.id, '123456');
+    const [error]
+      = await verifyEmailChange(user, request.id, '123456', httpRequest);
 
     expect(error).toBe(VerifyEmailChangeError.Expired);
     expect(updateUserMock).not.toHaveBeenCalled();
@@ -166,34 +181,60 @@ describe('verifyEmailChange', () => {
     getValidEmailChangeRequestMock
       .mockResolvedValueOnce({ ...request, userId: 'someone-else' });
 
-    const [error] = await verifyEmailChange(user, request.id, '123456');
+    const [error]
+      = await verifyEmailChange(user, request.id, '123456', httpRequest);
 
     expect(error).toBe(VerifyEmailChangeError.Expired);
-    expect(recordFailedEmailChangeRequestAttemptMock).not.toHaveBeenCalled();
+    expect(claimEmailChangeRequestAttemptMock).not.toHaveBeenCalled();
     expect(updateUserMock).not.toHaveBeenCalled();
   });
 
-  it('records a wrong code as a failed attempt', async () => {
-    recordFailedEmailChangeRequestAttemptMock
-      .mockResolvedValueOnce({ ...request, attempts: 1 });
+  it('counts every attempt before checking the code', async () => {
+    await verifyEmailChange(user, request.id, '123456', httpRequest);
 
-    const [error] = await verifyEmailChange(user, request.id, '000000');
+    expect(claimEmailChangeRequestAttemptMock)
+      .toHaveBeenCalledWith(request.id, 5);
+  });
+
+  it('reports a request without attempts left as expired', async () => {
+    claimEmailChangeRequestAttemptMock.mockResolvedValueOnce(undefined);
+
+    const [error]
+      = await verifyEmailChange(user, request.id, '123456', httpRequest);
+
+    expect(error).toBe(VerifyEmailChangeError.Expired);
+    expect(updateUserMock).not.toHaveBeenCalled();
+  });
+
+  it('refuses a wrong code', async () => {
+    const [error]
+      = await verifyEmailChange(user, request.id, '000000', httpRequest);
 
     expect(error).toBe(VerifyEmailChangeError.Invalid);
-    expect(recordFailedEmailChangeRequestAttemptMock)
-      .toHaveBeenCalledWith(request.id);
     expect(expireEmailChangeRequestMock).not.toHaveBeenCalled();
     expect(updateUserMock).not.toHaveBeenCalled();
   });
 
   it('expires the request on the fifth wrong code', async () => {
-    recordFailedEmailChangeRequestAttemptMock
+    claimEmailChangeRequestAttemptMock
       .mockResolvedValueOnce({ ...request, attempts: 5 });
 
-    const [error] = await verifyEmailChange(user, request.id, '000000');
+    const [error]
+      = await verifyEmailChange(user, request.id, '000000', httpRequest);
 
     expect(error).toBe(VerifyEmailChangeError.Expired);
     expect(expireEmailChangeRequestMock).toHaveBeenCalledWith(request.id);
+  });
+
+  it('reports a request used meanwhile as expired', async () => {
+    markEmailChangeRequestAsUsedMock.mockResolvedValueOnce(undefined);
+
+    const [error]
+      = await verifyEmailChange(user, request.id, '123456', httpRequest);
+
+    expect(error).toBe(VerifyEmailChangeError.Expired);
+    expect(updateUserMock).not.toHaveBeenCalled();
+    expect(signOutOtherSessionsMock).not.toHaveBeenCalled();
   });
 
   it('spends the request and refuses an address taken meanwhile',
@@ -201,39 +242,40 @@ describe('verifyEmailChange', () => {
       getUserByEmailMock
         .mockResolvedValueOnce({ ...userFixture, id: 'other' });
 
-      const [error] = await verifyEmailChange(user, request.id, '123456');
+      const [error]
+        = await verifyEmailChange(user, request.id, '123456', httpRequest);
 
       expect(error).toBe(VerifyEmailChangeError.EmailTaken);
       expect(markEmailChangeRequestAsUsedMock)
-        .toHaveBeenCalledWith(request.id);
+        .toHaveBeenCalledWith(request.id, 'tx');
       expect(updateUserMock).not.toHaveBeenCalled();
+      expect(signOutOtherSessionsMock).not.toHaveBeenCalled();
     });
 
-  it('moves the user to the new address once the code is right',
-    async () => {
-      const [error, result]
-        = await verifyEmailChange(user, request.id, '123456');
+  it('moves the user to the new address and signs out the other sessions '
+    + 'in one transaction', async () => {
+    const [error, result]
+      = await verifyEmailChange(user, request.id, '123456', httpRequest);
 
-      expect(error).toBeNull();
-      expect(result?.user.email).toBe('new@example.com');
-      expect(markEmailChangeRequestAsUsedMock)
-        .toHaveBeenCalledWith(request.id);
-      expect(updateUserMock)
-        .toHaveBeenCalledWith(user.id, { email: 'new@example.com' });
-    });
+    expect(error).toBeNull();
+    expect(result?.user.email).toBe('new@example.com');
+    expect(markEmailChangeRequestAsUsedMock)
+      .toHaveBeenCalledWith(request.id, 'tx');
+    expect(updateUserMock)
+      .toHaveBeenCalledWith(user.id, { email: 'new@example.com' }, 'tx');
+    expect(signOutOtherSessionsMock)
+      .toHaveBeenCalledWith(httpRequest, user.id, 'tx');
+  });
 
   it('hands the new address to Creem', async () => {
-    await verifyEmailChange(user, request.id, '123456');
+    await verifyEmailChange(user, request.id, '123456', httpRequest);
 
     expect(syncCreemCustomerEmailMock)
       .toHaveBeenCalledWith({ ...user, email: 'new@example.com' });
   });
 
   it('leaves Creem alone when the code is wrong', async () => {
-    recordFailedEmailChangeRequestAttemptMock
-      .mockResolvedValueOnce({ ...request, attempts: 1 });
-
-    await verifyEmailChange(user, request.id, '000000');
+    await verifyEmailChange(user, request.id, '000000', httpRequest);
 
     expect(syncCreemCustomerEmailMock).not.toHaveBeenCalled();
   });

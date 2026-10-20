@@ -16,7 +16,7 @@ import {
   expireEmailChangeRequest,
   getValidEmailChangeRequest,
   markEmailChangeRequestAsUsed,
-  recordFailedEmailChangeRequestAttempt,
+  claimEmailChangeRequestAttempt,
 } from './email-change-request';
 
 describe('createEmailChangeRequest', () => {
@@ -104,19 +104,31 @@ describe('expireAllValidEmailChangeRequests', () => {
   });
 });
 
-describe('recordFailedEmailChangeRequestAttempt', () => {
+describe('claimEmailChangeRequestAttempt', () => {
   it('increments the attempts', async () => {
     const user = await createTestUser();
     const request = await createTestEmailChangeRequest(user.id);
 
-    await recordFailedEmailChangeRequestAttempt(request.id);
-    const failed = await recordFailedEmailChangeRequestAttempt(request.id);
+    await claimEmailChangeRequestAttempt(request.id, 5);
+    const claimed = await claimEmailChangeRequestAttempt(request.id, 5);
 
-    expect(failed?.attempts).toBe(2);
+    expect(claimed?.attempts).toBe(2);
+  });
+
+  it('claims no more attempts than allowed', async () => {
+    const user = await createTestUser();
+    const request = await createTestEmailChangeRequest(user.id);
+
+    const attempts = await Promise.all(Array.from(
+      { length: 10 },
+      () => claimEmailChangeRequestAttempt(request.id, 5),
+    ));
+
+    expect(attempts.filter(Boolean)).toHaveLength(5);
   });
 
   it('returns undefined for an invalid id', async () => {
-    expect(await recordFailedEmailChangeRequestAttempt('invalid-id'))
+    expect(await claimEmailChangeRequestAttempt('invalid-id', 5))
       .toBeUndefined();
   });
 });
@@ -128,8 +140,16 @@ describe('markEmailChangeRequestAsUsed', () => {
 
     const used = await markEmailChangeRequestAsUsed(request.id);
 
-    expect(used.usedAt).toEqual(expect.any(Date));
+    expect(used?.usedAt).toEqual(expect.any(Date));
     expect(await getValidEmailChangeRequest(request.id)).toBeUndefined();
+  });
+
+  it('stamps the request only once', async () => {
+    const user = await createTestUser();
+    const request = await createTestEmailChangeRequest(user.id);
+
+    expect(await markEmailChangeRequestAsUsed(request.id)).toBeDefined();
+    expect(await markEmailChangeRequestAsUsed(request.id)).toBeUndefined();
   });
 });
 

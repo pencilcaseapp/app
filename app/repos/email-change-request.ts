@@ -1,6 +1,6 @@
 import { and, eq, gt, inArray, isNull, lt, or, sql, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
-import { db } from '~/db';
+import { db, type Executor } from '~/db';
 import { emailChangeRequests } from '~/db/schema';
 
 export type EmailChangeRequest = InferSelectModel<typeof emailChangeRequests>;
@@ -67,7 +67,16 @@ export async function expireAllValidEmailChangeRequests(userId: string) {
       ));
 }
 
-export async function recordFailedEmailChangeRequestAttempt(id: string) {
+/**
+ * Counts an attempt before the code is checked, in the same statement that
+ * checks the request is still valid and has attempts left, so guesses sent
+ * in parallel cannot get past the limit. Returns `undefined` when there is
+ * no attempt left to take.
+ */
+export async function claimEmailChangeRequestAttempt(
+  id: string,
+  maxAttempts: number,
+) {
   if (!isUuid(id)) {
     return undefined;
   }
@@ -77,19 +86,35 @@ export async function recordFailedEmailChangeRequestAttempt(id: string) {
       attempts: sql`${emailChangeRequests.attempts} + 1`,
       updatedAt: new Date(),
     })
-    .where(eq(emailChangeRequests.id, id))
+    .where(and(
+      eq(emailChangeRequests.id, id),
+      gt(emailChangeRequests.expiresAt, new Date()),
+      isNull(emailChangeRequests.usedAt),
+      lt(emailChangeRequests.attempts, maxAttempts),
+    ))
     .returning();
 
   return request;
 }
 
-export async function markEmailChangeRequestAsUsed(id: string) {
-  const [request] = await db.update(emailChangeRequests)
+/**
+ * Returns `undefined` when the request was used or expired in the
+ * meantime, so a code is only ever redeemed once.
+ */
+export async function markEmailChangeRequestAsUsed(
+  id: string,
+  executor: Executor = db,
+) {
+  const [request] = await executor.update(emailChangeRequests)
     .set({
       usedAt: new Date(),
       updatedAt: new Date(),
     })
-    .where(eq(emailChangeRequests.id, id))
+    .where(and(
+      eq(emailChangeRequests.id, id),
+      gt(emailChangeRequests.expiresAt, new Date()),
+      isNull(emailChangeRequests.usedAt),
+    ))
     .returning();
 
   return request;

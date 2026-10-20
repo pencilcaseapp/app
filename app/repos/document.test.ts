@@ -6,7 +6,6 @@ import {
   countOwnedDocuments,
   createDocument,
   createDocumentAsset,
-  deleteDocumentAssets,
   getDeletedDocumentList,
   getDocument,
   getDocumentAsset,
@@ -1191,17 +1190,21 @@ describe('getDocumentIdsDeletedBefore', () => {
 });
 
 describe('hardDeleteDocuments', () => {
-  it('deletes the documents and their collaborators', async () => {
+  it('deletes the documents, their assets and collaborators', async () => {
     const owner = await createTestUser();
     const collaborator = await createTestUser();
     const deleted = await createDeletedDocument(owner.id);
     const other = await createDocumentWithTitle(owner.id);
     await connectDocumentCollaborator(deleted.id, collaborator.id);
+    const asset = await createTestAsset(deleted.id);
+    const kept = await createTestAsset(other.id);
 
     expect(await hardDeleteDocuments([deleted.id, randomUUID()])).toBe(1);
 
     expect(await getDocument(deleted.id)).toBeUndefined();
     expect(await getDocument(other.id)).toBeDefined();
+    expect(await getDocumentAsset(asset.id)).toBeUndefined();
+    expect(await getDocumentAsset(kept.id)).toEqual(kept);
     expect(await db.query.documentCollaborators.findMany({
       where: { documentId: deleted.id },
     })).toHaveLength(0);
@@ -1285,20 +1288,5 @@ describe('getDocumentAssets', () => {
 
   it('returns nothing without ids', async () => {
     expect(await getDocumentAssets([])).toEqual([]);
-  });
-});
-
-describe('deleteDocumentAssets', () => {
-  it('deletes the assets of the given documents only', async () => {
-    const user = await createTestUser();
-    const document = await createDocumentWithTitle(user.id);
-    const other = await createDocumentWithTitle(user.id);
-    const asset = await createTestAsset(document.id);
-    const kept = await createTestAsset(other.id);
-
-    await deleteDocumentAssets([document.id]);
-
-    expect(await getDocumentAsset(asset.id)).toBeUndefined();
-    expect(await getDocumentAsset(kept.id)).toEqual(kept);
   });
 });

@@ -293,6 +293,7 @@ export interface SetDocumentLinkSharedInput {
  */
 export async function setDocumentLinkShared(
   input: SetDocumentLinkSharedInput,
+  executor: Executor = db,
 ) {
   const { documentId, ownerId, linkShared } = input;
 
@@ -300,7 +301,7 @@ export async function setDocumentLinkShared(
     return undefined;
   }
 
-  const [document] = await db.update(documents)
+  const [document] = await executor.update(documents)
     .set({ linkShared, linkAccess: DEFAULT_DOCUMENT_LINK_ACCESS })
     .where(and(
       eq(documents.id, documentId),
@@ -359,12 +360,16 @@ export async function setDocumentLinkAccess(
  * nor the restore touches `updatedAt`: the content did not change, and a
  * restored document should land back where it was in the navigation.
  */
-export async function softDeleteDocument(documentId: string, ownerId: string) {
+export async function softDeleteDocument(
+  documentId: string,
+  ownerId: string,
+  executor: Executor = db,
+) {
   if (!isUuid(documentId) || !isUuid(ownerId)) {
     return undefined;
   }
 
-  const [document] = await db.update(documents)
+  const [document] = await executor.update(documents)
     .set({ deletedAt: sql`NOW()`, linkShared: false })
     .where(and(
       eq(documents.id, documentId),
@@ -401,26 +406,33 @@ export async function restoreDocument(documentId: string, ownerId: string) {
   return document;
 }
 
-/** Documents soft deleted before the given date, oldest first. */
+/**
+ * Documents soft deleted before the given date, oldest first. The rows are
+ * locked until the transaction passed in ends, so nobody restores one of
+ * them while it is being purged.
+ */
 export async function getDocumentIdsDeletedBefore(
   before: Date,
   limit: number,
+  executor: Executor = db,
 ) {
-  const rows = await db
+  const rows = await executor
     .select({ id: documents.id })
     .from(documents)
     .where(lt(documents.deletedAt, before))
     .orderBy(asc(documents.deletedAt))
-    .limit(limit);
+    .limit(limit)
+    .for('update');
 
   return rows.map(row => row.id);
 }
 
 /**
- * Hard deletes documents. Deleting drops the collaborators already;
- * clearing them again here keeps the foreign key satisfied whatever state
- * a row is in. Their assets have to be gone first. Returns how many
- * documents were deleted.
+ * Hard deletes documents along with their asset rows and collaborators.
+ * Deleting drops the link collaborators already; clearing them again here
+ * keeps the foreign key satisfied whatever state a row is in. The files
+ * behind the assets are the caller's to delete. Returns how many documents
+ * were deleted.
  */
 export async function hardDeleteDocuments(
   ids: string[],
@@ -431,6 +443,8 @@ export async function hardDeleteDocuments(
   }
 
   return executor.transaction(async (tx) => {
+    await tx.delete(documentAssets)
+      .where(inArray(documentAssets.documentId, ids));
     await tx.delete(documentCollaborators)
       .where(inArray(documentCollaborators.documentId, ids));
     const deleted = await tx.delete(documents)
@@ -474,12 +488,15 @@ export async function connectCollaborator(input: ConnectCollaboratorInput) {
  * Drops the connections made through the link, which is what turning the
  * link off takes back. The people invited by e-mail keep their rows.
  */
-export async function removeLinkCollaborators(documentId: string) {
+export async function removeLinkCollaborators(
+  documentId: string,
+  executor: Executor = db,
+) {
   if (!isUuid(documentId)) {
     return;
   }
 
-  await db.delete(documentCollaborators)
+  await executor.delete(documentCollaborators)
     .where(and(
       eq(documentCollaborators.documentId, documentId),
       eq(documentCollaborators.source, 'link'),
@@ -715,23 +732,16 @@ export async function getDocumentAsset(id: string) {
   return db.query.documentAssets.findFirst({ where: { id } });
 }
 
-export async function getDocumentAssets(documentIds: string[]) {
+export async function getDocumentAssets(
+  documentIds: string[],
+  executor: Executor = db,
+) {
   if (documentIds.length === 0) {
     return [];
   }
 
-  return db
+  return executor
     .select()
     .from(documentAssets)
-    .where(inArray(documentAssets.documentId, documentIds));
-}
-
-export async function deleteDocumentAssets(documentIds: string[]) {
-  if (documentIds.length === 0) {
-    return;
-  }
-
-  await db
-    .delete(documentAssets)
     .where(inArray(documentAssets.documentId, documentIds));
 }

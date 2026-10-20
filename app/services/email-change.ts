@@ -1,17 +1,19 @@
 import argon2 from 'argon2';
 import { randomInt } from 'node:crypto';
+import { transaction } from '~/db';
 import {
   canRequestEmailChange,
+  claimEmailChangeRequestAttempt,
   createEmailChangeRequest,
   expireAllValidEmailChangeRequests,
   expireEmailChangeRequest,
   getValidEmailChangeRequest,
   markEmailChangeRequestAsUsed,
-  recordFailedEmailChangeRequestAttempt,
   type EmailChangeRequest,
 } from '~/repos/email-change-request';
 import { getUserByEmail, updateUser, type User } from '~/repos/user';
 import { getCanonicalEmail, normalizeEmail } from '~/utils/email';
+import { signOutOtherSessions } from './auth';
 import { sendEmailChangeCode } from './email-templates';
 import { syncCreemCustomerEmail } from './subscription';
 
@@ -92,43 +94,64 @@ export type VerifyEmailChangeResult
 /**
  * Accepts the code and moves the user to the new address. The request has
  * to belong to the user of the session, so a code can never be redeemed
- * against another account.
+ * against another account. The address and the other sessions change
+ * together: whoever could sign in through the old mailbox is signed out
+ * in the same transaction, while the session behind `request` stays.
  */
 export async function verifyEmailChange(
   user: User,
   requestId: string,
   code: string,
+  request: Request,
 ): Promise<VerifyEmailChangeResult> {
-  const request = await getValidEmailChangeRequest(requestId);
+  const change = await getValidEmailChangeRequest(requestId);
 
-  if (!request || request.userId !== user.id) {
+  if (!change || change.userId !== user.id) {
     return [VerifyEmailChangeError.Expired];
   }
 
-  const isValid = await argon2.verify(request.codeHash, code);
-  if (!isValid) {
-    const failed = await recordFailedEmailChangeRequestAttempt(request.id);
+  const attempt = await claimEmailChangeRequestAttempt(
+    change.id, MAX_EMAIL_CHANGE_ATTEMPTS,
+  );
 
-    if (failed && failed.attempts >= MAX_EMAIL_CHANGE_ATTEMPTS) {
-      await expireEmailChangeRequest(request.id);
+  if (!attempt) {
+    return [VerifyEmailChangeError.Expired];
+  }
+
+  const isValid = await argon2.verify(change.codeHash, code);
+  if (!isValid) {
+    if (attempt.attempts >= MAX_EMAIL_CHANGE_ATTEMPTS) {
+      await expireEmailChangeRequest(change.id);
       return [VerifyEmailChangeError.Expired];
     }
 
     return [VerifyEmailChangeError.Invalid];
   }
 
-  // Someone may have signed up with the address while the code was in
-  // transit; the request is spent either way.
-  await markEmailChangeRequestAsUsed(request.id);
+  const result = await transaction(
+    async (tx): Promise<VerifyEmailChangeResult> => {
+      if (!await markEmailChangeRequestAsUsed(change.id, tx)) {
+        return [VerifyEmailChangeError.Expired];
+      }
 
-  if (await getUserByEmail(request.email)) {
-    return [VerifyEmailChangeError.EmailTaken];
+      // Someone may have signed up with the address while the code was in
+      // transit; the request is spent either way.
+      if (await getUserByEmail(change.email)) {
+        return [VerifyEmailChangeError.EmailTaken];
+      }
+
+      const updatedUser
+        = await updateUser(user.id, { email: change.email }, tx);
+      await signOutOtherSessions(request, user.id, tx);
+
+      return [null, { user: updatedUser }];
+    },
+  );
+
+  if (result[0] === null) {
+    // The merchant of record bills and writes to the address it has.
+    await syncCreemCustomerEmail(result[1].user);
   }
 
-  const updatedUser = await updateUser(user.id, { email: request.email });
-
-  // The merchant of record bills and writes to the address it has.
-  await syncCreemCustomerEmail(updatedUser);
-
-  return [null, { user: updatedUser }];
+  return result;
 }

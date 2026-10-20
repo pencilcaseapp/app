@@ -19,7 +19,13 @@ import { userFixture } from '~/test/fixtures/user';
 const updateUserMock = vi.fn();
 const getUserMock = vi.fn();
 const getUserByCreemCustomerIdMock = vi.fn();
+vi.mock('~/db', () => ({
+  transaction: (run: (tx: string) => unknown) => run('tx'),
+}));
+
+const lockUserMock = vi.fn();
 vi.mock('~/repos/user', () => ({
+  lockUser: (...args: unknown[]) => lockUserMock(...args),
   updateUser: (...args: unknown[]) => updateUserMock(...args),
   getUser: (...args: unknown[]) => getUserMock(...args),
   getUserByCreemCustomerId:
@@ -326,11 +332,12 @@ describe('completeProCheckout', () => {
       priceCurrency: 'EUR',
       billingPeriod: 'every-year',
       creemUpdatedAt: new Date('2026-08-01T00:00:00.000Z'),
-    });
+    }, 'tx');
+    expect(lockUserMock).toHaveBeenCalledWith(userFixture.id, 'tx');
     expect(updateUserMock).toHaveBeenCalledWith(userFixture.id, {
       hasSubscription: true,
       creemCustomerId: 'cust_123',
-    });
+    }, 'tx');
     expect(sendEmailSubscriptionStartedMock).toHaveBeenCalledWith({
       to: { email: userFixture.email, name: userFixture.name ?? undefined },
       subscriptionId: 'sub_123',
@@ -408,7 +415,7 @@ describe('handleCreemWebhook', () => {
     expect(updateUserMock).toHaveBeenCalledWith(userFixture.id, {
       hasSubscription: true,
       creemCustomerId: 'cust_123',
-    });
+    }, 'tx');
     expect(sendEmailSubscriptionStartedMock).toHaveBeenCalled();
     expect(markWebhookEventProcessedMock).toHaveBeenCalledWith('evt_123');
   });
@@ -461,6 +468,7 @@ describe('handleCreemWebhook', () => {
     expect(updateUserMock).toHaveBeenCalledWith(
       userFixture.id,
       expect.objectContaining({ hasSubscription: false }),
+      'tx',
     );
     expect(sendEmailSubscriptionCanceledMock).toHaveBeenCalledWith({
       to: { email: userFixture.email, name: userFixture.name ?? undefined },
@@ -482,10 +490,12 @@ describe('handleCreemWebhook', () => {
     expect(hasSubscriptionWithStatusMock).toHaveBeenCalledWith(
       userFixture.id,
       expect.arrayContaining(['past_due']),
+      'tx',
     );
     expect(updateUserMock).toHaveBeenCalledWith(
       userFixture.id,
       expect.objectContaining({ hasSubscription: true }),
+      'tx',
     );
     expect(sendEmailSubscriptionPaymentFailedMock).toHaveBeenCalledWith({
       to: { email: userFixture.email, name: userFixture.name ?? undefined },
@@ -614,7 +624,7 @@ describe('handleCreemWebhook', () => {
       expect(updateUserMock).toHaveBeenCalledWith(userFixture.id, {
         hasSubscription: true,
         creemCustomerId: undefined,
-      });
+      }, 'tx');
       expect(log).toHaveBeenCalledWith(
         'Creem customer cust_123 is already linked to another user',
       );

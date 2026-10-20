@@ -81,7 +81,7 @@ export async function updateUser(id: string, input: {
   onboarded?: boolean;
   hasSubscription?: boolean;
   creemCustomerId?: string;
-}) {
+}, executor: Executor = db) {
   const {
     email,
     name,
@@ -90,7 +90,7 @@ export async function updateUser(id: string, input: {
     hasSubscription,
     creemCustomerId,
   } = input;
-  const response = await db.update(users)
+  const response = await executor.update(users)
     .set({
       email,
       name,
@@ -104,6 +104,21 @@ export async function updateUser(id: string, input: {
     .returning();
 
   return response[0];
+}
+
+/**
+ * Locks the user's row until the transaction passed in ends, so writes
+ * that derive a user's fields from other tables run one after the other.
+ */
+export async function lockUser(id: string, executor: Executor) {
+  if (!isUuid(id)) {
+    return;
+  }
+
+  await executor.select({ id: users.id })
+    .from(users)
+    .where(eq(users.id, id))
+    .for('update');
 }
 
 export async function getUserByCreemCustomerId(creemCustomerId: string) {
@@ -187,8 +202,9 @@ export async function expireUserSession(tokenHash: string) {
 export async function expireOtherUserSessions(
   userId: string,
   keptTokenHash: string,
+  executor: Executor = db,
 ) {
-  return db
+  return executor
     .update(sessions)
     .set({
       expiresAt: new Date(),
