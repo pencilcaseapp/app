@@ -1,7 +1,9 @@
 import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import {
+  LexicalExtensionComposer,
+} from '@lexical/react/LexicalExtensionComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
@@ -10,7 +12,7 @@ import { ListNode, ListItemNode } from '@lexical/list';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { COMMAND_PRIORITY_LOW } from 'lexical';
+import { COMMAND_PRIORITY_LOW, defineExtension } from 'lexical';
 import { useEffect } from 'react';
 import { EditorPluginToolbar } from './editor-plugin-toolbar';
 import { PICK_IMAGES_COMMAND } from './editor-plugin-images';
@@ -37,14 +39,16 @@ function renderToolbar(
 ) {
   return render(
     <SidebarProvider>
-      <LexicalComposer
-        initialConfig={{
+      <LexicalExtensionComposer
+        extension={defineExtension({
+          name: 'test',
           namespace: 'test',
           onError: (error) => {
             throw error;
           },
           nodes: [HeadingNode, ListNode, ListItemNode],
-        }}
+        })}
+        contentEditable={null}
       >
         <EditorPluginToolbar
           avatars={avatars}
@@ -59,7 +63,7 @@ function renderToolbar(
         />
         <ListPlugin />
         <CheckListPlugin />
-      </LexicalComposer>
+      </LexicalExtensionComposer>
     </SidebarProvider>,
   );
 }

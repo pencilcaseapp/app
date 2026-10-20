@@ -1,7 +1,9 @@
 import { describe, expect, test, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import {
+  LexicalExtensionComposer,
+} from '@lexical/react/LexicalExtensionComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
@@ -12,6 +14,7 @@ import { $isHeadingNode, HeadingNode } from '@lexical/rich-text';
 import { CodeHighlightNode, CodeNode } from '@lexical/code-core';
 import { $isListNode, ListItemNode, ListNode } from '@lexical/list';
 import {
+  defineExtension,
   $getRoot,
   $getSelection,
   $isRangeSelection,
@@ -34,8 +37,9 @@ const EditorRef: React.FC = () => {
 
 function renderSlashMenu({ canInsertImages = false } = {}) {
   render(
-    <LexicalComposer
-      initialConfig={{
+    <LexicalExtensionComposer
+      extension={defineExtension({
+        name: 'test',
         namespace: 'test',
         onError: (error) => {
           throw error;
@@ -47,7 +51,8 @@ function renderSlashMenu({ canInsertImages = false } = {}) {
           ListNode,
           ListItemNode,
         ],
-      }}
+      })}
+      contentEditable={null}
     >
       <EditorRef />
       <RichTextPlugin
@@ -57,7 +62,7 @@ function renderSlashMenu({ canInsertImages = false } = {}) {
       <ListPlugin />
       <CheckListPlugin />
       <EditorPluginSlashMenu canInsertImages={canInsertImages} />
-    </LexicalComposer>,
+    </LexicalExtensionComposer>,
   );
 
   // The menu is positioned from the DOM selection, which Lexical only writes

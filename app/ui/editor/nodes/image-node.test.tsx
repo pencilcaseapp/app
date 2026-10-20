@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { createEditor } from 'lexical';
+import {
+  LexicalExtensionComposer,
+} from '@lexical/react/LexicalExtensionComposer';
+import { createEditor, defineExtension } from 'lexical';
 import { ImageNode } from './image-node';
 import { AssetUrlsContext } from '~/contexts/asset-urls';
 import { ImageView } from './image-view';
@@ -35,11 +37,16 @@ function exportImage(imageSrc: string) {
 function renderView(viewSrc: string, assetUrls: Record<string, string> = {}) {
   return render(
     <AssetUrlsContext value={assetUrls}>
-      <LexicalComposer
-        initialConfig={{ namespace: 'test', onError: console.error }}
+      <LexicalExtensionComposer
+        extension={defineExtension({
+          name: 'test',
+          namespace: 'test',
+          onError: console.error,
+        })}
+        contentEditable={null}
       >
         <ImageView nodeKey="1" src={viewSrc} width={800} height={600} />
-      </LexicalComposer>
+      </LexicalExtensionComposer>
     </AssetUrlsContext>,
   );
 }

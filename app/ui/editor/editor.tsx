@@ -1,8 +1,12 @@
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { CodeExtension } from '@lexical/code-core';
+import {
+  LexicalExtensionComposer,
+} from '@lexical/react/LexicalExtensionComposer';
 import { ClickableLinkPlugin } from '@lexical/react/LexicalClickableLinkPlugin';
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
-import { useMemo, type ComponentProps } from 'react';
+import { defineExtension, type InitialEditorStateType } from 'lexical';
+import { useState } from 'react';
 import { EditorPluginMarkdown } from './plugins/editor-plugin-markdown';
 import { EditorPluginAutoLink } from './plugins/editor-plugin-auto-link';
 import { EditorPluginCodePrism } from './plugins/editor-plugin-code-prism';
@@ -24,10 +28,8 @@ import {
 } from './plugins/editor-plugin-images';
 import { EditorPluginImageDrag } from './plugins/editor-plugin-image-drag';
 
-export type EditorConfig = ComponentProps<typeof LexicalComposer>['initialConfig'];
-
 export interface EditorProps extends React.PropsWithChildren {
-  initialEditorState?: EditorConfig['editorState'];
+  initialEditorState?: InitialEditorStateType;
   avatars: Collaborator[];
   topbarLeft?: React.ReactNode;
   topbarRight?: React.ReactNode;
@@ -61,18 +63,22 @@ export const Editor: React.FC<EditorProps> = ({
   preview,
   children,
 }) => {
-  const config = useMemo<EditorConfig>(() => ({
-    editorState: initialEditorState ?? null,
-    editable,
+  // Built once: a new extension would build a new editor, so later changes
+  // to `editable` go through `EditorPluginEditable` instead.
+  const [extension] = useState(() => defineExtension({
+    name: 'pencilCase',
     namespace: 'pencilCase',
+    $initialEditorState: initialEditorState ?? null,
+    editable,
     onError: console.log,
     nodes: EDITOR_NODES,
     theme: editorTheme,
-  }), [initialEditorState, editable]);
+    dependencies: [CodeExtension],
+  }));
 
   return (
     <div className="w-full relative">
-      <LexicalComposer initialConfig={config}>
+      <LexicalExtensionComposer extension={extension} contentEditable={null}>
         <EditorPluginEditable editable={editable} />
         <EditorPluginToolbar
           avatars={avatars}
@@ -105,7 +111,7 @@ export const Editor: React.FC<EditorProps> = ({
         <EditorPluginMarkdown />
         <EditorPluginCodePrism />
         {children}
-      </LexicalComposer>
+      </LexicalExtensionComposer>
     </div>
   );
 };

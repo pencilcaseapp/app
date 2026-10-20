@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import {
+  LexicalExtensionComposer,
+} from '@lexical/react/LexicalExtensionComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
@@ -15,6 +17,7 @@ import {
   ListNode,
 } from '@lexical/list';
 import {
+  defineExtension,
   $createTextNode,
   $getRoot,
   $isTextNode,
@@ -37,14 +40,15 @@ const EditorRef: React.FC = () => {
 
 function renderCheckList() {
   return render(
-    <LexicalComposer
-      initialConfig={{
+    <LexicalExtensionComposer
+      extension={defineExtension({
+        name: 'test',
         namespace: 'test',
         onError: (error) => {
           throw error;
         },
         nodes: [ListNode, ListItemNode],
-        editorState: () => {
+        $initialEditorState: () => {
           const list = $createListNode('check');
           list.append(
             $createListItemNode(false).append($createTextNode('Save title')),
@@ -52,7 +56,8 @@ function renderCheckList() {
           );
           $getRoot().append(list);
         },
-      }}
+      })}
+      contentEditable={null}
     >
       <EditorRef />
       <RichTextPlugin
@@ -61,7 +66,7 @@ function renderCheckList() {
       />
       <ListPlugin />
       <EditorPluginCheckList />
-    </LexicalComposer>,
+    </LexicalExtensionComposer>,
   );
 }
 
