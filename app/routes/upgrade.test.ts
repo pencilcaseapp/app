@@ -8,9 +8,12 @@ import { loader } from './upgrade';
 import type { Route } from './+types/upgrade';
 
 const getDocumentListMock = vi.fn();
-const createDocumentMock = vi.fn();
 vi.mock('~/repos/document', () => ({
   getDocumentList: (...args: unknown[]) => getDocumentListMock(...args),
+}));
+
+const createDocumentMock = vi.fn();
+vi.mock('~/services/document', () => ({
   createDocument: (...args: unknown[]) => createDocumentMock(...args),
 }));
 
@@ -47,13 +50,13 @@ test('opens the subscription settings over the latest document',
 
 test('creates a document for a user without one', async () => {
   getDocumentListMock.mockResolvedValue([]);
-  createDocumentMock.mockResolvedValue({ id: DOC_ID });
+  createDocumentMock.mockResolvedValue([null, { id: DOC_ID }]);
 
   const response = await callLoader();
 
   expect(response.headers.get('Location'))
     .toBe(`/doc/${DOC_ID}/settings/subscription`);
-  expect(createDocumentMock).toHaveBeenCalledWith({ userId: userFixture.id });
+  expect(createDocumentMock).toHaveBeenCalledWith(userFixture);
 });
 
 test('carries the search params along', async () => {

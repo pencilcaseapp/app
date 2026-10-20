@@ -1,8 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { createUser, createUserSession, deleteSessionsExpiredBefore, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getUser, getUserByCreemCustomerId, getUserByEmail, getAndRefreshUserSession, getUserSession, updateUser } from './user';
 import { createExpiredUserSession, createTestUser, createValidUserSession } from '~/test/data-factories/user';
 import { faker } from '@faker-js/faker';
-import { getDailyStat } from './daily-stat';
 
 describe('createUser', () => {
   it('creates a user', async () => {
@@ -68,15 +67,16 @@ describe('getUserByEmail', () => {
 describe('getOrCreateUserByEmail', () => {
   it('returns an existing user', async () => {
     const userFixture = await createTestUser();
-    const user = await getOrCreateUserByEmail(userFixture.email);
+    const result = await getOrCreateUserByEmail(userFixture.email);
 
-    expect(user).toStrictEqual(userFixture);
+    expect(result).toStrictEqual({ user: userFixture, created: false });
   });
 
   it('creates a new user if one does not exist', async () => {
     const email = faker.internet.email();
-    const user = await getOrCreateUserByEmail(email);
+    const { user, created } = await getOrCreateUserByEmail(email);
 
+    expect(created).toBe(true);
     expect(user).toStrictEqual({
       id: expect.any(String),
       email,
@@ -88,23 +88,6 @@ describe('getOrCreateUserByEmail', () => {
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
-  });
-
-  it('counts the new account but not the returning one', async () => {
-    vi.useFakeTimers({ toFake: ['Date'] });
-    vi.setSystemTime(new Date('2001-01-01T12:00:00Z'));
-
-    try {
-      const email = faker.internet.email();
-      await getOrCreateUserByEmail(email);
-      await getOrCreateUserByEmail(email);
-
-      expect(await getDailyStat('2001-01-01'))
-        .toMatchObject({ accountsCreated: 1 });
-    }
-    finally {
-      vi.useRealTimers();
-    }
   });
 });
 

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   acceptInvite,
   connectCollaborator,
@@ -28,7 +28,6 @@ import {
   softDeleteDocument,
   updateDocument,
 } from './document';
-import { getDailyStat } from './daily-stat';
 import { db } from '~/db';
 import {
   connectDocumentCollaborator,
@@ -68,23 +67,6 @@ describe('createDocument', () => {
       deletedAt: null,
       userId: user.id,
     });
-  });
-
-  it('counts the document in the daily stats', async () => {
-    const user = await createTestUser();
-    vi.useFakeTimers({ toFake: ['Date'] });
-    vi.setSystemTime(new Date('2002-01-01T12:00:00Z'));
-
-    try {
-      await createDocument({ userId: user.id });
-      await createDocument({ userId: user.id });
-
-      expect(await getDailyStat('2002-01-01'))
-        .toMatchObject({ documentsCreated: 2 });
-    }
-    finally {
-      vi.useRealTimers();
-    }
   });
 });
 
@@ -1216,7 +1198,7 @@ describe('hardDeleteDocuments', () => {
     const other = await createDocumentWithTitle(owner.id);
     await connectDocumentCollaborator(deleted.id, collaborator.id);
 
-    await hardDeleteDocuments([deleted.id]);
+    expect(await hardDeleteDocuments([deleted.id, randomUUID()])).toBe(1);
 
     expect(await getDocument(deleted.id)).toBeUndefined();
     expect(await getDocument(other.id)).toBeDefined();
@@ -1225,26 +1207,8 @@ describe('hardDeleteDocuments', () => {
     })).toHaveLength(0);
   });
 
-  it('counts the documents it deleted in the daily stats', async () => {
-    const owner = await createTestUser();
-    const first = await createDeletedDocument(owner.id);
-    const second = await createDeletedDocument(owner.id);
-    vi.useFakeTimers({ toFake: ['Date'] });
-    vi.setSystemTime(new Date('2002-01-02T12:00:00Z'));
-
-    try {
-      await hardDeleteDocuments([first.id, second.id, randomUUID()]);
-
-      expect(await getDailyStat('2002-01-02'))
-        .toMatchObject({ documentsDeleted: 2 });
-    }
-    finally {
-      vi.useRealTimers();
-    }
-  });
-
   it('does nothing without ids', async () => {
-    await expect(hardDeleteDocuments([])).resolves.toBeUndefined();
+    await expect(hardDeleteDocuments([])).resolves.toBe(0);
   });
 });
 

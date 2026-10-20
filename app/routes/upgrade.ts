@@ -1,7 +1,9 @@
 import { href, redirect, type MiddlewareFunction } from 'react-router';
 import { userSessionContext } from '~/contexts/user-session';
+import type { User } from '~/repos/user';
 import { authMiddleware } from '~/middleware/auth';
-import { createDocument, getDocumentList } from '~/repos/document';
+import { getDocumentList } from '~/repos/document';
+import { createDocument } from '~/services/document';
 import type { Route } from './+types/upgrade';
 
 export const middleware: MiddlewareFunction[] = [
@@ -18,10 +20,20 @@ export const middleware: MiddlewareFunction[] = [
 export async function loader({ request, context }: Route.LoaderArgs) {
   const user = context.get(userSessionContext);
   const [latest] = await getDocumentList(user.id);
-  const document = latest ?? await createDocument({ userId: user.id });
+  const id = latest?.id ?? await createFirstDocument(user);
 
   return redirect(
-    href('/doc/:id/settings/subscription', { id: document.id })
+    href('/doc/:id/settings/subscription', { id })
     + new URL(request.url).search,
   );
+}
+
+async function createFirstDocument(user: User) {
+  const [error, document] = await createDocument(user);
+
+  if (error !== null) {
+    throw new Error('A user without documents is below the document limit');
+  }
+
+  return document.id;
 }

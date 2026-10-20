@@ -6,29 +6,22 @@ export type DailyStat = InferSelectModel<typeof dailyStats>;
 
 export type DailyStatCounter = Exclude<keyof DailyStat, 'date'>;
 
-type Executor = Pick<typeof db, 'insert'>;
-
 export function getUtcDate(at = new Date()) {
   return at.toISOString().slice(0, 10);
 }
 
 /**
  * Adds to one counter of today's (UTC) row, creating the row on the day's
- * first event. Pass the transaction of the write being counted, so the
- * count and the write commit or roll back together.
+ * first event.
  */
-export async function incrementDailyStat(
-  counter: DailyStatCounter,
-  by = 1,
-  executor: Executor = db,
-) {
+export async function incrementDailyStat(counter: DailyStatCounter, by = 1) {
   if (by <= 0) {
     return;
   }
 
   const column = dailyStats[counter];
 
-  await executor
+  await db
     .insert(dailyStats)
     .values({ date: getUtcDate(), [counter]: by })
     .onConflictDoUpdate({

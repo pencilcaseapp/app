@@ -361,12 +361,13 @@ a `transform` — the only property those rules leave alone.
 **Daily stats — `app/repos/daily-stat.ts`.** Rows are hard deleted, so
 `daily_stats` keeps the only history: per UTC day, how many accounts and
 documents were created and deleted, as plain counts with nothing that
-points at a person or a document. The repo that does the write counts it
-in the same transaction (`incrementDailyStat`): `getOrCreateUserByEmail`
-when the upsert inserted (`xmax = 0`), `createDocument`, and
-`hardDeleteDocuments`, so a document counts as deleted when it is purged,
-not when it is soft deleted. Account deletion is not built yet; its purge
-should count `accountsDeleted` the same way.
+points at a person or a document. The services count the event where it
+happens (`incrementDailyStat`), the repos stay out of it: `auth.ts` when
+`getOrCreateUserByEmail` reports it inserted the row (`xmax = 0`), and
+`document.ts` in `createDocument` and `purgeDeletedDocuments`, so a
+document counts as deleted when it is purged, not when it is soft
+deleted. Account deletion is not built yet; its purge should count
+`accountsDeleted` the same way.
 
 **Who may open a document — `documents.link_shared`,
 `document_collaborators.source`.** Access comes from two independent

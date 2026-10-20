@@ -47,6 +47,7 @@ import {
   type DocumentForViewer,
   type DocumentViewer,
 } from '~/repos/document';
+import { incrementDailyStat } from '~/repos/daily-stat';
 import { countEmailLogsByUser } from '~/repos/email-log';
 import { getUserByEmail, type User } from '~/repos/user';
 import { parseAssetSrc } from '~/utils/asset-src';
@@ -667,6 +668,7 @@ export async function createDocument(
   }
 
   const document = await createDocumentRow({ userId: user.id });
+  await incrementDailyStat('documentsCreated');
 
   return [null, { id: document.id }];
 }
@@ -692,7 +694,8 @@ export async function purgeDeletedDocuments(before: Date) {
     const assets = await getDocumentAssets(ids);
     await deleteObjects(assets.map(asset => asset.storageKey));
     await deleteDocumentAssets(ids);
-    await hardDeleteDocuments(ids);
+    const purgedCount = await hardDeleteDocuments(ids);
+    await incrementDailyStat('documentsDeleted', purgedCount);
 
     deletedCount += ids.length;
 
