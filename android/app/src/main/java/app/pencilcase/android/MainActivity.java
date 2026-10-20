@@ -21,6 +21,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(PullToRefreshPlugin.class);
+        registerPlugin(SoftKeyboardPlugin.class);
         super.onCreate(savedInstanceState);
         addNavigationBarBackground();
     }

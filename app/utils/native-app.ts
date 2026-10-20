@@ -33,11 +33,19 @@ interface NativePullToRefresh {
   allow: (options: { allowed: boolean }) => Promise<void>;
 }
 
+/** Opens the keyboard in the Android app, which a focus alone does not. */
+interface NativeSoftKeyboard {
+  show: () => Promise<void>;
+}
+
 declare global {
   interface Window {
     Capacitor?: {
       getPlatform?: () => string;
-      Plugins?: { PullToRefresh?: NativePullToRefresh };
+      Plugins?: {
+        PullToRefresh?: NativePullToRefresh;
+        SoftKeyboard?: NativeSoftKeyboard;
+      };
     };
   }
 }
@@ -51,6 +59,9 @@ export const isNativeIosApp = () =>
 
 export const getNativePullToRefresh = () =>
   window.Capacitor?.Plugins?.PullToRefresh;
+
+export const getNativeSoftKeyboard = () =>
+  window.Capacitor?.Plugins?.SoftKeyboard;
 
 /**
  * Whether a pull starting on `target` pulls the page itself down, the way a

@@ -2,6 +2,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { $getRoot } from 'lexical';
 import { $isHeadingNode } from '@lexical/rich-text';
 import { useEffect, useRef } from 'react';
+import { getNativeSoftKeyboard } from '~/utils/native-app';
 
 export const EditorPluginAutoFocus: React.FC = () => {
   const [editor] = useLexicalComposerContext();
@@ -43,6 +44,8 @@ export const EditorPluginAutoFocus: React.FC = () => {
           ) {
             rootElement.focus({ preventScroll: true });
           }
+
+          getNativeSoftKeyboard()?.show().catch(() => {});
         },
         { defaultSelection: 'rootEnd' },
       );
