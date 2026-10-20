@@ -1,13 +1,16 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import {
+  LexicalExtensionComposer,
+} from '@lexical/react/LexicalExtensionComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { DRAG_DROP_PASTE } from '@lexical/rich-text';
 import {
+  defineExtension,
   $createParagraphNode,
   $createTextNode,
   $getRoot,
@@ -41,14 +44,16 @@ const copyImage = vi.fn<CopyImage>();
 
 function renderPlugin() {
   render(
-    <LexicalComposer
-      initialConfig={{
+    <LexicalExtensionComposer
+      extension={defineExtension({
+        name: 'test',
         namespace: 'test',
         onError: (error) => {
           throw error;
         },
         nodes: [ImageNode],
-      }}
+      })}
+      contentEditable={null}
     >
       <EditorRef />
       <RichTextPlugin
@@ -56,7 +61,7 @@ function renderPlugin() {
         ErrorBoundary={LexicalErrorBoundary}
       />
       <EditorPluginImages uploadImage={uploadImage} copyImage={copyImage} />
-    </LexicalComposer>,
+    </LexicalExtensionComposer>,
   );
 }
 
