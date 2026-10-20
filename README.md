@@ -41,4 +41,4 @@ Your app will be available at `http://localhost:3000`.
 
 ## License
 
-Just MIT. See [license](LICENSE.md).
+Copyright 2026 pencil case. Licensed under the [GNU Affero General Public License v3.0](LICENSE.md).
