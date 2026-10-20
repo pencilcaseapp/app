@@ -1,7 +1,7 @@
 import { and, eq, isNull, lte, or, type InferSelectModel } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { SubscriptionStatus } from '~/constants/subscription';
-import { db } from '~/db';
+import { db, type Executor } from '~/db';
 import { subscriptions } from '~/db/schema';
 
 export type Subscription = InferSelectModel<typeof subscriptions>;
@@ -28,8 +28,11 @@ export type UpsertSubscriptionInput = {
  * them gets `true`. A stale update (Creem's `updated_at` older than what
  * is stored, webhooks can arrive out of order) leaves the row untouched.
  */
-export async function upsertSubscription(input: UpsertSubscriptionInput) {
-  const [insertedRow] = await db
+export async function upsertSubscription(
+  input: UpsertSubscriptionInput,
+  executor: Executor = db,
+) {
+  const [insertedRow] = await executor
     .insert(subscriptions)
     .values(input)
     .onConflictDoNothing({ target: subscriptions.creemSubscriptionId })
@@ -46,7 +49,7 @@ export async function upsertSubscription(input: UpsertSubscriptionInput) {
       )
     : undefined;
 
-  const [updatedRow] = await db
+  const [updatedRow] = await executor
     .update(subscriptions)
     .set({ ...input, updatedAt: new Date() })
     .where(and(
@@ -57,13 +60,16 @@ export async function upsertSubscription(input: UpsertSubscriptionInput) {
 
   return {
     subscription: updatedRow
-      ?? await getSubscriptionByCreemId(input.creemSubscriptionId),
+      ?? await getSubscriptionByCreemId(input.creemSubscriptionId, executor),
     inserted: false,
   };
 }
 
-export async function getSubscriptionByCreemId(creemSubscriptionId: string) {
-  return db.query.subscriptions.findFirst({
+export async function getSubscriptionByCreemId(
+  creemSubscriptionId: string,
+  executor: Executor = db,
+) {
+  return executor.query.subscriptions.findFirst({
     where: {
       creemSubscriptionId,
     },
@@ -77,12 +83,13 @@ export async function getSubscriptionByCreemId(creemSubscriptionId: string) {
 export async function getSubscriptionWithStatus(
   userId: string,
   statuses: SubscriptionStatus[],
+  executor: Executor = db,
 ) {
   if (!isUuid(userId)) {
     return undefined;
   }
 
-  return db.query.subscriptions.findFirst({
+  return executor.query.subscriptions.findFirst({
     where: {
       userId,
       status: {
@@ -98,6 +105,7 @@ export async function getSubscriptionWithStatus(
 export async function hasSubscriptionWithStatus(
   userId: string,
   statuses: SubscriptionStatus[],
+  executor: Executor = db,
 ) {
-  return !!await getSubscriptionWithStatus(userId, statuses);
+  return !!await getSubscriptionWithStatus(userId, statuses, executor);
 }

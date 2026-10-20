@@ -1,4 +1,4 @@
-import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, expireOtp, getValidOtp, markOtpAsUsed, recordFailedOtpAttempt } from '~/repos/otp';
+import { claimOtpAttempt, createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, expireOtp, getValidOtp, markOtpAsUsed } from '~/repos/otp';
 import { incrementDailyStat } from '~/repos/daily-stat';
 import { createUserSession, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getAndRefreshUserSession, updateUser, type User } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
@@ -6,7 +6,7 @@ import argon2 from 'argon2';
 import { createHash, randomBytes, randomInt } from 'node:crypto';
 import { createCookieSessionStorage, href } from 'react-router';
 import { getConfig } from '~/config';
-import { transaction } from '~/db';
+import { db, transaction, type Executor, type Transaction } from '~/db';
 import { getNormalizedReturnUrl, withSearchParams } from '~/utils/url';
 import { getCanonicalEmail, normalizeEmail } from '~/utils/email';
 import { SearchParamAuth } from '~/constants/search-params';
@@ -88,11 +88,14 @@ export async function verifyMagicCode(
     return [VerifyMagicCodeError.Expired];
   }
 
+  const attempt = await claimOtpAttempt(otp.id, MAX_OTP_ATTEMPTS);
+  if (!attempt) {
+    return [VerifyMagicCodeError.Expired];
+  }
+
   const isValid = await argon2.verify(otp.codeHash, code);
   if (!isValid) {
-    const failed = await recordFailedOtpAttempt(otp.id);
-
-    if (failed && failed.attempts >= MAX_OTP_ATTEMPTS) {
+    if (attempt.attempts >= MAX_OTP_ATTEMPTS) {
       await expireOtp(otp.id);
       return [VerifyMagicCodeError.Expired];
     }
@@ -100,11 +103,19 @@ export async function verifyMagicCode(
     return [VerifyMagicCodeError.Invalid];
   }
 
-  await markOtpAsUsed(otp.id);
-
   // The user row only exists once the address is proven, so unverified
   // sign-in requests leave nothing behind but the OTP row.
-  const user = await getOrCreateUser(otp.email);
+  const user = await transaction(async (tx) => {
+    if (!await markOtpAsUsed(otp.id, tx)) {
+      return undefined;
+    }
+
+    return getOrCreateUser(otp.email, tx);
+  });
+
+  if (!user) {
+    return [VerifyMagicCodeError.Expired];
+  }
 
   return [null, { otp, user }];
 }
@@ -177,7 +188,11 @@ export async function signOut(request: Request) {
  * cookie, for after a credential change: whoever got in through the old
  * mailbox does not keep their session.
  */
-export async function signOutOtherSessions(request: Request, userId: string) {
+export async function signOutOtherSessions(
+  request: Request,
+  userId: string,
+  executor: Executor = db,
+) {
   const cookieSession = await getSession(request.headers.get('Cookie'));
   const token = cookieSession.get('token');
 
@@ -185,7 +200,7 @@ export async function signOutOtherSessions(request: Request, userId: string) {
     return;
   }
 
-  await expireOtherUserSessions(userId, hashUserSessionToken(token));
+  await expireOtherUserSessions(userId, hashUserSessionToken(token), executor);
 }
 
 /**
@@ -193,7 +208,7 @@ export async function signOutOtherSessions(request: Request, userId: string) {
  * `/e2e/auth`, which is off in prod (see `Config['e2e']`).
  */
 export async function signInE2eUser(request: Request, email: string) {
-  const user = await getOrCreateUser(email);
+  const user = await transaction(tx => getOrCreateUser(email, tx));
 
   if (!user.onboarded) {
     await updateUser(user.id, { onboarded: true });
@@ -241,15 +256,13 @@ function hashUserSessionToken(token: string) {
   return createHash('sha256').update(token).digest('hex');
 }
 
-async function getOrCreateUser(email: string) {
-  return transaction(async (tx) => {
-    const { user, created }
-      = await getOrCreateUserByEmail(normalizeEmail(email), tx);
+async function getOrCreateUser(email: string, tx: Transaction) {
+  const { user, created }
+    = await getOrCreateUserByEmail(normalizeEmail(email), tx);
 
-    if (created) {
-      await incrementDailyStat('accountsCreated', 1, tx);
-    }
+  if (created) {
+    await incrementDailyStat('accountsCreated', 1, tx);
+  }
 
-    return user;
-  });
+  return user;
 }

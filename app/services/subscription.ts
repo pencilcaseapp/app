@@ -1,6 +1,7 @@
 import { validate as isUuid } from 'uuid';
 import { z } from 'zod';
 import { getConfig } from '~/config';
+import { transaction } from '~/db';
 import { SubscriptionStatus } from '~/constants/subscription';
 import {
   getWebhookEvent,
@@ -16,6 +17,7 @@ import {
 import {
   getUser,
   getUserByCreemCustomerId,
+  lockUser,
   updateUser,
   type User,
 } from '~/repos/user';
@@ -353,7 +355,9 @@ async function processWebhookEvent(
  * user's `hasSubscription` flag from what is stored. The account is found
  * through the subscription we already stored, the user id from the
  * checkout metadata, or the Creem customer already linked to a user —
- * an unknown subscription is logged and skipped.
+ * an unknown subscription is logged and skipped. The user's row is locked
+ * while the flag is recomputed, so two events for the same user arriving
+ * at once cannot leave it computed from what the other had not stored yet.
  */
 async function syncCreemSubscription(creemSubscription: CreemSubscription) {
   const user = await resolveUser(creemSubscription);
@@ -369,37 +373,47 @@ async function syncCreemSubscription(creemSubscription: CreemSubscription) {
   const creemCustomerId
     = typeof customer === 'string' ? customer : customer.id;
 
-  const { inserted } = await upsertSubscription({
-    userId: user.id,
-    creemSubscriptionId: creemSubscription.id,
-    creemCustomerId,
-    creemProductId: typeof product === 'string' ? product : product.id,
-    status: creemSubscription.status,
-    currentPeriodStart:
-      parseDate(creemSubscription.current_period_start_date),
-    currentPeriodEnd: parseDate(creemSubscription.current_period_end_date),
-    canceledAt: creemSubscription.canceled_at
-      ? new Date(creemSubscription.canceled_at)
-      : null,
-    priceAmount:
-      typeof product === 'string' ? undefined : product.price ?? undefined,
-    priceCurrency:
-      typeof product === 'string'
-        ? undefined
-        : product.currency ?? undefined,
-    billingPeriod:
-      typeof product === 'string'
-        ? undefined
-        : product.billing_period ?? undefined,
-    creemUpdatedAt: parseDate(creemSubscription.updated_at),
-  });
+  const creemCustomerIdToLink
+    = await customerIdLinkableTo(user, creemCustomerId);
 
-  const hasSubscription
-    = await hasSubscriptionWithStatus(user.id, ACCESS_GRANTING_STATUSES);
+  const { inserted } = await transaction(async (tx) => {
+    await lockUser(user.id, tx);
 
-  await updateUser(user.id, {
-    hasSubscription,
-    creemCustomerId: await customerIdLinkableTo(user, creemCustomerId),
+    const upserted = await upsertSubscription({
+      userId: user.id,
+      creemSubscriptionId: creemSubscription.id,
+      creemCustomerId,
+      creemProductId: typeof product === 'string' ? product : product.id,
+      status: creemSubscription.status,
+      currentPeriodStart:
+        parseDate(creemSubscription.current_period_start_date),
+      currentPeriodEnd: parseDate(creemSubscription.current_period_end_date),
+      canceledAt: creemSubscription.canceled_at
+        ? new Date(creemSubscription.canceled_at)
+        : null,
+      priceAmount:
+        typeof product === 'string' ? undefined : product.price ?? undefined,
+      priceCurrency:
+        typeof product === 'string'
+          ? undefined
+          : product.currency ?? undefined,
+      billingPeriod:
+        typeof product === 'string'
+          ? undefined
+          : product.billing_period ?? undefined,
+      creemUpdatedAt: parseDate(creemSubscription.updated_at),
+    }, tx);
+
+    const hasSubscription = await hasSubscriptionWithStatus(
+      user.id, ACCESS_GRANTING_STATUSES, tx,
+    );
+
+    await updateUser(user.id, {
+      hasSubscription,
+      creemCustomerId: creemCustomerIdToLink,
+    }, tx);
+
+    return upserted;
   });
 
   if (

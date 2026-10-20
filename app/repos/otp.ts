@@ -1,6 +1,6 @@
 import { eq, and, gt, lt, inArray, sql, type InferSelectModel, isNull } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
-import { db } from '~/db';
+import { db, type Executor } from '~/db';
 import { otps } from '~/db/schema';
 
 export type Otp = InferSelectModel<typeof otps>;
@@ -78,7 +78,13 @@ export async function expireAllValidOtps(canonicalEmail: string) {
     .returning();
 }
 
-export async function recordFailedOtpAttempt(id: string) {
+/**
+ * Counts an attempt before the code is checked, in the same statement that
+ * checks the OTP is still valid and has attempts left, so guesses sent in
+ * parallel cannot get past the limit. Returns `undefined` when there is
+ * no attempt left to take.
+ */
+export async function claimOtpAttempt(id: string, maxAttempts: number) {
   if (!isUuid(id)) {
     return undefined;
   }
@@ -88,19 +94,32 @@ export async function recordFailedOtpAttempt(id: string) {
       attempts: sql`${otps.attempts} + 1`,
       updatedAt: new Date(),
     })
-    .where(eq(otps.id, id))
+    .where(and(
+      eq(otps.id, id),
+      gt(otps.expiresAt, new Date()),
+      isNull(otps.usedAt),
+      lt(otps.attempts, maxAttempts),
+    ))
     .returning();
 
   return otp;
 }
 
-export async function markOtpAsUsed(id: string) {
-  const [otp] = await db.update(otps)
+/**
+ * Returns `undefined` when the OTP was used or expired in the meantime, so
+ * a code is only ever redeemed once.
+ */
+export async function markOtpAsUsed(id: string, executor: Executor = db) {
+  const [otp] = await executor.update(otps)
     .set({
       usedAt: new Date(),
       updatedAt: new Date(),
     })
-    .where(eq(otps.id, id))
+    .where(and(
+      eq(otps.id, id),
+      gt(otps.expiresAt, new Date()),
+      isNull(otps.usedAt),
+    ))
     .returning();
 
   return otp;

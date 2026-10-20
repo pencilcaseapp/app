@@ -28,7 +28,6 @@ import {
   countOwnedDocuments,
   createDocument as createDocumentRow,
   createDocumentAsset,
-  deleteDocumentAssets,
   getDocument,
   getDocumentAsset,
   getDocumentAssets,
@@ -241,10 +240,18 @@ export async function shareDocument(
   input: ShareDocumentInput,
 ): Promise<ShareDocumentResult> {
   const { documentId, userId, linkShared } = input;
-  const document = await setDocumentLinkShared({
-    documentId,
-    ownerId: userId,
-    linkShared,
+  const document = await transaction(async (tx) => {
+    const row = await setDocumentLinkShared({
+      documentId,
+      ownerId: userId,
+      linkShared,
+    }, tx);
+
+    if (row && !linkShared) {
+      await removeLinkCollaborators(row.id, tx);
+    }
+
+    return row;
   });
 
   if (!document) {
@@ -252,7 +259,6 @@ export async function shareDocument(
   }
 
   if (!linkShared) {
-    await removeLinkCollaborators(document.id);
     closeDocumentConnections({
       documentId: document.id,
       keepUserId: userId,
@@ -516,13 +522,20 @@ export async function deleteDocument(
   documentId: string,
   userId: string,
 ): Promise<DeleteDocumentResult> {
-  const document = await softDeleteDocument(documentId, userId);
+  const document = await transaction(async (tx) => {
+    const row = await softDeleteDocument(documentId, userId, tx);
+
+    if (row) {
+      await removeLinkCollaborators(row.id, tx);
+    }
+
+    return row;
+  });
 
   if (!document) {
     return [DeleteDocumentError.PermissionDenied];
   }
 
-  await removeLinkCollaborators(document.id);
   closeDocumentConnections({ documentId: document.id });
 
   return [null, { id: document.id }];
@@ -678,35 +691,38 @@ export async function createDocument(
   return [null, { id: document.id }];
 }
 
-const PURGE_BATCH_SIZE = 1000;
+const PURGE_BATCH_SIZE = 100;
 
 /**
- * Hard deletes documents that were soft deleted before the given date, in
- * batches so a backlog never turns into one long statement. Their files go
- * from the bucket before their rows, so a failure halfway leaves rows to
- * retry with rather than files nothing points at any more.
+ * Hard deletes documents that were soft deleted before the given date, a
+ * batch per transaction. The files are the one step a rollback cannot
+ * undo, so each batch locks its documents, deletes the rows and only then
+ * the files, right before the commit: a failure in either rolls the rows
+ * back and the next run tries the batch again, and the files of a
+ * document never go while its rows could still stay. Deleting a file that
+ * is gone already succeeds, so a retry after files went halfway finishes
+ * the job. The daily stat comes last because its row is shared with every
+ * sign-up and new document, which should not wait on the bucket.
  */
 export async function purgeDeletedDocuments(before: Date) {
   let deletedCount = 0;
 
   while (true) {
-    const ids = await getDocumentIdsDeletedBefore(before, PURGE_BATCH_SIZE);
-
-    if (ids.length === 0) {
-      return deletedCount;
-    }
-
-    const assets = await getDocumentAssets(ids);
-    await deleteObjects(assets.map(asset => asset.storageKey));
-    await deleteDocumentAssets(ids);
-    await transaction(async (tx) => {
+    const batchSize = await transaction(async (tx) => {
+      const ids
+        = await getDocumentIdsDeletedBefore(before, PURGE_BATCH_SIZE, tx);
+      const assets = await getDocumentAssets(ids, tx);
       const purgedCount = await hardDeleteDocuments(ids, tx);
+
+      await deleteObjects(assets.map(asset => asset.storageKey));
       await incrementDailyStat('documentsDeleted', purgedCount, tx);
+
+      return ids.length;
     });
 
-    deletedCount += ids.length;
+    deletedCount += batchSize;
 
-    if (ids.length < PURGE_BATCH_SIZE) {
+    if (batchSize < PURGE_BATCH_SIZE) {
       return deletedCount;
     }
   }

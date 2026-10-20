@@ -83,7 +83,6 @@ const removeViewerCollaboratorsMock = vi.fn();
 const createDocumentAssetMock = vi.fn();
 const getDocumentAssetMock = vi.fn();
 const getDocumentAssetsMock = vi.fn();
-const deleteDocumentAssetsMock = vi.fn();
 vi.mock('~/repos/document', () => ({
   countOwnedDocuments: (...args: unknown[]) => countOwnedDocumentsMock(...args),
   createDocument: (...args: unknown[]) => createDocumentRowMock(...args),
@@ -116,8 +115,6 @@ vi.mock('~/repos/document', () => ({
     createDocumentAssetMock(...args),
   getDocumentAsset: (...args: unknown[]) => getDocumentAssetMock(...args),
   getDocumentAssets: (...args: unknown[]) => getDocumentAssetsMock(...args),
-  deleteDocumentAssets: (...args: unknown[]) =>
-    deleteDocumentAssetsMock(...args),
 }));
 
 const deleteObjectsMock = vi.fn();
@@ -545,12 +542,13 @@ describe('shareDocument', () => {
       documentId: documentFixture.id,
       ownerId: userFixture.id,
       linkShared: true,
-    });
+    }, 'tx');
     expect(removeLinkCollaboratorsMock).not.toHaveBeenCalled();
     expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
   });
 
-  it('drops the collaborators when a document is unshared', async () => {
+  it('drops the collaborators in the same transaction when a document is '
+    + 'unshared', async () => {
     setDocumentLinkSharedMock.mockResolvedValue({
       id: documentFixture.id,
       linkShared: false,
@@ -566,7 +564,7 @@ describe('shareDocument', () => {
     expect(error).toBeNull();
     expect(result?.linkShared).toBe(false);
     expect(removeLinkCollaboratorsMock)
-      .toHaveBeenCalledWith(documentFixture.id);
+      .toHaveBeenCalledWith(documentFixture.id, 'tx');
   });
 
   it('disconnects the collaborators editing right now', async () => {
@@ -791,7 +789,7 @@ describe('deleteDocument', () => {
     expect(error).toBeNull();
     expect(result).toStrictEqual({ id: documentFixture.id });
     expect(softDeleteDocumentMock)
-      .toHaveBeenCalledWith(documentFixture.id, userFixture.id);
+      .toHaveBeenCalledWith(documentFixture.id, userFixture.id, 'tx');
   });
 
   it('drops the collaborators and closes every connection', async () => {
@@ -803,7 +801,7 @@ describe('deleteDocument', () => {
     await deleteDocument(documentFixture.id, userFixture.id);
 
     expect(removeLinkCollaboratorsMock)
-      .toHaveBeenCalledWith(documentFixture.id);
+      .toHaveBeenCalledWith(documentFixture.id, 'tx');
     expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
       documentId: documentFixture.id,
     });
@@ -967,7 +965,7 @@ describe('purgeDeletedDocuments', () => {
     vi.clearAllMocks();
   });
 
-  it('deletes the files, then the assets, then the documents', async () => {
+  it('deletes the rows, then the files, then counts them', async () => {
     const ids = [documentFixture.id];
     const calls: string[] = [];
     getDocumentIdsDeletedBeforeMock.mockResolvedValueOnce(ids);
@@ -975,39 +973,40 @@ describe('purgeDeletedDocuments', () => {
       { storageKey: 'documents/a/1.webp' },
       { storageKey: 'documents/a/2.webp' },
     ]);
-    deleteObjectsMock.mockImplementation(() => calls.push('objects'));
-    deleteDocumentAssetsMock.mockImplementation(() => calls.push('assets'));
-    hardDeleteDocumentsMock.mockImplementation(() => calls.push('documents'));
+    hardDeleteDocumentsMock.mockImplementation(() => {
+      calls.push('rows');
+      return 1;
+    });
+    deleteObjectsMock.mockImplementation(() => calls.push('files'));
+    incrementDailyStatMock.mockImplementation(() => calls.push('stat'));
 
     const deletedCount = await purgeDeletedDocuments(before);
 
     expect(deletedCount).toBe(1);
-    expect(getDocumentIdsDeletedBeforeMock).toHaveBeenCalledWith(
-      before, 1000,
-    );
+    expect(getDocumentIdsDeletedBeforeMock)
+      .toHaveBeenCalledWith(before, 100, 'tx');
+    expect(getDocumentAssetsMock).toHaveBeenCalledWith(ids, 'tx');
+    expect(hardDeleteDocumentsMock).toHaveBeenCalledWith(ids, 'tx');
     expect(deleteObjectsMock).toHaveBeenCalledWith([
       'documents/a/1.webp',
       'documents/a/2.webp',
     ]);
-    expect(deleteDocumentAssetsMock).toHaveBeenCalledWith(ids);
-    expect(hardDeleteDocumentsMock).toHaveBeenCalledWith(ids, 'tx');
-    expect(calls).toEqual(['objects', 'assets', 'documents']);
+    expect(incrementDailyStatMock)
+      .toHaveBeenCalledWith('documentsDeleted', 1, 'tx');
+    expect(calls).toEqual(['rows', 'files', 'stat']);
   });
 
-  it('counts the documents it purged in the daily stats', async () => {
-    getDocumentIdsDeletedBeforeMock.mockResolvedValueOnce(['a', 'b']);
-    getDocumentAssetsMock.mockResolvedValue([]);
-    hardDeleteDocumentsMock.mockResolvedValueOnce(2);
+  it('fails the batch when the files cannot be deleted', async () => {
+    getDocumentIdsDeletedBeforeMock.mockResolvedValueOnce(['a']);
+    getDocumentAssetsMock.mockResolvedValue([{ storageKey: 'documents/a' }]);
+    deleteObjectsMock.mockRejectedValueOnce(new Error('S3 is down'));
 
-    await purgeDeletedDocuments(before);
-
-    expect(hardDeleteDocumentsMock).toHaveBeenCalledWith(['a', 'b'], 'tx');
-    expect(incrementDailyStatMock)
-      .toHaveBeenCalledWith('documentsDeleted', 2, 'tx');
+    await expect(purgeDeletedDocuments(before)).rejects.toThrow('S3 is down');
+    expect(incrementDailyStatMock).not.toHaveBeenCalled();
   });
 
   it('keeps going while a batch comes back full', async () => {
-    const fullBatch = Array.from({ length: 1000 }, (_, i) => `id-${i}`);
+    const fullBatch = Array.from({ length: 100 }, (_, i) => `id-${i}`);
     getDocumentIdsDeletedBeforeMock
       .mockResolvedValueOnce(fullBatch)
       .mockResolvedValueOnce(['last']);
@@ -1015,16 +1014,16 @@ describe('purgeDeletedDocuments', () => {
 
     const deletedCount = await purgeDeletedDocuments(before);
 
-    expect(deletedCount).toBe(1001);
+    expect(deletedCount).toBe(101);
     expect(hardDeleteDocumentsMock).toHaveBeenCalledTimes(2);
   });
 
-  it('does nothing when no document is due', async () => {
+  it('stops when no document is due', async () => {
     getDocumentIdsDeletedBeforeMock.mockResolvedValueOnce([]);
+    getDocumentAssetsMock.mockResolvedValue([]);
 
     expect(await purgeDeletedDocuments(before)).toBe(0);
-    expect(deleteObjectsMock).not.toHaveBeenCalled();
-    expect(hardDeleteDocumentsMock).not.toHaveBeenCalled();
+    expect(getDocumentIdsDeletedBeforeMock).toHaveBeenCalledTimes(1);
   });
 });
 

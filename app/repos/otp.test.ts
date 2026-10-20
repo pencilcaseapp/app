@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { deleteOtpsExpiredBefore, expireAllValidOtps, canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed, recordFailedOtpAttempt } from './otp';
+import { deleteOtpsExpiredBefore, expireAllValidOtps, canRequestNewOtp, createOtp, expireOtp, getOtp, getValidOtp, markOtpAsUsed, claimOtpAttempt } from './otp';
 import { createTestUser } from '~/test/data-factories/user';
 import { createExpiredOtp, createValidOtp, createUsedOtp } from '~/test/data-factories/otp';
 import { getCanonicalEmail } from '~/utils/email';
@@ -156,29 +156,62 @@ describe('markOtpAsUsed', () => {
     const otpFixture = await createValidOtp(userFixture.id);
     const usedOtp = await markOtpAsUsed(otpFixture.id);
 
-    // OTP should be marked as used immediately
     expect(
-      usedOtp.usedAt?.getTime(),
+      usedOtp?.usedAt?.getTime(),
     ).toBeLessThanOrEqual(new Date().getTime());
+  });
+
+  it('marks an otp as used only once', async () => {
+    const userFixture = await createTestUser();
+    const otpFixture = await createValidOtp(userFixture.id);
+
+    expect(await markOtpAsUsed(otpFixture.id)).toBeDefined();
+    expect(await markOtpAsUsed(otpFixture.id)).toBeUndefined();
+  });
+
+  it('does not mark an expired otp as used', async () => {
+    const userFixture = await createTestUser();
+    const otpFixture = await createExpiredOtp({ userId: userFixture.id });
+
+    expect(await markOtpAsUsed(otpFixture.id)).toBeUndefined();
   });
 });
 
-describe('recordFailedOtpAttempt', () => {
+describe('claimOtpAttempt', () => {
   it('increments the attempts of an otp', async () => {
     const userFixture = await createTestUser();
     const otpFixture = await createValidOtp(userFixture.id);
 
-    expect((await recordFailedOtpAttempt(otpFixture.id))?.attempts).toBe(1);
-    expect((await recordFailedOtpAttempt(otpFixture.id))?.attempts).toBe(2);
+    expect((await claimOtpAttempt(otpFixture.id, 5))?.attempts).toBe(1);
+    expect((await claimOtpAttempt(otpFixture.id, 5))?.attempts).toBe(2);
+  });
+
+  it('claims no more attempts than allowed', async () => {
+    const userFixture = await createTestUser();
+    const otpFixture = await createValidOtp(userFixture.id);
+
+    const attempts = await Promise.all(
+      Array.from({ length: 10 }, () => claimOtpAttempt(otpFixture.id, 5)),
+    );
+
+    expect(attempts.filter(Boolean)).toHaveLength(5);
+  });
+
+  it('claims no attempt on a used otp', async () => {
+    const userFixture = await createTestUser();
+    const otpFixture = await createValidOtp(userFixture.id);
+    await markOtpAsUsed(otpFixture.id);
+
+    expect(await claimOtpAttempt(otpFixture.id, 5)).toBeUndefined();
   });
 
   it('returns undefined for an invalid uuid', async () => {
-    expect(await recordFailedOtpAttempt('not-a-uuid')).toBeUndefined();
+    expect(await claimOtpAttempt('not-a-uuid', 5)).toBeUndefined();
   });
 
   it('returns undefined for an unknown otp', async () => {
     expect(
-      await recordFailedOtpAttempt(faker.string.uuid()),
+      await claimOtpAttempt(faker.string.uuid(), 5),
     ).toBeUndefined();
   });
 });

@@ -12,7 +12,7 @@ const createOtpMock = vi.fn();
 const getValidOtpMock = vi.fn();
 const markOtpAsUsedMock = vi.fn();
 const expireOtpMock = vi.fn();
-const recordFailedOtpAttemptMock = vi.fn();
+const claimOtpAttemptMock = vi.fn();
 vi.mock('~/repos/otp', async (importOriginal) => {
   const actual = await importOriginal();
 
@@ -24,8 +24,7 @@ vi.mock('~/repos/otp', async (importOriginal) => {
     getValidOtp: (...args: unknown[]) => getValidOtpMock(...args),
     markOtpAsUsed: (...args: unknown[]) => markOtpAsUsedMock(...args),
     expireOtp: (...args: unknown[]) => expireOtpMock(...args),
-    recordFailedOtpAttempt: (...args: unknown[]) =>
-      recordFailedOtpAttemptMock(...args),
+    claimOtpAttempt: (...args: unknown[]) => claimOtpAttemptMock(...args),
   };
 });
 
@@ -52,6 +51,7 @@ vi.mock('~/repos/user', () => ({
 }));
 
 vi.mock('~/db', () => ({
+  db: 'db',
   transaction: (run: (tx: string) => unknown) => run('tx'),
 }));
 
@@ -80,6 +80,8 @@ vi.mock('node:crypto', () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   createOtpMock.mockResolvedValue(otpFixture);
+  claimOtpAttemptMock.mockResolvedValue({ ...otpFixture, attempts: 1 });
+  markOtpAsUsedMock.mockResolvedValue(otpFixture);
 });
 
 const validSessionCookie
@@ -193,16 +195,11 @@ describe('initMagicCode', () => {
         ...otpFixture,
         codeHash,
       });
-      recordFailedOtpAttemptMock.mockResolvedValueOnce({
-        ...otpFixture,
-        attempts: 1,
-      });
-
       const [error] = await verifyMagicCode(otpFixture.id, otpFixture.email, '654321');
 
       expect(error).toEqual(VerifyMagicCodeError.Invalid);
-      expect(recordFailedOtpAttemptMock).toHaveBeenCalledWith(otpFixture.id);
       expect(expireOtpMock).not.toHaveBeenCalled();
+      expect(markOtpAsUsedMock).not.toHaveBeenCalled();
     });
 
     it('expires the otp after too many wrong codes', async () => {
@@ -213,7 +210,7 @@ describe('initMagicCode', () => {
         ...otpFixture,
         codeHash,
       });
-      recordFailedOtpAttemptMock.mockResolvedValueOnce({
+      claimOtpAttemptMock.mockResolvedValueOnce({
         ...otpFixture,
         attempts: 5,
       });
@@ -224,7 +221,7 @@ describe('initMagicCode', () => {
       expect(expireOtpMock).toHaveBeenCalledWith(otpFixture.id);
     });
 
-    it('does not count a matching code as an attempt', async () => {
+    it('counts every attempt before checking the code', async () => {
       const code = '123456';
       const codeHash = await argon2.hash(code);
 
@@ -235,7 +232,57 @@ describe('initMagicCode', () => {
 
       await verifyMagicCode(otpFixture.id, otpFixture.email, code);
 
-      expect(recordFailedOtpAttemptMock).not.toHaveBeenCalled();
+      expect(claimOtpAttemptMock).toHaveBeenCalledWith(otpFixture.id, 5);
+    });
+
+    it('returns Expired error if no attempt is left', async () => {
+      const code = '123456';
+      const codeHash = await argon2.hash(code);
+
+      getValidOtpMock.mockResolvedValueOnce({
+        ...otpFixture,
+        codeHash,
+      });
+      claimOtpAttemptMock.mockResolvedValueOnce(undefined);
+
+      const [error]
+        = await verifyMagicCode(otpFixture.id, otpFixture.email, code);
+
+      expect(error).toEqual(VerifyMagicCodeError.Expired);
+      expect(markOtpAsUsedMock).not.toHaveBeenCalled();
+    });
+
+    it('returns Expired error if the code was used meanwhile', async () => {
+      const code = '123456';
+      const codeHash = await argon2.hash(code);
+
+      getValidOtpMock.mockResolvedValueOnce({
+        ...otpFixture,
+        codeHash,
+      });
+      markOtpAsUsedMock.mockResolvedValueOnce(undefined);
+
+      const [error]
+        = await verifyMagicCode(otpFixture.id, otpFixture.email, code);
+
+      expect(error).toEqual(VerifyMagicCodeError.Expired);
+      expect(getOrCreateUserByEmailMock).not.toHaveBeenCalled();
+    });
+
+    it('spends the code and creates the user in one transaction', async () => {
+      const code = '123456';
+      const codeHash = await argon2.hash(code);
+
+      getValidOtpMock.mockResolvedValueOnce({
+        ...otpFixture,
+        codeHash,
+      });
+
+      await verifyMagicCode(otpFixture.id, otpFixture.email, code);
+
+      expect(markOtpAsUsedMock).toHaveBeenCalledWith(otpFixture.id, 'tx');
+      expect(getOrCreateUserByEmailMock)
+        .toHaveBeenCalledWith(otpFixture.email.toLowerCase(), 'tx');
     });
 
     it('returns otp and user if code matches', async () => {
@@ -446,7 +493,7 @@ describe('signOutOtherSessions', () => {
     await signOutOtherSessions(request, userFixture.id);
 
     expect(expireOtherUserSessionsMock)
-      .toHaveBeenCalledWith(userFixture.id, 'hashed-token');
+      .toHaveBeenCalledWith(userFixture.id, 'hashed-token', 'db');
   });
 
   it('does nothing without a session cookie', async () => {
