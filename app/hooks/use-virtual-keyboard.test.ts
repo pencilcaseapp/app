@@ -174,6 +174,19 @@ describe('useVirtualKeyboard', () => {
     expect(result.current[0]).toBe(false);
   });
 
+  it('should report the keyboard open when the Android app opens it for a focus', () => {
+    window.Capacitor = {
+      getPlatform: () => 'android',
+      Plugins: { SoftKeyboard: { show: () => Promise.resolve() } },
+    };
+    const { result } = renderHook(() => useVirtualKeyboard());
+    focus(createEditable());
+
+    setViewportHeight(400);
+
+    expect(result.current[0]).toBe(true);
+  });
+
   it('should ignore a finger dragged across the content', () => {
     const editable = createEditable();
     const { result } = renderHook(() => useVirtualKeyboard());

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMedia } from 'react-use';
 import { listenForEditableTap } from '~/utils/editable-tap';
-import { isNativeIosApp } from '~/utils/native-app';
+import { getNativeSoftKeyboard, isNativeIosApp } from '~/utils/native-app';
 
 const KEYBOARD_HEIGHT_THRESHOLD = 50;
 
@@ -32,10 +32,12 @@ export const useVirtualKeyboard = () => {
     // Nor is a shrinking viewport with the content focused: the spinner of
     // a pull-to-refresh shrinks it as well, and a focus the page moved there
     // itself opens no keyboard. Only a tap on the content does, except in
-    // the iOS app, where any focus there does, like the one a new document
-    // gets.
+    // the apps: the iOS app opens it for any focus there, and the Android
+    // app for the one a new document gets, the only one the page moves
+    // there itself (`EditorPluginAutoFocus`).
     let tapped = false;
-    const opensKeyboardOnFocus = isNativeIosApp();
+    const opensKeyboardOnFocus = isNativeIosApp()
+      || getNativeSoftKeyboard() !== undefined;
 
     // iOS and Chrome leave the page its height and only shrink the visual
     // viewport, but the Android web view shrinks the page along with it, so
