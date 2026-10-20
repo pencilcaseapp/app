@@ -14,6 +14,7 @@ import {
 import { EmailTemplate } from '~/constants/email';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { getConfig, type Config } from '~/config';
+import { transaction } from '~/db';
 import {
   copyObject,
   deleteObjects,
@@ -47,6 +48,7 @@ import {
   type DocumentForViewer,
   type DocumentViewer,
 } from '~/repos/document';
+import { incrementDailyStat } from '~/repos/daily-stat';
 import { countEmailLogsByUser } from '~/repos/email-log';
 import { getUserByEmail, type User } from '~/repos/user';
 import { parseAssetSrc } from '~/utils/asset-src';
@@ -666,7 +668,12 @@ export async function createDocument(
     return [CreateDocumentError.LimitReached];
   }
 
-  const document = await createDocumentRow({ userId: user.id });
+  const document = await transaction(async (tx) => {
+    const row = await createDocumentRow({ userId: user.id }, tx);
+    await incrementDailyStat('documentsCreated', 1, tx);
+
+    return row;
+  });
 
   return [null, { id: document.id }];
 }
@@ -692,7 +699,10 @@ export async function purgeDeletedDocuments(before: Date) {
     const assets = await getDocumentAssets(ids);
     await deleteObjects(assets.map(asset => asset.storageKey));
     await deleteDocumentAssets(ids);
-    await hardDeleteDocuments(ids);
+    await transaction(async (tx) => {
+      const purgedCount = await hardDeleteDocuments(ids, tx);
+      await incrementDailyStat('documentsDeleted', purgedCount, tx);
+    });
 
     deletedCount += ids.length;
 

@@ -1198,7 +1198,7 @@ describe('hardDeleteDocuments', () => {
     const other = await createDocumentWithTitle(owner.id);
     await connectDocumentCollaborator(deleted.id, collaborator.id);
 
-    await hardDeleteDocuments([deleted.id]);
+    expect(await hardDeleteDocuments([deleted.id, randomUUID()])).toBe(1);
 
     expect(await getDocument(deleted.id)).toBeUndefined();
     expect(await getDocument(other.id)).toBeDefined();
@@ -1208,7 +1208,7 @@ describe('hardDeleteDocuments', () => {
   });
 
   it('does nothing without ids', async () => {
-    await expect(hardDeleteDocuments([])).resolves.toBeUndefined();
+    await expect(hardDeleteDocuments([])).resolves.toBe(0);
   });
 });
 

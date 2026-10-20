@@ -67,15 +67,16 @@ describe('getUserByEmail', () => {
 describe('getOrCreateUserByEmail', () => {
   it('returns an existing user', async () => {
     const userFixture = await createTestUser();
-    const user = await getOrCreateUserByEmail(userFixture.email);
+    const result = await getOrCreateUserByEmail(userFixture.email);
 
-    expect(user).toStrictEqual(userFixture);
+    expect(result).toStrictEqual({ user: userFixture, created: false });
   });
 
   it('creates a new user if one does not exist', async () => {
     const email = faker.internet.email();
-    const user = await getOrCreateUserByEmail(email);
+    const { user, created } = await getOrCreateUserByEmail(email);
 
+    expect(created).toBe(true);
     expect(user).toStrictEqual({
       id: expect.any(String),
       email,

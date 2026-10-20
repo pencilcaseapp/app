@@ -136,6 +136,15 @@ vi.mock('~/repos/user', () => ({
   getUserByEmail: (...args: unknown[]) => getUserByEmailMock(...args),
 }));
 
+vi.mock('~/db', () => ({
+  transaction: (run: (tx: string) => unknown) => run('tx'),
+}));
+
+const incrementDailyStatMock = vi.fn();
+vi.mock('~/repos/daily-stat', () => ({
+  incrementDailyStat: (...args: unknown[]) => incrementDailyStatMock(...args),
+}));
+
 const countEmailLogsByUserMock = vi.fn();
 vi.mock('~/repos/email-log', () => ({
   countEmailLogsByUser: (...args: unknown[]) =>
@@ -921,7 +930,9 @@ describe('createDocument', () => {
     expect(result).toEqual([null, { id: documentFixture.id }]);
     expect(createDocumentRowMock).toHaveBeenCalledWith({
       userId: userFixture.id,
-    });
+    }, 'tx');
+    expect(incrementDailyStatMock)
+      .toHaveBeenCalledWith('documentsCreated', 1, 'tx');
   });
 
   it('refuses a free account at the limit', async () => {
@@ -934,6 +945,7 @@ describe('createDocument', () => {
 
     expect(result).toEqual([CreateDocumentError.LimitReached]);
     expect(createDocumentRowMock).not.toHaveBeenCalled();
+    expect(incrementDailyStatMock).not.toHaveBeenCalled();
   });
 
   it('does not limit a subscribed account', async () => {
@@ -978,8 +990,20 @@ describe('purgeDeletedDocuments', () => {
       'documents/a/2.webp',
     ]);
     expect(deleteDocumentAssetsMock).toHaveBeenCalledWith(ids);
-    expect(hardDeleteDocumentsMock).toHaveBeenCalledWith(ids);
+    expect(hardDeleteDocumentsMock).toHaveBeenCalledWith(ids, 'tx');
     expect(calls).toEqual(['objects', 'assets', 'documents']);
+  });
+
+  it('counts the documents it purged in the daily stats', async () => {
+    getDocumentIdsDeletedBeforeMock.mockResolvedValueOnce(['a', 'b']);
+    getDocumentAssetsMock.mockResolvedValue([]);
+    hardDeleteDocumentsMock.mockResolvedValueOnce(2);
+
+    await purgeDeletedDocuments(before);
+
+    expect(hardDeleteDocumentsMock).toHaveBeenCalledWith(['a', 'b'], 'tx');
+    expect(incrementDailyStatMock)
+      .toHaveBeenCalledWith('documentsDeleted', 2, 'tx');
   });
 
   it('keeps going while a batch comes back full', async () => {

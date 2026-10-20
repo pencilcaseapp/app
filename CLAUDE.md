@@ -358,6 +358,18 @@ screen, so
 `useCursorNameBounds` measures the tags it drew and nudges them sideways with
 a `transform` — the only property those rules leave alone.
 
+**Daily stats — `app/repos/daily-stat.ts`.** Rows are hard deleted, so
+`daily_stats` keeps the only history: per UTC day, how many accounts and
+documents were created and deleted, as plain counts with nothing that
+points at a person or a document. The services count the event where it
+happens (`incrementDailyStat`), in one `transaction` (`app/db`) with the
+write, and the repos only take that transaction: `auth.ts` when
+`getOrCreateUserByEmail` reports it inserted the row (`xmax = 0`), and
+`document.ts` in `createDocument` and `purgeDeletedDocuments`, so a
+document counts as deleted when it is purged, not when it is soft
+deleted. Account deletion is not built yet; its purge should count
+`accountsDeleted` the same way.
+
 **Who may open a document — `documents.link_shared`,
 `document_collaborators.source`.** Access comes from two independent
 places, and the schema says which is which. `documents.link_shared` means
@@ -455,7 +467,13 @@ width and height of an image reserve its box before it loads).
 **Layering.** `app/routes/` and `app/layouts/` (loaders/actions) → `app/services/`
 (business logic) → `app/repos/` (Drizzle queries, one module per table) →
 `app/db/`. Repos validate UUIDs before querying and return `undefined`/`[]`
-rather than throwing. Next to the repos, `app/clients/` holds one module per
+rather than throwing. A repo stays inside its own domain: it never imports
+another repo or writes another domain's tables. A write that has to touch
+two domains (a document and its daily stat, say) is the service's job: it
+opens a `transaction` from `app/db` and hands the `tx` to each repo, which
+takes it as an optional last `executor: Executor = db` parameter and
+returns whatever the service needs to decide (`created`, a count). Next to
+the repos, `app/clients/` holds one module per
 third party (`creem`, `lettermint`, `storage` for S3): it builds the SDK
 client from the config and turns our calls into theirs, with no business
 logic. Only services import clients. Services are grouped by domain, not

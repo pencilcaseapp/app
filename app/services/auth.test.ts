@@ -33,7 +33,9 @@ const getAndRefreshUserSessionMock = vi.fn();
 const expireUserSessionMock = vi.fn();
 const expireOtherUserSessionsMock = vi.fn();
 const updateUserMock = vi.fn();
-const getOrCreateUserByEmailMock = vi.fn(() => userFixture);
+const getOrCreateUserByEmailMock = vi.fn(
+  () => ({ user: userFixture, created: false }),
+);
 vi.mock('~/repos/user', () => ({
   getOrCreateUserByEmail: (...args: unknown[]) =>
     getOrCreateUserByEmailMock(...args as []),
@@ -47,6 +49,15 @@ vi.mock('~/repos/user', () => ({
   expireOtherUserSessions: (...args: unknown[]) =>
     expireOtherUserSessionsMock(...args),
   updateUser: (...args: unknown[]) => updateUserMock(...args),
+}));
+
+vi.mock('~/db', () => ({
+  transaction: (run: (tx: string) => unknown) => run('tx'),
+}));
+
+const incrementDailyStatMock = vi.fn();
+vi.mock('~/repos/daily-stat', () => ({
+  incrementDailyStat: (...args: unknown[]) => incrementDailyStatMock(...args),
 }));
 
 const sendEmailMagicCodeMock = vi.fn();
@@ -283,7 +294,31 @@ describe('initMagicCode', () => {
       await verifyMagicCode(otpFixture.id, 'John@Example.com', code);
 
       expect(getOrCreateUserByEmailMock)
-        .toHaveBeenCalledWith('john@example.com');
+        .toHaveBeenCalledWith('john@example.com', 'tx');
+    });
+
+    it('counts a new account in the daily stats', async () => {
+      const code = '123456';
+      const codeHash = await argon2.hash(code);
+      getValidOtpMock.mockResolvedValueOnce({ ...otpFixture, codeHash });
+      getOrCreateUserByEmailMock
+        .mockReturnValueOnce({ user: userFixture, created: true });
+
+      await verifyMagicCode(otpFixture.id, otpFixture.email, code);
+
+      expect(incrementDailyStatMock)
+        .toHaveBeenCalledWith('accountsCreated', 1, 'tx');
+    });
+
+    it('does not count a returning account', async () => {
+      const code = '123456';
+      const codeHash = await argon2.hash(code);
+      getValidOtpMock.mockResolvedValueOnce({ ...otpFixture, codeHash });
+      incrementDailyStatMock.mockClear();
+
+      await verifyMagicCode(otpFixture.id, otpFixture.email, code);
+
+      expect(incrementDailyStatMock).not.toHaveBeenCalled();
     });
   });
 });

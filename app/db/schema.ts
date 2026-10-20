@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { pgTable, boolean, integer, timestamp, uuid, text, bytea, jsonb, uniqueIndex, index, check } from 'drizzle-orm/pg-core';
+import { pgTable, boolean, date, integer, timestamp, uuid, text, bytea, jsonb, uniqueIndex, index, check } from 'drizzle-orm/pg-core';
 import {
   DEFAULT_DOCUMENT_LINK_ACCESS,
   type DocumentAccess,
@@ -223,3 +223,18 @@ export const documentAssets = pgTable('document_assets', {
   index('document_assets_document_id_idx').on(table.documentId),
   index('document_assets_user_id_idx').on(table.userId),
 ]);
+
+/*
+ * How many accounts and documents were created and deleted on a UTC day,
+ * which is all the history that is left once a row is hard deleted. Only
+ * aggregate counts: never add anything that points at a person or a
+ * document. A document counts as deleted when it is purged, not when it
+ * goes to the Deleted view, because only the purge cannot be undone.
+ */
+export const dailyStats = pgTable('daily_stats', {
+  date: date('date', { mode: 'string' }).primaryKey(),
+  accountsCreated: integer('accounts_created').notNull().default(0),
+  accountsDeleted: integer('accounts_deleted').notNull().default(0),
+  documentsCreated: integer('documents_created').notNull().default(0),
+  documentsDeleted: integer('documents_deleted').notNull().default(0),
+});

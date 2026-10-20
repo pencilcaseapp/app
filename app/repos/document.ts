@@ -19,7 +19,7 @@ import {
   type DocumentAccess,
   type DocumentLinkAccess,
 } from '~/constants/document';
-import { db } from '~/db';
+import { db, type Executor } from '~/db';
 import {
   documentAssets,
   documentCollaborators,
@@ -44,9 +44,12 @@ export interface CreateDocumentInput {
   userId: string;
 }
 
-export async function createDocument(input: CreateDocumentInput) {
+export async function createDocument(
+  input: CreateDocumentInput,
+  executor: Executor = db,
+) {
   const { userId } = input;
-  const [document] = await db.insert(documents)
+  const [document] = await executor.insert(documents)
     .values({
       userId,
     })
@@ -416,17 +419,25 @@ export async function getDocumentIdsDeletedBefore(
 /**
  * Hard deletes documents. Deleting drops the collaborators already;
  * clearing them again here keeps the foreign key satisfied whatever state
- * a row is in. Their assets have to be gone first.
+ * a row is in. Their assets have to be gone first. Returns how many
+ * documents were deleted.
  */
-export async function hardDeleteDocuments(ids: string[]) {
+export async function hardDeleteDocuments(
+  ids: string[],
+  executor: Executor = db,
+) {
   if (ids.length === 0) {
-    return;
+    return 0;
   }
 
-  await db.transaction(async (tx) => {
+  return executor.transaction(async (tx) => {
     await tx.delete(documentCollaborators)
       .where(inArray(documentCollaborators.documentId, ids));
-    await tx.delete(documents).where(inArray(documents.id, ids));
+    const deleted = await tx.delete(documents)
+      .where(inArray(documents.id, ids))
+      .returning({ id: documents.id });
+
+    return deleted.length;
   });
 }
 

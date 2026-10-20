@@ -1,10 +1,12 @@
 import { createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, expireOtp, getValidOtp, markOtpAsUsed, recordFailedOtpAttempt } from '~/repos/otp';
+import { incrementDailyStat } from '~/repos/daily-stat';
 import { createUserSession, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getAndRefreshUserSession, updateUser, type User } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
 import { createHash, randomBytes, randomInt } from 'node:crypto';
 import { createCookieSessionStorage, href } from 'react-router';
 import { getConfig } from '~/config';
+import { transaction } from '~/db';
 import { getNormalizedReturnUrl, withSearchParams } from '~/utils/url';
 import { getCanonicalEmail, normalizeEmail } from '~/utils/email';
 import { SearchParamAuth } from '~/constants/search-params';
@@ -102,7 +104,7 @@ export async function verifyMagicCode(
 
   // The user row only exists once the address is proven, so unverified
   // sign-in requests leave nothing behind but the OTP row.
-  const user = await getOrCreateUserByEmail(normalizeEmail(otp.email));
+  const user = await getOrCreateUser(otp.email);
 
   return [null, { otp, user }];
 }
@@ -191,7 +193,7 @@ export async function signOutOtherSessions(request: Request, userId: string) {
  * `/e2e/auth`, which is off in prod (see `Config['e2e']`).
  */
 export async function signInE2eUser(request: Request, email: string) {
-  const user = await getOrCreateUserByEmail(normalizeEmail(email));
+  const user = await getOrCreateUser(email);
 
   if (!user.onboarded) {
     await updateUser(user.id, { onboarded: true });
@@ -237,4 +239,17 @@ async function readUserSession(cookieHeader: string | null) {
 
 function hashUserSessionToken(token: string) {
   return createHash('sha256').update(token).digest('hex');
+}
+
+async function getOrCreateUser(email: string) {
+  return transaction(async (tx) => {
+    const { user, created }
+      = await getOrCreateUserByEmail(normalizeEmail(email), tx);
+
+    if (created) {
+      await incrementDailyStat('accountsCreated', 1, tx);
+    }
+
+    return user;
+  });
 }
