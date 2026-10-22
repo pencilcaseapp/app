@@ -587,3 +587,15 @@ passed.
   `e2e/fixtures/<domain>/test.ts` (the app-wide ones, document, sidebar
   and share panel, ride on the base `AppUser`). Helpers go in
   `e2e/utils/`, the setup project in `e2e/setup/`.
+- An e2e test is the most expensive test we have (a dev server, real
+  browsers, often a second user and reloads until the live server has
+  stored), so the suite holds only two kinds: the happy path of a feature
+  as a user walks it (signing up, writing, sharing, paying), and security
+  (sign-in, OTP limits, redirects, who may open a document or its
+  assets, revocation). Everything else goes one layer down: rules into
+  service tests, screens into route tests, components and hooks into
+  their own tests. A layout detail that happy-dom cannot measure is
+  checked in Storybook, not added to e2e. Before adding an e2e test, check
+  it is one of the two kinds and that no existing one already walks the
+  same path; extend that one with an assertion rather than starting a
+  test next to it.

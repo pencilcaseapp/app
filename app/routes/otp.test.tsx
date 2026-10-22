@@ -204,3 +204,25 @@ test('resends code', async () => {
     );
   });
 });
+
+test('links back to sign in to correct the address', async () => {
+  getValidOtpMock.mockResolvedValueOnce(otpFixture);
+
+  const { findByRole } = await renderRoute('/otp/:otpId', {
+    params: {
+      otpId: otpFixture.id,
+    },
+    searchParams: {
+      [SearchParamAuth.Email]: userFixture.email,
+      [SearchParamAuth.ReturnUrl]: '/doc/1',
+    },
+  });
+
+  expect(await findByRole('link', { name: 'edit' })).toHaveAttribute(
+    'href',
+    withSearchParams(href('/signin'), {
+      [SearchParamAuth.Email]: userFixture.email,
+      [SearchParamAuth.ReturnUrl]: '/doc/1',
+    }),
+  );
+});

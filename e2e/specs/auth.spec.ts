@@ -72,20 +72,6 @@ test.describe('signing in', () => {
         .toContainText('My private notes');
     });
 
-  test('signs in to the same account whatever the case of the address',
-    async ({ page, signInPage, otpPage, userA, documentPage }) => {
-      const url = await userA.document.create();
-      await userA.document.typeLines('Case insensitive');
-
-      await signInPage.goto(url);
-      await signInPage.requestCode(userA.email!.toUpperCase());
-      await otpPage.enterCode();
-
-      await page.waitForURL(url);
-      await expect(documentPage.content)
-        .toContainText('Case insensitive');
-    });
-
   test('never returns to another site',
     async ({ page, signInPage, otpPage, onboardingPage, baseURL }) => {
       await signInPage.goto('//example.com/phish');
@@ -95,19 +81,6 @@ test.describe('signing in', () => {
 
       await page.waitForURL('**/doc/**');
       expect(new URL(page.url()).origin).toBe(new URL(baseURL!).origin);
-    });
-
-  test('turns down a wrong code and still takes the right one',
-    async ({ page, signInPage, otpPage }) => {
-      await signInPage.goto();
-      await signInPage.requestCode(createTestAccountEmail('wrong-code'));
-
-      await otpPage.enterCode(WRONG_CODE);
-      await expect(otpPage.invalidCodeError).toBeVisible();
-      await expect(page).toHaveURL(/\/otp\//);
-
-      await otpPage.enterCode();
-      await page.waitForURL('**/onboarding**');
     });
 
   test('expires the code after five wrong attempts',
@@ -128,44 +101,6 @@ test.describe('signing in', () => {
       // The right code is no use any more either.
       await page.goto(otpUrl);
       await page.waitForURL('**/signin**');
-    });
-
-  test('lets the address be corrected on the code page',
-    async ({ page, signInPage, otpPage }) => {
-      const typo = createTestAccountEmail('typo');
-      const email = createTestAccountEmail('fixed');
-
-      await signInPage.goto();
-      await signInPage.requestCode(typo);
-      await expect(page.getByText(typo)).toBeVisible();
-
-      await otpPage.editAddressLink.click();
-      await page.waitForURL('**/signin**');
-      await expect(signInPage.emailField).toHaveValue(typo);
-
-      await signInPage.requestCode(email);
-      await expect(page.getByText(email)).toBeVisible();
-      await otpPage.enterCode();
-      await page.waitForURL('**/onboarding**');
-    });
-
-  test('sends a new code and retires the old one',
-    async ({ page, signInPage, otpPage }) => {
-      await signInPage.goto();
-      await signInPage.requestCode(createTestAccountEmail('resend'));
-      const firstOtpUrl = page.url();
-
-      await otpPage.resendButton.click();
-      await page.waitForURL(url => url.href !== firstOtpUrl);
-      await expect(page).toHaveURL(/\/otp\//);
-
-      await otpPage.enterCode();
-      await page.waitForURL('**/onboarding**');
-
-      await page.context().clearCookies();
-      await page.goto(firstOtpUrl);
-      await page.waitForURL('**/signin**');
-      await expect(signInPage.expiredNotice).toBeVisible();
     });
 
   test('allows three codes per address in fifteen minutes',

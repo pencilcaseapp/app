@@ -108,3 +108,14 @@ test('expired code shows notification', async () => {
 
   expect(await findByText('Code has expired. Please try again.')).toBeInTheDocument();
 });
+
+test('prefills the address it was sent back with', async () => {
+  const { findByLabelText } = await renderRoute('/signin', {
+    params: {},
+    searchParams: {
+      [SearchParamAuth.Email]: userFixture.email,
+    },
+  });
+
+  expect(await findByLabelText('E-Mail')).toHaveValue(userFixture.email);
+});
