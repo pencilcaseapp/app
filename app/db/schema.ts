@@ -66,7 +66,7 @@ export const sessions = pgTable('sessions', {
   tokenHash: text('token_hash').notNull().unique(),
   userAgent: text('user_agent'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  expiresAt: timestamp('expires_at').notNull().default(sql`(CURRENT_TIMESTAMP + INTERVAL '30 days')`),
+  expiresAt: timestamp('expires_at').notNull().default(sql`(CURRENT_TIMESTAMP + INTERVAL '90 days')`),
   userId: uuid('user_id').notNull().references(() => users.id),
 }, table => [
   index('sessions_user_id_idx').on(table.userId),

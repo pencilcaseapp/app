@@ -8,7 +8,7 @@ export type User = InferSelectModel<typeof users>;
 
 export type UserSession = InferSelectModel<typeof sessions>;
 
-const SESSION_REFRESH_THRESHOLD_MS = 28 * 24 * 60 * 60 * 1000;
+const SESSION_REFRESH_THRESHOLD_MS = 89 * 24 * 60 * 60 * 1000;
 
 export async function createUser(input: {
   email: string;
@@ -170,7 +170,7 @@ export async function getAndRefreshUserSession(tokenHash: string) {
     const [updateResponse] = await db
       .update(sessions)
       .set({
-        expiresAt: sql`(CURRENT_TIMESTAMP + INTERVAL '30 days')`,
+        expiresAt: sql`(CURRENT_TIMESTAMP + INTERVAL '90 days')`,
       })
       .where(and(
         eq(sessions.id, session.id),
