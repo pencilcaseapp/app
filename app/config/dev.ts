@@ -77,6 +77,12 @@ export function getConfigDev(): Config {
         .asString(),
     },
 
+    testAccounts: {
+      code: '000000',
+      emails: [],
+      domains: ['pencilcase.test'],
+    },
+
     e2e: {
       apiToken: env.get('E2E_API_TOKEN').default('e2e-t0k3n').asString(),
     },

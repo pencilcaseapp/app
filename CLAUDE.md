@@ -221,6 +221,16 @@ refreshed, a `set-cookie` header context that `root.tsx`'s loader commits;
 setting the non-optional `userSessionContext`. Loaders read the user from
 `context.get(...)`, never by re-parsing the request.
 
+**Test accounts — `config.testAccounts`.** Some addresses sign in with a
+fixed code and are never mailed one (`initMagicCode`); the code still goes
+through the OTP row, its attempts and the rate limit. In dev and test that
+is any address at `pencilcase.test` with the code `000000`: sign in as one
+to look at pages behind a session in the dev server (vary the address, the
+rate limit of three codes per fifteen minutes applies to these too). Prod
+reads the app store reviewers' addresses and their code from
+`TEST_ACCOUNT_EMAILS` (comma separated) and `TEST_ACCOUNT_CODE`, so the
+repository never shows them; without the first, prod has none.
+
 **Changing the e-mail — `app/services/email-change.ts`.** The address is
 the only credential, so it changes through a verified two-step flow
 stacked on the account section (`/doc/:id/settings/account/email`, then

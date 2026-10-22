@@ -52,6 +52,10 @@ cookie. Three guards keep it out of production:
   the resulting login is special, so revocation and expiry behave as in
   production.
 
+The real sign-in form is covered too, in `specs/auth.spec.ts`: any
+address at `pencilcase.test` is a test account (`config.testAccounts`)
+that signs in with the code `000000` and is never mailed one.
+
 `e2e/setup/auth.setup.ts` runs once as a Playwright "setup" project: it
 calls the endpoint and saves the cookie to `e2e/.auth/user.json`
 (gitignored), which every test then loads via `storageState` — tests

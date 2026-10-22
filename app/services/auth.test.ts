@@ -60,6 +60,22 @@ vi.mock('~/repos/daily-stat', () => ({
   incrementDailyStat: (...args: unknown[]) => incrementDailyStatMock(...args),
 }));
 
+vi.mock('~/config', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('~/config')>();
+  const config = actual.getConfig();
+
+  return {
+    ...actual,
+    getConfig: () => ({
+      ...config,
+      testAccounts: {
+        ...config.testAccounts!,
+        emails: ['Reviewer@Example.com'],
+      },
+    }),
+  };
+});
+
 const sendEmailMagicCodeMock = vi.fn();
 vi.mock('./email-templates', () => ({
   sendEmailMagicCode: (...args: unknown[]) => sendEmailMagicCodeMock(...args),
@@ -167,6 +183,46 @@ describe('initMagicCode', () => {
         otpId: otpFixture.id,
         userId: otpFixture.userId,
       });
+    });
+  });
+
+  describe('for a test account', () => {
+    it('creates the OTP with the fixed code', async () => {
+      canRequestNewOtpMock.mockResolvedValueOnce(true);
+      await initMagicCode('Claude@pencilcase.test');
+
+      const codeHash = createOtpMock.mock.calls[0][0].codeHash;
+
+      expect(await argon2.verify(codeHash, '000000')).toBe(true);
+    });
+
+    it('does not send an email', async () => {
+      canRequestNewOtpMock.mockResolvedValueOnce(true);
+      await initMagicCode('claude@pencilcase.test');
+
+      expect(sendEmailMagicCodeMock).not.toHaveBeenCalled();
+    });
+
+    it('still rate limits the address', async () => {
+      canRequestNewOtpMock.mockResolvedValueOnce(false);
+
+      const [error] = await initMagicCode('claude@pencilcase.test');
+
+      expect(error).toEqual(InitMagicCodeError.TooManyRequests);
+    });
+
+    it('matches a listed address', async () => {
+      canRequestNewOtpMock.mockResolvedValueOnce(true);
+      await initMagicCode('reviewer@example.com');
+
+      expect(sendEmailMagicCodeMock).not.toHaveBeenCalled();
+    });
+
+    it('does not match a subdomain of a test domain', async () => {
+      canRequestNewOtpMock.mockResolvedValueOnce(true);
+      await initMagicCode('claude@mail.pencilcase.test');
+
+      expect(sendEmailMagicCodeMock).toHaveBeenCalled();
     });
   });
 

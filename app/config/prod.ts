@@ -85,10 +85,25 @@ export function getConfigProd(): Config {
       webhookSecret: env.get('CREEM_WEBHOOK_SECRET').required().asString(),
     },
 
+    testAccounts: getTestAccounts(),
+
     session: {
       secure: true,
       secret: env.get('SESSION_SECRET').required().asString(),
       domain: 'pencilcase.app',
     },
+  };
+}
+
+function getTestAccounts(): Config['testAccounts'] {
+  const emails = env.get('TEST_ACCOUNT_EMAILS').default('').asArray(',');
+  if (emails.length === 0) {
+    return undefined;
+  }
+
+  return {
+    code: env.get('TEST_ACCOUNT_CODE').required().asString(),
+    emails,
+    domains: [],
   };
 }
