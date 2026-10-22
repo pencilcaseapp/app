@@ -46,7 +46,10 @@ onboarding, and comes back to the sign-in page instead of the start page,
 which would create a document for the user. Every test account goes
 through the same OTP row, attempts and rate limit (three codes per
 fifteen minutes) as a real address, so each user gets an address nobody
-has used before (`createTestAccountEmail`).
+has used before (`createTestAccountEmail`). Its two steps,
+`requestCode` and `enterCode`, are what `specs/auth.spec.ts` drives
+the sign-in and onboarding with; both wait for the page to hydrate
+first, because hydration empties a field filled in before it.
 
 `e2e/setup/auth.setup.ts` runs once as a Playwright "setup" project: it
 signs a fresh test account in and saves the cookie to
