@@ -29,7 +29,6 @@ export async function signIn(page: Page, email: string) {
 
 /** Asks for a code on the sign-in page the browser is on. */
 export async function requestCode(page: Page, email: string) {
-  await waitForHydration(page);
   await page.getByLabel('E-Mail').fill(email);
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.waitForURL('**/otp/**');
@@ -37,7 +36,6 @@ export async function requestCode(page: Page, email: string) {
 
 /** Submits a code on the code page the browser is on. */
 export async function enterCode(page: Page, code = TEST_ACCOUNT_CODE) {
-  await waitForHydration(page);
   const field = page.getByLabel('One-Time Password');
 
   // The field keeps a rejected code, and filling over it only replaces
@@ -45,18 +43,4 @@ export async function enterCode(page: Page, code = TEST_ACCOUNT_CODE) {
   await field.clear();
   await field.fill(code);
   await page.getByRole('button', { name: 'Continue' }).click();
-}
-
-/**
- * Hydration resets the form fields to their defaults, so whatever was
- * typed into the server-rendered page before it gets lost. React marks
- * the elements it has taken over with its fiber key.
- */
-async function waitForHydration(page: Page) {
-  await page.waitForFunction(() => {
-    const form = document.querySelector('form');
-
-    return !!form && Object.keys(form)
-      .some(key => key.startsWith('__reactFiber'));
-  });
 }

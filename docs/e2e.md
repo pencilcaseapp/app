@@ -48,8 +48,9 @@ through the same OTP row, attempts and rate limit (three codes per
 fifteen minutes) as a real address, so each user gets an address nobody
 has used before (`createTestAccountEmail`). Its two steps,
 `requestCode` and `enterCode`, are what `specs/auth.spec.ts` drives
-the sign-in and onboarding with; both wait for the page to hydrate
-first, because hydration empties a field filled in before it.
+the sign-in and onboarding with. Forms stay disabled until the page
+has hydrated (`ControlledForm`), and Playwright waits for a field to be
+enabled before it fills it, so no test has to wait for hydration itself.
 
 `e2e/setup/auth.setup.ts` runs once as a Playwright "setup" project: it
 signs a fresh test account in and saves the cookie to

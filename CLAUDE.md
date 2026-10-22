@@ -500,7 +500,9 @@ client state. Actions call `validateForm(request, zodSchema)` from
 server-side, and derives `FormDataInfo` coercion hints from the schema shape.
 Return `form.formState` on failure, or `returnFormError(...)` for
 service-level errors. The same Zod schema is reused as the client `onBlur`
-validator.
+validator. `ControlledForm` keeps its fields in a
+disabled `fieldset` until the page has hydrated: hydration resets the
+fields, which would throw away anything typed or autofilled before it.
 
 **UI.** `app/ui/` is the design system (presentational, has Storybook stories,
 no data access); `app/components/` is app-specific composition. Tailwind v4 with
