@@ -171,7 +171,7 @@ describe('getAndRefreshUserSession', () => {
 
   it('refreshes a session when it is within the refresh threshold', async () => {
     const userFixture = await createTestUser();
-    const expiresAt = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
     const sessionFixture = await createValidUserSession(
       userFixture.id,
       expiresAt,
@@ -193,7 +193,7 @@ describe('getAndRefreshUserSession', () => {
     });
 
     expect(result?.session.expiresAt.getTime())
-      .toBeGreaterThan(expiresAt.getTime());
+      .toBeGreaterThan(Date.now() + 89 * 24 * 60 * 60 * 1000);
   });
 
   it('returns null if no session is found', async () => {
