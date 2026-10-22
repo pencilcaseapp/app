@@ -587,3 +587,19 @@ passed.
   `e2e/fixtures/<domain>/test.ts` (the app-wide ones, document, sidebar
   and share panel, ride on the base `AppUser`). Helpers go in
   `e2e/utils/`, the setup project in `e2e/setup/`.
+- An e2e test is the most expensive test we have (a dev server, real
+  browsers, often a second user and reloads until the live server has
+  stored), so it only covers what nothing but the running system can
+  prove: the key journeys a user walks (signing up, writing, sharing,
+  paying), the security boundaries (sign-in, redirects, who may open a
+  document or its assets, revocation), and the seams between browser,
+  server and live server that no lower test reaches (the server render
+  handing over to the editor, reconnecting after access changes).
+  Security rules themselves (how many attempts, how many codes) are
+  service tests; e2e proves once per mechanism that the route enforces
+  them. Everything else goes one layer down: screens into route tests,
+  components and hooks into their own tests. A layout detail that
+  happy-dom cannot measure is checked in Storybook, not added to e2e.
+  Before adding an e2e test, check that it is one of these and that no
+  existing one already walks the same path; extend that one with an
+  assertion rather than starting a test next to it.

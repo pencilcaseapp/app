@@ -1,7 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 
-type Section = 'Account' | 'Subscription' | 'Support';
-
 /** `/doc/:id/settings/*`: the settings dialog over the document. */
 export class SettingsDialog {
   readonly dialog: Locator;
@@ -29,20 +27,9 @@ export class SettingsDialog {
     await expect(this.page).toHaveURL(/\/settings\/account$/);
   }
 
-  async openSection(section: Section): Promise<void> {
-    await this.page.getByRole('link', { name: section }).click();
-    await expect(this.page)
-      .toHaveURL(new RegExp(`/settings/${section.toLowerCase()}$`));
-  }
-
   async saveAccount(): Promise<void> {
     await this.page.getByRole('button', { name: 'Save' }).click();
     await expect(this.page.getByText('Your account has been updated'))
       .toBeVisible();
-  }
-
-  async close(): Promise<void> {
-    await this.page.getByRole('button', { name: 'Close' }).click();
-    await expect(this.page).not.toHaveURL(/\/settings/);
   }
 }

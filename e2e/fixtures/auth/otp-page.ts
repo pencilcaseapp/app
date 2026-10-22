@@ -5,15 +5,11 @@ import { TEST_ACCOUNT_CODE } from '../../utils/test-accounts';
 export class OtpPage {
   readonly codeField: Locator;
   readonly invalidCodeError: Locator;
-  readonly editAddressLink: Locator;
-  readonly resendButton: Locator;
 
   constructor(readonly page: Page) {
     this.codeField = page.getByLabel('One-Time Password');
     this.invalidCodeError = page
       .getByText('Invalid code. Please check the code');
-    this.editAddressLink = page.getByRole('link', { name: 'edit' });
-    this.resendButton = page.getByRole('button', { name: 'Resend code' });
   }
 
   async enterCode(code = TEST_ACCOUNT_CODE): Promise<void> {
