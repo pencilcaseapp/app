@@ -51,8 +51,10 @@ export function getConfigTest(): Config {
       webhookSecret: 'whsec-test',
     },
 
-    e2e: {
-      apiToken: 'e2e-t0k3n',
+    testAccounts: {
+      code: '000000',
+      emails: [],
+      domains: ['pencilcase.test'],
     },
 
     session: {

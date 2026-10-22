@@ -115,11 +115,16 @@ export interface Config {
   };
 
   /**
-   * Enables the `/e2e/auth` endpoint the Playwright tests use to sign in
-   * without the OTP flow. Left out in prod; staging sets it once it exists.
+   * Accounts that sign in with a fixed code instead of a mailed one, and
+   * are never mailed a sign-in code: any address at one of `domains` (dev
+   * and test, for e2e runs and Claude sessions) and the exact `emails` (the
+   * app store reviewers in prod, which reads both from the environment so
+   * the open source repository never shows them). Left out, nobody does.
    */
-  e2e?: {
-    apiToken: string;
+  testAccounts?: {
+    code: string;
+    emails: string[];
+    domains: string[];
   };
 
   session: {

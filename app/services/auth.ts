@@ -44,7 +44,8 @@ export async function initMagicCode(
 
   await expireAllValidOtps(canonicalEmail);
 
-  const code = randomInt(100000, 1000000).toString();
+  const testAccountCode = getTestAccountCode(to);
+  const code = testAccountCode ?? randomInt(100000, 1000000).toString();
   const codeHash = await argon2.hash(code);
 
   const otp = await createOtp({
@@ -53,14 +54,16 @@ export async function initMagicCode(
     codeHash,
   });
 
-  await sendEmailMagicCode({
-    to: {
-      email: to,
-    },
-    code,
-    otpId: otp.id,
-    userId: otp.userId ?? undefined,
-  });
+  if (!testAccountCode) {
+    await sendEmailMagicCode({
+      to: {
+        email: to,
+      },
+      code,
+      otpId: otp.id,
+      userId: otp.userId ?? undefined,
+    });
+  }
 
   return [null, { otp }];
 }
@@ -203,20 +206,6 @@ export async function signOutOtherSessions(
   await expireOtherUserSessions(userId, hashUserSessionToken(token), executor);
 }
 
-/**
- * Signs in an e2e test user without the OTP flow. Only reachable through
- * `/e2e/auth`, which is off in prod (see `Config['e2e']`).
- */
-export async function signInE2eUser(request: Request, email: string) {
-  const user = await transaction(tx => getOrCreateUser(email, tx));
-
-  if (!user.onboarded) {
-    await updateUser(user.id, { onboarded: true });
-  }
-
-  return createSessionCookie({ request, userId: user.id });
-}
-
 export async function onboardUser(
   userId: string,
   input: { name?: string; newsletter?: boolean },
@@ -250,6 +239,24 @@ async function readUserSession(cookieHeader: string | null) {
   }
 
   return { cookieSession, userSession };
+}
+
+/**
+ * The fixed code of a test account (`Config['testAccounts']`), which goes
+ * through the same OTP row, attempts and rate limit as everybody else's.
+ */
+function getTestAccountCode(email: string) {
+  const { testAccounts } = config;
+  if (!testAccounts) {
+    return undefined;
+  }
+
+  const domain = email.slice(email.lastIndexOf('@') + 1);
+  const isTestAccount
+    = testAccounts.emails.some(entry => normalizeEmail(entry) === email)
+      || testAccounts.domains.includes(domain);
+
+  return isTestAccount ? testAccounts.code : undefined;
 }
 
 function hashUserSessionToken(token: string) {
