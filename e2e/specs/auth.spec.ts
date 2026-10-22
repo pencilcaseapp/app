@@ -1,4 +1,3 @@
-import { AppUser } from '../fixtures/app-user';
 import { expect, test } from '../fixtures/auth/test';
 import { createTestAccountEmail } from '../utils/test-accounts';
 
@@ -6,7 +5,7 @@ const WRONG_CODE = '111111';
 
 test.describe('signing up', () => {
   test('onboards a new account and opens its first document',
-    async ({ page, signInPage, otpPage, onboardingPage }) => {
+    async ({ page, signInPage, otpPage, onboardingPage, documentPage }) => {
       await page.goto('/');
       await page.waitForURL('**/signin**');
       await signInPage.requestCode(createTestAccountEmail('signup'));
@@ -17,7 +16,7 @@ test.describe('signing up', () => {
       });
 
       await page.waitForURL('**/doc/**');
-      await new AppUser(page).waitForEditorSynced();
+      await documentPage.waitForSynced();
 
       // The onboarding is only ever shown once.
       await page.goto('/onboarding');
@@ -30,10 +29,17 @@ test.describe('signing up', () => {
     });
 
   test('brings a visitor of a shared document back to it',
-    async ({ page, signInPage, otpPage, onboardingPage, userA }) => {
-      const url = await userA.createDocument();
-      await userA.typeLines('Shared plans', 'Read me after signing up');
-      await userA.shareDocument();
+    async ({
+      page,
+      signInPage,
+      otpPage,
+      onboardingPage,
+      documentPage,
+      userA,
+    }) => {
+      const url = await userA.document.create();
+      await userA.document.typeLines('Shared plans', 'Read me after signing up');
+      await userA.sharePanel.share();
 
       await page.goto(url);
       await page.getByRole('link', { name: 'Sign In' }).click();
@@ -43,7 +49,7 @@ test.describe('signing up', () => {
       await onboardingPage.skip();
 
       await page.waitForURL(url);
-      await expect(new AppUser(page).content)
+      await expect(documentPage.content)
         .toContainText('Read me after signing up');
       await expect(page.getByRole('link', { name: 'Sign In' })).toHaveCount(0);
     });
@@ -51,9 +57,9 @@ test.describe('signing up', () => {
 
 test.describe('signing in', () => {
   test('sends a returning account back where it was, past the onboarding',
-    async ({ page, signInPage, otpPage, userA }) => {
-      const url = await userA.createDocument();
-      await userA.typeLines('My private notes');
+    async ({ page, signInPage, otpPage, userA, documentPage }) => {
+      const url = await userA.document.create();
+      await userA.document.typeLines('My private notes');
 
       // Same account, signed out: the private document asks for a session.
       await page.goto(url);
@@ -62,21 +68,21 @@ test.describe('signing in', () => {
       await otpPage.enterCode();
 
       await page.waitForURL(url);
-      await expect(new AppUser(page).content)
+      await expect(documentPage.content)
         .toContainText('My private notes');
     });
 
   test('signs in to the same account whatever the case of the address',
-    async ({ page, signInPage, otpPage, userA }) => {
-      const url = await userA.createDocument();
-      await userA.typeLines('Case insensitive');
+    async ({ page, signInPage, otpPage, userA, documentPage }) => {
+      const url = await userA.document.create();
+      await userA.document.typeLines('Case insensitive');
 
       await signInPage.goto(url);
       await signInPage.requestCode(userA.email!.toUpperCase());
       await otpPage.enterCode();
 
       await page.waitForURL(url);
-      await expect(new AppUser(page).content)
+      await expect(documentPage.content)
         .toContainText('Case insensitive');
     });
 
@@ -185,7 +191,7 @@ test.describe('signing out', () => {
   test('ends the session and sends the user back to sign in',
     async ({ userA }) => {
       const { page } = userA;
-      await userA.createDocument();
+      await userA.document.create();
 
       await page.getByRole('link', { name: 'Settings' }).click();
       await page.getByRole('link', { name: 'Logout' }).click();

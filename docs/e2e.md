@@ -22,7 +22,7 @@ Playwright (and with it its pinned browser build) is upgraded.
 ```
 e2e/
   setup/     the Playwright setup project (auth.setup.ts)
-  fixtures/  the `test` fixtures, the AppUser flows and the page objects
+  fixtures/  the base `test`, one `test` per domain and their page objects
   utils/     helpers that are not fixtures (test accounts, images)
   specs/     one spec per domain of the app
 ```
@@ -68,21 +68,32 @@ Specs import `test` and `expect` from `e2e/fixtures/test.ts` instead of
   without them sharing cookies, and a fresh user keeps sidebar
   assertions independent of documents left behind by earlier runs.
 
-Each user is an `AppUser` wrapping the flows the specs share:
-creating and opening documents, typing, toggling sharing, finding a
-document in the sidebar. The flows also carry the synchronisation that
-keeps the live-server tests stable — `createDocument`/`openDocument`
-wait for the websocket to deliver the server-seeded heading before
-anyone types, and toggling sharing waits for the share action's round
-trip before the link is handed to the other user (or their access is
-expected to be gone).
+Each user is an `AppUser` carrying one page object per part of the
+app they use (`e2e/fixtures/app/`): `document` (creating, opening and
+typing into a document), `sidebar` (the navigation, deleting and
+restoring) and `sharePanel` (the link switch and what it allows). A
+test with two users reads the same as one with a single user:
+`userB.sidebar.documentInAllDocs(title)`. The page objects also carry
+the synchronisation that keeps the live-server tests stable —
+`document.create`/`document.open` wait for the websocket to deliver the
+server-seeded heading before anyone types, and `sharePanel.share` waits
+for the share action's round trip before the link is handed to the
+other user (or their access is expected to be gone).
 
-A domain whose pages have flows of their own extends that test once
-more, the way Playwright's docs build page object fixtures. The auth
-spec imports its `test` from `e2e/fixtures/auth/test.ts`: `page` starts
-without a session there, and `signInPage`, `otpPage` and
-`onboardingPage` hand out one page object per screen of the sign-in
-(`e2e/fixtures/auth/`), which `signIn` drives as well.
+Every domain extends that test once more in `e2e/fixtures/<domain>/`
+with the page objects of its own screens, the way Playwright's docs
+build page object fixtures, and its spec imports `test` from there:
+
+- `auth/test.ts` — `page` starts without a session, and `signInPage`,
+  `otpPage`, `onboardingPage` and `documentPage` hand out one page
+  object per screen of the sign-in, which `signIn` drives as well.
+- `settings/test.ts` — `userA` also carries `settings` (the settings
+  dialog) and `checkout` (Creem's hosted checkout).
+
+The editor spec needs nothing past the app-wide page objects, so it
+imports the base `e2e/fixtures/test.ts`. A page object only ever wraps
+one screen or part of one; a new screen gets its own class next to its
+domain's `test.ts`.
 
 ## The Creem checkout
 
@@ -92,7 +103,7 @@ always-succeeding test card on their hosted page, follow the signed
 redirect back into the settings, see pro switched on and the customer
 portal open. That buys real end-to-end confidence at the
 price of depending on Creem being up and their checkout page keeping
-its shape — the card-form locators in the spec are the one place to
+its shape — the card-form locators in `CreemCheckoutPage` are the one place to
 adjust when it changes.
 
 The paid spec needs `CREEM_API_KEY` (the playwright config loads

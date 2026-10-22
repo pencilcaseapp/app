@@ -582,5 +582,8 @@ passed.
   `e2e/specs/` holds one spec per domain of the app (`editor`, `auth`,
   `settings-overview`, `settings-subscription`, …): a new test joins the
   spec of its domain, under a `test.describe` for its feature, rather than
-  starting a spec of its own. Fixtures go in `e2e/fixtures/`, helpers in
+  starting a spec of its own. Flows go through page objects, one per
+  screen, and a domain hands its page objects out through its own `test.extend` in
+  `e2e/fixtures/<domain>/test.ts` (the app-wide ones, document, sidebar
+  and share panel, ride on the base `AppUser`). Helpers go in
   `e2e/utils/`, the setup project in `e2e/setup/`.
