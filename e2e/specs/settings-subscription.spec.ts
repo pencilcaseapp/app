@@ -1,5 +1,4 @@
-import type { Page } from '@playwright/test';
-import { expect, test } from '../fixtures/test';
+import { expect, test } from '../fixtures/settings/test';
 
 /**
  * The paid flow runs against Creem's real test-mode checkout, so it
@@ -21,17 +20,15 @@ test('upgrading to pro through the Creem checkout', async ({ userA }) => {
   );
   test.setTimeout(180_000);
 
-  const { page } = userA;
-  const documentUrl = await userA.createDocument();
+  const { page, settings } = userA;
+  const documentUrl = await userA.document.create();
 
   // The sidebar opens the subscription settings over the document.
-  await page.getByRole('link', { name: 'Upgrade to Pro' }).click();
+  await userA.sidebar.upgradeLink.click();
   await expect(page).toHaveURL(`${documentUrl}/settings/subscription`);
-  const settings = page.getByRole('dialog');
-  await settings.getByRole('link', { name: 'Upgrade to Pro' }).click();
+  await settings.upgradeLink.click();
 
-  await page.waitForURL('**creem.io/**', { timeout: 30_000 });
-  await payWithTestCard(page);
+  await userA.checkout.payWithTestCard();
 
   // Creem sends the user back to the same settings over the same
   // document, where the signed parameters are confirmed and dropped.
@@ -43,56 +40,11 @@ test('upgrading to pro through the Creem checkout', async ({ userA }) => {
     page.getByRole('heading', { name: 'You’re on Pencil Case Pro.' }),
   ).toBeVisible();
   await expect(page.getByText('Active', { exact: true })).toBeVisible();
-  await expect(settings.getByRole('link', { name: 'Upgrade to Pro' }))
-    .not.toBeVisible();
-
-  const manage = page.getByRole('link', { name: 'Manage subscription' });
-  await expect(manage).toBeVisible();
+  await expect(settings.upgradeLink).not.toBeVisible();
+  await expect(settings.manageSubscriptionLink).toBeVisible();
 
   const popupPromise = page.waitForEvent('popup');
-  await manage.click();
+  await settings.manageSubscriptionLink.click();
   const popup = await popupPromise;
   await popup.waitForURL('**creem.io/**', { timeout: 30_000 });
 });
-
-/**
- * Creem's checkout is not our page, so this is the one place to adjust
- * when it changes. Step one wants the full name and a billing address
- * (the email is prefilled and locked); step two holds the card fields
- * inside the payment provider's iframe, with the cardholder name and
- * the pay button outside it. 4111… is Creem's always-succeeding test
- * card; expiry, CVC and the billing address can be anything.
- *
- * The cardholder name is typed key by key before the card fields: the
- * provider's input only reacts to key events, so a fill leaves it
- * empty, it drops digits, and its SDK pulls the focus back into the
- * iframe right after a card field changes, so text typed in that
- * moment lands in the CVC.
- */
-async function payWithTestCard(page: Page): Promise<void> {
-  await page.getByRole('textbox', { name: 'Full name' })
-    .fill('E2E Tester');
-
-  await page.getByRole('textbox', { name: 'Address line 1' })
-    .fill('123 Test Street');
-  await page.getByRole('textbox', { name: 'City' }).fill('Los Angeles');
-  await page.getByRole('textbox', { name: 'Postal Code' }).fill('90001');
-  await page.getByRole('combobox').filter({ hasText: /^State$/ }).click();
-  await page.getByRole('option', { name: 'California' }).click();
-
-  await page.getByRole('button', { name: 'Continue to payment' }).click();
-
-  const cardholderName
-    = page.getByRole('textbox', { name: 'Cardholder Name' });
-  await cardholderName.click();
-  await cardholderName.pressSequentially('Test Buyer');
-
-  const cardFrame = page.frameLocator('iframe[title="card_form"]');
-  await cardFrame.getByRole('textbox', { name: 'Card number' })
-    .fill('4111111111111111');
-  await cardFrame.getByRole('textbox', { name: 'MM/YY' }).fill('12/30');
-  await cardFrame.getByRole('textbox', { name: 'CVC/CVV' }).fill('123');
-
-  await expect(cardholderName).toHaveValue('Test Buyer');
-  await page.getByRole('button', { name: /^Pay €/ }).click();
-}

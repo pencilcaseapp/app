@@ -1,3 +1,4 @@
+import { DocumentPage } from '../app/document-page';
 import { test as base } from '../test';
 import { OnboardingPage } from './onboarding-page';
 import { OtpPage } from './otp-page';
@@ -7,6 +8,8 @@ interface AuthFixtures {
   signInPage: SignInPage;
   otpPage: OtpPage;
   onboardingPage: OnboardingPage;
+  /** Where a signed in visitor lands. */
+  documentPage: DocumentPage;
 }
 
 /**
@@ -23,6 +26,9 @@ export const test = base.extend<AuthFixtures>({
   },
   onboardingPage: async ({ page }, provide) => {
     await provide(new OnboardingPage(page));
+  },
+  documentPage: async ({ page }, provide) => {
+    await provide(new DocumentPage(page));
   },
 });
 
