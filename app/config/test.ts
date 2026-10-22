@@ -57,10 +57,6 @@ export function getConfigTest(): Config {
       domains: ['pencilcase.test'],
     },
 
-    e2e: {
-      apiToken: 'e2e-t0k3n',
-    },
-
     session: {
       secure: false,
       secret: 's3cr3t',

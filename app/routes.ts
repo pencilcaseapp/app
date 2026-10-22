@@ -45,5 +45,4 @@ export default [
   route('invite/:code', 'routes/invite.ts'),
   route('billing-portal', 'routes/billing-portal.ts'),
   route('webhooks/creem', 'routes/creem-webhook.ts'),
-  route('e2e/auth', 'routes/e2e-auth.ts'),
 ] satisfies RouteConfig;

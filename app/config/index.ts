@@ -127,14 +127,6 @@ export interface Config {
     domains: string[];
   };
 
-  /**
-   * Enables the `/e2e/auth` endpoint the Playwright tests use to sign in
-   * without the OTP flow. Left out in prod; staging sets it once it exists.
-   */
-  e2e?: {
-    apiToken: string;
-  };
-
   session: {
     secure: boolean;
     secret: string;

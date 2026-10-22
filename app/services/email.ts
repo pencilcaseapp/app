@@ -102,8 +102,8 @@ const testEmailDomains = ['example.com', 'example.net', 'example.org'];
 const testEmailTlds = ['.test', '.invalid', '.example', '.localhost'];
 
 /**
- * The e2e tests sign their throwaway users up as `e2e-…@pencilcase.app`
- * (see e2e/fixtures/test.ts), and the reserved example/test domains never
+ * The e2e tests sign their throwaway users up as `e2e-…@pencilcase.test`
+ * (see e2e/utils/sign-in.ts), and the reserved example/test domains never
  * route anywhere — none of these must reach Lettermint when a real
  * token is configured.
  */

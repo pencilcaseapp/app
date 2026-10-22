@@ -38,28 +38,20 @@ describe block of its domain; only a new domain starts a new spec.
 
 ## Authentication
 
-Signing in through the real magic-code flow would need an inbox, so the
-tests use `POST /e2e/auth` instead: it takes `{ "email": ... }`, creates
-(or reuses) the user, marks it onboarded, and answers with a real session
-cookie. Three guards keep it out of production:
-
-- The route 404s unless `config.e2e` is set, and `app/config/prod.ts`
-  does not set it. Staging gets it later by wiring `e2e` into its config.
-- The request must carry `Authorization: Bearer <apiToken>`. Dev defaults
-  to `e2e-t0k3n`; `E2E_API_TOKEN` overrides the server and the tests in
-  one go (staging should use a real secret).
-- The session it creates is an ordinary `sessions` row — nothing about
-  the resulting login is special, so revocation and expiry behave as in
-  production.
-
-The real sign-in form is covered too, in `specs/auth.spec.ts`: any
-address at `pencilcase.test` is a test account (`config.testAccounts`)
-that signs in with the code `000000` and is never mailed one.
+The tests sign in through the real form, as test accounts
+(`config.testAccounts`): any address at `pencilcase.test` signs in with
+the code `000000` and is never mailed one. `signIn` in
+`e2e/utils/sign-in.ts` fills in the address and the code and skips the
+onboarding, and comes back to the sign-in page instead of the start page,
+which would create a document for the user. Every test account goes
+through the same OTP row, attempts and rate limit (three codes per
+fifteen minutes) as a real address, so each user gets an address nobody
+has used before (`createTestAccountEmail`).
 
 `e2e/setup/auth.setup.ts` runs once as a Playwright "setup" project: it
-calls the endpoint and saves the cookie to `e2e/.auth/user.json`
-(gitignored), which every test then loads via `storageState` — tests
-start signed in without repeating the request.
+signs a fresh test account in and saves the cookie to
+`e2e/.auth/user.json` (gitignored), which every test then loads via
+`storageState` — tests start signed in without repeating the sign-in.
 
 ## Fixtures and shared flows
 
@@ -67,12 +59,11 @@ Specs import `test` and `expect` from `e2e/fixtures/test.ts` instead of
 `@playwright/test`. The base test is extended with signed in users:
 
 - `user` — the storage-state user from the setup project above.
-- `userA` / `userB` — users created fresh for the test through
-  `POST /e2e/auth`, each in a browser context of their own. Multi-user
-  scenarios (sharing, live collaboration, revocation) put both into the
-  same document without them sharing cookies, and a fresh user keeps
-  sidebar assertions independent of documents left behind by earlier
-  runs.
+- `userA` / `userB` — test accounts signed in fresh for the test, each
+  in a browser context of their own. Multi-user scenarios (sharing,
+  live collaboration, revocation) put both into the same document
+  without them sharing cookies, and a fresh user keeps sidebar
+  assertions independent of documents left behind by earlier runs.
 
 Each of them is an `AppUser` wrapping the flows the specs share:
 creating and opening documents, typing, toggling sharing, finding a
