@@ -22,8 +22,8 @@ Playwright (and with it its pinned browser build) is upgraded.
 ```
 e2e/
   setup/     the Playwright setup project (auth.setup.ts)
-  fixtures/  the `test` fixtures and the AppUser flows they hand out
-  utils/     helpers that are not fixtures (images to paste or drop)
+  fixtures/  the `test` fixtures and the AppUser and Visitor flows they hand out
+  utils/     helpers that are not fixtures (test accounts, images)
   specs/     one spec per domain of the app
 ```
 
@@ -40,17 +40,16 @@ describe block of its domain; only a new domain starts a new spec.
 
 The tests sign in through the real form, as test accounts
 (`config.testAccounts`): any address at `pencilcase.test` signs in with
-the code `000000` and is never mailed one. `signIn` in
-`e2e/utils/sign-in.ts` fills in the address and the code and skips the
-onboarding, and comes back to the sign-in page instead of the start page,
-which would create a document for the user. Every test account goes
-through the same OTP row, attempts and rate limit (three codes per
+the code `000000` and is never mailed one. `Visitor.signIn`
+(`e2e/fixtures/visitor.ts`) fills in the address and the code and skips
+the onboarding, and comes back to the sign-in page instead of the start
+page, which would create a document for the user. Every test account
+goes through the same OTP row, attempts and rate limit (three codes per
 fifteen minutes) as a real address, so each user gets an address nobody
-has used before (`createTestAccountEmail`). Its two steps,
-`requestCode` and `enterCode`, are what `specs/auth.spec.ts` drives
-the sign-in and onboarding with. Forms stay disabled until the page
-has hydrated (`ControlledForm`), and Playwright waits for a field to be
-enabled before it fills it, so no test has to wait for hydration itself.
+has used before (`createTestAccountEmail` in `e2e/utils/test-accounts.ts`).
+Forms stay disabled until the page has hydrated (`ControlledForm`), and
+Playwright waits for a field to be enabled before it fills it, so no
+test has to wait for hydration itself.
 
 `e2e/setup/auth.setup.ts` runs once as a Playwright "setup" project: it
 signs a fresh test account in and saves the cookie to
@@ -68,15 +67,19 @@ Specs import `test` and `expect` from `e2e/fixtures/test.ts` instead of
   live collaboration, revocation) put both into the same document
   without them sharing cookies, and a fresh user keeps sidebar
   assertions independent of documents left behind by earlier runs.
+- `visitor` — somebody without a session, in a browser context of
+  their own, for the sign-in and onboarding specs.
 
-Each of them is an `AppUser` wrapping the flows the specs share:
+Each user is an `AppUser` wrapping the flows the specs share:
 creating and opening documents, typing, toggling sharing, finding a
 document in the sidebar. The flows also carry the synchronisation that
 keeps the live-server tests stable — `createDocument`/`openDocument`
 wait for the websocket to deliver the server-seeded heading before
 anyone types, and toggling sharing waits for the share action's round
 trip before the link is handed to the other user (or their access is
-expected to be gone).
+expected to be gone). The `visitor` is a `Visitor` wrapping the steps
+before a session exists: asking for a code, entering it, filling in or
+skipping the onboarding.
 
 ## The Creem checkout
 

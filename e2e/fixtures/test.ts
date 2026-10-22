@@ -1,6 +1,7 @@
 import { test as base, type Browser } from '@playwright/test';
-import { createTestAccountEmail, signIn } from '../utils/sign-in';
+import { createTestAccountEmail } from '../utils/test-accounts';
 import { AppUser } from './app-user';
+import { Visitor } from './visitor';
 
 interface AppUserFixtures {
   /** The shared storage-state user signed in by `auth.setup.ts`. */
@@ -9,6 +10,8 @@ interface AppUserFixtures {
   userA: AppUser;
   /** A second fresh user, isolated from `userA`. */
   userB: AppUser;
+  /** Somebody without a session, in a context of their own. */
+  visitor: Visitor;
 }
 
 // Playwright calls the second fixture parameter `use`, which the React
@@ -22,6 +25,17 @@ export const test = base.extend<AppUserFixtures>({
   },
   userB: async ({ browser, baseURL }, provide) => {
     await provideFreshUser(browser, baseURL, 'b', provide);
+  },
+  visitor: async ({ browser, baseURL }, provide) => {
+    // Without an explicit empty state the context would load the
+    // project's `storageState` and start signed in as `user`.
+    const context = await browser.newContext({
+      baseURL,
+      storageState: { cookies: [], origins: [] },
+    });
+
+    await provide(new Visitor(await context.newPage()));
+    await context.close();
   },
 });
 
@@ -42,7 +56,7 @@ async function provideFreshUser(
   const context = await browser.newContext({ baseURL });
   const page = await context.newPage();
   const email = createTestAccountEmail(name);
-  await signIn(page, email);
+  await new Visitor(page).signIn(email);
 
   await provide(new AppUser(page, email));
   await context.close();
