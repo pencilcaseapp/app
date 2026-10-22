@@ -22,8 +22,8 @@ Playwright (and with it its pinned browser build) is upgraded.
 ```
 e2e/
   setup/     the Playwright setup project (auth.setup.ts)
-  fixtures/  the `test` fixtures and the AppUser flows they hand out
-  utils/     helpers that are not fixtures (images to paste or drop)
+  fixtures/  the `test` fixtures, the AppUser flows and the page objects
+  utils/     helpers that are not fixtures (test accounts, images)
   specs/     one spec per domain of the app
 ```
 
@@ -41,12 +41,15 @@ describe block of its domain; only a new domain starts a new spec.
 The tests sign in through the real form, as test accounts
 (`config.testAccounts`): any address at `pencilcase.test` signs in with
 the code `000000` and is never mailed one. `signIn` in
-`e2e/utils/sign-in.ts` fills in the address and the code and skips the
-onboarding, and comes back to the sign-in page instead of the start page,
-which would create a document for the user. Every test account goes
-through the same OTP row, attempts and rate limit (three codes per
+`e2e/utils/sign-in.ts` fills in the address and the code and skips
+the onboarding, and comes back to the sign-in page instead of the start
+page, which would create a document for the user. Every test account
+goes through the same OTP row, attempts and rate limit (three codes per
 fifteen minutes) as a real address, so each user gets an address nobody
-has used before (`createTestAccountEmail`).
+has used before (`createTestAccountEmail` in `e2e/utils/test-accounts.ts`).
+Forms stay disabled until the page has hydrated (`ControlledForm`), and
+Playwright waits for a field to be enabled before it fills it, so no
+test has to wait for hydration itself.
 
 `e2e/setup/auth.setup.ts` runs once as a Playwright "setup" project: it
 signs a fresh test account in and saves the cookie to
@@ -65,7 +68,7 @@ Specs import `test` and `expect` from `e2e/fixtures/test.ts` instead of
   without them sharing cookies, and a fresh user keeps sidebar
   assertions independent of documents left behind by earlier runs.
 
-Each of them is an `AppUser` wrapping the flows the specs share:
+Each user is an `AppUser` wrapping the flows the specs share:
 creating and opening documents, typing, toggling sharing, finding a
 document in the sidebar. The flows also carry the synchronisation that
 keeps the live-server tests stable — `createDocument`/`openDocument`
@@ -73,6 +76,13 @@ wait for the websocket to deliver the server-seeded heading before
 anyone types, and toggling sharing waits for the share action's round
 trip before the link is handed to the other user (or their access is
 expected to be gone).
+
+A domain whose pages have flows of their own extends that test once
+more, the way Playwright's docs build page object fixtures. The auth
+spec imports its `test` from `e2e/fixtures/auth/test.ts`: `page` starts
+without a session there, and `signInPage`, `otpPage` and
+`onboardingPage` hand out one page object per screen of the sign-in
+(`e2e/fixtures/auth/`), which `signIn` drives as well.
 
 ## The Creem checkout
 

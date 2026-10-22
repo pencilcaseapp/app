@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vitest';
 import z from 'zod';
 import { useAppForm } from '~/hooks/use-app-form';
@@ -99,4 +100,32 @@ test('shows error message on submit', async () => {
   await userEvent.click(getByText('Submit'));
 
   expect(getByText('Invalid email address')).toBeInTheDocument();
+});
+
+test('keeps the fields disabled until the page has hydrated', () => {
+  const Stub = createRoutesStub([
+    {
+      path: '/',
+      Component: () => {
+        const form = useAppForm({ defaultValues: { email: '' } });
+
+        return (
+          <AuthenticityTokenProvider token="test-token">
+            <ControlledForm form={form}>
+              <form.AppField name="email">
+                {field => <field.TextField label="Email" />}
+              </form.AppField>
+            </ControlledForm>
+          </AuthenticityTokenProvider>
+        );
+      },
+    },
+  ]);
+
+  const container = document.createElement('div');
+  container.innerHTML = renderToString(<Stub />);
+  expect(container.querySelector('fieldset')).toHaveProperty('disabled', true);
+
+  const { getByLabelText } = render(<Stub />);
+  expect(getByLabelText('Email')).toBeEnabled();
 });

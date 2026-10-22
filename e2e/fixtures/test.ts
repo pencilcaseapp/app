@@ -1,5 +1,6 @@
 import { test as base, type Browser } from '@playwright/test';
-import { createTestAccountEmail, signIn } from '../utils/sign-in';
+import { signIn } from '../utils/sign-in';
+import { createTestAccountEmail } from '../utils/test-accounts';
 import { AppUser } from './app-user';
 
 interface AppUserFixtures {
