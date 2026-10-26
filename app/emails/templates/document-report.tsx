@@ -3,7 +3,6 @@ import {
   type DocumentReportReason,
 } from '../../constants/document';
 import { Layout } from '../ui/layout/layout';
-import { LinkButton } from '../ui/link-button/link-button';
 import { Typography } from '../ui/typography/typography';
 
 const untitledDocument = 'Untitled';
@@ -11,10 +10,8 @@ const untitledDocument = 'Untitled';
 const previewUrl = 'https://docs.pencilcase.app/doc/'
   + '2f4c9b1e-0c3a-4f2b-9c7e-1a2b3c4d5e6f';
 
-const closing = 'Reply to this email to answer the person who reported it. '
-  + 'The stores expect a timely response.';
-
 export interface DocumentReportEmailProps {
+  reportId: string;
   reason: DocumentReportReason;
   details: string | null;
   documentTitle: string | null;
@@ -38,6 +35,7 @@ export function documentReportEmailSubject(input: {
  * and replies go to whoever reported it.
  */
 export function DocumentReportEmail({
+  reportId,
   reason,
   details,
   documentTitle,
@@ -52,6 +50,7 @@ export function DocumentReportEmail({
     ['Link', documentUrl],
     ['Owner', ownerEmail],
     ['Reported by', reporterEmail],
+    ['Report ID', reportId],
   ];
 
   return (
@@ -74,17 +73,12 @@ export function DocumentReportEmail({
           </Typography>
         </div>
       ))}
-      <LinkButton href={documentUrl} className="mt-6 mb-6">
-        Open the document
-      </LinkButton>
-      <Typography variant="bodyTiny" textAlign="center" textColor="grey-600">
-        {closing}
-      </Typography>
     </Layout>
   );
 }
 
 DocumentReportEmail.PreviewProps = {
+  reportId: '8d1f3a6c-5b2e-4c7d-9a0f-3e4b5c6d7e8f',
   reason: 'harassment',
   details: 'The second paragraph insults a colleague of mine by name.',
   documentTitle: 'Trip to the Alps',

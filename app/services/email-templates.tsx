@@ -198,6 +198,7 @@ export async function sendEmailDocumentReport(input: {
     subject: documentReportEmailSubject({ reason, documentTitle }),
     email: (
       <DocumentReportEmail
+        reportId={reportId}
         reason={reason}
         details={details}
         documentTitle={documentTitle}

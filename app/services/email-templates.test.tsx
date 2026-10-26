@@ -170,4 +170,12 @@ describe('sendEmailDocumentReport', () => {
     expect(await render(email, { plainText: true }))
       .toContain(`/doc/${report.documentId}`);
   });
+
+  it('names the report row', async () => {
+    await sendEmailDocumentReport(report);
+
+    const [{ email }] = sendEMailMock.mock.calls[0];
+    expect(await render(email, { plainText: true }))
+      .toContain('report-id');
+  });
 });

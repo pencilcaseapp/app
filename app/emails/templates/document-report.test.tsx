@@ -9,6 +9,7 @@ import {
 const documentUrl = 'https://docs.pencilcase.app/doc/doc-id';
 
 const props: DocumentReportEmailProps = {
+  reportId: 'report-id',
   reason: 'harassment',
   details: 'Insults a colleague by name.',
   documentTitle: 'Trip to the Alps',
@@ -34,22 +35,18 @@ describe('documentReportEmailSubject', () => {
 });
 
 describe('DocumentReportEmail', () => {
-  it('links to the reported document', async () => {
-    const html = await render(<DocumentReportEmail {...props} />);
-
-    expect(html).toContain(`href="${documentUrl}"`);
-  });
-
   it('says why, what and who', async () => {
     const text = await render(<DocumentReportEmail {...props} />, {
       plainText: true,
     });
 
     expect(text).toContain('Harassment or hate');
+    expect(text).toContain(documentUrl);
     expect(text).toContain('Insults a colleague by name.');
     expect(text).toContain('Trip to the Alps');
     expect(text).toContain('alex@example.com');
     expect(text).toContain('sam@example.com');
+    expect(text).toContain('report-id');
   });
 
   it('marks a report without details', async () => {
