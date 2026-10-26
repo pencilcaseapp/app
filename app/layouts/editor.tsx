@@ -55,6 +55,7 @@ import { DocumentLimitDialog } from '~/components/document-limit-dialog/document
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import type { DocumentShareState } from '~/constants/document';
 import { useIsMobile } from '~/hooks/use-is-mobile';
+import { isNativeAppRequest } from '~/utils/native-app';
 import { readUserPrefs, storeUserPrefs } from '~/utils/user-prefs-cookie';
 
 export const handle = {
@@ -114,6 +115,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
     documentLimitReached: user
       ? hasReachedDocumentLimit(user, ownedDocumentCount)
       : false,
+    isNativeApp: isNativeAppRequest(request),
   };
 }
 
@@ -125,6 +127,7 @@ export default function LayoutEditor({
     deletedNavigation,
     ownedDocumentCount,
     documentLimitReached,
+    isNativeApp,
   },
 }: Route.ComponentProps) {
   return (
@@ -146,6 +149,7 @@ export default function LayoutEditor({
                       ownedDocumentCount={ownedDocumentCount}
                       documentLimitReached={documentLimitReached}
                       showUpgrade={!user.hasSubscription}
+                      isNativeApp={isNativeApp}
                     >
                       <Outlet />
                     </EditorSidebar>
@@ -176,6 +180,8 @@ export interface EditorSidebarProps extends PropsWithChildren {
   /** "Create Doc" opens the upgrade dialog instead of `/new`. */
   documentLimitReached: boolean;
   showUpgrade?: boolean;
+  /** The native apps sell nothing: the meter stays, the offer goes. */
+  isNativeApp?: boolean;
 }
 
 const getNavigationKey = (item: NavigationItemData) => item.to;
@@ -188,6 +194,7 @@ function EditorSidebar({
   ownedDocumentCount,
   documentLimitReached,
   showUpgrade,
+  isNativeApp,
   children,
 }: EditorSidebarProps) {
   const location = useLocation();
@@ -315,7 +322,7 @@ function EditorSidebar({
                 {/* Not in the bottom area, which the slim sidebar
                     renders a second time. */}
                 <DocumentLimitDialog
-                  checkoutUrl={checkoutUrl}
+                  checkoutUrl={isNativeApp ? undefined : checkoutUrl}
                   open={isLimitDialogOpen}
                   onOpenChange={setIsLimitDialogOpen}
                 />
@@ -355,14 +362,14 @@ function EditorSidebar({
         ]}
         // The upgrade area adds the meter block, the button, and the
         // column gap on top of the footer's base height.
-        reservedFooterHeight={showUpgrade ? 223 : 123}
+        reservedFooterHeight={showUpgrade ? (isNativeApp ? 163 : 223) : 123}
         bottomArea={(
           <>
             {showUpgrade && (
               <SidebarUpgrade
                 documentCount={ownedDocumentCount}
                 documentLimit={FREE_DOCUMENT_LIMIT}
-                to={upgradeUrl}
+                to={isNativeApp ? undefined : upgradeUrl}
               />
             )}
             {documentLimitReached

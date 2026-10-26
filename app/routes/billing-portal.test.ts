@@ -23,8 +23,8 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-function callLoader() {
-  const request = new Request('http://localhost/billing-portal');
+function callLoader(headers?: HeadersInit) {
+  const request = new Request('http://localhost/billing-portal', { headers });
   const context = new RouterContextProvider();
   context.set(userSessionContext, userFixture);
 
@@ -69,4 +69,11 @@ test('sends a user back with a toast when the portal fails', async () => {
   const response = await callLoader();
 
   expect(response.headers.get('Location')).toContain('toastDanger');
+});
+
+test('opens no customer portal from the native apps', async () => {
+  const response = await callLoader({ 'user-agent': 'Mozilla/5.0 PencilCaseApp' });
+
+  expect(response.headers.get('Location')).toBe(href('/upgrade'));
+  expect(getBillingPortalUrlMock).not.toHaveBeenCalled();
 });

@@ -24,7 +24,7 @@ export type UpgradeDialogProps = {
   title?: string;
   headline: string;
   description?: string;
-  pricingArea: ReactNode;
+  pricingArea?: ReactNode;
   trigger?: ResponsiveDialogTriggerProps['render'];
   size?: DialogSize;
   closeLabel?: string;
@@ -84,7 +84,7 @@ export const UpgradeDialog: FC<UpgradeDialogProps> = ({
                 {description}
               </ResponsiveDialogDescription>
             )}
-            <div className="mt-6">{pricingArea}</div>
+            {pricingArea && <div className="mt-6">{pricingArea}</div>}
           </div>
         </ResponsiveDialogContentInner>
       </ResponsiveDialogContent>

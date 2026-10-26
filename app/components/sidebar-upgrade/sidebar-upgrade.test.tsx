@@ -81,3 +81,10 @@ test('renders nothing in the icon-only sidebar', () => {
 
   expect(container).toBeEmptyDOMElement();
 });
+
+test('shows the meter without the upgrade in the native apps', () => {
+  render(<SidebarUpgrade documentCount={2} documentLimit={3} />);
+
+  expect(screen.getByRole('meter')).toBeInTheDocument();
+  expect(screen.queryByRole('link')).not.toBeInTheDocument();
+});

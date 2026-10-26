@@ -30,6 +30,7 @@ import { SharePanel } from '~/components/share-panel/share-panel';
 import { Button } from '~/ui/button/button';
 import { DocEmptyState } from '~/components/doc-empty-state/doc-empty-state';
 import { PageTitle } from '~/components/page-title/page-title';
+import { isNativeAppRequest } from '~/utils/native-app';
 import { getUserPresenceIdentity } from '~/utils/presence';
 import { Notification } from '~/ui/notification/notification';
 import {
@@ -136,6 +137,7 @@ export async function loader({ params, context, request }: Route.LoaderArgs) {
     owner: isOwner ? { name: user.name, email: user.email } : null,
     invited: isOwner ? await listInvitedCollaborators(params.id) : [],
     hasSubscription: user?.hasSubscription ?? false,
+    isNativeApp: isNativeAppRequest(request),
     linkShared: document.linkShared,
     linkAccess: document.linkAccess,
     deleted: document.deleted,
@@ -268,6 +270,7 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
           owner={loaderData.owner}
           invited={loaderData.invited}
           showUpgrade={!loaderData.hasSubscription}
+          isNativeApp={loaderData.isNativeApp}
         />
       )
     : null;

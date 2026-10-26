@@ -38,6 +38,9 @@ export interface SharePanelProps {
   invited?: InvitedPerson[];
   /** Offer the paid plan instead of the features behind it. */
   showUpgrade?: boolean;
+  /** The native apps sell nothing: the features stay hidden on the free
+   * plan, without the offer. */
+  isNativeApp?: boolean;
   defaultOpen?: boolean;
 }
 
@@ -49,6 +52,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
   owner,
   invited = [],
   showUpgrade,
+  isNativeApp,
   defaultOpen,
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen ?? false);
@@ -140,7 +144,7 @@ export const SharePanel: React.FC<SharePanelProps> = ({
           owner={owner}
           invited={invited}
         />
-        {showUpgrade && (
+        {showUpgrade && !isNativeApp && (
           <UpgradeTeaser
             as={Link}
             to={href('/doc/:id/settings/subscription', { id: documentId })}

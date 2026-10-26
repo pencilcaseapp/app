@@ -104,4 +104,21 @@ describe('CurrentSubscription', () => {
     expect(rowOf('Status').getByText('Active')).toBeInTheDocument();
     expect(screen.getByText('On the house. Enjoy!')).toBeInTheDocument();
   });
+
+  test('shows no prices and no portal in the native apps', () => {
+    render(
+      <CurrentSubscription
+        status={SubscriptionStatus.PastDue}
+        periodEnd="06.07.2026"
+        isNativeApp
+      />,
+    );
+
+    expect(screen.getByRole('heading', { name: 'You’re on Pencil Case Pro.' }))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/€/)).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Your last payment failed. We’ve emailed you what to do.',
+    );
+  });
 });

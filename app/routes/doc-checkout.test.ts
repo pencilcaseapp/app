@@ -28,8 +28,11 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-function callLoader() {
-  const request = new Request(`http://localhost:3000/doc/${DOC_ID}/checkout`);
+function callLoader(headers?: HeadersInit) {
+  const request = new Request(
+    `http://localhost:3000/doc/${DOC_ID}/checkout`,
+    { headers },
+  );
   const context = new RouterContextProvider();
   context.set(userSessionContext, userFixture);
 
@@ -80,3 +83,12 @@ test('sends the user back with a toast when the checkout fails',
     expect(response.headers.get('Location'))
       .toContain(`${subscriptionUrl}?toastDanger`);
   });
+
+test('starts no checkout from the native apps', async () => {
+  getSubscriptionOverviewMock.mockResolvedValue({ kind: 'none' });
+
+  const response = await callLoader({ 'user-agent': 'Mozilla/5.0 PencilCaseApp' });
+
+  expect(response.headers.get('Location')).toBe(subscriptionUrl);
+  expect(startProCheckoutMock).not.toHaveBeenCalled();
+});

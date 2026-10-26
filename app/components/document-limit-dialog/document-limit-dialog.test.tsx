@@ -37,3 +37,17 @@ test('renders nothing while closed', () => {
 
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
+
+test('only explains the limit in the native apps', () => {
+  render(<DocumentLimitDialog open onOpenChange={vi.fn()} />);
+
+  expect(screen.getByRole('dialog', { name: 'Create Doc' }))
+    .toBeInTheDocument();
+  expect(
+    screen.getByText(`You’ve used all ${FREE_DOCUMENT_LIMIT} of your free docs.`),
+  ).toBeInTheDocument();
+  expect(screen.getByText('Delete a doc to make room for a new one.'))
+    .toBeInTheDocument();
+  expect(screen.queryByText('Pencil Case Pro')).not.toBeInTheDocument();
+  expect(screen.queryByRole('link')).not.toBeInTheDocument();
+});

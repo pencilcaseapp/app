@@ -6,6 +6,7 @@ import {
   getBillingPortalUrl,
   GetBillingPortalUrlError,
 } from '~/services/subscription';
+import { isNativeAppRequest } from '~/utils/native-app';
 import { withSearchParams } from '~/utils/url';
 import type { Route } from './+types/billing-portal';
 
@@ -13,7 +14,12 @@ export const middleware: MiddlewareFunction[] = [
   authMiddleware,
 ];
 
-export async function loader({ context }: Route.LoaderArgs) {
+/** The native apps manage no billing (`docs/native-apps.md`). */
+export async function loader({ request, context }: Route.LoaderArgs) {
+  if (isNativeAppRequest(request)) {
+    return redirect(href('/upgrade'));
+  }
+
   const user = context.get(userSessionContext);
   const [error, result] = await getBillingPortalUrl(user);
 

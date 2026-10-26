@@ -32,6 +32,34 @@ CAPACITOR_SERVER_URL=http://192.168.1.10:3000 npx cap sync
 
 Sync again without it before building anything you hand to someone else.
 
+## Selling nothing in the apps
+
+Pro is sold only on the web, through Creem, so the apps pay Apple and Google
+nothing. That holds only while the apps sell nothing and point to no
+purchase: Apple's guidelines (3.1.1, 3.1.3) allow an app without In-App
+Purchase as long as it does not, within the app, encourage users to buy
+some other way, outside the US storefront not even with plain text; links
+out cost a commission in the EU. Google Play's consumption-only apps need no
+Play Billing as long as nothing can be bought in the app and nothing links
+to a purchase. So the apps follow Apple's stricter rule on both platforms:
+
+- no upgrade button, offer, plan comparison or price anywhere: the sidebar
+  keeps the usage meter, the subscription section shows the plan and its
+  usage or status, "Create Doc" at the limit says to delete a doc, and the
+  share panel drops the invite teaser;
+- no billing: no "Manage subscription" button, and a failed payment points
+  to the email we send about it rather than to the customer portal;
+- `/doc/:id/checkout` and `/billing-portal` refuse requests from the apps,
+  so nothing inside them reaches Creem even through a stray link, and the
+  universal links below keep the billing paths in the browser.
+
+The server tells the apps from a browser by `PencilCaseApp` in the user
+agent (`isNativeAppRequest`), and the loaders hand that to the components
+as `isNativeApp`. The subscription itself unlocks Pro in the apps as on the
+web, through `users.has_subscription`; emails about it are outside the app
+and keep their links. The store listings must not mention prices or buying
+on the web either.
+
 ## Universal links
 
 Links to `docs.pencilcase.app` open the iOS app when it is installed:

@@ -6,6 +6,7 @@ import {
   getSubscriptionOverview,
   startProCheckout,
 } from '~/services/subscription';
+import { isNativeAppRequest } from '~/utils/native-app';
 import { withSearchParams } from '~/utils/url';
 import type { Route } from './+types/doc-checkout';
 
@@ -19,11 +20,17 @@ export const middleware: MiddlewareFunction[] = [
  * checkout with the back button finds the page as it was, not a
  * submission still pending. The success URL is the subscription
  * section over the same document, whose loader confirms the checkout.
+ * The native apps sell nothing (`docs/native-apps.md`), so a request
+ * from one never reaches Creem.
  */
 export async function loader({ request, params, context }: Route.LoaderArgs) {
   const user = context.get(userSessionContext);
   const subscriptionUrl
     = href('/doc/:id/settings/subscription', { id: params.id });
+  if (isNativeAppRequest(request)) {
+    return redirect(subscriptionUrl);
+  }
+
   const overview = await getSubscriptionOverview(user);
 
   if (overview.kind !== 'none') {
