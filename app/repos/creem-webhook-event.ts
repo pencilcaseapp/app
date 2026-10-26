@@ -1,4 +1,9 @@
-import { eq, type InferSelectModel } from 'drizzle-orm';
+import {
+  eq,
+  inArray,
+  lt,
+  type InferSelectModel,
+} from 'drizzle-orm';
 import { db } from '~/db';
 import { creemWebhookEvents } from '~/db/schema';
 
@@ -39,4 +44,29 @@ export async function markWebhookEventProcessed(id: string) {
     .returning();
 
   return event;
+}
+
+const DELETE_BATCH_SIZE = 1000;
+
+export async function deleteWebhookEventsReceivedBefore(before: Date) {
+  let deletedCount = 0;
+
+  while (true) {
+    const batch = db
+      .select({ id: creemWebhookEvents.id })
+      .from(creemWebhookEvents)
+      .where(lt(creemWebhookEvents.receivedAt, before))
+      .limit(DELETE_BATCH_SIZE);
+
+    const deleted = await db
+      .delete(creemWebhookEvents)
+      .where(inArray(creemWebhookEvents.id, batch))
+      .returning({ id: creemWebhookEvents.id });
+
+    deletedCount += deleted.length;
+
+    if (deleted.length < DELETE_BATCH_SIZE) {
+      return deletedCount;
+    }
+  }
 }
