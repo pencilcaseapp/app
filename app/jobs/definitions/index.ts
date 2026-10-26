@@ -1,5 +1,6 @@
 import type { JobDefinition } from '../job';
 import { cleanUpExpiredEmailChangeRequests } from './clean-up-expired-email-change-requests';
+import { cleanUpOldCreemWebhookEvents } from './clean-up-old-creem-webhook-events';
 import { cleanUpExpiredOtps } from './clean-up-expired-otps';
 import { cleanUpExpiredSessions } from './clean-up-expired-sessions';
 import { cleanUpOldEmailLogs } from './clean-up-old-email-logs';
@@ -10,5 +11,6 @@ export const jobDefinitions: JobDefinition[] = [
   cleanUpExpiredEmailChangeRequests,
   cleanUpExpiredSessions,
   cleanUpOldEmailLogs,
+  cleanUpOldCreemWebhookEvents,
   purgeDeletedDocuments,
 ];
