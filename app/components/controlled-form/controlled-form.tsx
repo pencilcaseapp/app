@@ -1,9 +1,9 @@
 import type { AnyFormApi } from '@tanstack/react-form';
-import { useIsClient } from '@uidotdev/usehooks';
 import type { ReactNode } from 'react';
 import { Form } from 'react-router';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { getFormId } from '~/contexts/form';
+import { useIsHydrated } from '~/hooks/use-is-hydrated';
 
 export type ControlledFormProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,8 +15,9 @@ export type ControlledFormProps = {
 export const ControlledForm: React.FC<ControlledFormProps>
   = ({ form, children, noValidate }) => {
     // Hydration resets the fields, which would throw away whatever was
-    // typed or autofilled into the server-rendered form.
-    const isHydrated = useIsClient();
+    // typed or autofilled into the server-rendered form. A form mounted by a
+    // client-side navigation has nothing to lose and is enabled at once.
+    const isHydrated = useIsHydrated();
 
     const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
       event.preventDefault();
