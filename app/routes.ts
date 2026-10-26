@@ -49,4 +49,5 @@ export default [
     '.well-known/apple-app-site-association',
     'routes/apple-app-site-association.ts',
   ),
+  route('.well-known/assetlinks.json', 'routes/assetlinks.ts'),
 ] satisfies RouteConfig;
