@@ -20,6 +20,7 @@ import { Typography } from './ui/typography/typography';
 import { PageTitle } from './components/page-title/page-title';
 import { ToastProvider } from './ui/toast/toast-provider';
 import { useToast } from './hooks/use-toast';
+import { useNativeOpenLink } from './hooks/use-native-open-link';
 import { useNativePullToRefresh } from './hooks/use-native-pull-to-refresh';
 import { useBlurInBackground } from './hooks/use-blur-in-background';
 import {
@@ -59,6 +60,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     .map(match => match.handle?.bodyClassName);
   const isNativeApp = useRouteLoaderData<typeof loader>('root')?.isNativeApp;
   useNativePullToRefresh();
+  useNativeOpenLink();
   useBlurInBackground();
 
   return (

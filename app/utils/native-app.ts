@@ -40,6 +40,8 @@ interface NativeSoftKeyboard {
 
 declare global {
   interface Window {
+    /** Set by `useNativeOpenLink` once the page can navigate itself. */
+    openNativeLink?: (path: string) => boolean;
     Capacitor?: {
       getPlatform?: () => string;
       Plugins?: {
