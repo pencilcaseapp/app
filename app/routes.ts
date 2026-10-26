@@ -21,6 +21,7 @@ export default [
   route('doc/:id/delete', 'routes/doc-delete.ts'),
   route('doc/:id/restore', 'routes/doc-restore.ts'),
   route('doc/:id/leave', 'routes/doc-leave.ts'),
+  route('doc/:id/report', 'routes/doc-report.ts'),
   route('doc/:id/checkout', 'routes/doc-checkout.ts'),
   route('doc/:id/share', 'routes/doc-share.ts'),
   route('doc/:id/assets', 'routes/doc-assets.ts'),

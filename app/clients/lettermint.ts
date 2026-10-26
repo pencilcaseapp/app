@@ -5,6 +5,7 @@ export interface LettermintEmail {
   idempotencyKey: string;
   from: string;
   to: string;
+  replyTo?: string;
   subject: string;
   html: string;
   text: string;
@@ -18,6 +19,7 @@ export async function sendLettermintEmail(email: LettermintEmail) {
   const response = await lettermint.emails.send({
     from: email.from,
     to: [email.to],
+    reply_to: email.replyTo ? [email.replyTo] : undefined,
     subject: email.subject,
     html: email.html,
     text: email.text,

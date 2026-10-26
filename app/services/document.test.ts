@@ -28,6 +28,8 @@ import {
   purgeDeletedDocuments,
   removeCollaborator,
   RemoveCollaboratorError,
+  reportDocument,
+  ReportDocumentError,
   restoreDocument,
   shareDocument,
   ShareDocumentError,
@@ -35,6 +37,7 @@ import {
 } from './document';
 import {
   DOCUMENT_INVITE_LIMIT,
+  DOCUMENT_REPORT_LIMIT,
   type DocumentCollaboratorSource,
   type DocumentLinkAccess,
 } from '~/constants/document';
@@ -129,8 +132,10 @@ vi.mock('~/clients/storage', () => ({
 }));
 
 const getUserByEmailMock = vi.fn();
+const getUserMock = vi.fn();
 vi.mock('~/repos/user', () => ({
   getUserByEmail: (...args: unknown[]) => getUserByEmailMock(...args),
+  getUser: (...args: unknown[]) => getUserMock(...args),
 }));
 
 vi.mock('~/db', () => ({
@@ -149,9 +154,12 @@ vi.mock('~/repos/email-log', () => ({
 }));
 
 const sendEmailDocumentInviteMock = vi.fn();
+const sendEmailDocumentReportMock = vi.fn();
 vi.mock('./email-templates', () => ({
   sendEmailDocumentInvite: (...args: unknown[]) =>
     sendEmailDocumentInviteMock(...args),
+  sendEmailDocumentReport: (...args: unknown[]) =>
+    sendEmailDocumentReportMock(...args),
 }));
 
 const closeDocumentConnectionsMock = vi.fn();
@@ -1647,5 +1655,146 @@ describe('signAssetUrl', () => {
     const next = signAssetUrl(key, cdnConfig, 1_800_000_300_000);
 
     expect(next.url).toMatch(/&expires=1800000900$/);
+  });
+});
+
+describe('reportDocument', () => {
+  const ownerEmail = 'owner@example.com';
+
+  function report(overrides?: { details?: string }) {
+    return reportDocument({
+      documentId: documentFixture.id,
+      user: viewer,
+      reason: 'harassment',
+      details: 'Insults a colleague by name.',
+      ...overrides,
+    });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      linkShared: true,
+    }));
+    getUserMock.mockResolvedValue({ id: otherUserId, email: ownerEmail });
+    countEmailLogsByUserMock.mockResolvedValue(0);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('sends the report with the owner and the reporter', async () => {
+    const [error] = await report();
+
+    expect(error).toBeNull();
+    expect(getUserMock).toHaveBeenCalledWith(otherUserId);
+    expect(sendEmailDocumentReportMock).toHaveBeenCalledWith({
+      reportId: expect.any(String),
+      reason: 'harassment',
+      details: 'Insults a colleague by name.',
+      documentId: documentFixture.id,
+      documentTitle: documentFixture.title,
+      ownerEmail,
+      reporter: { id: viewer.id, email: viewer.email },
+    });
+  });
+
+  it('draws a new id for every report, so each one goes out', async () => {
+    await report();
+    await report();
+
+    const [[first], [second]] = sendEmailDocumentReportMock.mock.calls;
+    expect(first.reportId).not.toBe(second.reportId);
+  });
+
+  it('leaves out blank details', async () => {
+    await report({ details: '   ' });
+
+    expect(sendEmailDocumentReportMock).toHaveBeenCalledWith(
+      expect.objectContaining({ details: null }),
+    );
+  });
+
+  it('lets somebody invited by e-mail report with the link off', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      collaborator: {
+        id: collaboratorId,
+        source: 'invite',
+        userId: viewer.id,
+        email: viewer.email,
+        access: 'view',
+        acceptedAt: new Date(),
+      },
+    }));
+
+    const [error] = await report();
+
+    expect(error).toBeNull();
+  });
+
+  it('refuses the owner', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument());
+
+    const [error] = await report();
+
+    expect(error).toBe(ReportDocumentError.PermissionDenied);
+    expect(sendEmailDocumentReportMock).not.toHaveBeenCalled();
+  });
+
+  it('refuses somebody who cannot open the document', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+    }));
+
+    const [error] = await report();
+
+    expect(error).toBe(ReportDocumentError.PermissionDenied);
+  });
+
+  it('refuses a deleted document', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      linkShared: true,
+      deletedAt: new Date(),
+    }));
+
+    const [error] = await report();
+
+    expect(error).toBe(ReportDocumentError.PermissionDenied);
+  });
+
+  it('refuses an unknown document', async () => {
+    getDocumentForViewerMock.mockResolvedValue(undefined);
+
+    const [error] = await report();
+
+    expect(error).toBe(ReportDocumentError.PermissionDenied);
+  });
+
+  it('counts the reports the account sent in the last day', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-26T12:00:00Z'));
+    countEmailLogsByUserMock.mockResolvedValue(DOCUMENT_REPORT_LIMIT - 1);
+
+    const [error] = await report();
+
+    expect(error).toBeNull();
+    expect(countEmailLogsByUserMock).toHaveBeenCalledWith({
+      userId: viewer.id,
+      template: EmailTemplate.DocumentReport,
+      since: new Date('2026-10-25T12:00:00Z'),
+    });
+  });
+
+  it('refuses a report past the limit', async () => {
+    countEmailLogsByUserMock.mockResolvedValue(DOCUMENT_REPORT_LIMIT);
+
+    const [error] = await report();
+
+    expect(error).toBe(ReportDocumentError.TooManyReports);
+    expect(sendEmailDocumentReportMock).not.toHaveBeenCalled();
   });
 });

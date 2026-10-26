@@ -5,6 +5,10 @@ import {
   documentInviteEmailSubject,
 } from '~/emails/templates/document-invite';
 import {
+  DocumentReportEmail,
+  documentReportEmailSubject,
+} from '~/emails/templates/document-report';
+import {
   EmailChangeCodeEmail,
   emailChangeCodeEmailSubject,
 } from '~/emails/templates/email-change-code';
@@ -21,6 +25,8 @@ import {
   SubscriptionStartedEmail,
   subscriptionStartedEmailSubject,
 } from '~/emails/templates/subscription-started';
+import { commonCopies } from '~/constants/common-copies';
+import type { DocumentReportReason } from '~/constants/document';
 import { EmailTemplate } from '~/constants/email';
 import { sendEmail, type EmailData } from './email';
 
@@ -159,5 +165,49 @@ export async function sendEmailDocumentInvite(input: {
     template: EmailTemplate.DocumentInvite,
     idempotencyScope: inviteId,
     userId: inviterId,
+  });
+}
+
+/**
+ * Somebody reported a document they can open but do not own. It goes to
+ * our own inbox with the reporter as the reply-to address, so answering
+ * them is a reply. Logged against the reporter, whose reports are capped.
+ */
+export async function sendEmailDocumentReport(input: {
+  reportId: string;
+  reason: DocumentReportReason;
+  details: string | null;
+  documentId: string;
+  documentTitle: string | null;
+  ownerEmail: string;
+  reporter: { id: string; email: string };
+}) {
+  const {
+    reportId,
+    reason,
+    details,
+    documentId,
+    documentTitle,
+    ownerEmail,
+    reporter,
+  } = input;
+
+  await sendEmail({
+    to: { email: commonCopies.supportEmail },
+    replyTo: reporter.email,
+    subject: documentReportEmailSubject({ reason, documentTitle }),
+    email: (
+      <DocumentReportEmail
+        reason={reason}
+        details={details}
+        documentTitle={documentTitle}
+        documentUrl={`${config.appUrl}${href('/doc/:id', { id: documentId })}`}
+        ownerEmail={ownerEmail}
+        reporterEmail={reporter.email}
+      />
+    ),
+    template: EmailTemplate.DocumentReport,
+    idempotencyScope: reportId,
+    userId: reporter.id,
   });
 }

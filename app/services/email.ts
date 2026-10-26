@@ -20,6 +20,8 @@ export type EmailData = {
 
 export type SendEmailInput = {
   to: EmailData;
+  /** Where an answer goes instead of our own sender address. */
+  replyTo?: string;
   subject: string;
   email: React.ReactElement;
   template: EmailTemplate;
@@ -39,7 +41,15 @@ export type SendEmailInput = {
  * reached them without us recording the answer.
  */
 export async function sendEmail(input: SendEmailInput) {
-  const { to, subject, email, template, idempotencyScope, userId } = input;
+  const {
+    to,
+    replyTo,
+    subject,
+    email,
+    template,
+    idempotencyScope,
+    userId,
+  } = input;
   const config = getConfig();
   const apiToken = config.email.apiToken;
   const idempotencyKey = emailIdempotencyKey(template, idempotencyScope);
@@ -80,6 +90,7 @@ export async function sendEmail(input: SendEmailInput) {
       idempotencyKey,
       from: formatEmailData(config.email.from),
       to: formatEmailData(to),
+      replyTo,
       subject,
       html,
       text,

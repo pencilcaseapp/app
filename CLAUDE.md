@@ -422,6 +422,17 @@ a person whose access changed reconnects with it — including when the
 loader's `readOnly` did not change, which would otherwise leave them
 detached. `docs/emails.md` covers the e-mail.
 
+**Reporting a document — `app/services/document.ts`.** The app stores
+treat shared documents as user generated content (Apple 1.2, Google
+Play's UGC policy), so everybody but the owner gets a Report button in
+the top bar where the owner has Share
+(`app/components/report-document-dialog/`). It posts a reason and
+optional details to `/doc/:id/report`; `reportDocument` checks the
+reporter may open the document and does not own it, caps reports per
+account from `email_logs` (`DOCUMENT_REPORT_LIMIT`) and e-mails the
+report to our inbox with the reporter as reply-to. Reports have no table
+of their own, and a signed out visitor is asked to sign in first.
+
 **Deletion — `app/services/document.ts`.** Documents are soft deleted:
 `deleteDocument` stamps `documents.deleted_at` and turns the link off in the
 same owner-scoped update (`softDeleteDocument`), then drops the `link`
