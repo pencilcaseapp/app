@@ -205,6 +205,24 @@ class MainViewController: UIViewController {
         placeIndicator(for: pull)
     }
 
+    /// Loads a link to the web app, with its path on the server the app
+    /// points at, so a link to production opens on a dev server too.
+    func open(_ url: URL) {
+        guard let webView = bridgeViewController.webView,
+              let serverURL = bridgeViewController.bridge?.config.serverURL,
+              var components = URLComponents(url: serverURL, resolvingAgainstBaseURL: false),
+              let link = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return
+        }
+
+        components.percentEncodedPath = link.percentEncodedPath
+        components.percentEncodedQuery = link.percentEncodedQuery
+        components.percentEncodedFragment = link.percentEncodedFragment
+        if let target = components.url {
+            webView.load(URLRequest(url: target))
+        }
+    }
+
     /*
      * Over the empty band between the status bar and the top bar's buttons:
      * the page's own room for the status bar, which comes down with it, and

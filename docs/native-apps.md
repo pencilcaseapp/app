@@ -32,6 +32,19 @@ CAPACITOR_SERVER_URL=http://192.168.1.10:3000 npx cap sync
 
 Sync again without it before building anything you hand to someone else.
 
+## Universal links
+
+Links to `docs.pencilcase.app` open the iOS app when it is installed:
+`/.well-known/apple-app-site-association` (`routes/apple-app-site-association.ts`)
+claims every path for the app, and the `applinks:` associated domain in
+`App.entitlements` claims the domain. `SceneDelegate` hands the link to
+`MainViewController.open`, which loads its path on the server the app points
+at. The paths in `BROWSER_ONLY_PATHS` (`app/constants/native-app.ts`), the
+upgrade, the checkout and the billing portal, stay in Safari, which keeps
+selling the subscription out of the app and away from In-App Purchase rules.
+Apple fetches the file through its CDN when the app is installed, so a change
+reaches devices only after a while.
+
 ## Bounce and pull to refresh
 
 Capacitor turns the web view's bounce off on iOS; `BridgeViewController`

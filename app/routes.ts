@@ -45,4 +45,8 @@ export default [
   route('invite/:code', 'routes/invite.ts'),
   route('billing-portal', 'routes/billing-portal.ts'),
   route('webhooks/creem', 'routes/creem-webhook.ts'),
+  route(
+    '.well-known/apple-app-site-association',
+    'routes/apple-app-site-association.ts',
+  ),
 ] satisfies RouteConfig;

@@ -11,6 +11,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = MainViewController()
         window?.makeKeyAndVisible()
 
+        // A universal link that launched the app opens instead of the start page.
+        for userActivity in connectionOptions.userActivities {
+            open(userActivity)
+        }
+
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
     }
 
@@ -19,6 +24,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        open(userActivity)
         SceneDelegateProxy.shared.scene(scene, continue: userActivity)
+    }
+
+    /// Opens a universal link (`apple-app-site-association`) in the web view.
+    private func open(_ userActivity: NSUserActivity) {
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+              let url = userActivity.webpageURL else {
+            return
+        }
+
+        (window?.rootViewController as? MainViewController)?.open(url)
     }
 }
