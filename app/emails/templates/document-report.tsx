@@ -74,7 +74,7 @@ export function DocumentReportEmail({
           </Typography>
         </div>
       ))}
-      <LinkButton href={documentUrl} className="mt-2 mb-6">
+      <LinkButton href={documentUrl} className="mt-6 mb-6">
         Open the document
       </LinkButton>
       <Typography variant="bodyTiny" textAlign="center" textColor="grey-600">
