@@ -201,7 +201,8 @@ success URL, and the section's loader verifies the signed redirect
 Creem comes back with, `/upgrade` redirects into the
 section over the latest document (emails link there),
 `/webhooks/creem` keeps the `subscriptions` table in sync (events
-recorded in `creem_webhook_events` for idempotency), and
+recorded in `creem_webhook_events` for idempotency, deleted after 30
+days by the `clean-up-old-creem-webhook-events` job), and
 `/billing-portal` opens Creem's self-service portal. Access control is
 only ever `users.has_subscription`, recomputed from the stored statuses
 on every sync. `app/clients/creem.ts` wraps the official `creem` SDK;

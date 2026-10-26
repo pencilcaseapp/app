@@ -58,7 +58,10 @@ on. Nothing about money lives in our code — only state.
   `creem-signature` header (HMAC-SHA256 of the raw body with the
   webhook secret). Every event is recorded in `creem_webhook_events`
   under Creem's event id — the raw payload is kept for debugging and
-  replay — and then processed.
+  replay — and then processed. The payload carries the customer's name
+  and e-mail, so the `clean-up-old-creem-webhook-events` job deletes
+  events after 30 days. A redelivery is long over by then, and the
+  e-mails behind an event stay deduped by `email_logs`.
 - **`/billing-portal`** asks Creem for a customer portal session and
   redirects to it. The subscription section opens it in a new tab;
   inside, customers cancel subscriptions, change payment methods and
