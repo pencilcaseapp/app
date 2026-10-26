@@ -48,9 +48,9 @@ export enum EmailLogStatus {
  * - `document-invite` uses the id of the invite. An invite the owner sent
  *   again is another invite and goes out; a retried send of the same one
  *   does not, the same way round as the codes above.
- * - `document-report` uses an id drawn for the report, which has no row
- *   of its own. Every report somebody sends goes out; the key only stops
- *   a retry of the same one.
+ * - `document-report` uses the id of the `document_reports` row. Every
+ *   report somebody sends goes out; the key only stops a retry of the
+ *   same one.
  */
 export function emailIdempotencyKey(template: EmailTemplate, scope: string) {
   return `${template}:${scope}`;

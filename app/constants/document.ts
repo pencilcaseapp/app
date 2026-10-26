@@ -105,6 +105,9 @@ export const DOCUMENT_REPORT_LIMIT = 10;
 
 export const DOCUMENT_REPORT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
+/** How long a report is kept before the nightly job deletes it. */
+export const DOCUMENT_REPORT_RETENTION_DAYS = 365;
+
 export const documentReportCopies = {
   reasonRequired: 'Please choose a reason',
   detailsTooLong: 'Keep it under '

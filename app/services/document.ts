@@ -51,6 +51,10 @@ import {
   type DocumentViewer,
 } from '~/repos/document';
 import { incrementDailyStat } from '~/repos/daily-stat';
+import {
+  countDocumentReportsByUser,
+  createDocumentReport,
+} from '~/repos/document-report';
 import { countEmailLogsByUser } from '~/repos/email-log';
 import { getUser, getUserByEmail, type User } from '~/repos/user';
 import { parseAssetSrc } from '~/utils/asset-src';
@@ -618,12 +622,12 @@ export interface ReportDocumentInput {
 }
 
 /**
- * Reports a document to us by e-mail, which the app stores ask of
- * content people share with each other. Anybody who can open the
- * document may report it, but not its owner, and no account more often
- * than `DOCUMENT_REPORT_LIMIT` times a day, counted from the e-mail log
- * like the invites. A report has no row of its own, so it draws an id
- * for the idempotency key.
+ * Reports a document to us, which the app stores ask of content people
+ * share with each other. Anybody who can open the document may report
+ * it, but not its owner, and no account more often than
+ * `DOCUMENT_REPORT_LIMIT` times a day. The report is recorded, kept for
+ * `DOCUMENT_REPORT_RETENTION_DAYS`, and e-mailed to our inbox keyed by
+ * its id.
  */
 export async function reportDocument(
   input: ReportDocumentInput,
@@ -640,9 +644,8 @@ export async function reportDocument(
     return [ReportDocumentError.PermissionDenied];
   }
 
-  const count = await countEmailLogsByUser({
+  const count = await countDocumentReportsByUser({
     userId: user.id,
-    template: EmailTemplate.DocumentReport,
     since: new Date(Date.now() - DOCUMENT_REPORT_WINDOW_MS),
   });
 
@@ -650,12 +653,24 @@ export async function reportDocument(
     return [ReportDocumentError.TooManyReports];
   }
 
+  const details = input.details?.trim() || null;
+  const report = await createDocumentReport({
+    documentId: document.id,
+    userId: user.id,
+    reason,
+    details,
+  });
+
+  if (!report) {
+    return [ReportDocumentError.PermissionDenied];
+  }
+
   const owner = await getUser(document.userId);
 
   await sendEmailDocumentReport({
-    reportId: randomUUID(),
+    reportId: report.id,
     reason,
-    details: input.details?.trim() || null,
+    details,
     documentId: document.id,
     documentTitle: document.title,
     ownerEmail: owner?.email ?? document.userId,

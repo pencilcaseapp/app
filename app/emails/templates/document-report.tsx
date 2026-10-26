@@ -8,7 +8,7 @@ import { Typography } from '../ui/typography/typography';
 
 const untitledDocument = 'Untitled';
 
-const previewUrl = 'https://pencilcase.app/doc/'
+const previewUrl = 'https://docs.pencilcase.app/doc/'
   + '2f4c9b1e-0c3a-4f2b-9c7e-1a2b3c4d5e6f';
 
 const closing = 'Reply to this email to answer the person who reported it. '

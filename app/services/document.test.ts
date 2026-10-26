@@ -147,6 +147,15 @@ vi.mock('~/repos/daily-stat', () => ({
   incrementDailyStat: (...args: unknown[]) => incrementDailyStatMock(...args),
 }));
 
+const countDocumentReportsByUserMock = vi.fn();
+const createDocumentReportMock = vi.fn();
+vi.mock('~/repos/document-report', () => ({
+  countDocumentReportsByUser: (...args: unknown[]) =>
+    countDocumentReportsByUserMock(...args),
+  createDocumentReport: (...args: unknown[]) =>
+    createDocumentReportMock(...args),
+}));
+
 const countEmailLogsByUserMock = vi.fn();
 vi.mock('~/repos/email-log', () => ({
   countEmailLogsByUser: (...args: unknown[]) =>
@@ -1660,6 +1669,7 @@ describe('signAssetUrl', () => {
 
 describe('reportDocument', () => {
   const ownerEmail = 'owner@example.com';
+  const reportId = 'c3d4e5f6-0000-4000-8000-000000000000';
 
   function report(overrides?: { details?: string }) {
     return reportDocument({
@@ -1678,20 +1688,30 @@ describe('reportDocument', () => {
       linkShared: true,
     }));
     getUserMock.mockResolvedValue({ id: otherUserId, email: ownerEmail });
-    countEmailLogsByUserMock.mockResolvedValue(0);
+    countDocumentReportsByUserMock.mockResolvedValue(0);
+    createDocumentReportMock.mockImplementation(async input => ({
+      id: reportId,
+      ...input,
+    }));
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it('sends the report with the owner and the reporter', async () => {
+  it('records the report and sends it keyed by its id', async () => {
     const [error] = await report();
 
     expect(error).toBeNull();
+    expect(createDocumentReportMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      userId: viewer.id,
+      reason: 'harassment',
+      details: 'Insults a colleague by name.',
+    });
     expect(getUserMock).toHaveBeenCalledWith(otherUserId);
     expect(sendEmailDocumentReportMock).toHaveBeenCalledWith({
-      reportId: expect.any(String),
+      reportId,
       reason: 'harassment',
       details: 'Insults a colleague by name.',
       documentId: documentFixture.id,
@@ -1701,17 +1721,12 @@ describe('reportDocument', () => {
     });
   });
 
-  it('draws a new id for every report, so each one goes out', async () => {
-    await report();
-    await report();
-
-    const [[first], [second]] = sendEmailDocumentReportMock.mock.calls;
-    expect(first.reportId).not.toBe(second.reportId);
-  });
-
   it('leaves out blank details', async () => {
     await report({ details: '   ' });
 
+    expect(createDocumentReportMock).toHaveBeenCalledWith(
+      expect.objectContaining({ details: null }),
+    );
     expect(sendEmailDocumentReportMock).toHaveBeenCalledWith(
       expect.objectContaining({ details: null }),
     );
@@ -1741,6 +1756,7 @@ describe('reportDocument', () => {
     const [error] = await report();
 
     expect(error).toBe(ReportDocumentError.PermissionDenied);
+    expect(createDocumentReportMock).not.toHaveBeenCalled();
     expect(sendEmailDocumentReportMock).not.toHaveBeenCalled();
   });
 
@@ -1777,24 +1793,26 @@ describe('reportDocument', () => {
   it('counts the reports the account sent in the last day', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-10-26T12:00:00Z'));
-    countEmailLogsByUserMock.mockResolvedValue(DOCUMENT_REPORT_LIMIT - 1);
+    countDocumentReportsByUserMock.mockResolvedValue(
+      DOCUMENT_REPORT_LIMIT - 1,
+    );
 
     const [error] = await report();
 
     expect(error).toBeNull();
-    expect(countEmailLogsByUserMock).toHaveBeenCalledWith({
+    expect(countDocumentReportsByUserMock).toHaveBeenCalledWith({
       userId: viewer.id,
-      template: EmailTemplate.DocumentReport,
       since: new Date('2026-10-25T12:00:00Z'),
     });
   });
 
   it('refuses a report past the limit', async () => {
-    countEmailLogsByUserMock.mockResolvedValue(DOCUMENT_REPORT_LIMIT);
+    countDocumentReportsByUserMock.mockResolvedValue(DOCUMENT_REPORT_LIMIT);
 
     const [error] = await report();
 
     expect(error).toBe(ReportDocumentError.TooManyReports);
+    expect(createDocumentReportMock).not.toHaveBeenCalled();
     expect(sendEmailDocumentReportMock).not.toHaveBeenCalled();
   });
 });

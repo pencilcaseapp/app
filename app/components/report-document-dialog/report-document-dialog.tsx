@@ -84,6 +84,7 @@ export const ReportDocumentDialog: FC<ReportDocumentDialogProps> = ({
       <ResponsiveDialogContent
         minHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
         maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
+        forceBackdrop
       >
         {signInUrl
           ? <SignInToReport signInUrl={signInUrl} />

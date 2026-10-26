@@ -6,7 +6,7 @@ import {
   type DocumentReportEmailProps,
 } from './document-report';
 
-const documentUrl = 'https://pencilcase.app/doc/doc-id';
+const documentUrl = 'https://docs.pencilcase.app/doc/doc-id';
 
 const props: DocumentReportEmailProps = {
   reason: 'harassment',
