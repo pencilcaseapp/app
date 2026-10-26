@@ -3,6 +3,7 @@ import { FREE_PLAN, PRO_PLAN } from '~/constants/plans';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { Button } from '~/ui/button/button';
 import { PlanComparison } from '~/ui/plan-comparison/plan-comparison';
+import { SIDEBAR_DRAWER_MAX_HEIGHT } from '~/ui/sidebar/sidebar';
 import { UpgradeDialog } from '~/ui/upgrade-dialog/upgrade-dialog';
 
 export interface DocumentLimitDialogProps {
@@ -19,7 +20,7 @@ export interface DocumentLimitDialogProps {
  * the one in the subscription settings; the native apps sell nothing
  * and only say how to make room (`docs/native-apps.md`). Render it
  * inside the sidebar's drawer tree, so it stacks on top of the sidebar
- * on mobile.
+ * on mobile, as tall as the sidebar like the delete sheet.
  */
 export const DocumentLimitDialog: FC<DocumentLimitDialogProps> = ({
   checkoutUrl,
@@ -31,6 +32,8 @@ export const DocumentLimitDialog: FC<DocumentLimitDialogProps> = ({
       <UpgradeDialog
         open={open}
         onOpenChange={onOpenChange}
+        minHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
+        maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
         title="Create Doc"
         headline={`You’ve used all ${FREE_DOCUMENT_LIMIT} of your free docs.`}
         description="Delete a doc to make room for a new one."
@@ -42,6 +45,8 @@ export const DocumentLimitDialog: FC<DocumentLimitDialogProps> = ({
     <UpgradeDialog
       open={open}
       onOpenChange={onOpenChange}
+      minHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
+      maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
       headline="Need more docs?"
       description={`You’ve used all ${FREE_DOCUMENT_LIMIT} of your free docs, `
         + 'but getting more is easy.'}

@@ -44,7 +44,7 @@ Play Billing as long as nothing can be bought in the app and nothing links
 to a purchase. So the apps follow Apple's stricter rule on both platforms:
 
 - no upgrade button, offer, plan comparison or price anywhere: the sidebar
-  keeps the usage meter, the subscription section shows the plan and its
+  drops the usage meter, the subscription section shows the plan and its
   usage or status, "Create Doc" at the limit says to delete a doc, and the
   share panel drops the invite teaser;
 - no billing: no "Manage subscription" button, and a failed payment points

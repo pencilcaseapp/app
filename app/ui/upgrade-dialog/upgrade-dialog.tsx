@@ -30,6 +30,10 @@ export type UpgradeDialogProps = {
   closeLabel?: string;
   imageSrcLight?: string;
   imageSrcDark?: string;
+  /** Drawer only. */
+  minHeight?: string;
+  /** Drawer only. */
+  maxHeight?: string;
 } & Omit<ResponsiveDialogProps, 'children'>;
 
 export const UpgradeDialog: FC<UpgradeDialogProps> = ({
@@ -42,12 +46,18 @@ export const UpgradeDialog: FC<UpgradeDialogProps> = ({
   closeLabel = 'Close',
   imageSrcLight = '/flying-docs-light.svg',
   imageSrcDark = '/flying-docs-dark.svg',
+  minHeight,
+  maxHeight,
   ...rest
 }) => {
   return (
     <ResponsiveDialog {...rest}>
       {trigger && <ResponsiveDialogTrigger render={trigger} />}
-      <ResponsiveDialogContent size={size}>
+      <ResponsiveDialogContent
+        size={size}
+        minHeight={minHeight}
+        maxHeight={maxHeight}
+      >
         <ResponsiveDialogContentInner
           topArea={(
             <ResponsiveDialogTopbar title={title} closeLabel={closeLabel} />

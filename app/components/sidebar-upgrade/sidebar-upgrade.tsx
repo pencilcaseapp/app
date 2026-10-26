@@ -8,9 +8,8 @@ import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 export interface SidebarUpgradeProps {
   documentCount: number;
   documentLimit: number;
-  /** The subscription settings to open; left out in the native apps,
-   * which show the meter without the offer. */
-  to?: string;
+  /** The subscription settings to open. */
+  to: string;
 }
 
 export const SidebarUpgrade: React.FC<SidebarUpgradeProps> = ({
@@ -35,20 +34,18 @@ export const SidebarUpgrade: React.FC<SidebarUpgradeProps> = ({
         value={Math.min(documentCount, documentLimit)}
         max={documentLimit}
       />
-      {to && (
-        <Button
-          as={Link}
-          to={to}
-          // The settings dialog opens over the document, which keeps its
-          // scroll position; on mobile the drawer stacks on the open
-          // sidebar instead of replacing it.
-          preventScrollReset
-          onClick={isMobile ? undefined : closeOnNavigate}
-          colorLight="yellow-500"
-        >
-          Upgrade to Pro
-        </Button>
-      )}
+      <Button
+        as={Link}
+        to={to}
+        // The settings dialog opens over the document, which keeps its
+        // scroll position; on mobile the drawer stacks on the open
+        // sidebar instead of replacing it.
+        preventScrollReset
+        onClick={isMobile ? undefined : closeOnNavigate}
+        colorLight="yellow-500"
+      >
+        Upgrade to Pro
+      </Button>
     </div>
   );
 };

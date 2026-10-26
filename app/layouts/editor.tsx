@@ -180,7 +180,7 @@ export interface EditorSidebarProps extends PropsWithChildren {
   /** "Create Doc" opens the upgrade dialog instead of `/new`. */
   documentLimitReached: boolean;
   showUpgrade?: boolean;
-  /** The native apps sell nothing: the meter stays, the offer goes. */
+  /** The native apps sell nothing: no meter and no offer. */
   isNativeApp?: boolean;
 }
 
@@ -362,14 +362,14 @@ function EditorSidebar({
         ]}
         // The upgrade area adds the meter block, the button, and the
         // column gap on top of the footer's base height.
-        reservedFooterHeight={showUpgrade ? (isNativeApp ? 163 : 223) : 123}
+        reservedFooterHeight={showUpgrade && !isNativeApp ? 223 : 123}
         bottomArea={(
           <>
-            {showUpgrade && (
+            {showUpgrade && !isNativeApp && (
               <SidebarUpgrade
                 documentCount={ownedDocumentCount}
                 documentLimit={FREE_DOCUMENT_LIMIT}
-                to={isNativeApp ? undefined : upgradeUrl}
+                to={upgradeUrl}
               />
             )}
             {documentLimitReached
