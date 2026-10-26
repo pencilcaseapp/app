@@ -52,19 +52,32 @@ describe('ReportDocumentDialog', () => {
 
     expect(await screen.findByRole('dialog', { name: 'Report document' }))
       .toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Reason' }))
-      .toHaveTextContent('Choose a reason');
+    expect(screen.getByLabelText('Reason')).toHaveValue('');
   });
 
-  test('waits for a reason before it can be sent', async () => {
+  test('marks a missing reason instead of sending', async () => {
     const user = userEvent.setup();
-    renderDialog();
+    const action = vi.fn(async () => ({ ok: true }));
+    renderDialog({ action });
 
     await user.click(screen.getByRole('button', { name: 'Report' }));
     const dialog = await screen.findByRole('dialog');
-    const submit = dialog.querySelector('button[type="submit"]');
+    await user.click(
+      dialog.querySelector('button[type="submit"]') as HTMLElement,
+    );
 
-    expect(submit).toBeDisabled();
+    const reason = screen.getByLabelText('Reason');
+    expect(await screen.findByText(documentReportCopies.reasonRequired))
+      .toBeInTheDocument();
+    expect(reason).toHaveAttribute('aria-invalid', 'true');
+    expect(action).not.toHaveBeenCalled();
+
+    await user.selectOptions(reason, 'spam');
+
+    await vi.waitFor(() => {
+      expect(screen.queryByText(documentReportCopies.reasonRequired))
+        .not.toBeInTheDocument();
+    });
   });
 
   test('posts the reason and details, then closes with a toast',
@@ -81,11 +94,9 @@ describe('ReportDocumentDialog', () => {
       renderDialog({ action });
 
       await user.click(screen.getByRole('button', { name: 'Report' }));
-      await user.click(
-        await screen.findByRole('combobox', { name: 'Reason' }),
-      );
-      await user.click(
-        await screen.findByRole('option', { name: 'Spam or scam' }),
+      await user.selectOptions(
+        await screen.findByLabelText('Reason'),
+        'spam',
       );
       await user.type(
         screen.getByLabelText('Details'),
@@ -121,12 +132,7 @@ describe('ReportDocumentDialog', () => {
     });
 
     await user.click(screen.getByRole('button', { name: 'Report' }));
-    await user.click(
-      await screen.findByRole('combobox', { name: 'Reason' }),
-    );
-    await user.click(
-      await screen.findByRole('option', { name: 'Something else' }),
-    );
+    await user.selectOptions(await screen.findByLabelText('Reason'), 'other');
     const dialog = screen.getByRole('dialog');
     await user.click(
       dialog.querySelector('button[type="submit"]') as HTMLElement,

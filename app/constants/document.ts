@@ -106,6 +106,9 @@ export const DOCUMENT_REPORT_LIMIT = 10;
 export const DOCUMENT_REPORT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 export const documentReportCopies = {
+  reasonRequired: 'Please choose a reason',
+  detailsTooLong: 'Keep it under '
+    + `${MAX_DOCUMENT_REPORT_DETAILS_LENGTH} characters`,
   tooManyReports: 'Too many reports. Please try again later',
   sent: 'Thanks, we received your report',
 };

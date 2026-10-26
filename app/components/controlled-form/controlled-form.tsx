@@ -10,10 +10,12 @@ export type ControlledFormProps = {
   form: AnyFormApi & { AppForm: any };
   children: ReactNode;
   noValidate?: boolean;
+  /** Where it posts; the current route's action when left out. */
+  action?: string;
 };
 
 export const ControlledForm: React.FC<ControlledFormProps>
-  = ({ form, children, noValidate }) => {
+  = ({ form, children, noValidate, action }) => {
     // Hydration resets the fields, which would throw away whatever was
     // typed or autofilled into the server-rendered form.
     const isHydrated = useIsClient();
@@ -28,6 +30,7 @@ export const ControlledForm: React.FC<ControlledFormProps>
       <Form
         id={getFormId(form)}
         method="post"
+        action={action}
         onSubmit={handleSubmit}
         noValidate={noValidate}
         className="block"

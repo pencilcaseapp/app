@@ -9,6 +9,7 @@ export interface TextAreaProps
   id: string;
   label?: string;
   hint?: string;
+  errorMessage?: string;
   className?: string;
 }
 
@@ -17,6 +18,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
   id,
   label,
   hint,
+  errorMessage,
   className,
   disabled,
   rows = 4,
@@ -34,10 +36,12 @@ export const TextArea: React.FC<TextAreaProps> = ({
         id={id}
         rows={rows}
         disabled={disabled}
+        aria-invalid={!!errorMessage}
+        aria-errormessage={errorMessage ? `${id}-error` : undefined}
         className="resize-none"
         {...props}
       />
-      {hint && (
+      {hint && !errorMessage && (
         <Typography
           as="span"
           variant="bodyTiny"
@@ -45,6 +49,17 @@ export const TextArea: React.FC<TextAreaProps> = ({
           textColorDark="grey-400"
         >
           {hint}
+        </Typography>
+      )}
+      {errorMessage && (
+        <Typography
+          id={`${id}-error`}
+          as="span"
+          variant="bodyTiny"
+          textColorLight="red-500"
+          textColorDark="red-500"
+        >
+          {errorMessage}
         </Typography>
       )}
     </div>

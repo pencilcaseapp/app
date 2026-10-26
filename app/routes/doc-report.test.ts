@@ -64,15 +64,15 @@ test('reports the document as the signed in user', async () => {
 });
 
 test('takes a report without details', async () => {
-  await callAction({ reason: 'other' });
+  await callAction({ reason: 'other', details: '' });
 
   expect(reportDocumentMock).toHaveBeenCalledWith(
-    expect.objectContaining({ reason: 'other' }),
+    expect.objectContaining({ reason: 'other', details: '' }),
   );
 });
 
 test('responds with 400 without a known reason', async () => {
-  await expect(callAction({ reason: 'boring' })).rejects.toMatchObject({
+  await expect(callAction({ reason: 'boring', details: '' })).rejects.toMatchObject({
     init: { status: 400 },
   });
   expect(reportDocumentMock).not.toHaveBeenCalled();
@@ -81,7 +81,7 @@ test('responds with 400 without a known reason', async () => {
 test('responds with 403 when the service denies the user', async () => {
   reportDocumentMock.mockResolvedValue([ReportDocumentError.PermissionDenied]);
 
-  await expect(callAction({ reason: 'spam' })).rejects.toMatchObject({
+  await expect(callAction({ reason: 'spam', details: '' })).rejects.toMatchObject({
     init: { status: 403 },
   });
 });
@@ -89,7 +89,7 @@ test('responds with 403 when the service denies the user', async () => {
 test('says so when the user sent too many reports', async () => {
   reportDocumentMock.mockResolvedValue([ReportDocumentError.TooManyReports]);
 
-  expect(await callAction({ reason: 'spam' })).toStrictEqual({
+  expect(await callAction({ reason: 'spam', details: '' })).toStrictEqual({
     ok: false,
     error: documentReportCopies.tooManyReports,
   });

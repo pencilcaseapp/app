@@ -426,7 +426,8 @@ detached. `docs/emails.md` covers the e-mail.
 treat shared documents as user generated content (Apple 1.2, Google
 Play's UGC policy), so everybody but the owner gets a Report button in
 the top bar where the owner has Share
-(`app/components/report-document-dialog/`). It posts a reason and
+(`app/components/report-document-dialog/`). Its form (a native
+select for the reason, checked by the zod schema) posts a reason and
 optional details to `/doc/:id/report`; `reportDocument` checks the
 reporter may open the document and does not own it, caps reports per
 account from `email_logs` (`DOCUMENT_REPORT_LIMIT`) and e-mails the
@@ -509,7 +510,9 @@ feature joins it rather than starting a file of its own.
 **Forms.** TanStack Form via `useAppForm` (`app/hooks/use-app-form.ts`), which
 wires the field/form component registry (`ControlledTextField`, `Checkbox`,
 `OneTimePasswordField`, `SubmitButton`) and merges server `actionData` back into
-client state. Actions call `validateForm(request, zodSchema)` from
+client state; a form posting to a resource route passes its fetcher
+(`useAppForm(…, { fetcher })`, `ControlledForm`'s `action`) and reads the
+answer from it. Actions call `validateForm(request, zodSchema)` from
 `app/utils/form.ts` — it enforces CSRF (throwing 403), runs the Zod schema
 server-side, and derives `FormDataInfo` coercion hints from the schema shape.
 Return `form.formState` on failure, or `returnFormError(...)` for
