@@ -43,11 +43,12 @@ test('only explains the limit in the native apps', () => {
 
   expect(screen.getByRole('dialog', { name: 'Create Doc' }))
     .toBeInTheDocument();
-  expect(
-    screen.getByText(`You’ve used all ${FREE_DOCUMENT_LIMIT} of your free docs.`),
-  ).toBeInTheDocument();
-  expect(screen.getByText('Delete a doc to make room for a new one.'))
+  expect(screen.getByRole('heading', { name: 'Doc limit reached.' }))
     .toBeInTheDocument();
+  expect(screen.getByText(
+    `You’ve used all ${FREE_DOCUMENT_LIMIT} of your free docs. `
+    + 'Delete one to make room for a new one.',
+  )).toBeInTheDocument();
   expect(screen.queryByText('Pencil Case Pro')).not.toBeInTheDocument();
   expect(screen.queryByRole('link')).not.toBeInTheDocument();
 });

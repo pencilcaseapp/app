@@ -35,8 +35,9 @@ export const DocumentLimitDialog: FC<DocumentLimitDialogProps> = ({
         minHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
         maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
         title="Create Doc"
-        headline={`You’ve used all ${FREE_DOCUMENT_LIMIT} of your free docs.`}
-        description="Delete a doc to make room for a new one."
+        headline="Doc limit reached."
+        description={`You’ve used all ${FREE_DOCUMENT_LIMIT} of your free `
+          + 'docs. Delete one to make room for a new one.'}
       />
     );
   }
