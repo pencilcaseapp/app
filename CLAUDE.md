@@ -209,7 +209,10 @@ on every sync. `app/clients/creem.ts` wraps the official `creem` SDK;
 drive Creem's real test-mode checkout and skip without
 `CREEM_API_KEY`. Read
 `docs/subscriptions.md` before touching webhook handling or the emails
-around it — it also spells out which emails Creem sends for us.
+around it — it also spells out which emails Creem sends for us. The
+native apps sell nothing: no offer, price, checkout or billing link
+inside them (`isNativeApp` from the loaders, `docs/native-apps.md`), so
+neither store takes a cut.
 
 **Auth.** Passwordless magic code. `app/services/auth.ts` owns the flow
 (argon2-hashed OTP → cookie session with a sha256-hashed token stored in

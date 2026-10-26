@@ -24,12 +24,16 @@ export type UpgradeDialogProps = {
   title?: string;
   headline: string;
   description?: string;
-  pricingArea: ReactNode;
+  pricingArea?: ReactNode;
   trigger?: ResponsiveDialogTriggerProps['render'];
   size?: DialogSize;
   closeLabel?: string;
   imageSrcLight?: string;
   imageSrcDark?: string;
+  /** Drawer only. */
+  minHeight?: string;
+  /** Drawer only. */
+  maxHeight?: string;
 } & Omit<ResponsiveDialogProps, 'children'>;
 
 export const UpgradeDialog: FC<UpgradeDialogProps> = ({
@@ -42,12 +46,18 @@ export const UpgradeDialog: FC<UpgradeDialogProps> = ({
   closeLabel = 'Close',
   imageSrcLight = '/flying-docs-light.svg',
   imageSrcDark = '/flying-docs-dark.svg',
+  minHeight,
+  maxHeight,
   ...rest
 }) => {
   return (
     <ResponsiveDialog {...rest}>
       {trigger && <ResponsiveDialogTrigger render={trigger} />}
-      <ResponsiveDialogContent size={size}>
+      <ResponsiveDialogContent
+        size={size}
+        minHeight={minHeight}
+        maxHeight={maxHeight}
+      >
         <ResponsiveDialogContentInner
           topArea={(
             <ResponsiveDialogTopbar title={title} closeLabel={closeLabel} />
@@ -84,7 +94,7 @@ export const UpgradeDialog: FC<UpgradeDialogProps> = ({
                 {description}
               </ResponsiveDialogDescription>
             )}
-            <div className="mt-6">{pricingArea}</div>
+            {pricingArea && <div className="mt-6">{pricingArea}</div>}
           </div>
         </ResponsiveDialogContentInner>
       </ResponsiveDialogContent>

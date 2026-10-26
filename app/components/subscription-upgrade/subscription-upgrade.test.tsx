@@ -8,7 +8,7 @@ import { SubscriptionUpgrade } from './subscription-upgrade';
 
 const DOC_ID = '11111111-2222-4333-8444-555555555555';
 
-function renderUpgrade(documentCount = 2) {
+function renderUpgrade(documentCount = 2, isNativeApp = false) {
   const Stub = createRoutesStub([
     {
       path: '/settings/subscription',
@@ -18,6 +18,7 @@ function renderUpgrade(documentCount = 2) {
             <SubscriptionUpgrade
               documentCount={documentCount}
               documentId={DOC_ID}
+              isNativeApp={isNativeApp}
             />
           </SettingsDialogContent>
         </ResponsiveDialog>
@@ -58,4 +59,21 @@ test('links to the checkout over the same document', () => {
 
   expect(screen.getByRole('link', { name: 'Upgrade to Pro' }))
     .toHaveAttribute('href', `/doc/${DOC_ID}/checkout`);
+});
+
+test('shows only the usage in the native apps', () => {
+  renderUpgrade(2, true);
+
+  expect(screen.getByRole('heading', { name: 'You’re on the free plan.' }))
+    .toBeInTheDocument();
+  expect(screen.getByText(
+    `You’ve used 2 of your ${FREE_DOCUMENT_LIMIT} free docs.`,
+  )).toBeInTheDocument();
+  expect(screen.queryByText('Pencil Case Pro')).not.toBeInTheDocument();
+  expect(screen.queryByText(/€/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Creem/)).not.toBeInTheDocument();
+  expect(screen.queryByRole('rowheader', { name: 'Docs' }))
+    .not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Upgrade to Pro' }))
+    .not.toBeInTheDocument();
 });

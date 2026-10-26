@@ -13,6 +13,8 @@ export interface CurrentSubscriptionProps {
   status: SubscriptionStatus | 'complimentary';
   /** The formatted end of the running period, when known. */
   periodEnd: string | null;
+  /** The native apps show no prices and point to no billing. */
+  isNativeApp?: boolean;
 }
 
 type StatusPresentation = {
@@ -29,6 +31,7 @@ type StatusPresentation = {
 function presentStatus(
   status: CurrentSubscriptionProps['status'],
   periodEnd: string | null,
+  isNativeApp?: boolean,
 ): StatusPresentation {
   switch (status) {
     case 'complimentary': {
@@ -63,8 +66,10 @@ function presentStatus(
       return {
         badge: 'danger',
         label: 'Payment failed',
-        notice: 'Update your payment method in the customer portal to '
-          + 'keep Pro.',
+        notice: isNativeApp
+          ? 'Your last payment failed. We’ve emailed you what to do.'
+          : 'Update your payment method in the customer portal to '
+            + 'keep Pro.',
       };
     }
 
@@ -93,14 +98,17 @@ const valueClasses = 'h-11 text-right align-middle';
 export const CurrentSubscription: FC<CurrentSubscriptionProps> = ({
   status,
   periodEnd,
+  isNativeApp,
 }) => {
-  const { badge, label, date, note, notice } = presentStatus(status, periodEnd);
+  const { badge, label, date, note, notice }
+    = presentStatus(status, periodEnd, isNativeApp);
 
   return (
     <PlanOverview
       image="pencil-and-doc"
       headline="You’re on Pencil Case Pro."
       currentPlan="pro"
+      showPlans={!isNativeApp}
     >
       <div className="flex flex-col gap-3">
         {notice && <Notification variant="danger" title={notice} />}

@@ -17,11 +17,17 @@ import { loader } from './settings-subscription';
 import type { Route } from './+types/settings-subscription';
 
 const getDocumentListMock = vi.fn().mockResolvedValue([]);
+const isNativeAppRequestMock = vi.fn().mockReturnValue(false);
 const getSubscriptionOverviewMock = vi.fn();
 const completeProCheckoutMock = vi.fn();
 
 vi.mock('~/repos/document', () => ({
   getDocumentList: (...args: unknown[]) => getDocumentListMock(...args),
+}));
+
+vi.mock('~/utils/native-app', () => ({
+  isNativeAppRequest:
+    (...args: unknown[]) => isNativeAppRequestMock(...args),
 }));
 
 vi.mock('~/services/subscription', async (importOriginal) => {
@@ -75,6 +81,7 @@ async function renderSubscription(
 afterEach(() => {
   vi.clearAllMocks();
   getDocumentListMock.mockResolvedValue([]);
+  isNativeAppRequestMock.mockReturnValue(false);
 });
 
 describe('page', () => {
@@ -171,6 +178,30 @@ describe('page', () => {
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Manage subscription' }))
       .not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Upgrade to Pro' }))
+      .not.toBeInTheDocument();
+  });
+
+  test('sells nothing in the native apps', async () => {
+    isNativeAppRequestMock.mockReturnValue(true);
+
+    await renderSubscription(subscriber, activeSubscription);
+
+    expect(await screen.findByText('You’re on Pencil Case Pro.'))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/€/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Manage subscription' }))
+      .not.toBeInTheDocument();
+  });
+
+  test('offers no upgrade in the native apps', async () => {
+    isNativeAppRequestMock.mockReturnValue(true);
+
+    await renderSubscription(userFixture, { kind: 'none' });
+
+    expect(await screen.findByText('You’re on the free plan.'))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/€/)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Upgrade to Pro' }))
       .not.toBeInTheDocument();
   });

@@ -14,6 +14,7 @@ import {
   getSubscriptionOverview,
 } from '~/services/subscription';
 import { formatDate } from '~/utils/date';
+import { isNativeAppRequest } from '~/utils/native-app';
 import { withSearchParams } from '~/utils/url';
 import type { Route } from './+types/settings-subscription';
 
@@ -65,6 +66,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
       : overview,
     hasBillingAccount: !!user.creemCustomerId,
     documentCount: documents.length,
+    isNativeApp: isNativeAppRequest(request),
   };
 }
 
@@ -72,17 +74,19 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
  * The subscription section: the upgrade offer, or the subscription
  * behind the pro features once there is one. Each view's action sits
  * in the dialog's footer; complimentary pro has no Creem customer to
- * manage, and so no footer.
+ * manage, and so no footer, and neither have the native apps, which
+ * sell nothing and point to no billing (`docs/native-apps.md`).
  */
 export default function SettingsSubscriptionRoute({
   params: { id: documentId },
-  loaderData: { overview, hasBillingAccount, documentCount },
+  loaderData: { overview, hasBillingAccount, documentCount, isNativeApp },
 }: Route.ComponentProps) {
   if (overview.kind === 'none') {
     return (
       <SubscriptionUpgrade
         documentCount={documentCount}
         documentId={documentId}
+        isNativeApp={isNativeApp}
       />
     );
   }
@@ -90,7 +94,8 @@ export default function SettingsSubscriptionRoute({
   return (
     <SettingsDialogContentInner
       section="subscription"
-      footerArea={hasBillingAccount && <CurrentSubscriptionFooter />}
+      footerArea={hasBillingAccount && !isNativeApp
+        && <CurrentSubscriptionFooter />}
     >
       <CurrentSubscription
         status={overview.kind === 'subscribed'
@@ -99,6 +104,7 @@ export default function SettingsSubscriptionRoute({
         periodEnd={overview.kind === 'subscribed'
           ? overview.periodEnd
           : null}
+        isNativeApp={isNativeApp}
       />
     </SettingsDialogContentInner>
   );

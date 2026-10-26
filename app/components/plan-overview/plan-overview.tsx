@@ -17,6 +17,9 @@ export interface PlanOverviewProps extends PropsWithChildren {
   subheadline?: string;
   /** The plan the reader is on. */
   currentPlan: 'free' | 'pro';
+  /** The pricing cards; the native apps leave them out, they sell
+   * nothing and show no prices. */
+  showPlans?: boolean;
 }
 
 /*
@@ -32,6 +35,7 @@ export const PlanOverview: FC<PlanOverviewProps> = ({
   headline,
   subheadline,
   currentPlan,
+  showPlans = true,
   children,
 }) => {
   const onPro = currentPlan === 'pro';
@@ -72,26 +76,28 @@ export const PlanOverview: FC<PlanOverviewProps> = ({
           </Typography>
         )}
       </div>
-      <div className="mx-auto grid w-full max-w-md grid-cols-2 gap-3">
-        <PricingCard
-          plan={FREE_PLAN.plan}
-          amount={FREE_PLAN.amount}
-          period={FREE_PLAN.period}
-          size="compact"
-          background="white"
-          tilted={onPro}
-          disabled={onPro}
-          badge={!onPro && <Badge variant="neutral">Current</Badge>}
-        />
-        <PricingCard
-          plan={PRO_PLAN.plan}
-          amount={PRO_PLAN.amount}
-          period={PRO_PLAN.period}
-          size="compact"
-          tilted={!onPro}
-          badge={onPro && <Badge variant="dark">Current</Badge>}
-        />
-      </div>
+      {showPlans && (
+        <div className="mx-auto grid w-full max-w-md grid-cols-2 gap-3">
+          <PricingCard
+            plan={FREE_PLAN.plan}
+            amount={FREE_PLAN.amount}
+            period={FREE_PLAN.period}
+            size="compact"
+            background="white"
+            tilted={onPro}
+            disabled={onPro}
+            badge={!onPro && <Badge variant="neutral">Current</Badge>}
+          />
+          <PricingCard
+            plan={PRO_PLAN.plan}
+            amount={PRO_PLAN.amount}
+            period={PRO_PLAN.period}
+            size="compact"
+            tilted={!onPro}
+            badge={onPro && <Badge variant="dark">Current</Badge>}
+          />
+        </div>
+      )}
       {children}
     </div>
   );

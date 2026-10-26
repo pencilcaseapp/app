@@ -38,6 +38,7 @@ function renderSharePanel({
   linkAccess = 'view' as DocumentLinkAccess,
   defaultOpen = true,
   showUpgrade = false,
+  isNativeApp = false,
   invited = [],
   action = async () => ({ ok: true }),
   shareAction = async () => ({ ok: true }),
@@ -49,6 +50,7 @@ function renderSharePanel({
   linkAccess?: DocumentLinkAccess;
   defaultOpen?: boolean;
   showUpgrade?: boolean;
+  isNativeApp?: boolean;
   invited?: InvitedPerson[];
   action?: Action;
   shareAction?: Action;
@@ -71,6 +73,7 @@ function renderSharePanel({
               owner={owner}
               invited={invited}
               showUpgrade={showUpgrade}
+              isNativeApp={isNativeApp}
               defaultOpen={defaultOpen}
             />
           </ToastProvider>
@@ -385,6 +388,16 @@ describe('SharePanel', () => {
     expect(
       screen.queryByRole('link', { name: /Invite people by email/ }),
     ).not.toBeInTheDocument();
+  });
+
+  test('offers no upgrade in the native apps', () => {
+    renderSharePanel({ showUpgrade: true, isNativeApp: true });
+
+    expect(
+      screen.queryByRole('link', { name: /Invite people by email/ }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('textbox', { name: 'Email address' }))
+      .not.toBeInTheDocument();
   });
 
   test('closes the panel when the upgrade offer is opened', async () => {
