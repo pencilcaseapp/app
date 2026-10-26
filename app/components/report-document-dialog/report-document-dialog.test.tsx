@@ -52,8 +52,8 @@ describe('ReportDocumentDialog', () => {
 
     expect(await screen.findByRole('dialog', { name: 'Report document' }))
       .toBeInTheDocument();
-    expect(screen.getByRole('radiogroup', { name: 'Reason' }))
-      .toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Reason' }))
+      .toHaveTextContent('Choose a reason');
   });
 
   test('waits for a reason before it can be sent', async () => {
@@ -81,7 +81,12 @@ describe('ReportDocumentDialog', () => {
       renderDialog({ action });
 
       await user.click(screen.getByRole('button', { name: 'Report' }));
-      await user.click(await screen.findByText('Spam or scam'));
+      await user.click(
+        await screen.findByRole('combobox', { name: 'Reason' }),
+      );
+      await user.click(
+        await screen.findByRole('option', { name: 'Spam or scam' }),
+      );
       await user.type(
         screen.getByLabelText('Details'),
         'Links to a fake shop.',
@@ -116,7 +121,12 @@ describe('ReportDocumentDialog', () => {
     });
 
     await user.click(screen.getByRole('button', { name: 'Report' }));
-    await user.click(await screen.findByText('Something else'));
+    await user.click(
+      await screen.findByRole('combobox', { name: 'Reason' }),
+    );
+    await user.click(
+      await screen.findByRole('option', { name: 'Something else' }),
+    );
     const dialog = screen.getByRole('dialog');
     await user.click(
       dialog.querySelector('button[type="submit"]') as HTMLElement,
@@ -135,6 +145,6 @@ describe('ReportDocumentDialog', () => {
 
     expect(await screen.findByRole('link', { name: 'Sign in' }))
       .toHaveAttribute('href', '/signin?returnUrl=%2Fdoc');
-    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
 });

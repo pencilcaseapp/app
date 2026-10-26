@@ -11,7 +11,6 @@ import {
 import { useEmitToast } from '~/hooks/use-toast';
 import type { action as reportAction } from '~/routes/doc-report';
 import { Button } from '~/ui/button/button';
-import { RadioGroup } from '~/ui/radio-group/radio-group';
 import {
   ResponsiveDialog,
   ResponsiveDialogClose,
@@ -21,6 +20,8 @@ import {
 } from '~/ui/responsive-dialog/responsive-dialog';
 import { ResponsiveDialogContent } from '~/ui/responsive-dialog/responsive-dialog-content';
 import { ResponsiveDialogContentInner } from '~/ui/responsive-dialog/responsive-dialog-content-inner';
+import { FormFieldStyle } from '~/ui/form-field-style/form-field-style';
+import { Select } from '~/ui/select/select';
 import { SIDEBAR_DRAWER_MAX_HEIGHT } from '~/ui/sidebar/sidebar';
 import { TextArea } from '~/ui/text-area/text-area';
 import { Typography } from '~/ui/typography/typography';
@@ -176,13 +177,29 @@ const ReportForm: FC<{ documentId: string; onSent: () => void }> = ({
         className="mt-5 flex flex-col gap-5"
       >
         <AuthenticityTokenInput />
-        <RadioGroup
-          name="reason"
-          label="Reason"
-          items={REASON_ITEMS}
-          value={reason}
-          onValueChange={setReason}
-        />
+        <div className="flex flex-col gap-2">
+          <Typography
+            as="span"
+            variant="bodySmall"
+            fontWeight="semibold"
+            textColorDark="grey-300"
+            aria-hidden
+          >
+            Reason
+          </Typography>
+          <FormFieldStyle as="div" focusWithin className="p-1.5">
+            <Select
+              name="reason"
+              aria-label="Reason"
+              items={REASON_ITEMS}
+              value={reason}
+              onValueChange={setReason}
+              placeholder="Choose a reason"
+              variant="solid"
+              className="w-full justify-between"
+            />
+          </FormFieldStyle>
+        </div>
         <TextArea
           id={`${formId}-details`}
           name="details"
