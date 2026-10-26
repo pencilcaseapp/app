@@ -205,8 +205,10 @@ class MainViewController: UIViewController {
         placeIndicator(for: pull)
     }
 
-    /// Loads a link to the web app, with its path on the server the app
-    /// points at, so a link to production opens on a dev server too.
+    /// Opens a link to the web app, with its path on the server the app
+    /// points at, so a link to production opens on a dev server too. The page
+    /// navigates there itself when it can (`useNativeOpenLink`): loading it
+    /// anew leaves the web view white for a few frames.
     func open(_ url: URL) {
         guard let webView = bridgeViewController.webView,
               let serverURL = bridgeViewController.bridge?.config.serverURL,
@@ -218,8 +220,23 @@ class MainViewController: UIViewController {
         components.percentEncodedPath = link.percentEncodedPath
         components.percentEncodedQuery = link.percentEncodedQuery
         components.percentEncodedFragment = link.percentEncodedFragment
-        if let target = components.url {
-            webView.load(URLRequest(url: target))
+        guard let target = components.url else {
+            return
+        }
+
+        var path = URLComponents()
+        path.percentEncodedPath = link.percentEncodedPath
+        path.percentEncodedQuery = link.percentEncodedQuery
+        path.percentEncodedFragment = link.percentEncodedFragment
+        webView.callAsyncJavaScript(
+            "return window.openNativeLink?.(path) === true",
+            arguments: ["path": path.string ?? "/"],
+            in: nil,
+            in: .page
+        ) { result in
+            if (try? result.get()) as? Bool != true {
+                webView.load(URLRequest(url: target))
+            }
         }
     }
 
