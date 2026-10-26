@@ -10,7 +10,9 @@ export async function setup() {
 
 async function resetDatabase() {
   // Get all tables
-  const { rows: tables } = await db.execute(sql`
+  const { rows: tables } = await db.execute<{
+    tablename: string;
+  }>(sql`
       SELECT tablename FROM pg_tables WHERE schemaname = 'public';
     `);
 
