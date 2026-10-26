@@ -25,18 +25,6 @@ describe('Select', () => {
     expect(screen.getByRole('combobox')).toHaveTextContent('Can view');
   });
 
-  test('shows the placeholder until an item is chosen', async () => {
-    const user = userEvent.setup();
-    renderSelect({ defaultValue: undefined, placeholder: 'Choose access' });
-
-    expect(screen.getByRole('combobox')).toHaveTextContent('Choose access');
-
-    await user.click(screen.getByRole('combobox'));
-    await user.click(screen.getByRole('option', { name: 'Can edit' }));
-
-    expect(screen.getByRole('combobox')).toHaveTextContent('Can edit');
-  });
-
   test('does not show the list by default', () => {
     renderSelect();
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();

@@ -90,7 +90,7 @@ export const Select = <Value extends string>({
         className={className}
         render={<ChoiceTrigger />}
       >
-        <BaseSelect.Value placeholder={placeholder} />
+        <BaseSelect.Value>{placeholder}</BaseSelect.Value>
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
         <BaseSelect.Positioner
