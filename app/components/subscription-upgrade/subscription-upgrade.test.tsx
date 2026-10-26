@@ -64,10 +64,11 @@ test('links to the checkout over the same document', () => {
 test('shows only the usage in the native apps', () => {
   renderUpgrade(2, true);
 
-  expect(screen.getByRole('heading', {
-    name: `You’ve used 2 of your ${FREE_DOCUMENT_LIMIT} free docs.`,
-  })).toBeInTheDocument();
-  expect(screen.getByText('You’re on the free plan.')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'You’re on the free plan.' }))
+    .toBeInTheDocument();
+  expect(screen.getByText(
+    `You’ve used 2 of your ${FREE_DOCUMENT_LIMIT} free docs.`,
+  )).toBeInTheDocument();
   expect(screen.queryByText('Pencil Case Pro')).not.toBeInTheDocument();
   expect(screen.queryByText(/€/)).not.toBeInTheDocument();
   expect(screen.queryByText(/Creem/)).not.toBeInTheDocument();

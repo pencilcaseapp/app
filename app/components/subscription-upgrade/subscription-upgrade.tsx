@@ -44,8 +44,8 @@ export const SubscriptionUpgrade: FC<SubscriptionUpgradeProps> = ({
       <SettingsDialogContentInner section="subscription">
         <PlanOverview
           image="flying-docs"
-          headline={headlineFor(documentCount)}
-          subheadline="You’re on the free plan."
+          headline="You’re on the free plan."
+          subheadline={headlineFor(documentCount)}
           currentPlan="free"
           showPlans={false}
         />
