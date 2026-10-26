@@ -126,6 +126,32 @@ test('does not look the invited people up for a visitor', async () => {
   expect(listInvitedCollaboratorsMock).not.toHaveBeenCalled();
 });
 
+test('offers a report instead of sharing to anybody but the owner',
+  async () => {
+    const context = new RouterContextProvider();
+    context.set(optionalUserSessionContext, userFixture);
+    openDocumentMock.mockResolvedValue(
+      openedDocument({ isOwner: false, linkShared: true }),
+    );
+
+    const { findByRole, queryByRole } = await renderDoc(context);
+
+    expect(await findByRole('button', { name: 'Report' }))
+      .toBeInTheDocument();
+    expect(queryByRole('button', { name: 'Share' })).not.toBeInTheDocument();
+  });
+
+test('offers no report to the owner', async () => {
+  const context = new RouterContextProvider();
+  context.set(optionalUserSessionContext, userFixture);
+  openDocumentMock.mockResolvedValue(openedDocument());
+
+  const { findByRole, queryByRole } = await renderDoc(context);
+
+  expect(await findByRole('button', { name: 'Share' })).toBeInTheDocument();
+  expect(queryByRole('button', { name: 'Report' })).not.toBeInTheDocument();
+});
+
 test('renders not found state', async () => {
   const context = new RouterContextProvider();
   context.set(optionalUserSessionContext, userFixture);
@@ -222,6 +248,7 @@ test('lets an anonymous visitor read a shared document', async () => {
     .toHaveBeenCalledWith(documentFixture.id, undefined);
   expect(queryByText('Permission Denied')).not.toBeInTheDocument();
   expect(redirectMock).not.toHaveBeenCalled();
+  expect(queryByText('Report')).toBeInTheDocument();
 });
 
 test('opens a deleted document read-only with a notice', async () => {

@@ -39,7 +39,8 @@ export type IconName
     | 'externalLink'
     | 'globe'
     | 'users'
-    | 'lock';
+    | 'lock'
+    | 'flag';
 
 export const icons: {
   [index in IconName]: React.ReactElement<SVGPathElement>;
@@ -411,6 +412,15 @@ export const icons: {
   'lock': (
     <path
       d="M7.5 10.5V8C7.5 5.51472 9.51472 3.5 12 3.5C14.4853 3.5 16.5 5.51472 16.5 8V10.5M6.5 10.5H17.5C18.0523 10.5 18.5 10.9477 18.5 11.5V19.5C18.5 20.0523 18.0523 20.5 17.5 20.5H6.5C5.94772 20.5 5.5 20.0523 5.5 19.5V11.5C5.5 10.9477 5.94772 10.5 6.5 10.5ZM12 14.5V16.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'flag': (
+    <path
+      d="M4 15C4 15 5 14 8 14C11 14 13 16 16 16C19 16 20 15 20 15V4C20 4 19 5 16 5C13 5 11 3 8 3C5 3 4 4 4 4V15ZM4 15V22"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"

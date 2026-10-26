@@ -62,3 +62,56 @@ export const documentInviteCopies = {
   invalidEmail: 'Enter a valid email address',
   tooManyInvites: 'Too many invites. Please try again later',
 };
+
+/**
+ * Why somebody reports a document they can open but do not own. The app
+ * stores have us offer a way to report what others share (Apple 1.2,
+ * Google Play's user generated content policy); the reason heads the
+ * e-mail the report becomes.
+ */
+export const DOCUMENT_REPORT_REASONS = [
+  'spam',
+  'harassment',
+  'sexual',
+  'violence',
+  'illegal',
+  'intellectual-property',
+  'other',
+] as const;
+
+export type DocumentReportReason = typeof DOCUMENT_REPORT_REASONS[number];
+
+export const documentReportReasonLabels: Record<
+  DocumentReportReason,
+  string
+> = {
+  'spam': 'Spam or scam',
+  'harassment': 'Harassment or hate',
+  'sexual': 'Sexual content',
+  'violence': 'Violence or self-harm',
+  'illegal': 'Something illegal',
+  'intellectual-property': 'Copyright or trademark',
+  'other': 'Something else',
+};
+
+export const MAX_DOCUMENT_REPORT_DETAILS_LENGTH = 2000;
+
+/**
+ * How many reports one account may send within
+ * `DOCUMENT_REPORT_WINDOW_MS`. Each one is an e-mail to our own inbox,
+ * so the cap only keeps a single account from flooding it.
+ */
+export const DOCUMENT_REPORT_LIMIT = 10;
+
+export const DOCUMENT_REPORT_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/** How long a report is kept before the nightly job deletes it. */
+export const DOCUMENT_REPORT_RETENTION_DAYS = 365;
+
+export const documentReportCopies = {
+  reasonRequired: 'Please choose a reason',
+  detailsTooLong: 'Keep it under '
+    + `${MAX_DOCUMENT_REPORT_DETAILS_LENGTH} characters`,
+  tooManyReports: 'Too many reports. Please try again later',
+  sent: 'Thanks, we received your report',
+};

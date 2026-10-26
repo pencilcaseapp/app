@@ -114,6 +114,15 @@ describe('sendEmail', () => {
       });
     });
 
+  it('hands a reply-to address on to Lettermint', async () => {
+    await sendEmail({ ...input, replyTo: 'reporter@doe.com' });
+
+    expect(lettermintEmailMock.send).toHaveBeenCalledWith(
+      expect.objectContaining({ reply_to: ['reporter@doe.com'] }),
+      expect.anything(),
+    );
+  });
+
   it('hands the same key to Lettermint', async () => {
     await sendEmail(input);
 

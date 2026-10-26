@@ -8,8 +8,11 @@ import {
 import {
   DOCUMENT_INVITE_LIMIT,
   DOCUMENT_INVITE_WINDOW_MS,
+  DOCUMENT_REPORT_LIMIT,
+  DOCUMENT_REPORT_WINDOW_MS,
   type DocumentAccess,
   type DocumentLinkAccess,
+  type DocumentReportReason,
 } from '~/constants/document';
 import { EmailTemplate } from '~/constants/email';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
@@ -48,15 +51,22 @@ import {
   type DocumentViewer,
 } from '~/repos/document';
 import { incrementDailyStat } from '~/repos/daily-stat';
+import {
+  countDocumentReportsByUser,
+  createDocumentReport,
+} from '~/repos/document-report';
 import { countEmailLogsByUser } from '~/repos/email-log';
-import { getUserByEmail, type User } from '~/repos/user';
+import { getUser, getUserByEmail, type User } from '~/repos/user';
 import { parseAssetSrc } from '~/utils/asset-src';
 import { signBunnyUrl } from '~/utils/bunny-token';
 import { renderDocumentPreview } from '~/utils/document-preview';
 import { createInitialDocumentContent } from '~/utils/headless';
 import { normalizeEmail } from '~/utils/email';
 import { processImage } from '~/utils/image';
-import { sendEmailDocumentInvite } from './email-templates';
+import {
+  sendEmailDocumentInvite,
+  sendEmailDocumentReport,
+} from './email-templates';
 
 export type { DocumentViewer } from '~/repos/document';
 
@@ -595,6 +605,79 @@ export async function leaveDocument(
   }
 
   return [null, { id: document.id }];
+}
+
+export enum ReportDocumentError {
+  PermissionDenied,
+  TooManyReports,
+}
+
+export type ReportDocumentResult = [ReportDocumentError] | [null];
+
+export interface ReportDocumentInput {
+  documentId: string;
+  user: Pick<User, 'id' | 'email'>;
+  reason: DocumentReportReason;
+  details?: string;
+}
+
+/**
+ * Reports a document to us, which the app stores ask of content people
+ * share with each other. Anybody who can open the document may report
+ * it, but not its owner, and no account more often than
+ * `DOCUMENT_REPORT_LIMIT` times a day. The report is recorded, kept for
+ * `DOCUMENT_REPORT_RETENTION_DAYS`, and e-mailed to our inbox keyed by
+ * its id.
+ */
+export async function reportDocument(
+  input: ReportDocumentInput,
+): Promise<ReportDocumentResult> {
+  const { documentId, user, reason } = input;
+  const document = await getDocumentForViewer(documentId, user);
+
+  if (
+    !document
+    || isGone(document, user)
+    || !hasAccess(document, user)
+    || isOwnedBy(document, user)
+  ) {
+    return [ReportDocumentError.PermissionDenied];
+  }
+
+  const count = await countDocumentReportsByUser({
+    userId: user.id,
+    since: new Date(Date.now() - DOCUMENT_REPORT_WINDOW_MS),
+  });
+
+  if (count >= DOCUMENT_REPORT_LIMIT) {
+    return [ReportDocumentError.TooManyReports];
+  }
+
+  const details = input.details?.trim() || null;
+  const report = await createDocumentReport({
+    documentId: document.id,
+    userId: user.id,
+    reason,
+    details,
+  });
+
+  if (!report) {
+    return [ReportDocumentError.PermissionDenied];
+  }
+
+  const owner = await getUser(document.userId);
+
+  await sendEmailDocumentReport({
+    reportId: report.id,
+    reason,
+    details,
+    documentId: document.id,
+    documentTitle: document.title,
+    ownerEmail: owner?.email ?? document.userId,
+    reporter: { id: user.id, email: user.email },
+  });
+
+  return [null];
 }
 
 type DocumentAccessInfo = Pick<

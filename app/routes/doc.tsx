@@ -26,6 +26,7 @@ import { useEditedDocument } from '~/contexts/edited-document';
 import { useLeavingDocument } from '~/contexts/leaving-document';
 import { useCallback, useState } from 'react';
 import { MenuOrSignInButton } from '~/components/menu-or-sign-in-button/menu-or-sign-in-button';
+import { ReportDocumentDialog } from '~/components/report-document-dialog/report-document-dialog';
 import { SharePanel } from '~/components/share-panel/share-panel';
 import { Button } from '~/ui/button/button';
 import { DocEmptyState } from '~/components/doc-empty-state/doc-empty-state';
@@ -260,20 +261,28 @@ export default function ({ params, loaderData }: Route.ComponentProps) {
       signInUrl={loaderData.ok ? loaderData.signInUrl : null}
     />
   );
-  const topbarRight = loaderData.ok && loaderData.owner && !deleted
-    ? (
-        <SharePanel
-          documentId={params.id}
-          linkShared={loaderData.linkShared}
-          linkAccess={loaderData.linkAccess}
-          shareUrl={loaderData.shareUrl}
-          owner={loaderData.owner}
-          invited={loaderData.invited}
-          showUpgrade={!loaderData.hasSubscription}
-          isNativeApp={loaderData.isNativeApp}
-        />
-      )
-    : null;
+  // The owner shares the document, everybody else may report it.
+  const topbarRight = !loaderData.ok || deleted
+    ? null
+    : loaderData.owner
+      ? (
+          <SharePanel
+            documentId={params.id}
+            linkShared={loaderData.linkShared}
+            linkAccess={loaderData.linkAccess}
+            shareUrl={loaderData.shareUrl}
+            owner={loaderData.owner}
+            invited={loaderData.invited}
+            showUpgrade={!loaderData.hasSubscription}
+            isNativeApp={loaderData.isNativeApp}
+          />
+        )
+      : (
+          <ReportDocumentDialog
+            documentId={params.id}
+            signInUrl={loaderData.signInUrl}
+          />
+        );
   const preview = loaderData.ok ? loaderData.preview : null;
 
   return (

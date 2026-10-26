@@ -989,3 +989,26 @@ exports[`Icon Component > should render with icon name 41`] = `
   </svg>
 </div>
 `;
+
+exports[`Icon Component > should render with icon name 42`] = `
+<div>
+  <svg
+    aria-hidden="true"
+    class=""
+    fill="transparent"
+    focusable="false"
+    height="24"
+    viewBox="0 0 24 24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M4 15C4 15 5 14 8 14C11 14 13 16 16 16C19 16 20 15 20 15V4C20 4 19 5 16 5C13 5 11 3 8 3C5 3 4 4 4 4V15ZM4 15V22"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.5"
+    />
+  </svg>
+</div>
+`;

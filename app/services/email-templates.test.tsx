@@ -6,9 +6,11 @@ import {
 import { emailChangeCodeEmailSubject } from '~/emails/templates/email-change-code';
 import { otpCodeEmailSubject } from '~/emails/templates/otp-code';
 import { EmailTemplate } from '~/constants/email';
+import { documentReportEmailSubject } from '~/emails/templates/document-report';
 import {
   sendEmailChangeCode,
   sendEmailDocumentInvite,
+  sendEmailDocumentReport,
   sendEmailMagicCode,
   sendEmailSubscriptionPaymentFailed,
 } from './email-templates';
@@ -129,5 +131,51 @@ describe('sendEmailDocumentInvite', () => {
     const [{ email }] = sendEMailMock.mock.calls[0];
     expect(await render(email, { plainText: true }))
       .toContain(`/doc/${invite.documentId}`);
+  });
+});
+
+describe('sendEmailDocumentReport', () => {
+  const report = {
+    reportId: 'report-id',
+    reason: 'spam' as const,
+    details: 'Links to a fake shop.',
+    documentId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+    documentTitle: 'Trip to the Alps',
+    ownerEmail: 'alex@example.com',
+    reporter: { id: 'user-id', email: 'sam@example.com' },
+  };
+
+  it('sends the report to our inbox, answerable to the reporter and logged '
+    + 'against them', async () => {
+    await sendEmailDocumentReport(report);
+
+    expect(sendEMailMock).toHaveBeenCalledWith({
+      to: { email: 'inbox@pencilcase.app' },
+      replyTo: 'sam@example.com',
+      subject: documentReportEmailSubject({
+        reason: 'spam',
+        documentTitle: 'Trip to the Alps',
+      }),
+      email: expect.anything(),
+      template: EmailTemplate.DocumentReport,
+      idempotencyScope: 'report-id',
+      userId: 'user-id',
+    });
+  });
+
+  it('links to the reported document', async () => {
+    await sendEmailDocumentReport(report);
+
+    const [{ email }] = sendEMailMock.mock.calls[0];
+    expect(await render(email, { plainText: true }))
+      .toContain(`/doc/${report.documentId}`);
+  });
+
+  it('names the report row', async () => {
+    await sendEmailDocumentReport(report);
+
+    const [{ email }] = sendEMailMock.mock.calls[0];
+    expect(await render(email, { plainText: true }))
+      .toContain('report-id');
   });
 });

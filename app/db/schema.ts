@@ -5,6 +5,7 @@ import {
   type DocumentAccess,
   type DocumentCollaboratorSource,
   type DocumentLinkAccess,
+  type DocumentReportReason,
 } from '~/constants/document';
 
 export const users = pgTable('users', {
@@ -222,6 +223,28 @@ export const documentAssets = pgTable('document_assets', {
   uniqueIndex('document_assets_storage_key_idx').on(table.storageKey),
   index('document_assets_document_id_idx').on(table.documentId),
   index('document_assets_user_id_idx').on(table.userId),
+]);
+
+/*
+ * A report somebody sent about a document they can open but do not own,
+ * kept for `DOCUMENT_REPORT_RETENTION_DAYS` as the record of what was
+ * reported and what we were told; the e-mail to our inbox is only the
+ * notice. Both references are set null rather than blocking the purge of
+ * the document or the deletion of the reporter's account.
+ */
+export const documentReports = pgTable('document_reports', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  documentId: uuid('document_id')
+    .references(() => documents.id, { onDelete: 'set null' }),
+  userId: uuid('user_id')
+    .references(() => users.id, { onDelete: 'set null' }),
+  reason: text('reason').$type<DocumentReportReason>().notNull(),
+  details: text('details'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, table => [
+  index('document_reports_document_id_idx').on(table.documentId),
+  index('document_reports_user_id_idx').on(table.userId),
+  index('document_reports_created_at_idx').on(table.createdAt),
 ]);
 
 /*

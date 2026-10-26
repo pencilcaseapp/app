@@ -14,6 +14,12 @@ export type ResponsiveDialogContentProps = {
   maxHeight?: string;
   /** Drawer only. */
   minHeight?: string;
+  /**
+   * Drawer only. A drawer opened from the page chrome renders inside the
+   * sidebar's drawer root, so Base UI counts it as nested and leaves the
+   * backdrop to the sidebar's drawer, which is closed by then.
+   */
+  forceBackdrop?: boolean;
 } & PropsWithChildren;
 
 /*
@@ -28,6 +34,7 @@ export const ResponsiveDialogContent: FC<ResponsiveDialogContentProps> = ({
   className,
   maxHeight,
   minHeight,
+  forceBackdrop,
 }) => {
   const isDrawer = useIsDrawer();
 
@@ -37,6 +44,7 @@ export const ResponsiveDialogContent: FC<ResponsiveDialogContentProps> = ({
         isFullHeight={isFullHeight}
         maxHeight={maxHeight}
         minHeight={minHeight}
+        drawerBackdropProps={forceBackdrop ? { forceRender: true } : undefined}
       >
         {children}
       </DrawerContent>

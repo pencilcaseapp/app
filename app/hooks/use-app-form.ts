@@ -1,13 +1,15 @@
 import { createFormHook, type FormAsyncValidateOrFn, type FormOptions, type FormValidateOrFn } from '@tanstack/react-form';
 import { mergeForm, useTransform } from '@tanstack/react-form-remix';
 import { useId, useRef } from 'react';
-import { useActionData, useSubmit } from 'react-router';
+import { useActionData, useSubmit, type FetcherWithComponents } from 'react-router';
 import { ControlledCheckbox } from '~/components/controlled-checkbox/controlled-checkbox';
+import { ControlledNativeSelect } from '~/components/controlled-native-select/controlled-native-select';
 import { ControlledHiddenInput } from '~/components/controlled-hidden-input/controlled-hidden-input';
 import { ControlledOneTimePasswordField } from '~/components/controlled-one-time-password-field/controlled-one-time-password-field';
 import { ControlledSelect } from '~/components/controlled-select/controlled-select';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
 import { ControlledSwitch } from '~/components/controlled-switch/controlled-switch';
+import { ControlledTextArea } from '~/components/controlled-text-area/controlled-text-area';
 import { ControlledTextField } from '~/components/controlled-text-field/controlled-text-field';
 import { fieldContext, formContext, type FormMeta } from '~/contexts/form';
 
@@ -21,6 +23,8 @@ export const formHook = createFormHook({
     OneTimePasswordField: ControlledOneTimePasswordField,
     HiddenInput: ControlledHiddenInput,
     Select: ControlledSelect,
+    NativeSelect: ControlledNativeSelect,
+    TextArea: ControlledTextArea,
   },
   formComponents: {
     SubmitButton: ControlledSubmitButton,
@@ -35,6 +39,12 @@ export interface AppFormOptions {
    * errors of its last submission.
    */
   freshOnMount?: boolean;
+  /**
+   * Submit through this fetcher instead of navigating, for a form that
+   * posts to a resource route. Its answer is the fetcher's to read; the
+   * schema already ran in the browser.
+   */
+  fetcher?: Pick<FetcherWithComponents<unknown>, 'submit'>;
 }
 
 export function useAppForm<
@@ -72,7 +82,8 @@ export function useAppForm<
   const formId = useId();
 
   const mergedActionData
-    = options.freshOnMount && actionData === mountActionDataRef.current
+    = options.fetcher
+      || (options.freshOnMount && actionData === mountActionDataRef.current)
       ? undefined
       : actionData;
 
@@ -93,7 +104,10 @@ export function useAppForm<
       InvalidInput?.focus();
     },
     async onSubmit({ meta }) {
-      await submit(document.getElementById(meta.formId) as HTMLFormElement);
+      const formElement
+        = document.getElementById(meta.formId) as HTMLFormElement;
+
+      await (options.fetcher?.submit ?? submit)(formElement);
     },
   });
 }
