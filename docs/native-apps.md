@@ -45,6 +45,18 @@ selling the subscription out of the app and away from In-App Purchase rules.
 Apple fetches the file through its CDN when the app is installed, so a change
 reaches devices only after a while.
 
+Android does the same with App Links: `/.well-known/assetlinks.json`
+(`routes/assetlinks.ts`) names the app and the fingerprint of Google Play's
+app signing key (`ANDROID_CERT_FINGERPRINTS`), and the `autoVerify` intent
+filter in `AndroidManifest.xml` claims the domain. `MainActivity.onNewIntent`
+loads the link the same way, also for the intent that launched the app. Only
+Android 15 and later can leave paths out of an intent filter
+(`uri-relative-filter-group`), so on older versions the billing paths reach
+the app too, and `MainActivity` hands them straight to the browser. A
+debug build is signed with another key and does not verify; allow it by hand
+with `adb shell pm set-app-links-user-selection --user 0 --package
+app.pencilcase.android true docs.pencilcase.app`.
+
 ## Bounce and pull to refresh
 
 Capacitor turns the web view's bounce off on iOS; `BridgeViewController`
