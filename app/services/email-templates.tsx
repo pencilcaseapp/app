@@ -25,6 +25,10 @@ import {
   SubscriptionStartedEmail,
   subscriptionStartedEmailSubject,
 } from '~/emails/templates/subscription-started';
+import {
+  SupportRequestEmail,
+  supportRequestEmailSubject,
+} from '~/emails/templates/support-request';
 import { commonCopies } from '~/constants/common-copies';
 import type { DocumentReportReason } from '~/constants/document';
 import { EmailTemplate } from '~/constants/email';
@@ -210,5 +214,38 @@ export async function sendEmailDocumentReport(input: {
     template: EmailTemplate.DocumentReport,
     idempotencyScope: reportId,
     userId: reporter.id,
+  });
+}
+
+/**
+ * Somebody wrote us through the contact form in the settings. It goes to
+ * our own inbox with them as the reply-to address, so answering them is a
+ * reply. Logged against the sender, whose messages are capped.
+ */
+export async function sendEmailSupportRequest(input: {
+  requestId: string;
+  message: string;
+  url: string;
+  userAgent: string;
+  sender: { id: string; email: string };
+}) {
+  const { requestId, message, url, userAgent, sender } = input;
+
+  await sendEmail({
+    to: { email: commonCopies.supportEmail },
+    replyTo: sender.email,
+    subject: supportRequestEmailSubject(sender.email),
+    email: (
+      <SupportRequestEmail
+        message={message}
+        senderEmail={sender.email}
+        url={url}
+        userAgent={userAgent}
+        userId={sender.id}
+      />
+    ),
+    template: EmailTemplate.SupportRequest,
+    idempotencyScope: requestId,
+    userId: sender.id,
   });
 }

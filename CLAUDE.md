@@ -423,6 +423,13 @@ a person whose access changed reconnects with it — including when the
 loader's `readOnly` did not change, which would otherwise leave them
 detached. `docs/emails.md` covers the e-mail.
 
+**Contact form — `app/services/support.ts`.** The support section of the
+settings dialog (`/doc/:id/settings/support`) e-mails a message to our
+inbox with the sender as reply-to, plus the page they were on (sent from
+the browser) and the request's user agent, for debugging. Nothing but the
+`email_logs` row is stored, and that row is also what caps an account at
+`SUPPORT_REQUEST_LIMIT` messages a day.
+
 **Reporting a document — `app/services/document.ts`.** The app stores
 treat shared documents as user generated content (Apple 1.2, Google
 Play's UGC policy), so everybody but the owner gets a Report button in

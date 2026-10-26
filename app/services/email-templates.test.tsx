@@ -13,6 +13,7 @@ import {
   sendEmailDocumentReport,
   sendEmailMagicCode,
   sendEmailSubscriptionPaymentFailed,
+  sendEmailSupportRequest,
 } from './email-templates';
 
 const sendEMailMock = vi.fn();
@@ -177,5 +178,28 @@ describe('sendEmailDocumentReport', () => {
     const [{ email }] = sendEMailMock.mock.calls[0];
     expect(await render(email, { plainText: true }))
       .toContain('report-id');
+  });
+});
+
+describe('sendEmailSupportRequest', () => {
+  it('sends the message to our inbox, answerable to the sender and logged '
+    + 'against them', async () => {
+    await sendEmailSupportRequest({
+      requestId: 'request-id',
+      message: 'Images I paste don’t show up.',
+      url: 'https://docs.pencilcase.app/doc/doc-id/settings/support',
+      userAgent: 'Mozilla/5.0 Safari/605.1.15',
+      sender: { id: 'user-id', email: 'sam@example.com' },
+    });
+
+    expect(sendEMailMock).toHaveBeenCalledWith({
+      to: { email: 'inbox@pencilcase.app' },
+      replyTo: 'sam@example.com',
+      subject: 'Support request from sam@example.com',
+      email: expect.anything(),
+      template: EmailTemplate.SupportRequest,
+      idempotencyScope: 'request-id',
+      userId: 'user-id',
+    });
   });
 });

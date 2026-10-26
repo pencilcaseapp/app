@@ -148,14 +148,6 @@ describe('the settings routes', () => {
         ).not.toBeInTheDocument();
       });
 
-    test('link to support through a mailto', async () => {
-      await renderSettings('/doc/:id/settings/support', 'tablet');
-
-      expect(
-        await screen.findByRole('link', { name: 'inbox@pencilcase.app' }),
-      ).toHaveAttribute('href', 'mailto:inbox@pencilcase.app');
-    });
-
     test('deep link into a section', async () => {
       await renderSettings('/doc/:id/settings/subscription', 'tablet');
 
