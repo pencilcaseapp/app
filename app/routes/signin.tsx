@@ -115,11 +115,11 @@ export default function SignIn({ loaderData }: Route.ComponentProps) {
         By continuing, you acknowledge that you understand
         and agree to the
         {' '}
-        <Link variant="bodyTiny" fontWeight="regular" textColorLight="grey-800" textColorDark="grey-300" href="https://example.com/terms" target="_blank">Terms & Conditions</Link>
+        <Link variant="bodyTiny" fontWeight="regular" textColorLight="grey-800" textColorDark="grey-300" href="https://pencilcase.app/terms" target="_blank">Terms of Use</Link>
         {' '}
         and
         {' '}
-        <Link variant="bodyTiny" fontWeight="regular" textColorLight="grey-800" textColorDark="grey-300" href="https://example.com/privacy" target="_blank">Privacy Policy</Link>
+        <Link variant="bodyTiny" fontWeight="regular" textColorLight="grey-800" textColorDark="grey-300" href="https://pencilcase.app/privacy" target="_blank">Privacy Policy</Link>
         .
       </Typography>
     </ControlledForm>
