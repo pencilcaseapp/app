@@ -41,13 +41,22 @@ export class CreemCheckoutPage {
     await cardholderName.click();
     await cardholderName.pressSequentially('Test Buyer');
 
-    const cardFrame = page.frameLocator('iframe[title="card_form"]');
-    await cardFrame.getByRole('textbox', { name: 'Card number' })
+    // Creem serves two versions of the card form, so either name works.
+    const cardFrame = page.frameLocator(
+      'iframe[title="card_form"], iframe[title="card-form"]',
+    );
+    await cardFrame
+      .getByRole('textbox', { name: /^(Card number|1234 5678 9012 3456)$/ })
       .fill('4111111111111111');
     await cardFrame.getByRole('textbox', { name: 'MM/YY' }).fill('12/30');
-    await cardFrame.getByRole('textbox', { name: 'CVC/CVV' }).fill('123');
+    await cardFrame.getByRole('textbox', { name: /^(CVC\/CVV|CVV)$/ })
+      .fill('123');
 
     await expect(cardholderName).toHaveValue('Test Buyer');
+    // The SDK drops a click on the pay button that comes right after the
+    // card is complete, and from then on ignores every click, with nothing
+    // on the page to tell when it is ready. Give it a moment.
+    await page.waitForTimeout(3_000);
     await page.getByRole('button', { name: /^Pay €/ }).click();
   }
 }

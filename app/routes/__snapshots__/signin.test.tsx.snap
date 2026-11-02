@@ -71,17 +71,17 @@ exports[`matches snapshot 1`] = `
          
         <a
           class="antialiased font-inter text-xs text-pca-grey-800 dark:text-pca-grey-300 font-normal inline-block rounded-sm underline transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-blue-500 decoration-inherit transition-all duration-300 ease-in-out decoration-[1px] underline-offset-[3px]"
-          href="https://example.com/terms"
+          href="https://pencilcase.app/terms"
           target="_blank"
         >
-          Terms & Conditions
+          Terms of Use
         </a>
          
         and
          
         <a
           class="antialiased font-inter text-xs text-pca-grey-800 dark:text-pca-grey-300 font-normal inline-block rounded-sm underline transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-blue-500 decoration-inherit transition-all duration-300 ease-in-out decoration-[1px] underline-offset-[3px]"
-          href="https://example.com/privacy"
+          href="https://pencilcase.app/privacy"
           target="_blank"
         >
           Privacy Policy
