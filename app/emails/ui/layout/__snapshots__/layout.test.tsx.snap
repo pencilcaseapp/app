@@ -62,10 +62,10 @@ exports[`Layout > renders the shell around its children 1`] = `
                           <td style="padding:32px">
                             <img
                               alt="pencil case"
-                              height="31"
+                              height="28"
                               src="https://docs.pencilcase.app/emails/pencil-case-logo.png"
                               style="display:block;outline:none;border:none;text-decoration:none;margin-right:auto;margin-left:auto"
-                              width="138" />
+                              width="140" />
                           </td>
                         </tr>
                       </tbody>
