@@ -41,11 +41,15 @@ export class CreemCheckoutPage {
     await cardholderName.click();
     await cardholderName.pressSequentially('Test Buyer');
 
-    const cardFrame = page.frameLocator('iframe[title="card-form"]');
-    await cardFrame.getByRole('textbox', { name: '1234 5678 9012 3456' })
+    // Creem serves two versions of the card form, so either name works.
+    const cardFrame = page.frameLocator(
+      'iframe[title="card_form"], iframe[title="card-form"]',
+    );
+    await cardFrame
+      .getByRole('textbox', { name: /^(Card number|1234 5678 9012 3456)$/ })
       .fill('4111111111111111');
     await cardFrame.getByRole('textbox', { name: 'MM/YY' }).fill('12/30');
-    await cardFrame.getByRole('textbox', { name: 'CVV', exact: true })
+    await cardFrame.getByRole('textbox', { name: /^(CVC\/CVV|CVV)$/ })
       .fill('123');
 
     await expect(cardholderName).toHaveValue('Test Buyer');
