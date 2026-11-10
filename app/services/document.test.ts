@@ -12,6 +12,7 @@ import {
   copyImage,
   CopyImageError,
   createDocument,
+  getLatestDocumentId,
   CreateDocumentError,
   deleteDocument,
   DeleteDocumentError,
@@ -77,6 +78,7 @@ const restoreDocumentRowMock = vi.fn();
 const countOwnedDocumentsMock = vi.fn();
 const createDocumentRowMock = vi.fn();
 const getDocumentIdsDeletedBeforeMock = vi.fn();
+const getDocumentListMock = vi.fn();
 const hardDeleteDocumentsMock = vi.fn();
 const getInvitedCollaboratorsMock = vi.fn();
 const insertInviteMock = vi.fn();
@@ -104,6 +106,7 @@ vi.mock('~/repos/document', () => ({
   restoreDocument: (...args: unknown[]) => restoreDocumentRowMock(...args),
   getDocumentIdsDeletedBefore: (...args: unknown[]) =>
     getDocumentIdsDeletedBeforeMock(...args),
+  getDocumentList: (...args: unknown[]) => getDocumentListMock(...args),
   hardDeleteDocuments: (...args: unknown[]) =>
     hardDeleteDocumentsMock(...args),
   getInvitedCollaborators: (...args: unknown[]) =>
@@ -972,6 +975,31 @@ describe('createDocument', () => {
     });
 
     expect(result).toEqual([null, { id: documentFixture.id }]);
+  });
+});
+
+describe('getLatestDocumentId', () => {
+  it('returns the document the user worked on last', async () => {
+    getDocumentListMock.mockResolvedValue([{ id: 'latest' }, { id: 'older' }]);
+
+    const id = await getLatestDocumentId(userFixture);
+
+    expect(id).toBe('latest');
+    expect(getDocumentListMock).toHaveBeenCalledWith(userFixture.id);
+    expect(createDocumentRowMock).not.toHaveBeenCalled();
+  });
+
+  it('creates a document for a user without one', async () => {
+    getDocumentListMock.mockResolvedValue([]);
+    countOwnedDocumentsMock.mockResolvedValue(0);
+    createDocumentRowMock.mockResolvedValue(documentFixture);
+
+    const id = await getLatestDocumentId(userFixture);
+
+    expect(id).toBe(documentFixture.id);
+    expect(createDocumentRowMock).toHaveBeenCalledWith({
+      userId: userFixture.id,
+    }, 'tx');
   });
 });
 

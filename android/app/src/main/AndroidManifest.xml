@@ -37,6 +37,9 @@
                     <data android:path="/upgrade" />
                 </uri-relative-filter-group>
                 <uri-relative-filter-group android:allow="false">
+                    <data android:path="/checkout" />
+                </uri-relative-filter-group>
+                <uri-relative-filter-group android:allow="false">
                     <data android:path="/billing-portal" />
                 </uri-relative-filter-group>
                 <uri-relative-filter-group android:allow="false">
