@@ -199,7 +199,8 @@ running subscription; its upgrade button links to `/doc/:id/checkout`,
 which starts their hosted checkout with the section's URL as the
 success URL, and the section's loader verifies the signed redirect
 Creem comes back with, `/upgrade` redirects into the
-section over the latest document (emails link there),
+section over the latest document (emails link there), `/checkout`
+starts the checkout over it (the website's Buy button links there),
 `/webhooks/creem` keeps the `subscriptions` table in sync (events
 recorded in `creem_webhook_events` for idempotency, deleted after 30
 days by the `clean-up-old-creem-webhook-events` job), and

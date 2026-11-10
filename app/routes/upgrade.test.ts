@@ -7,20 +7,17 @@ import { userFixture } from '~/test/fixtures/user';
 import { loader } from './upgrade';
 import type { Route } from './+types/upgrade';
 
-const getDocumentListMock = vi.fn();
-vi.mock('~/repos/document', () => ({
-  getDocumentList: (...args: unknown[]) => getDocumentListMock(...args),
-}));
-
-const createDocumentMock = vi.fn();
+const getLatestDocumentIdMock = vi.fn();
 vi.mock('~/services/document', () => ({
-  createDocument: (...args: unknown[]) => createDocumentMock(...args),
+  getLatestDocumentId:
+    (...args: unknown[]) => getLatestDocumentIdMock(...args),
 }));
 
 const DOC_ID = '11111111-2222-4333-8444-555555555555';
 
 beforeEach(() => {
   vi.clearAllMocks();
+  getLatestDocumentIdMock.mockResolvedValue(DOC_ID);
 });
 
 function callLoader(search = '') {
@@ -39,29 +36,14 @@ function callLoader(search = '') {
 
 test('opens the subscription settings over the latest document',
   async () => {
-    getDocumentListMock.mockResolvedValue([{ id: DOC_ID }, { id: 'older' }]);
-
     const response = await callLoader();
 
     expect(response.headers.get('Location'))
       .toBe(`/doc/${DOC_ID}/settings/subscription`);
-    expect(createDocumentMock).not.toHaveBeenCalled();
+    expect(getLatestDocumentIdMock).toHaveBeenCalledWith(userFixture);
   });
 
-test('creates a document for a user without one', async () => {
-  getDocumentListMock.mockResolvedValue([]);
-  createDocumentMock.mockResolvedValue([null, { id: DOC_ID }]);
-
-  const response = await callLoader();
-
-  expect(response.headers.get('Location'))
-    .toBe(`/doc/${DOC_ID}/settings/subscription`);
-  expect(createDocumentMock).toHaveBeenCalledWith(userFixture);
-});
-
 test('carries the search params along', async () => {
-  getDocumentListMock.mockResolvedValue([{ id: DOC_ID }]);
-
   const response = await callLoader('?toastDanger=Nope');
 
   expect(response.headers.get('Location'))

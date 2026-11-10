@@ -26,7 +26,7 @@ public class MainActivity extends BridgeActivity {
 
     /** `BROWSER_ONLY_PATHS` in `app/constants/native-app.ts`. */
     private static final Pattern BROWSER_ONLY_PATH = Pattern.compile(
-        "/(upgrade|billing-portal|doc/[^/]+/(checkout|settings/subscription))"
+        "/(upgrade|checkout|billing-portal|doc/[^/]+/(checkout|settings/subscription))"
     );
 
     private View navigationBarBackground;

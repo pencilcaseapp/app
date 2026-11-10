@@ -24,6 +24,7 @@ export const ANDROID_CERT_FINGERPRINTS = [
  */
 export const BROWSER_ONLY_PATHS = [
   '/upgrade',
+  '/checkout',
   '/billing-portal',
   '/doc/*/checkout',
   '/doc/*/settings/subscription',
