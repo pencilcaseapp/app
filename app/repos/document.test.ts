@@ -496,6 +496,7 @@ describe('softDeleteDocument', () => {
     expect(deleted).toStrictEqual({
       id: fixture.id,
       deletedAt: expect.any(Date),
+      content: null,
     });
 
     const document = await getDocument(fixture.id);

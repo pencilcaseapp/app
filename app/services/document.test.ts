@@ -52,6 +52,7 @@ import { $createTextNode, $getRoot } from 'lexical';
 import { $createHeadingNode } from '@lexical/rich-text';
 import { EDITOR_NODES } from '~/ui/editor/editor-nodes';
 import { $createImageNode } from '~/ui/editor/nodes/image-node';
+import * as Y from 'yjs';
 
 type CdnConfig = Config['storage']['cdn'];
 const cdn = vi.hoisted(() => ({ config: undefined as CdnConfig }));
@@ -175,9 +176,11 @@ vi.mock('./email-templates', () => ({
 }));
 
 const closeDocumentConnectionsMock = vi.fn();
+const getLiveDocumentMock = vi.fn();
 vi.mock('~/live/connections', () => ({
   closeDocumentConnections: (...args: unknown[]) =>
     closeDocumentConnectionsMock(...args),
+  getLiveDocument: (...args: unknown[]) => getLiveDocumentMock(...args),
 }));
 
 const otherUserId = 'e6d9c8f1-0000-4000-8000-000000000000';
@@ -796,11 +799,20 @@ describe('getLiveAccess', () => {
 });
 
 describe('deleteDocument', () => {
+  const writtenContent = () => createHeadlessEditorState(() => {
+    const heading = $createHeadingNode('h1');
+    heading.append($createTextNode('Groceries'));
+    $getRoot().clear().append(heading);
+  });
+
+  const deletedRow = (content: Uint8Array | null = writtenContent()) => ({
+    id: documentFixture.id,
+    deletedAt: new Date(),
+    content,
+  });
+
   it('soft deletes a document for its owner', async () => {
-    softDeleteDocumentMock.mockResolvedValue({
-      id: documentFixture.id,
-      deletedAt: new Date(),
-    });
+    softDeleteDocumentMock.mockResolvedValue(deletedRow());
 
     const [error, result] = await deleteDocument(
       documentFixture.id, userFixture.id,
@@ -810,13 +822,11 @@ describe('deleteDocument', () => {
     expect(result).toStrictEqual({ id: documentFixture.id });
     expect(softDeleteDocumentMock)
       .toHaveBeenCalledWith(documentFixture.id, userFixture.id, 'tx');
+    expect(hardDeleteDocumentsMock).not.toHaveBeenCalled();
   });
 
   it('drops the collaborators and closes every connection', async () => {
-    softDeleteDocumentMock.mockResolvedValue({
-      id: documentFixture.id,
-      deletedAt: new Date(),
-    });
+    softDeleteDocumentMock.mockResolvedValue(deletedRow());
 
     await deleteDocument(documentFixture.id, userFixture.id);
 
@@ -827,6 +837,60 @@ describe('deleteDocument', () => {
     });
   });
 
+  it('purges a document nobody wrote anything in right away', async () => {
+    softDeleteDocumentMock.mockResolvedValue(deletedRow(null));
+    getDocumentAssetsMock.mockResolvedValue([
+      { storageKey: 'documents/a/1.webp' },
+    ]);
+    hardDeleteDocumentsMock.mockResolvedValue(1);
+
+    const [error, result] = await deleteDocument(
+      documentFixture.id, userFixture.id,
+    );
+
+    expect(error).toBeNull();
+    expect(result).toStrictEqual({ id: documentFixture.id });
+    expect(hardDeleteDocumentsMock)
+      .toHaveBeenCalledWith([documentFixture.id], 'tx');
+    expect(deleteObjectsMock).toHaveBeenCalledWith(['documents/a/1.webp']);
+    expect(incrementDailyStatMock)
+      .toHaveBeenCalledWith('documentsDeleted', 1, 'tx');
+    expect(removeLinkCollaboratorsMock).not.toHaveBeenCalled();
+    expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+    });
+  });
+
+  it('keeps a document that only holds an image', async () => {
+    softDeleteDocumentMock.mockResolvedValue(deletedRow(
+      createHeadlessEditorState(() => {
+        $getRoot().append($createImageNode({
+          src: `/doc/${documentFixture.id}/assets/a`,
+          width: 800,
+          height: 600,
+        }));
+      }, EDITOR_NODES),
+    ));
+
+    await deleteDocument(documentFixture.id, userFixture.id);
+
+    expect(hardDeleteDocumentsMock).not.toHaveBeenCalled();
+    expect(removeLinkCollaboratorsMock)
+      .toHaveBeenCalledWith(documentFixture.id, 'tx');
+  });
+
+  it('goes by the live document over what was stored', async () => {
+    const liveDocument = new Y.Doc();
+    Y.applyUpdate(liveDocument, writtenContent());
+    getLiveDocumentMock.mockReturnValueOnce(liveDocument);
+    softDeleteDocumentMock.mockResolvedValue(deletedRow(null));
+
+    await deleteDocument(documentFixture.id, userFixture.id);
+
+    expect(getLiveDocumentMock).toHaveBeenCalledWith(documentFixture.id);
+    expect(hardDeleteDocumentsMock).not.toHaveBeenCalled();
+  });
+
   it('denies somebody who does not own the document', async () => {
     softDeleteDocumentMock.mockResolvedValue(undefined);
 
@@ -834,6 +898,7 @@ describe('deleteDocument', () => {
 
     expect(error).toBe(DeleteDocumentError.PermissionDenied);
     expect(removeLinkCollaboratorsMock).not.toHaveBeenCalled();
+    expect(hardDeleteDocumentsMock).not.toHaveBeenCalled();
     expect(closeDocumentConnectionsMock).not.toHaveBeenCalled();
   });
 });

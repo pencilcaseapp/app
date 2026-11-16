@@ -458,7 +458,13 @@ in first.
 same owner-scoped update (`softDeleteDocument`), then drops the `link`
 collaborators and closes every live
 connection, so the document vanishes for everybody else at once; the
-people invited by e-mail keep their rows and come back with the document. A deleted document is not found for anyone but
+people invited by e-mail keep their rows and come back with the document. A
+document nobody wrote anything in (`isContentEmpty`/`isYDocEmpty` in
+`app/utils/yjs.ts`: no text but whitespace and no image or other
+non-text node) has nothing to restore, so `deleteDocument` purges it in
+the same transaction instead, the way `purgeDeletedDocuments` does,
+reading the live server's in-memory Y.Doc over the stored content when
+this process holds it (`getLiveDocument`), since the store is debounced. A deleted document is not found for anyone but
 its owner, who can still open it read-only: `openDocument` reports it as
 `deleted`, the doc route then shows a notice above the content and drops
 the share panel, and `getLiveAccess` hands the live server a read-only

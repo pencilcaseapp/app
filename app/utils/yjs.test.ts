@@ -12,7 +12,13 @@ import {
 } from '@lexical/yjs';
 import type { Provider, ProviderAwareness } from '@lexical/yjs';
 import type { SerializedEditorState } from 'lexical';
-import { extractTitleFromYDoc, getTextFromXmlText } from './yjs';
+import {
+  extractTitleFromYDoc,
+  getTextFromXmlText,
+  isContentEmpty,
+  isYDocEmpty,
+} from './yjs';
+import { createInitialDocumentContent } from './headless';
 import { initialEditorStateFixture } from '~/test/fixtures/editor';
 
 const nodes = [
@@ -296,5 +302,52 @@ describe('extractTitleFromYDoc', () => {
     );
 
     expect(extractTitleFromYDoc(doc)).toBe('Hello World 👩‍💻');
+  });
+});
+
+describe('isYDocEmpty', () => {
+  it('is empty with nothing but blank lines and whitespace', () => {
+    const doc = createYDocFromEditorState(
+      makeEditorState([makeHeading('  '), makeParagraph(''), makeParagraph(' ')]),
+    );
+
+    expect(isYDocEmpty(doc)).toBe(true);
+  });
+
+  it('is not empty with text further down', () => {
+    const doc = createYDocFromEditorState(
+      makeEditorState([makeHeading(''), makeParagraph('Milk')]),
+    );
+
+    expect(isYDocEmpty(doc)).toBe(false);
+  });
+
+  it('is not empty with a node that is not text', () => {
+    const doc = createYDocFromEditorState(
+      makeEditorState([
+        makeHeading(''),
+        { type: 'horizontalrule', version: 1 },
+      ]),
+    );
+
+    expect(isYDocEmpty(doc)).toBe(false);
+  });
+});
+
+describe('isContentEmpty', () => {
+  it('is empty when nothing was stored yet', () => {
+    expect(isContentEmpty(null)).toBe(true);
+  });
+
+  it('is empty for the heading a new document is seeded with', () => {
+    expect(isContentEmpty(createInitialDocumentContent())).toBe(true);
+  });
+
+  it('is not empty with text', () => {
+    const doc = createYDocFromEditorState(
+      makeEditorState([makeHeading('Groceries')]),
+    );
+
+    expect(isContentEmpty(Y.encodeStateAsUpdate(doc))).toBe(false);
   });
 });

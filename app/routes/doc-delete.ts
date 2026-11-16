@@ -13,8 +13,9 @@ export const middleware: MiddlewareFunction[] = [
 const formSchema = z.object({});
 
 /**
- * Soft deletes the document for its owner. Posted to from the sidebar's
- * delete dialog; the fetcher revalidates the navigation afterwards.
+ * Deletes the document for its owner (see `deleteDocument`). Posted to
+ * from the sidebar's delete dialog; the fetcher revalidates the
+ * navigation afterwards.
  */
 export async function action({ request, params, context }: Route.ActionArgs) {
   const user = context.get(userSessionContext);

@@ -37,6 +37,15 @@ export function registerRevocationChannel(
   });
 }
 
+/**
+ * The document as this process holds it in memory, which is ahead of what
+ * was stored by the store debounce. `undefined` when nobody has it open
+ * here.
+ */
+export function getLiveDocument(documentId: string) {
+  return globalForLive.liveServer?.documents.get(documentId);
+}
+
 export class ForbiddenError extends Error {
   readonly code = FORBIDDEN_CODE;
   readonly reason = 'Forbidden';

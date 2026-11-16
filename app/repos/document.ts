@@ -356,9 +356,11 @@ export async function setDocumentLinkAccess(
 /**
  * Marks the document deleted and turns the link off in the same update.
  * Scoped to the owner like `setDocumentLinkShared`; returns `undefined` when
- * the document does not exist or belongs to somebody else. Neither this
- * nor the restore touches `updatedAt`: the content did not change, and a
- * restored document should land back where it was in the navigation.
+ * the document does not exist or belongs to somebody else. The content
+ * comes along so the caller can tell whether there is anything to keep.
+ * Neither this nor the restore touches `updatedAt`: the content did not
+ * change, and a restored document should land back where it was in the
+ * navigation.
  */
 export async function softDeleteDocument(
   documentId: string,
@@ -378,6 +380,7 @@ export async function softDeleteDocument(
     .returning({
       id: documents.id,
       deletedAt: documents.deletedAt,
+      content: documents.content,
     });
 
   return document;

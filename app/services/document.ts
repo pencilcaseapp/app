@@ -17,14 +17,17 @@ import {
 import { EmailTemplate } from '~/constants/email';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { getConfig, type Config } from '~/config';
-import { transaction } from '~/db';
+import { transaction, type Executor } from '~/db';
 import {
   copyObject,
   deleteObjects,
   getObjectStream,
   putObject,
 } from '~/clients/storage';
-import { closeDocumentConnections } from '~/live/connections';
+import {
+  closeDocumentConnections,
+  getLiveDocument,
+} from '~/live/connections';
 import {
   acceptInvite,
   connectCollaborator,
@@ -64,6 +67,7 @@ import { renderDocumentPreview } from '~/utils/document-preview';
 import { createInitialDocumentContent } from '~/utils/headless';
 import { normalizeEmail } from '~/utils/email';
 import { processImage } from '~/utils/image';
+import { isContentEmpty, isYDocEmpty } from '~/utils/yjs';
 import {
   sendEmailDocumentInvite,
   sendEmailDocumentReport,
@@ -528,6 +532,11 @@ export type DeleteDocumentResult
  * connections made through the link are dropped and every live connection
  * is closed, so the document is gone for everybody at once. The invites
  * stay, and come back with the document when it is restored.
+ *
+ * A document nobody wrote anything in has nothing to restore, so it is
+ * purged right away instead, invites and stray image files included. What
+ * this process holds in memory is ahead of the store debounce, so it wins
+ * over what was stored.
  */
 export async function deleteDocument(
   documentId: string,
@@ -536,7 +545,19 @@ export async function deleteDocument(
   const document = await transaction(async (tx) => {
     const row = await softDeleteDocument(documentId, userId, tx);
 
-    if (row) {
+    if (!row) {
+      return undefined;
+    }
+
+    const liveDocument = getLiveDocument(row.id);
+    const empty = liveDocument
+      ? isYDocEmpty(liveDocument)
+      : isContentEmpty(row.content);
+
+    if (empty) {
+      await purgeDocuments([row.id], tx);
+    }
+    else {
       await removeLinkCollaborators(row.id, tx);
     }
 
@@ -816,11 +837,7 @@ export async function purgeDeletedDocuments(before: Date) {
     const batchSize = await transaction(async (tx) => {
       const ids
         = await getDocumentIdsDeletedBefore(before, PURGE_BATCH_SIZE, tx);
-      const assets = await getDocumentAssets(ids, tx);
-      const purgedCount = await hardDeleteDocuments(ids, tx);
-
-      await deleteObjects(assets.map(asset => asset.storageKey));
-      await incrementDailyStat('documentsDeleted', purgedCount, tx);
+      await purgeDocuments(ids, tx);
 
       return ids.length;
     });
@@ -831,6 +848,14 @@ export async function purgeDeletedDocuments(before: Date) {
       return deletedCount;
     }
   }
+}
+
+async function purgeDocuments(ids: string[], tx: Executor) {
+  const assets = await getDocumentAssets(ids, tx);
+  const purgedCount = await hardDeleteDocuments(ids, tx);
+
+  await deleteObjects(assets.map(asset => asset.storageKey));
+  await incrementDailyStat('documentsDeleted', purgedCount, tx);
 }
 
 export enum AddImageError {
