@@ -80,13 +80,11 @@ export function getConfigProd(): Config {
       code: env.get('INVITE_CODE').required().asString(),
     },
 
+    // Creem's live mode: real payments.
     creem: {
-      apiUrl: env
-        .get('CREEM_API_URL')
-        .default('https://api.creem.io')
-        .asString(),
+      apiUrl: 'https://api.creem.io',
       apiKey: env.get('CREEM_API_KEY').required().asString(),
-      productId: env.get('CREEM_PRODUCT_ID').required().asString(),
+      productId: 'prod_3QROQb1dR22mVL1WfwdKRF',
       webhookSecret: env.get('CREEM_WEBHOOK_SECRET').required().asString(),
     },
 

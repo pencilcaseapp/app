@@ -107,10 +107,11 @@ export interface Config {
   };
 
   /**
-   * The merchant of record selling the pro subscription. Test mode and live
-   * mode are separate Creem environments with their own API hosts, keys and
-   * webhook secrets, so all four values switch together. See
-   * docs/subscriptions.md.
+   * The merchant of record selling the pro subscription. Its sandbox (dev)
+   * and live mode (prod) are separate Creem environments with their own API
+   * hosts, products, keys and webhook secrets. The host and the product are
+   * fixed per environment, so prod cannot end up in the sandbox; only the
+   * secrets come from the environment. See docs/subscriptions.md.
    */
   creem: {
     apiUrl: string;
