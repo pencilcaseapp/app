@@ -59,19 +59,14 @@ export function getConfigDev(): Config {
       code: 'super-secret',
     },
 
+    // Creem's sandbox. The API key is never checked in: put it in `.env`.
     creem: {
-      apiUrl: env
-        .get('CREEM_API_URL')
-        .default('https://test-api.creem.io')
-        .asString(),
+      apiUrl: 'https://test-api.creem.io',
       apiKey: env
         .get('CREEM_API_KEY')
         .default('creem_test_apikey')
         .asString(),
-      productId: env
-        .get('CREEM_PRODUCT_ID')
-        .default('prod_Fzsxoj5uDsJeUHJif9JSg')
-        .asString(),
+      productId: 'prod_Fzsxoj5uDsJeUHJif9JSg',
       webhookSecret: env
         .get('CREEM_WEBHOOK_SECRET')
         .default('whsec-dev')

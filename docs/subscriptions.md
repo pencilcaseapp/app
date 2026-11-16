@@ -165,23 +165,27 @@ There is no trial email because the product has no trial; add one on
 ## Configuration
 
 `config.creem` (see `app/config/`): `apiUrl`, `apiKey`, `productId`,
-`webhookSecret`. The dev defaults point at our shared test-mode store,
-except for the API key, which is never checked in — put it in `.env`
-(loaded by the dev server) to talk to real Creem test mode; without it
-only the fake Creem of the e2e tests works. The API client wraps the
-official `creem` SDK; only the redirect-signature check is hand-rolled
-because the SDK has no helper for it.
+`webhookSecret`. Dev runs against Creem's sandbox
+(`https://test-api.creem.io`, our sandbox product) and prod against live
+mode (`https://api.creem.io`, the live product); the test environment
+talks to no Creem at all. The host and the product id are fixed in each
+environment's config, so prod cannot be pointed at the sandbox by
+accident; only the two secrets come from the environment. The API key
+is never checked in — put it in `.env` (loaded by the dev server) to
+talk to the sandbox; without it only the fake Creem of the e2e tests
+works. The API client wraps the official `creem` SDK; only the
+redirect-signature check is hand-rolled because the SDK has no helper
+for it.
 
 | Variable | From |
 | --- | --- |
-| `CREEM_API_URL` | `https://test-api.creem.io` or `https://api.creem.io` — test and live are separate environments |
-| `CREEM_API_KEY` | Dashboard → Developers (per environment) |
-| `CREEM_PRODUCT_ID` | Dashboard → Products → Copy ID |
-| `CREEM_WEBHOOK_SECRET` | Dashboard → Developers → Webhook |
+| `CREEM_API_KEY` | Dashboard → Developers (sandbox in dev and CI, live in prod) |
+| `CREEM_WEBHOOK_SECRET` | Dashboard → Developers → Webhooks (per registration) |
 
 Webhooks need a reachable URL: register
 `https://<host>/webhooks/creem` in the dashboard (test and live each
-have their own registration and secret). Locally, tunnel with ngrok
+have their own registration and secret; prod's is
+`https://docs.pencilcase.app/webhooks/creem`). Locally, tunnel with ngrok
 and set `CREEM_WEBHOOK_SECRET` to the secret shown for the tunnel
 registration; without a tunnel the callback path alone still activates
 subscriptions, only the later lifecycle events go unseen.
@@ -203,13 +207,10 @@ pay with the decline card, and watch the deliveries land — the
 dashboard's Developers page lists every delivery and lets you
 re-send.
 
-## Going live
+## Live mode
 
-1. Create the product in the live dashboard and set
-   `CREEM_PRODUCT_ID` to its id.
-2. Set `CREEM_API_KEY` to the live key; leave `CREEM_API_URL` unset in
-   prod (it defaults to `https://api.creem.io`).
-3. Register `https://pencilcase.app/webhooks/creem` in the live
-   dashboard and set `CREEM_WEBHOOK_SECRET` to its secret.
-4. Pay once with a real card, watch the events arrive, refund it from
-   the dashboard.
+Prod sells through live mode since November 2026. A product or price
+change there means creating it in the live dashboard and putting its id
+into `app/config/prod.ts`. After a change to the checkout or the
+webhook handling, pay once with a real card in prod, watch the events
+arrive in the live dashboard, and refund it from there.
