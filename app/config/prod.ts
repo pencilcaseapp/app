@@ -15,6 +15,11 @@ export function getConfigProd(): Config {
       .default('https://docs.pencilcase.app')
       .asString(),
 
+    websiteUrl: env
+      .get('WEBSITE_URL')
+      .default('https://pencilcase.app')
+      .asString(),
+
     server: {
       port: env.get('PORT').required().asIntPositive(),
       host: env.get('HOST').required().asString(),

@@ -236,6 +236,14 @@ reads the app store reviewers' addresses and their code from
 `TEST_ACCOUNT_EMAILS` (comma separated) and `TEST_ACCOUNT_CODE`, so the
 repository never shows them; without the first, prod has none.
 
+**Contact form — `app/routes/contact.ts`.** The website's contact form
+posts from the visitor's browser to `POST /contact`, which mails the
+message to our inbox (`sendContactMessage`, reply-to the sender). It lives
+here rather than on the website so the app's Bunny Shield rate limits it
+per visitor. No session or CSRF token is involved; the answer carries a
+CORS header for `config.websiteUrl` only, which is also why `server.ts`
+turns Vite's own CORS off in dev (it would double the header).
+
 **Changing the e-mail — `app/services/email-change.ts`.** The address is
 the only credential, so it changes through a verified two-step flow
 stacked on the account section (`/doc/:id/settings/account/email`, then

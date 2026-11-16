@@ -7,6 +7,7 @@ export function getConfigTest(): Config {
     instanceId: `local-${process.pid}`,
 
     appUrl: 'http://localhost:3000',
+    websiteUrl: 'http://localhost:5173',
 
     server: {
       port: 3000,

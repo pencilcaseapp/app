@@ -1,6 +1,10 @@
 import { href } from 'react-router';
 import { getConfig } from '~/config';
 import {
+  ContactMessageEmail,
+  contactMessageEmailSubject,
+} from '~/emails/templates/contact-message';
+import {
   DocumentInviteEmail,
   documentInviteEmailSubject,
 } from '~/emails/templates/document-invite';
@@ -210,5 +214,22 @@ export async function sendEmailDocumentReport(input: {
     template: EmailTemplate.DocumentReport,
     idempotencyScope: reportId,
     userId: reporter.id,
+  });
+}
+
+export async function sendEmailContactMessage(input: {
+  messageId: string;
+  email: string;
+  message: string;
+}) {
+  const { messageId, email, message } = input;
+
+  await sendEmail({
+    to: { email: commonCopies.supportEmail },
+    replyTo: email,
+    subject: contactMessageEmailSubject(email),
+    email: <ContactMessageEmail email={email} message={message} />,
+    template: EmailTemplate.ContactMessage,
+    idempotencyScope: messageId,
   });
 }
