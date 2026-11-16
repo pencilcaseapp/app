@@ -5,6 +5,10 @@ import {
   contactMessageEmailSubject,
 } from '~/emails/templates/contact-message';
 import {
+  ContractNoticeEmail,
+  contractNoticeEmailSubject,
+} from '~/emails/templates/contract-notice';
+import {
   DocumentInviteEmail,
   documentInviteEmailSubject,
 } from '~/emails/templates/document-invite';
@@ -30,6 +34,7 @@ import {
   subscriptionStartedEmailSubject,
 } from '~/emails/templates/subscription-started';
 import { commonCopies } from '~/constants/common-copies';
+import type { ContractNotice } from '~/constants/contract-notice';
 import type { DocumentReportReason } from '~/constants/document';
 import { EmailTemplate } from '~/constants/email';
 import { sendEmail, type EmailData } from './email';
@@ -231,5 +236,37 @@ export async function sendEmailContactMessage(input: {
     email: <ContactMessageEmail email={email} message={message} />,
     template: EmailTemplate.ContactMessage,
     idempotencyScope: messageId,
+  });
+}
+
+/**
+ * Confirms a cancellation or withdrawal to the customer and hands our
+ * inbox a copy to act on, answerable to the customer.
+ */
+export async function sendEmailContractNotice(input: {
+  noticeId: string;
+  notice: ContractNotice;
+  receivedAt: Date;
+}) {
+  const { noticeId, notice, receivedAt } = input;
+  const email = (
+    <ContractNoticeEmail notice={notice} receivedAt={receivedAt} />
+  );
+
+  await sendEmail({
+    to: { email: notice.email },
+    replyTo: commonCopies.supportEmail,
+    subject: contractNoticeEmailSubject(notice, 'customer'),
+    email,
+    template: EmailTemplate.ContractNotice,
+    idempotencyScope: `${noticeId}:customer`,
+  });
+  await sendEmail({
+    to: { email: commonCopies.supportEmail },
+    replyTo: notice.email,
+    subject: contractNoticeEmailSubject(notice, 'inbox'),
+    email,
+    template: EmailTemplate.ContractNotice,
+    idempotencyScope: `${noticeId}:inbox`,
   });
 }

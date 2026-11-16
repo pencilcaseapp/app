@@ -37,6 +37,7 @@ the id of whatever caused the send:
 | `document-invite` | the id of the invite | An invite sent again is another invite, so it goes out; a retried send of the same one does not. |
 | `document-report` | the `document_reports` row id | Goes to our inbox with the reporter as reply-to. Every report sent is a new row and goes out; a retry of the same one does not. |
 | `contact-message` | an id drawn for the message | The website's contact form (`POST /contact`), to our inbox with the sender as reply-to. Nothing is stored for a message, so every post goes out; rate limiting is Bunny Shield's job. |
+| `contract-notice` | an id drawn for the notice, plus `customer` or `inbox` | The website's cancel (§ 312k BGB) and withdraw (§ 356a BGB) forms, through the same `POST /contact`. Both laws ask for a confirmation on a durable medium with the content and the time it reached us, so the customer gets one and our inbox a copy (reply-to the customer); the two sends need their own keys. |
 
 `current_period_start_date` is nullable on Creem's side, so the payment-failed
 scope falls back to the Creem event id. That dedupes redeliveries of that one
