@@ -15,6 +15,13 @@ export interface Config {
    */
   appUrl: string;
 
+  /**
+   * The marketing website, without a trailing slash. Its contact form
+   * posts to `/contact` from the visitor's browser, so that route lets
+   * this origin read its answer.
+   */
+  websiteUrl: string;
+
   server: {
     port: number;
     host: string;

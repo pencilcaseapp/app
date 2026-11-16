@@ -7,8 +7,10 @@ import { emailChangeCodeEmailSubject } from '~/emails/templates/email-change-cod
 import { otpCodeEmailSubject } from '~/emails/templates/otp-code';
 import { EmailTemplate } from '~/constants/email';
 import { documentReportEmailSubject } from '~/emails/templates/document-report';
+import { contactMessageEmailSubject } from '~/emails/templates/contact-message';
 import {
   sendEmailChangeCode,
+  sendEmailContactMessage,
   sendEmailDocumentInvite,
   sendEmailDocumentReport,
   sendEmailMagicCode,
@@ -177,5 +179,24 @@ describe('sendEmailDocumentReport', () => {
     const [{ email }] = sendEMailMock.mock.calls[0];
     expect(await render(email, { plainText: true }))
       .toContain('report-id');
+  });
+});
+
+describe('sendEmailContactMessage', () => {
+  it('sends the message to our inbox, answerable to the sender', async () => {
+    await sendEmailContactMessage({
+      messageId: 'message-id',
+      email: 'sam@example.com',
+      message: 'Hello',
+    });
+
+    expect(sendEMailMock).toHaveBeenCalledWith({
+      to: { email: 'inbox@pencilcase.app' },
+      replyTo: 'sam@example.com',
+      subject: contactMessageEmailSubject('sam@example.com'),
+      email: expect.anything(),
+      template: EmailTemplate.ContactMessage,
+      idempotencyScope: 'message-id',
+    });
   });
 });

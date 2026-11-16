@@ -36,6 +36,7 @@ the id of whatever caused the send:
 | `subscription-payment-failed` | the subscription id and the start of the billing period | Creem retries a failed payment several times inside one period and sends `subscription.past_due` for each attempt. One warning per period is what the user wants. |
 | `document-invite` | the id of the invite | An invite sent again is another invite, so it goes out; a retried send of the same one does not. |
 | `document-report` | the `document_reports` row id | Goes to our inbox with the reporter as reply-to. Every report sent is a new row and goes out; a retry of the same one does not. |
+| `contact-message` | an id drawn for the message | The website's contact form (`POST /contact`), to our inbox with the sender as reply-to. Nothing is stored for a message, so every post goes out; rate limiting is Bunny Shield's job. |
 
 `current_period_start_date` is nullable on Creem's side, so the payment-failed
 scope falls back to the Creem event id. That dedupes redeliveries of that one

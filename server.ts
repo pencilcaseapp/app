@@ -42,7 +42,9 @@ else {
   const viteDevServer = await import('vite').then(vite =>
     vite.createServer({
       // HMR shares the app's port, so it also reaches a phone on the LAN.
-      server: { middlewareMode: true, hmr: { server } },
+      // Vite's CORS is off: it would add its own header to every response,
+      // doubling the one `/contact` sets for the website.
+      server: { middlewareMode: true, hmr: { server }, cors: false },
     }),
   );
 
