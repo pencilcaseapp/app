@@ -54,6 +54,9 @@ on. Nothing about money lives in our code — only state.
   opens the subscription section over the document the user worked
   on last (creating one for a user without any) and hands its search
   params on, which is how the billing portal's error toasts arrive.
+- **`/checkout`** is the stable address of the checkout, for the
+  website's Buy button: it signs the visitor in if needed and hands on
+  to `/doc/:id/checkout` over the same document as `/upgrade`.
 - **`/webhooks/creem`** receives Creem's events, verified against the
   `creem-signature` header (HMAC-SHA256 of the raw body with the
   webhook secret). Every event is recorded in `creem_webhook_events`

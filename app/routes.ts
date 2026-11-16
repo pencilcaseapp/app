@@ -43,6 +43,7 @@ export default [
   ]),
   route('signout', 'routes/signout.ts'),
   route('upgrade', 'routes/upgrade.ts'),
+  route('checkout', 'routes/checkout.ts'),
   route('invite/:code', 'routes/invite.ts'),
   route('billing-portal', 'routes/billing-portal.ts'),
   route('webhooks/creem', 'routes/creem-webhook.ts'),

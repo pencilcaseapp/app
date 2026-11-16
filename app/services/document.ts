@@ -36,6 +36,7 @@ import {
   getDocumentAssets,
   getDocumentForViewer,
   getDocumentIdsDeletedBefore,
+  getDocumentList,
   getInvitedCollaborators,
   hardDeleteDocuments,
   inviteCollaborator as insertInvite,
@@ -772,6 +773,27 @@ export async function createDocument(
   });
 
   return [null, { id: document.id }];
+}
+
+/**
+ * The document the user worked on last, or a fresh one for a user
+ * without any: the subscription settings and the checkout live over a
+ * document, so the addresses that open them from outside start here.
+ */
+export async function getLatestDocumentId(
+  user: Pick<User, 'id' | 'hasSubscription'>,
+) {
+  const [latest] = await getDocumentList(user.id);
+  if (latest) {
+    return latest.id;
+  }
+
+  const [error, document] = await createDocument(user);
+  if (error !== null) {
+    throw new Error('A user without documents is below the document limit');
+  }
+
+  return document.id;
 }
 
 const PURGE_BATCH_SIZE = 100;

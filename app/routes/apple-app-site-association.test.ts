@@ -14,6 +14,7 @@ test('opens every link in the app but the billing ones', async () => {
           appIDs: ['3KCKVSRRQ3.app.pencilcase.ios'],
           components: [
             { '/': '/upgrade', 'exclude': true },
+            { '/': '/checkout', 'exclude': true },
             { '/': '/billing-portal', 'exclude': true },
             { '/': '/doc/*/checkout', 'exclude': true },
             { '/': '/doc/*/settings/subscription', 'exclude': true },
