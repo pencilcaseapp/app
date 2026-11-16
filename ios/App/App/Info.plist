@@ -6,6 +6,8 @@
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>NSCameraUsageDescription</key>
+	<string>pencil case uses the camera when you take a photo to add to a document.</string>
 	<key>CFBundleDisplayName</key>
 	<string>pencil case</string>
 	<key>CFBundleExecutable</key>
