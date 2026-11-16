@@ -1,0 +1,368 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ContractNoticeEmail > matches the rendered cancellation 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="en">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>
+      We received your cancellation of pencil case Pro. Below is what you sent
+      us and when it reached us. We’ll take care of it and write to you once
+      it’s done.
+    </title>
+    <style></style>
+  </head>
+  <body
+    dir="ltr"
+    lang="en"
+    style="background-color:rgb(255,255,255);margin:0;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0">
+    <!--$--><!--html--><!--head-->
+    <div
+      style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0"
+      data-skip-in-text="true">
+      We received your cancellation of pencil case Pro. Below is what you sent
+      us and when it reached us. We’ll take care of it and write to you once
+      it’s done.
+      <div>
+         ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿
+      </div>
+    </div>
+    <!--body-->
+    <table
+      border="0"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      role="presentation"
+      align="center">
+      <tbody>
+        <tr>
+          <td
+            dir="ltr"
+            lang="en"
+            style='background-color:rgb(255,255,255);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;padding-bottom:24px;padding-top:24px;padding-right:18px;padding-left:18px'>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="max-width:296px;width:100%;margin-right:auto;margin-left:auto">
+              <tbody>
+                <tr style="width:100%">
+                  <td style="padding-bottom:86px">
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="text-align:center">
+                      <tbody>
+                        <tr>
+                          <td style="padding:32px">
+                            <img
+                              alt="pencil case"
+                              height="28"
+                              src="https://docs.pencilcase.app/emails/pencil-case-logo.png"
+                              style="display:block;outline:none;border:none;text-decoration:none;margin-right:auto;margin-left:auto"
+                              width="140" />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <h1
+                      style='font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-size:24px;line-height:29px;font-weight:700;color:rgb(16,16,16);text-align:center;margin-bottom:12px'>
+                      Cancellation Received
+                    </h1>
+                    <p
+                      style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);text-align:center;margin-bottom:24px;margin-top:0;margin-left:0;margin-right:0'>
+                      We received your cancellation of pencil case Pro. Below is
+                      what you sent us and when it reached us. We’ll take care
+                      of it and write to you once it’s done.
+                    </p>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Statement
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        I cancel my contract for pencil case Pro.
+                      </p>
+                    </div>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Type
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Extraordinary, for good cause
+                      </p>
+                    </div>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Reason
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        The service is down for weeks.
+                      </p>
+                    </div>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Ends
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        31 December 2026
+                      </p>
+                    </div>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Name
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Sam Doe
+                      </p>
+                    </div>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        E-mail address
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        sam@example.com
+                      </p>
+                    </div>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Received
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        16 November 2026 at 14:56 CET
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!--/$-->
+  </body>
+</html>
+"
+`;
+
+exports[`ContractNoticeEmail > matches the rendered cancellation 2`] = `
+"CANCELLATION RECEIVED
+
+We received your cancellation of pencil case Pro. Below is what you sent us and when it reached us. We’ll take care of it and write to you once it’s done.
+
+Statement
+
+I cancel my contract for pencil case Pro.
+
+Type
+
+Extraordinary, for good cause
+
+Reason
+
+The service is down for weeks.
+
+Ends
+
+31 December 2026
+
+Name
+
+Sam Doe
+
+E-mail address
+
+sam@example.com
+
+Received
+
+16 November 2026 at 14:56 CET"
+`;
+
+exports[`ContractNoticeEmail > matches the rendered withdrawal 1`] = `
+"<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="en">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>
+      We received your withdrawal from your pencil case Pro contract. Below is
+      what you sent us and when it reached us. We’ll refund your payment within
+      14 days and write to you once it’s done.
+    </title>
+    <style></style>
+  </head>
+  <body
+    dir="ltr"
+    lang="en"
+    style="background-color:rgb(255,255,255);margin:0;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0">
+    <!--$--><!--html--><!--head-->
+    <div
+      style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0"
+      data-skip-in-text="true">
+      We received your withdrawal from your pencil case Pro contract. Below is
+      what you sent us and when it reached us. We’ll refund your payment within
+      14 days and write to you once it’s done.
+      <div>
+         ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿ ‌​‍﻿
+      </div>
+    </div>
+    <!--body-->
+    <table
+      border="0"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      role="presentation"
+      align="center">
+      <tbody>
+        <tr>
+          <td
+            dir="ltr"
+            lang="en"
+            style='background-color:rgb(255,255,255);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;padding-bottom:24px;padding-top:24px;padding-right:18px;padding-left:18px'>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="max-width:296px;width:100%;margin-right:auto;margin-left:auto">
+              <tbody>
+                <tr style="width:100%">
+                  <td style="padding-bottom:86px">
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="text-align:center">
+                      <tbody>
+                        <tr>
+                          <td style="padding:32px">
+                            <img
+                              alt="pencil case"
+                              height="28"
+                              src="https://docs.pencilcase.app/emails/pencil-case-logo.png"
+                              style="display:block;outline:none;border:none;text-decoration:none;margin-right:auto;margin-left:auto"
+                              width="140" />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <h1
+                      style='font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-size:24px;line-height:29px;font-weight:700;color:rgb(16,16,16);text-align:center;margin-bottom:12px'>
+                      Withdrawal Received
+                    </h1>
+                    <p
+                      style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);text-align:center;margin-bottom:24px;margin-top:0;margin-left:0;margin-right:0'>
+                      We received your withdrawal from your pencil case Pro
+                      contract. Below is what you sent us and when it reached
+                      us. We’ll refund your payment within 14 days and write to
+                      you once it’s done.
+                    </p>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Statement
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        I withdraw from my contract for pencil case Pro.
+                      </p>
+                    </div>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Name
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Sam Doe
+                      </p>
+                    </div>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        E-mail address
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        sam@example.com
+                      </p>
+                    </div>
+                    <div style="margin-bottom:16px">
+                      <p
+                        style='font-size:12px;line-height:16px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(93,93,93);margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        Received
+                      </p>
+                      <p
+                        style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);white-space:pre-wrap;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0'>
+                        16 November 2026 at 14:56 CET
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!--/$-->
+  </body>
+</html>
+"
+`;
+
+exports[`ContractNoticeEmail > matches the rendered withdrawal 2`] = `
+"WITHDRAWAL RECEIVED
+
+We received your withdrawal from your pencil case Pro contract. Below is what you sent us and when it reached us. We’ll refund your payment within 14 days and write to you once it’s done.
+
+Statement
+
+I withdraw from my contract for pencil case Pro.
+
+Name
+
+Sam Doe
+
+E-mail address
+
+sam@example.com
+
+Received
+
+16 November 2026 at 14:56 CET"
+`;

@@ -12,6 +12,7 @@ export enum EmailTemplate {
   DocumentInvite = 'document-invite',
   DocumentReport = 'document-report',
   ContactMessage = 'contact-message',
+  ContractNotice = 'contract-notice',
 }
 
 /**
@@ -55,6 +56,9 @@ export enum EmailLogStatus {
  * - `contact-message` uses an id drawn for the message when the website's
  *   contact form posts it. Nothing is stored for it, so the id only
  *   stops a retry of that one send.
+ * - `contract-notice` uses an id drawn for the cancellation or withdrawal
+ *   when the website's form posts it, plus who gets the e-mail: the
+ *   customer's confirmation and our inbox's copy are two sends.
  */
 export function emailIdempotencyKey(template: EmailTemplate, scope: string) {
   return `${template}:${scope}`;

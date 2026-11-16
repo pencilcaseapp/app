@@ -242,7 +242,12 @@ message to our inbox (`sendContactMessage`, reply-to the sender). It lives
 here rather than on the website so the app's Bunny Shield rate limits it
 per visitor. No session or CSRF token is involved; the answer carries a
 CORS header for `config.websiteUrl` only, which is also why `server.ts`
-turns Vite's own CORS off in dev (it would double the header).
+turns Vite's own CORS off in dev (it would double the header). The
+website's cancel and withdraw forms (§ 312k and § 356a BGB) post to the
+same route with `form` set to `cancellation` or `withdrawal`
+(`sendContractNotice`): the customer gets the confirmation both laws ask
+for, with the time it reached us, and our inbox a copy to carry it out by
+hand in Creem. Nothing is stored and nobody signs in.
 
 **Changing the e-mail — `app/services/email-change.ts`.** The address is
 the only credential, so it changes through a verified two-step flow

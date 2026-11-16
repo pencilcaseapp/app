@@ -11,6 +11,7 @@ import { contactMessageEmailSubject } from '~/emails/templates/contact-message';
 import {
   sendEmailChangeCode,
   sendEmailContactMessage,
+  sendEmailContractNotice,
   sendEmailDocumentInvite,
   sendEmailDocumentReport,
   sendEmailMagicCode,
@@ -197,6 +198,39 @@ describe('sendEmailContactMessage', () => {
       email: expect.anything(),
       template: EmailTemplate.ContactMessage,
       idempotencyScope: 'message-id',
+    });
+  });
+});
+
+describe('sendEmailContractNotice', () => {
+  it('confirms it to the customer and copies our inbox', async () => {
+    const notice = {
+      kind: 'withdrawal' as const,
+      name: 'Sam Doe',
+      email: 'sam@example.com',
+    };
+
+    await sendEmailContractNotice({
+      noticeId: 'notice-id',
+      notice,
+      receivedAt: new Date('2026-11-16T13:56:42Z'),
+    });
+
+    expect(sendEMailMock).toHaveBeenNthCalledWith(1, {
+      to: { email: 'sam@example.com' },
+      replyTo: 'inbox@pencilcase.app',
+      subject: 'We received your withdrawal',
+      email: expect.anything(),
+      template: EmailTemplate.ContractNotice,
+      idempotencyScope: 'notice-id:customer',
+    });
+    expect(sendEMailMock).toHaveBeenNthCalledWith(2, {
+      to: { email: 'inbox@pencilcase.app' },
+      replyTo: 'sam@example.com',
+      subject: 'Withdrawal: sam@example.com',
+      email: expect.anything(),
+      template: EmailTemplate.ContractNotice,
+      idempotencyScope: 'notice-id:inbox',
     });
   });
 });
