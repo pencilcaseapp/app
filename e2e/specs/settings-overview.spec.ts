@@ -38,7 +38,7 @@ test.describe('deleting the account', () => {
     await new OtpPage(page).enterCode();
 
     await expect(
-      page.getByText('Welcome back, your account has been restored'),
+      page.getByText('Welcome back, account restored'),
     ).toBeVisible();
     await expect(userA.document.editor).toContainText('Keep me');
   });

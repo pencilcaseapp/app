@@ -124,7 +124,7 @@ test('welcomes back the owner of a restored account', async () => {
       {
         [SearchParamAuth.ReturnUrl]: withSearchParams('/doc/1', {
           a: 'b',
-          toastSuccess: 'Welcome back, your account has been restored',
+          toastSuccess: 'Welcome back, account restored',
         }),
       },
     ));
