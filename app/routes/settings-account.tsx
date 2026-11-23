@@ -12,6 +12,7 @@ import { useEmitToast } from '~/hooks/use-toast';
 import { DELETED_ACCOUNT_RETENTION_DAYS } from '~/constants/account';
 import { updateUser } from '~/repos/user';
 import { getAccountRestoreDeadline } from '~/services/account';
+import { DangerZone } from '~/ui/danger-zone/danger-zone';
 import { Button } from '~/ui/button/button';
 import { Icon } from '~/ui/icon/icon';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
@@ -67,11 +68,6 @@ const chevron = (
  * through the footer's save button, the e-mail changes through the
  * verified flow stacked on this page.
  */
-const dangerZoneTextColor = {
-  textColorLight: 'red-900',
-  textColorDark: 'red-300',
-} as const;
-
 export default function SettingsAccountRoute({
   loaderData: { user, restoreUntil },
   params,
@@ -157,39 +153,26 @@ export default function SettingsAccountRoute({
               )}
             </form.AppField>
           </div>
-          <section
-            aria-labelledby="danger-zone"
-            className="flex items-center justify-between gap-4 rounded-xl border border-pca-red-500/25 bg-pca-red-100 p-4 max-sm:flex-col max-sm:items-stretch sm:pr-5 dark:border-pca-red-900 dark:bg-pca-red-900/20"
-          >
-            <div className="flex min-w-0 flex-col gap-1">
-              <Typography
-                id="danger-zone"
-                variant="bodySmall"
-                fontWeight="semibold"
-                as="h3"
-                {...dangerZoneTextColor}
-              >
-                Danger zone
-              </Typography>
-              <Typography
-                variant="bodyTiny"
-                className="text-balance"
-                {...dangerZoneTextColor}
-              >
+          <DangerZone
+            title="Danger zone"
+            description={(
+              <>
                 Delete your account and every document in it. Sign in within
                 {` ${DELETED_ACCOUNT_RETENTION_DAYS}\u00A0days `}
                 to get it back.
-              </Typography>
-            </div>
-            <Button
-              type="button"
-              colorLight="red-500"
-              className="shrink-0 whitespace-nowrap"
-              onClick={() => setIsDeleteDialogOpen(true)}
-            >
-              Delete account
-            </Button>
-          </section>
+              </>
+            )}
+            actionArea={(
+              <Button
+                type="button"
+                colorLight="red-500"
+                className="whitespace-nowrap"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                Delete account
+              </Button>
+            )}
+          />
         </div>
       </ControlledForm>
       <DeleteAccountDialog
