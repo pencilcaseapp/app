@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Sidebar } from './sidebar';
 import { SidebarProvider } from '../sidebar-context/sidebar-provider';
 import { useSidebarContext } from '../sidebar-context/use-sidebar-context';
-import type { SidebarMenuItem } from './types';
 
 const DESKTOP_QUERY = '(min-width: 1280px)';
 const MOBILE_QUERY = '(max-width: 640px)';
@@ -40,17 +39,19 @@ const ToggleButton = () => {
   );
 };
 
-const items: SidebarMenuItem[] = [
-  { key: '1', content: 'Documents' },
-  { key: '2', content: 'Settings' },
-];
+const content = (
+  <>
+    <div>Documents</div>
+    <div>Settings</div>
+  </>
+);
 
 const renderSidebar = (defaultDesktopOpen = true) =>
   render(
     <MemoryRouter>
       <SidebarProvider defaultDesktopOpen={defaultDesktopOpen}>
         <ToggleButton />
-        <Sidebar items={items} bottomArea="Create Doc" />
+        <Sidebar content={content} bottomArea="Create Doc" />
       </SidebarProvider>
     </MemoryRouter>,
   );
@@ -100,7 +101,7 @@ describe('Sidebar', () => {
     const { rerender } = render(
       <MemoryRouter>
         <SidebarProvider>
-          <Sidebar items={items}><Page /></Sidebar>
+          <Sidebar content={content}><Page /></Sidebar>
         </SidebarProvider>
       </MemoryRouter>,
     );
@@ -110,7 +111,7 @@ describe('Sidebar', () => {
     rerender(
       <MemoryRouter>
         <SidebarProvider>
-          <Sidebar items={items}><Page /></Sidebar>
+          <Sidebar content={content}><Page /></Sidebar>
         </SidebarProvider>
       </MemoryRouter>,
     );

@@ -17,16 +17,16 @@ exports[`Sidebar > matches the snapshot on desktop 1`] = `
       <nav
         class="top-0 left-0 h-[100dvh-56px] flex justify-between flex-col w-full max-w-none sm:max-w-62.5 overflow-hidden overscroll-y-none overflow-x-hidden"
       >
-        <ul
+        <div
           class="flex gap-2 flex-col px-1.5 pt-4 grow overflow-scroll scrollbar-none pb-56"
         >
-          <li>
+          <div>
             Documents
-          </li>
-          <li>
+          </div>
+          <div>
             Settings
-          </li>
-        </ul>
+          </div>
+        </div>
         <div
           class="absolute w-full bottom-0 left-0 flex gap-1.5 flex-col glass-surface border-white dark:border-pca-grey-900 border px-1.5 pb-3 pt-1.5 z-10 rounded-t-xl"
         >

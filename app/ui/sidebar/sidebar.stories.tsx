@@ -113,60 +113,52 @@ export const Default: Story = {
           center={<Logo />}
         />
         <Sidebar
-          items={[
-            {
-              key: 'search',
-              content: (
-                <NavigationItem as="button" onClick={() => console.log('Search...')} icon="search" title="Search" />
-              ),
-            },
-            {
-              key: 'folder',
-              content: (
-                <div>
-                  <div className="sticky top-0 z-10 bg-pca-white pb-1.5 dark:bg-pca-grey-900">
-                    <FolderSwitch
-                      groups={folderGroups}
-                      value={folder}
-                      onValueChange={setFolder}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    {folder === 'all'
-                      ? navigation.map(item => (
-                          <DocumentItem
-                            title={item.label}
-                            as={NavLink}
-                            to={item.to}
-                            key={`${item.label}-${item.to}`}
-                            actionArea={(
-                              <DropdownMenu>
-                                <DropdownMenuTrigger iconTitle="Item options" />
-                                <DropdownMenuPortal>
-                                  <DropdownMenuContent align="start">
-                                    <DropdownMenuItem as="button" onClick={action('delete')} color="danger" icon="trash">
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenuPortal>
-                              </DropdownMenu>
-                            )}
-                          >
-                            {item.label}
-                          </DocumentItem>
-                        ))
-                      : (
-                          <DocumentGroupEmpty icon="no-docs">
-                            {folder === 'shared'
-                              ? 'No documents shared with you'
-                              : 'No deleted documents'}
-                          </DocumentGroupEmpty>
-                        )}
-                  </div>
+          content={(
+            <>
+              <NavigationItem as="button" onClick={() => console.log('Search...')} icon="search" title="Search" />
+              <div>
+                <div className="sticky top-0 z-10 bg-pca-white pb-1.5 dark:bg-pca-grey-900">
+                  <FolderSwitch
+                    groups={folderGroups}
+                    value={folder}
+                    onValueChange={setFolder}
+                  />
                 </div>
-              ),
-            },
-          ]}
+                <div className="flex flex-col gap-1.5">
+                  {folder === 'all'
+                    ? navigation.map(item => (
+                        <DocumentItem
+                          title={item.label}
+                          as={NavLink}
+                          to={item.to}
+                          key={`${item.label}-${item.to}`}
+                          actionArea={(
+                            <DropdownMenu>
+                              <DropdownMenuTrigger iconTitle="Item options" />
+                              <DropdownMenuPortal>
+                                <DropdownMenuContent align="start">
+                                  <DropdownMenuItem as="button" onClick={action('delete')} color="danger" icon="trash">
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenuPortal>
+                            </DropdownMenu>
+                          )}
+                        >
+                          {item.label}
+                        </DocumentItem>
+                      ))
+                    : (
+                        <DocumentGroupEmpty icon="no-docs">
+                          {folder === 'shared'
+                            ? 'No documents shared with you'
+                            : 'No deleted documents'}
+                        </DocumentGroupEmpty>
+                      )}
+                </div>
+              </div>
+            </>
+          )}
           bottomArea={(
             <>
               {bottomNavigation?.map(item => (

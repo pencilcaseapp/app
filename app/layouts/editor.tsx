@@ -310,97 +310,92 @@ function EditorSidebar({
   return (
     <>
       <Sidebar
-        items={[
-          {
-            key: 'folder',
-            content: (
-              <>
-                <div>
-                  <div className="sticky top-0 z-10 bg-pca-white pb-1.5 dark:bg-pca-grey-900">
-                    <FolderSwitch
-                      groups={folderGroups}
-                      value={pendingFolder ?? folder}
-                      onValueChange={folder => void switchFolder(folder)}
-                    />
-                  </div>
-                  <div
-                    // A new list for every folder, so the rows of one do
-                    // not glide into the places of the other.
-                    key={folder}
-                    aria-busy={isSwitchingFolder}
-                    className="flex flex-col gap-1.5"
-                  >
-                    {stableNavigation.length === 0 && (
-                      <DocumentGroupEmpty icon="no-docs">
-                        {EMPTY_FOLDER_COPIES[folder]}
-                      </DocumentGroupEmpty>
-                    )}
-                    {stableNavigation.map((item) => {
-                      const label = liveTitles.get(item.id) ?? item.label;
+        content={(
+          <>
+            <div>
+              <div className="sticky top-0 z-10 bg-pca-white pb-1.5 dark:bg-pca-grey-900">
+                <FolderSwitch
+                  groups={folderGroups}
+                  value={pendingFolder ?? folder}
+                  onValueChange={folder => void switchFolder(folder)}
+                />
+              </div>
+              <div
+                // A new list for every folder, so the rows of one do
+                // not glide into the places of the other.
+                key={folder}
+                aria-busy={isSwitchingFolder}
+                className="flex flex-col gap-1.5"
+              >
+                {stableNavigation.length === 0 && (
+                  <DocumentGroupEmpty icon="no-docs">
+                    {EMPTY_FOLDER_COPIES[folder]}
+                  </DocumentGroupEmpty>
+                )}
+                {stableNavigation.map((item) => {
+                  const label = liveTitles.get(item.id) ?? item.label;
 
-                      return (
-                        <DocumentItem
-                          title={label}
-                          shareState={item.shareState}
-                          as={NavLink}
-                          to={item.to}
-                          key={item.to}
-                          onClick={closeOnNavigate}
-                          actionArea={folder === 'deleted'
-                            ? <RestoreDocumentMenu documentId={item.id} />
-                            : (
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger
-                                    iconTitle="Item options"
-                                  />
-                                  <DropdownMenuPortal>
-                                    <DropdownMenuContent
-                                      align={isMobile ? 'end' : 'start'}
-                                    >
-                                      <DropdownMenuItem
-                                        as="button"
-                                        onClick={() => {
-                                          setDocumentToDelete({
-                                            id: item.id,
-                                            title: label,
-                                            shared:
-                                              item.shareState !== 'private',
-                                            isOwner: item.isOwner,
-                                          });
-                                          setIsDeleteDialogOpen(true);
-                                        }}
-                                        color="danger"
-                                        icon="trash"
-                                      >
-                                        Delete
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenuPortal>
-                                </DropdownMenu>
-                              )}
-                        >
-                          {label}
-                        </DocumentItem>
-                      );
-                    })}
-                  </div>
-                </div>
-                <DeleteDocumentDialog
-                  document={documentToDelete}
-                  open={isDeleteDialogOpen}
-                  onOpenChange={setIsDeleteDialogOpen}
-                />
-                {/* Not in the bottom area, which the slim sidebar
+                  return (
+                    <DocumentItem
+                      title={label}
+                      shareState={item.shareState}
+                      as={NavLink}
+                      to={item.to}
+                      key={item.to}
+                      onClick={closeOnNavigate}
+                      actionArea={folder === 'deleted'
+                        ? <RestoreDocumentMenu documentId={item.id} />
+                        : (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger
+                                iconTitle="Item options"
+                              />
+                              <DropdownMenuPortal>
+                                <DropdownMenuContent
+                                  align={isMobile ? 'end' : 'start'}
+                                >
+                                  <DropdownMenuItem
+                                    as="button"
+                                    onClick={() => {
+                                      setDocumentToDelete({
+                                        id: item.id,
+                                        title: label,
+                                        shared:
+                                          item.shareState !== 'private',
+                                        isOwner: item.isOwner,
+                                      });
+                                      setIsDeleteDialogOpen(true);
+                                    }}
+                                    color="danger"
+                                    icon="trash"
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenuPortal>
+                            </DropdownMenu>
+                          )}
+                    >
+                      {label}
+                    </DocumentItem>
+                  );
+                })}
+              </div>
+            </div>
+            <DeleteDocumentDialog
+              document={documentToDelete}
+              open={isDeleteDialogOpen}
+              onOpenChange={setIsDeleteDialogOpen}
+            />
+            {/* Not in the bottom area, which the slim sidebar
                     renders a second time. */}
-                <DocumentLimitDialog
-                  checkoutUrl={isNativeApp ? undefined : checkoutUrl}
-                  open={isLimitDialogOpen}
-                  onOpenChange={setIsLimitDialogOpen}
-                />
-              </>
-            ),
-          },
-        ]}
+            <DocumentLimitDialog
+              checkoutUrl={isNativeApp ? undefined : checkoutUrl}
+              open={isLimitDialogOpen}
+              onOpenChange={setIsLimitDialogOpen}
+            />
+          </>
+        )}
         // The upgrade area adds the meter block, the button, and the
         // column gap on top of the footer's base height.
         reservedFooterHeight={showUpgrade && !isNativeApp ? 223 : 123}

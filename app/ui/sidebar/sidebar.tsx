@@ -5,10 +5,8 @@ import { Drawer } from '../drawer/drawer';
 import { DrawerContent } from '../drawer/drawer-content';
 import { DrawerContentInner } from '../drawer/drawer-content-inner';
 import { useSidebarContext } from '../sidebar-context/use-sidebar-context';
-import type { SidebarMenuItem, SidebarBaseProps } from './types';
+import type { SidebarBaseProps } from './types';
 import { SidebarMenu } from './sidebar-menu';
-
-export type { SidebarMenuItem };
 
 /**
  * `children` is the page the sidebar sits next to. On mobile it renders
@@ -29,7 +27,7 @@ export const SIDEBAR_DRAWER_MAX_HEIGHT = 'calc(100dvh - 56px - var(--safe-area-t
 
 export const Sidebar: FC<SidebarProps> = ({
   bottomArea,
-  items,
+  content,
   // The footer's rendered height: two navigation items
   // plus the gap and the footer's own top padding.
   reservedFooterHeight = 123,
@@ -65,13 +63,7 @@ export const Sidebar: FC<SidebarProps> = ({
                   </div>
                 )}
               >
-                <nav>
-                  <ul className="flex flex-col gap-2">
-                    {items.map(({ key, content }) => {
-                      return <li key={key}>{content}</li>;
-                    })}
-                  </ul>
-                </nav>
+                <nav>{content}</nav>
               </DrawerContentInner>
             </DrawerContent>
           )
@@ -81,7 +73,7 @@ export const Sidebar: FC<SidebarProps> = ({
                 <SidebarMenu
                   initialState="close"
                   bottomArea={bottomArea}
-                  items={items}
+                  content={content}
                 />
               )}
               desktopChildren={(
@@ -89,7 +81,7 @@ export const Sidebar: FC<SidebarProps> = ({
                   showSlimSidebar
                   isOpen={isDesktopSidebarOpen}
                   bottomArea={bottomArea}
-                  items={items}
+                  content={content}
                 />
               )}
             />
