@@ -2,14 +2,14 @@ import { useEffect } from 'react';
 import type { RefObject } from 'react';
 
 /** How far the content dissolves into what sits above and below it. */
-const FADE_TOP = 16;
+export const FADE_TOP = 16;
 const FADE_BOTTOM = 24;
 
 /**
  * The fade grows with the content behind the edge up to its full size, so
  * it eases in as the content starts to scroll instead of snapping on.
  */
-const fadeSize = (distance: number, max: number) =>
+export const fadeSize = (distance: number, max: number) =>
   `${distance > 1 ? Math.min(Math.round(distance), max) : 0}px`;
 
 export interface ScrollEdgeFadeOptions {
