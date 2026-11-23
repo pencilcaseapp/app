@@ -110,10 +110,10 @@ export async function hasSubscriptionWithStatus(
   return !!await getSubscriptionWithStatus(userId, statuses, executor);
 }
 
-/** All of the user's subscriptions in one of the given statuses. */
-export async function getSubscriptionsWithStatus(
+/** The user's subscriptions, only those in one of `statuses` if given. */
+export async function getSubscriptions(
   userId: string,
-  statuses: SubscriptionStatus[],
+  { statuses }: { statuses?: SubscriptionStatus[] } = {},
 ) {
   if (!isUuid(userId)) {
     return [];
@@ -122,9 +122,7 @@ export async function getSubscriptionsWithStatus(
   return db.query.subscriptions.findMany({
     where: {
       userId,
-      status: {
-        in: statuses,
-      },
+      ...(statuses && { status: { in: statuses } }),
     },
   });
 }

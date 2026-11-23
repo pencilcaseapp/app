@@ -11,7 +11,7 @@ import {
 import {
   getSubscriptionByCreemId,
   getSubscriptionWithStatus,
-  getSubscriptionsWithStatus,
+  getSubscriptions,
   hasSubscriptionWithStatus,
   upsertSubscription,
 } from '~/repos/subscription';
@@ -252,7 +252,9 @@ const RENEWING_STATUSES = [
  * Creem could still charge it.
  */
 export async function cancelRenewingSubscriptions(user: Pick<User, 'id'>) {
-  const renewing = await getSubscriptionsWithStatus(user.id, RENEWING_STATUSES);
+  const renewing = await getSubscriptions(user.id, {
+    statuses: RENEWING_STATUSES,
+  });
 
   try {
     for (const subscription of renewing) {

@@ -37,7 +37,7 @@ const upsertSubscriptionMock = vi.fn();
 const getSubscriptionByCreemIdMock = vi.fn();
 const getSubscriptionWithStatusMock = vi.fn();
 const hasSubscriptionWithStatusMock = vi.fn();
-const getSubscriptionsWithStatusMock = vi.fn();
+const getSubscriptionsMock = vi.fn();
 vi.mock('~/repos/subscription', async (importOriginal) => {
   const actual
     = await importOriginal<typeof import('~/repos/subscription')>();
@@ -51,8 +51,8 @@ vi.mock('~/repos/subscription', async (importOriginal) => {
       (...args: unknown[]) => getSubscriptionWithStatusMock(...args),
     hasSubscriptionWithStatus:
       (...args: unknown[]) => hasSubscriptionWithStatusMock(...args),
-    getSubscriptionsWithStatus:
-      (...args: unknown[]) => getSubscriptionsWithStatusMock(...args),
+    getSubscriptions:
+      (...args: unknown[]) => getSubscriptionsMock(...args),
   };
 });
 
@@ -724,7 +724,7 @@ describe('syncCreemCustomerEmail', () => {
 
 describe('cancelRenewingSubscriptions', () => {
   it('cancels each renewing subscription at period end and stores it', async () => {
-    getSubscriptionsWithStatusMock.mockResolvedValue([
+    getSubscriptionsMock.mockResolvedValue([
       { creemSubscriptionId: 'sub_123' },
     ]);
     cancelSubscriptionAtPeriodEndMock.mockResolvedValue(
@@ -732,8 +732,10 @@ describe('cancelRenewingSubscriptions', () => {
     );
 
     expect(await cancelRenewingSubscriptions(userFixture)).toBe(true);
-    expect(getSubscriptionsWithStatusMock)
-      .toHaveBeenCalledWith(userFixture.id, ['active', 'trialing', 'past_due']);
+    expect(getSubscriptionsMock)
+      .toHaveBeenCalledWith(userFixture.id, {
+        statuses: ['active', 'trialing', 'past_due'],
+      });
     expect(cancelSubscriptionAtPeriodEndMock).toHaveBeenCalledWith('sub_123');
     expect(upsertSubscriptionMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -745,7 +747,7 @@ describe('cancelRenewingSubscriptions', () => {
   });
 
   it('has nothing to do without a renewing subscription', async () => {
-    getSubscriptionsWithStatusMock.mockResolvedValue([]);
+    getSubscriptionsMock.mockResolvedValue([]);
 
     expect(await cancelRenewingSubscriptions(userFixture)).toBe(true);
     expect(cancelSubscriptionAtPeriodEndMock).not.toHaveBeenCalled();
@@ -753,7 +755,7 @@ describe('cancelRenewingSubscriptions', () => {
 
   it('reports a failure when Creem refuses', async () => {
     const log = silenceLog('error');
-    getSubscriptionsWithStatusMock.mockResolvedValue([
+    getSubscriptionsMock.mockResolvedValue([
       { creemSubscriptionId: 'sub_123' },
     ]);
     cancelSubscriptionAtPeriodEndMock.mockRejectedValue(new Error('502'));
