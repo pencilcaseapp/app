@@ -173,8 +173,12 @@ const FolderSwitchSelect = <Value extends string>({
                       menuItemClasses,
                       'cursor-pointer select-none gap-2 text-sm',
                       'text-pca-grey-900 dark:text-pca-white',
-                      'data-highlighted:bg-pca-grey-200',
-                      'dark:data-highlighted:bg-pca-grey-700',
+                      // Base UI highlights the open folder as soon as the
+                      // list opens, so only the pointer and the keyboard
+                      // mark a row.
+                      'hover:bg-pca-grey-200 dark:hover:bg-pca-grey-700',
+                      'focus-visible:bg-pca-grey-200',
+                      'dark:focus-visible:bg-pca-grey-700',
                     )}
                   >
                     <Icon icon={item.icon} className="size-5 shrink-0" />
