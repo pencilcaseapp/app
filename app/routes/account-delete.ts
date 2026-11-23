@@ -6,6 +6,7 @@ import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
 import { deleteAccount } from '~/services/account';
 import { signOut } from '~/services/auth';
+import { toDateParam } from '~/utils/date';
 import { validateForm } from '~/utils/form';
 import { addSearchParams, getNormalizedReturnUrl, withSearchParams } from '~/utils/url';
 import type { Route } from './+types/account-delete';
@@ -43,8 +44,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
   return redirect(
     withSearchParams(href('/signin'), {
-      [SearchParamAuth.RestoreUntil]:
-        result.restoreUntil.toISOString().slice(0, 10),
+      [SearchParamAuth.RestoreUntil]: toDateParam(result.restoreUntil),
     }),
     {
       headers: {

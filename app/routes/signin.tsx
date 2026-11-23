@@ -12,7 +12,7 @@ import { initMagicCode } from '~/services/auth';
 import { getNormalizedReturnUrl, getOptionalSearchParam, withSearchParams } from '~/utils/url';
 import { SearchParamAuth } from '~/constants/search-params';
 import { Notification } from '~/ui/notification/notification';
-import { formatLongDate } from '~/utils/date';
+import { formatLongDate, parseDateParam } from '~/utils/date';
 
 const formSchema = z.object({
   email: z.email(),
@@ -34,17 +34,14 @@ export function loader({ request }: Route.ActionArgs) {
 
 /**
  * The day until which the account deleted a moment ago can be restored,
- * handed over by the deletion as `YYYY-MM-DD` and written out here.
+ * handed over by the deletion and written out like in its e-mail.
  */
 function getRestoreUntil(request: Request) {
-  const value = getOptionalSearchParam(request, SearchParamAuth.RestoreUntil);
-  const date = value && /^\d{4}-\d{2}-\d{2}$/.test(value)
-    ? new Date(`${value}T00:00:00Z`)
-    : undefined;
+  const date = parseDateParam(
+    getOptionalSearchParam(request, SearchParamAuth.RestoreUntil),
+  );
 
-  return date && !Number.isNaN(date.getTime())
-    ? formatLongDate(date)
-    : undefined;
+  return date && formatLongDate(date);
 }
 
 export async function action({ request }: Route.ActionArgs) {
