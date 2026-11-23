@@ -8,7 +8,7 @@ We received your request to delete your pencil case account. In 30 days we perma
 
 Until then you can always restore it. Sign in with this e-mail address by 23 December 2026 and your account is back, with all your documents.
 
-Sign in https://docs.pencilcase.app/signin"
+Restore account https://docs.pencilcase.app/signin"
 `;
 
 exports[`AccountDeletedEmail > matches the rendered markup 1`] = `
@@ -117,7 +117,7 @@ exports[`AccountDeletedEmail > matches the rendered markup 1`] = `
                                 ><!--[if mso]><i style="mso-font-width:300%;mso-text-raise:12px" hidden>&#8202;&#8202;</i><![endif]--></span
                               ><span
                                 style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:6px"
-                                >Sign in</span
+                                >Restore account</span
                               ><span
                                 ><!--[if mso]><i style="mso-font-width:300%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span
                               ></a
