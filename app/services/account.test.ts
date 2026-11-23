@@ -177,7 +177,7 @@ describe('sendAccountDeletedEmail', () => {
       to: { email: user.email, name: user.name },
       userId: user.id,
       deletedAt,
-      restoreUntil: '23 December 2026',
+      restoreUntil: new Date('2026-12-23T17:00:00Z'),
     });
   });
 

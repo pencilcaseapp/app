@@ -243,7 +243,7 @@ describe('sendEmailAccountDeleted', () => {
       to: { email: 'test@example.com' },
       userId: 'user-id',
       deletedAt: new Date('2026-11-23T16:00:00.000Z'),
-      restoreUntil: '23 December 2026',
+      restoreUntil: new Date('2026-12-23T16:00:00.000Z'),
     });
 
     expect(sendEMailMock).toHaveBeenCalledWith({
@@ -258,6 +258,6 @@ describe('sendEmailAccountDeleted', () => {
     const [{ email }] = sendEMailMock.mock.calls[0];
     const text = await render(email, { plainText: true });
     expect(text).toContain('23 December 2026');
-    expect(text).toContain('/signin');
+    expect(text).toContain('/signin?restoreUntil=2026-12-23');
   });
 });

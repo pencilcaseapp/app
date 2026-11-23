@@ -41,6 +41,9 @@ import { commonCopies } from '~/constants/common-copies';
 import type { ContractNotice } from '~/constants/contract-notice';
 import type { DocumentReportReason } from '~/constants/document';
 import { EmailTemplate } from '~/constants/email';
+import { SearchParamAuth } from '~/constants/search-params';
+import { formatLongDate, toDateParam } from '~/utils/date';
+import { withSearchParams } from '~/utils/url';
 import { sendEmail, type EmailData } from './email';
 
 const config = getConfig();
@@ -283,17 +286,20 @@ export async function sendEmailAccountDeleted(input: {
   to: EmailData;
   userId: string;
   deletedAt: Date;
-  restoreUntil: string;
+  restoreUntil: Date;
 }) {
   const { to, userId, deletedAt, restoreUntil } = input;
+  const signInUrl = withSearchParams(href('/signin'), {
+    [SearchParamAuth.RestoreUntil]: toDateParam(restoreUntil),
+  });
 
   await sendEmail({
     to,
     subject: accountDeletedEmailSubject(),
     email: (
       <AccountDeletedEmail
-        restoreUntil={restoreUntil}
-        signInUrl={`${config.appUrl}${href('/signin')}`}
+        restoreUntil={formatLongDate(restoreUntil)}
+        signInUrl={`${config.appUrl}${signInUrl}`}
       />
     ),
     template: EmailTemplate.AccountDeleted,
