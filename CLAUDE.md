@@ -513,7 +513,7 @@ is removed: signing in again with the same address clears the stamp in
 `DELETED_ACCOUNT_RETENTION_DAYS`, one transaction each, with every row
 tied to them (documents, images and their files, collaborators and
 invites, sessions, codes, email change requests, email logs,
-subscriptions, the Creem events naming them); reports keep their row
+subscriptions); reports keep their row
 with the reporter set null. Anything new that stores data about a user
 joins that purge.
 

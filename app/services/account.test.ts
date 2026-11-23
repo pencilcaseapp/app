@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getObjectStream, putObject } from '~/clients/storage';
 import { db } from '~/db';
 import {
-  creemWebhookEvents,
   documentAssets,
   documentCollaborators,
   documentReports,
@@ -238,28 +237,6 @@ describe('purgeDeletedAccounts', () => {
     await db.update(users)
       .set({ creemCustomerId: subscription.creemCustomerId })
       .where(eq(users.id, user.id));
-    const eventIds = [
-      `evt_${faker.string.alphanumeric(22)}`,
-      `evt_${faker.string.alphanumeric(22)}`,
-      `evt_${faker.string.alphanumeric(22)}`,
-    ];
-    await db.insert(creemWebhookEvents).values([
-      {
-        id: eventIds[0],
-        eventType: 'subscription.scheduled_cancel',
-        payload: { object: { customer: { id: subscription.creemCustomerId } } },
-      },
-      {
-        id: eventIds[1],
-        eventType: 'checkout.completed',
-        payload: { object: { metadata: { userId: user.id } } },
-      },
-      {
-        id: eventIds[2],
-        eventType: 'subscription.paid',
-        payload: { object: { customer: { email: user.email } } },
-      },
-    ]);
 
     // A report it sent about somebody else's document.
     const report = await createDocumentReport({
@@ -298,8 +275,6 @@ describe('purgeDeletedAccounts', () => {
     ))).toEqual([]);
     expect(await db.select().from(subscriptions)
       .where(eq(subscriptions.userId, user.id))).toEqual([]);
-    expect(await db.select().from(creemWebhookEvents)
-      .where(inArray(creemWebhookEvents.id, eventIds))).toEqual([]);
 
     // What belongs to the others stays, without the account in it.
     expect(await db.select({ id: documents.id }).from(documents)

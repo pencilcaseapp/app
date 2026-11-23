@@ -129,21 +129,15 @@ export async function getSubscriptionsWithStatus(
   });
 }
 
-/**
- * Deletes the user's subscriptions, for the purge of a deleted account.
- * Returns the Creem customer ids they were paid through.
- */
+/** Deletes the user's subscriptions, for the purge of a deleted account. */
 export async function deleteUserSubscriptions(
   userId: string,
   executor: Executor = db,
 ) {
   if (!isUuid(userId)) {
-    return [];
+    return;
   }
 
-  const deleted = await executor.delete(subscriptions)
-    .where(eq(subscriptions.userId, userId))
-    .returning({ creemCustomerId: subscriptions.creemCustomerId });
-
-  return deleted.map(row => row.creemCustomerId);
+  await executor.delete(subscriptions)
+    .where(eq(subscriptions.userId, userId));
 }

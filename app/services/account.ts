@@ -1,7 +1,6 @@
 import { deleteObjects } from '~/clients/storage';
 import { DELETED_ACCOUNT_RETENTION_MS } from '~/constants/account';
 import { transaction } from '~/db';
-import { deleteWebhookEventsMentioning } from '~/repos/creem-webhook-event';
 import { incrementDailyStat } from '~/repos/daily-stat';
 import { deleteUserEmailChangeRequests } from '~/repos/email-change-request';
 import { deleteUserEmailLogs } from '~/repos/email-log';
@@ -90,8 +89,8 @@ export async function deleteAccount(user: User): Promise<DeleteAccountResult> {
  *   to the documents of others (`deleteAccountDocuments`),
  * - its sessions, codes, e-mail change requests and e-mail logs, the
  *   codes and logs sent to its address included,
- * - its subscriptions and the stored Creem events that name it, its
- *   customer or its address,
+ * - its subscriptions (the stored Creem events go after 30 days with
+ *   all the others),
  * - and the user row, which clears its name from the reports it sent
  *   (the reports themselves are kept for their retention period).
  *
@@ -135,12 +134,7 @@ async function purgeDeletedAccount(id: string, before: Date) {
     await deleteUserEmailChangeRequests(user.id, tx);
     await deleteUserEmailLogs({ userId: user.id, email: user.email }, tx);
 
-    const customerIds = await deleteUserSubscriptions(user.id, tx);
-    await deleteWebhookEventsMentioning([
-      user.id,
-      user.email,
-      ...new Set([user.creemCustomerId, ...customerIds]),
-    ].filter(value => value !== null), tx);
+    await deleteUserSubscriptions(user.id, tx);
 
     await hardDeleteUser(user.id, tx);
 
