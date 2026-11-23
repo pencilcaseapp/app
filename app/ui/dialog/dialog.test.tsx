@@ -14,11 +14,11 @@ import type { DialogTopbarProps } from './dialog-topbar';
 
 function renderDialog(
   { contentProps, innerProps, defaultOpen }:
-  {
-    contentProps?: DialogContentProps;
-    innerProps?: DialogContentInnerProps;
-    defaultOpen?: boolean;
-  } = {},
+    {
+      contentProps?: DialogContentProps;
+      innerProps?: DialogContentInnerProps;
+      defaultOpen?: boolean;
+    } = {},
 ) {
   return render(
     <Dialog defaultOpen={defaultOpen}>

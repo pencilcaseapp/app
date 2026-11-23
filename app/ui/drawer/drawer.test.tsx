@@ -11,11 +11,11 @@ import type { DrawerContentInnerProps } from './drawer-content-inner';
 
 function renderDrawer(
   { contentProps, innerProps, defaultOpen }:
-  {
-    contentProps?: DrawerContentProps;
-    innerProps?: DrawerContentInnerProps;
-    defaultOpen?: boolean;
-  } = {},
+    {
+      contentProps?: DrawerContentProps;
+      innerProps?: DrawerContentInnerProps;
+      defaultOpen?: boolean;
+    } = {},
 ) {
   return render(
     <Drawer defaultOpen={defaultOpen}>

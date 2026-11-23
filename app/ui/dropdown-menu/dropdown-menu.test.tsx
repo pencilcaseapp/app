@@ -10,11 +10,11 @@ import { DropdownMenuSeparator } from './dropdown-menu-separator';
 
 function renderDropdownMenu(
   { items, defaultOpen, variant }:
-  {
-    items?: React.ReactNode;
-    defaultOpen?: boolean;
-    variant?: 'glass' | 'solid';
-  } = {},
+    {
+      items?: React.ReactNode;
+      defaultOpen?: boolean;
+      variant?: 'glass' | 'solid';
+    } = {},
 ) {
   const defaultItems = (
     <>

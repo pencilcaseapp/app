@@ -210,17 +210,16 @@ describe('EditorPluginSlashMenu', () => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 
-  test('turns the row into the chosen heading and drops the query',
-    async () => {
-      const { user } = renderSlashMenu();
+  test('turns the row into the chosen heading and drops the query', async () => {
+    const { user } = renderSlashMenu();
 
-      await type('/');
-      await user.click(screen.getByRole('menuitem', { name: 'Heading 2' }));
+    await type('/');
+    await user.click(screen.getByRole('menuitem', { name: 'Heading 2' }));
 
-      expect(rowType()).toBe('h2');
-      expect(documentText()).toBe('');
-      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
-    });
+    expect(rowType()).toBe('h2');
+    expect(documentText()).toBe('');
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
 
   test('turns the row into the chosen list', async () => {
     const { user } = renderSlashMenu();
@@ -269,15 +268,14 @@ describe('EditorPluginSlashMenu', () => {
     expect(documentText()).toBe('');
   });
 
-  test('picks the highlighted option with the arrow keys and enter',
-    async () => {
-      renderSlashMenu();
+  test('picks the highlighted option with the arrow keys and enter', async () => {
+    renderSlashMenu();
 
-      await type('/');
-      await press(KEY_ARROW_DOWN_COMMAND, 'ArrowDown');
-      await press(KEY_ENTER_COMMAND, 'Enter');
+    await type('/');
+    await press(KEY_ARROW_DOWN_COMMAND, 'ArrowDown');
+    await press(KEY_ENTER_COMMAND, 'Enter');
 
-      expect(rowType()).toBe('h2');
-      expect(documentText()).toBe('');
-    });
+    expect(rowType()).toBe('h2');
+    expect(documentText()).toBe('');
+  });
 });

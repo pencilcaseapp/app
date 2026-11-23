@@ -5,6 +5,5 @@ export function waitForPost(page: Page, ...routeSegments: string[]) {
   return page.waitForResponse(response =>
     response.request().method() === 'POST'
     && routeSegments.some(segment =>
-      new URL(response.url()).pathname.includes(segment)),
-  );
+      new URL(response.url()).pathname.includes(segment)));
 }

@@ -126,20 +126,19 @@ test('does not look the invited people up for a visitor', async () => {
   expect(listInvitedCollaboratorsMock).not.toHaveBeenCalled();
 });
 
-test('offers a report instead of sharing to anybody but the owner',
-  async () => {
-    const context = new RouterContextProvider();
-    context.set(optionalUserSessionContext, userFixture);
-    openDocumentMock.mockResolvedValue(
-      openedDocument({ isOwner: false, linkShared: true }),
-    );
+test('offers a report instead of sharing to anybody but the owner', async () => {
+  const context = new RouterContextProvider();
+  context.set(optionalUserSessionContext, userFixture);
+  openDocumentMock.mockResolvedValue(
+    openedDocument({ isOwner: false, linkShared: true }),
+  );
 
-    const { findByRole, queryByRole } = await renderDoc(context);
+  const { findByRole, queryByRole } = await renderDoc(context);
 
-    expect(await findByRole('button', { name: 'Report' }))
-      .toBeInTheDocument();
-    expect(queryByRole('button', { name: 'Share' })).not.toBeInTheDocument();
-  });
+  expect(await findByRole('button', { name: 'Report' }))
+    .toBeInTheDocument();
+  expect(queryByRole('button', { name: 'Share' })).not.toBeInTheDocument();
+});
 
 test('offers no report to the owner', async () => {
   const context = new RouterContextProvider();

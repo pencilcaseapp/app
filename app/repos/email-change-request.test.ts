@@ -201,7 +201,8 @@ describe('deleteEmailChangeRequestsExpiredBefore', () => {
   it('deletes the requests that expired before the date', async () => {
     const user = await createTestUser();
     const old = await createExpiredEmailChangeRequest(
-      user.id, new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      user.id,
+      new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     );
     const recent = await createExpiredEmailChangeRequest(user.id);
     const valid = await createTestEmailChangeRequest(user.id);

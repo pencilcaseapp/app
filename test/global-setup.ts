@@ -33,7 +33,8 @@ async function resetDatabase() {
       FROM pg_type t
       JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
       WHERE n.nspname = 'public' AND t.typtype = 'e';
-  `);
+  `,
+  );
 
   for (const { typname } of enums) {
     await db.execute(sql`DROP TYPE IF EXISTS "public"."${sql.raw(typname)}" CASCADE`);

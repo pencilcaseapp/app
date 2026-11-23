@@ -45,8 +45,7 @@ else {
       // Vite's CORS is off: it would add its own header to every response,
       // doubling the one `/contact` sets for the website.
       server: { middlewareMode: true, hmr: { server }, cors: false },
-    }),
-  );
+    }));
 
   server.on('upgrade', async (request, socket, head) => {
     const protocol = request.headers['sec-websocket-protocol'];

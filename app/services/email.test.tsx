@@ -97,22 +97,21 @@ describe('sendEmail', () => {
     });
   });
 
-  it('claims the key before it sends, and logs the provider message',
-    async () => {
-      await sendEmail({ ...input, userId: 'user-id' });
+  it('claims the key before it sends, and logs the provider message', async () => {
+    await sendEmail({ ...input, userId: 'user-id' });
 
-      expect(claimEmailLogMock).toHaveBeenCalledWith({
-        idempotencyKey: 'otp-code:otp-id',
-        template: EmailTemplate.OtpCode,
-        email: 'john@doe.com',
-        subject: 'Test Email',
-        userId: 'user-id',
-      });
-      expect(markEmailLogSentMock).toHaveBeenCalledWith({
-        id: log.id,
-        providerMessageId: 'msg_123',
-      });
+    expect(claimEmailLogMock).toHaveBeenCalledWith({
+      idempotencyKey: 'otp-code:otp-id',
+      template: EmailTemplate.OtpCode,
+      email: 'john@doe.com',
+      subject: 'Test Email',
+      userId: 'user-id',
     });
+    expect(markEmailLogSentMock).toHaveBeenCalledWith({
+      id: log.id,
+      providerMessageId: 'msg_123',
+    });
+  });
 
   it('hands a reply-to address on to Lettermint', async () => {
     await sendEmail({ ...input, replyTo: 'reporter@doe.com' });

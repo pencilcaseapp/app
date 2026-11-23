@@ -661,7 +661,8 @@ describe('removeLinkCollaborators', () => {
       userId: collaborator.id,
     });
     const invite = await inviteDocumentCollaborator(
-      document.id, 'invited@example.com',
+      document.id,
+      'invited@example.com',
     );
 
     await removeLinkCollaborators(document.id);
@@ -718,7 +719,9 @@ describe('getDocumentForViewer', () => {
     const invitee = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, invitee.email, { access: 'view' },
+      fixture.id,
+      invitee.email,
+      { access: 'view' },
     );
 
     expect(await getDocumentForViewer(fixture.id, viewerOf(invitee)))
@@ -739,7 +742,9 @@ describe('getDocumentForViewer', () => {
     const impostor = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     await inviteDocumentCollaborator(
-      fixture.id, invitee.email, { userId: invitee.id, accepted: true },
+      fixture.id,
+      invitee.email,
+      { userId: invitee.id, accepted: true },
     );
 
     expect(await getDocumentForViewer(fixture.id, {
@@ -757,7 +762,8 @@ describe('getDocumentForViewer', () => {
       userId: collaborator.id,
     });
     const invite = await inviteDocumentCollaborator(
-      fixture.id, collaborator.email,
+      fixture.id,
+      collaborator.email,
     );
 
     expect(await getDocumentForViewer(fixture.id, viewerOf(collaborator)))
@@ -791,10 +797,14 @@ describe('getInvitedCollaborators', () => {
     const fixture = await createSharedDocument(owner.id);
     await connectCollaborator({ documentId: fixture.id, userId: linked.id });
     const first = await inviteDocumentCollaborator(
-      fixture.id, accepted.email, { userId: accepted.id, accepted: true },
+      fixture.id,
+      accepted.email,
+      { userId: accepted.id, accepted: true },
     );
     const second = await inviteDocumentCollaborator(
-      fixture.id, 'pending@example.com', { access: 'view' },
+      fixture.id,
+      'pending@example.com',
+      { access: 'view' },
     );
 
     expect(await getInvitedCollaborators(fixture.id)).toStrictEqual([
@@ -902,7 +912,9 @@ describe('inviteCollaborator', () => {
     const invitee = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     await inviteDocumentCollaborator(
-      fixture.id, 'old-address@example.com', { userId: invitee.id },
+      fixture.id,
+      'old-address@example.com',
+      { userId: invitee.id },
     );
 
     expect(await inviteCollaborator({
@@ -943,7 +955,9 @@ describe('acceptInvite', () => {
     const invitee = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, invitee.email, { userId: invitee.id },
+      fixture.id,
+      invitee.email,
+      { userId: invitee.id },
     );
 
     const accepted = await acceptInvite({
@@ -976,7 +990,9 @@ describe('acceptInvite', () => {
     const other = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, invitee.email, { userId: invitee.id, accepted: true },
+      fixture.id,
+      invitee.email,
+      { userId: invitee.id, accepted: true },
     );
 
     expect(await acceptInvite({
@@ -998,7 +1014,9 @@ describe('setCollaboratorAccess', () => {
     const owner = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, 'invited@example.com', { access: 'view' },
+      fixture.id,
+      'invited@example.com',
+      { access: 'view' },
     );
 
     expect(await setCollaboratorAccess({
@@ -1014,7 +1032,9 @@ describe('setCollaboratorAccess', () => {
     const other = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, 'invited@example.com', { access: 'view' },
+      fixture.id,
+      'invited@example.com',
+      { access: 'view' },
     );
 
     expect(await setCollaboratorAccess({
@@ -1058,7 +1078,9 @@ describe('removeCollaborator', () => {
     const invitee = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, invitee.email, { userId: invitee.id, accepted: true },
+      fixture.id,
+      invitee.email,
+      { userId: invitee.id, accepted: true },
     );
 
     expect(await removeCollaborator({
@@ -1076,7 +1098,8 @@ describe('removeCollaborator', () => {
     const other = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, 'invited@example.com',
+      fixture.id,
+      'invited@example.com',
     );
 
     expect(await removeCollaborator({
@@ -1105,7 +1128,9 @@ describe('removeViewerCollaborators', () => {
     const other = await createTestUser();
     const fixture = await createDocumentWithTitle(owner.id);
     const invite = await inviteDocumentCollaborator(
-      fixture.id, viewer.email, { userId: viewer.id, accepted: true },
+      fixture.id,
+      viewer.email,
+      { userId: viewer.id, accepted: true },
     );
     const otherRow = await connectDocumentCollaborator(fixture.id, other.id);
 
@@ -1160,15 +1185,18 @@ describe('getDocumentIdsDeletedBefore', () => {
   it('lists documents deleted before the given date', async () => {
     const user = await createTestUser();
     const old = await createDeletedDocument(
-      user.id, new Date(Date.now() - 40 * days),
+      user.id,
+      new Date(Date.now() - 40 * days),
     );
     const recent = await createDeletedDocument(
-      user.id, new Date(Date.now() - 10 * days),
+      user.id,
+      new Date(Date.now() - 10 * days),
     );
     const live = await createDocumentWithTitle(user.id);
 
     const ids = await getDocumentIdsDeletedBefore(
-      new Date(Date.now() - 30 * days), 1000,
+      new Date(Date.now() - 30 * days),
+      1000,
     );
 
     expect(ids).toContain(old.id);
@@ -1182,7 +1210,8 @@ describe('getDocumentIdsDeletedBefore', () => {
     await createDeletedDocument(user.id, new Date(Date.now() - 41 * days));
 
     const ids = await getDocumentIdsDeletedBefore(
-      new Date(Date.now() - 30 * days), 1,
+      new Date(Date.now() - 30 * days),
+      1,
     );
 
     expect(ids).toHaveLength(1);

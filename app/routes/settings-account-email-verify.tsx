@@ -83,7 +83,10 @@ export async function action({ request, params, context }: Route.ActionArgs) {
   switch (form.data.action) {
     case 'verify': {
       const [error] = await verifyEmailChange(
-        user, params.requestId, form.data.otp, request,
+        user,
+        params.requestId,
+        form.data.otp,
+        request,
       );
 
       if (error !== null) {

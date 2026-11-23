@@ -69,8 +69,7 @@ export class SharePanel {
     const documentId = this.page.url().split('/').pop() ?? '';
     const saved = this.page.waitForResponse(response =>
       response.request().method() === 'POST'
-      && response.url().includes(documentId),
-    );
+      && response.url().includes(documentId));
     await this.linkSwitch.click();
     expect((await saved).ok()).toBeTruthy();
 

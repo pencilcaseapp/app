@@ -34,14 +34,13 @@ function callLoader(search = '') {
   } as Route.LoaderArgs);
 }
 
-test('opens the subscription settings over the latest document',
-  async () => {
-    const response = await callLoader();
+test('opens the subscription settings over the latest document', async () => {
+  const response = await callLoader();
 
-    expect(response.headers.get('Location'))
-      .toBe(`/doc/${DOC_ID}/settings/subscription`);
-    expect(getLatestDocumentIdMock).toHaveBeenCalledWith(userFixture);
-  });
+  expect(response.headers.get('Location'))
+    .toBe(`/doc/${DOC_ID}/settings/subscription`);
+  expect(getLatestDocumentIdMock).toHaveBeenCalledWith(userFixture);
+});
 
 test('carries the search params along', async () => {
   const response = await callLoader('?toastDanger=Nope');

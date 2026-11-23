@@ -7,8 +7,7 @@ import { Tooltip } from '../tooltip/tooltip';
 import { useIconOnly } from './icon-only-context';
 
 type TypographyColorProps
-  = Pick<React.ComponentProps<typeof Typography>,
-    'textColorLight' | 'textColorDark'>;
+  = Pick<React.ComponentProps<typeof Typography>, 'textColorLight' | 'textColorDark'>;
 
 export type DocumentItemProps<C extends React.ElementType>
   = PolymorphicComponentPropWithRef<
@@ -24,17 +23,7 @@ export type DocumentItemProps<C extends React.ElementType>
   >;
 
 export function NavigationItem<C extends React.ElementType = 'a'>(
-  { as = 'a' as C,
-    title,
-    icon,
-    actionArea,
-    isActionAreaVisible,
-    className,
-    iconOnly,
-    textColorLight,
-    textColorDark,
-    ref,
-    ...rest }: DocumentItemProps<C>,
+  { as = 'a' as C, title, icon, actionArea, isActionAreaVisible, className, iconOnly, textColorLight, textColorDark, ref, ...rest }: DocumentItemProps<C>,
 ) {
   const iconOnlyFromContext = useIconOnly();
   const isIconOnly = iconOnly ?? iconOnlyFromContext;

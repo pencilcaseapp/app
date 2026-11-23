@@ -25,17 +25,16 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-test('redeems the code from the url and redirects to the startpage',
-  async () => {
-    const context = new RouterContextProvider();
-    context.set(userSessionContext, userFixture);
+test('redeems the code from the url and redirects to the startpage', async () => {
+  const context = new RouterContextProvider();
+  context.set(userSessionContext, userFixture);
 
-    await renderRoute('/invite/:code', {
-      params: { code: 'super-secret' },
-      context,
-    });
-
-    expect(redeemInviteCodeMock)
-      .toHaveBeenCalledWith(userFixture, 'super-secret');
-    expect(redirectMock).toHaveBeenCalledWith(href('/'));
+  await renderRoute('/invite/:code', {
+    params: { code: 'super-secret' },
+    context,
   });
+
+  expect(redeemInviteCodeMock)
+    .toHaveBeenCalledWith(userFixture, 'super-secret');
+  expect(redirectMock).toHaveBeenCalledWith(href('/'));
+});

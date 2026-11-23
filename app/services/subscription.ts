@@ -68,14 +68,14 @@ export async function redeemInviteCode(user: User, code: string) {
   await updateUser(user.id, { hasSubscription: true });
 }
 
-export type SubscriptionOverview
-  = | { kind: 'none' }
-    | { kind: 'complimentary' }
-    | {
-      kind: 'subscribed';
-      status: SubscriptionStatus;
-      currentPeriodEnd: Date | null;
-    };
+export type SubscriptionOverview =
+  | { kind: 'none' }
+  | { kind: 'complimentary' }
+  | {
+    kind: 'subscribed';
+    status: SubscriptionStatus;
+    currentPeriodEnd: Date | null;
+  };
 
 /**
  * What the subscription settings show: the upgrade offer, the paid
@@ -405,7 +405,9 @@ async function syncCreemSubscription(creemSubscription: CreemSubscription) {
     }, tx);
 
     const hasSubscription = await hasSubscriptionWithStatus(
-      user.id, ACCESS_GRANTING_STATUSES, tx,
+      user.id,
+      ACCESS_GRANTING_STATUSES,
+      tx,
     );
 
     await updateUser(user.id, {

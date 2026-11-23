@@ -12,8 +12,8 @@ export type CancellationType = typeof CANCELLATION_TYPES[number];
  * `YYYY-MM-DD`; without one the contract ends at the earliest date it
  * allows.
  */
-export type ContractNotice
-  = | {
+export type ContractNotice =
+  | {
     kind: 'cancellation';
     name: string;
     email: string;

@@ -76,7 +76,8 @@ async function renderVerify({ isMobile = false } = {}) {
 
 async function enterCode(person: ReturnType<typeof userEvent.setup>) {
   await person.type(
-    await screen.findByLabelText('Verification Code'), '123456',
+    await screen.findByLabelText('Verification Code'),
+    '123456',
   );
   await person.click(screen.getByRole('button', { name: 'Verify' }));
 }
@@ -101,18 +102,17 @@ describe('the verify e-mail change route', () => {
       .toBeInTheDocument();
   });
 
-  test('send the user back to the address step without a request',
-    async () => {
-      getValidEmailChangeRequestMock.mockResolvedValue(undefined);
+  test('send the user back to the address step without a request', async () => {
+    getValidEmailChangeRequestMock.mockResolvedValue(undefined);
 
-      await renderVerify();
+    await renderVerify();
 
-      await vi.waitFor(() => {
-        expect(redirectMock).toHaveBeenCalledWith(
-          `${emailUrl}?toastDanger=The+code+has+expired.+Please+request+a+new+one.`,
-        );
-      });
+    await vi.waitFor(() => {
+      expect(redirectMock).toHaveBeenCalledWith(
+        `${emailUrl}?toastDanger=The+code+has+expired.+Please+request+a+new+one.`,
+      );
     });
+  });
 
   test('refuse the request of another user', async () => {
     getValidEmailChangeRequestMock
@@ -135,7 +135,10 @@ describe('the verify e-mail change route', () => {
 
     await vi.waitFor(() => {
       expect(verifyEmailChangeMock).toHaveBeenCalledWith(
-        userFixture, request.id, '123456', expect.any(Request),
+        userFixture,
+        request.id,
+        '123456',
+        expect.any(Request),
       );
       expect(redirectMock).toHaveBeenCalledWith(
         `${accountUrl}?toastSuccess=E-mail+successfully+changed`,
@@ -187,22 +190,21 @@ describe('the verify e-mail change route', () => {
     });
   });
 
-  test('stay on the code with a toast when resending is rate limited',
-    async () => {
-      initEmailChangeMock
-        .mockResolvedValueOnce([InitEmailChangeError.TooManyRequests]);
-      const person = await renderVerify();
+  test('stay on the code with a toast when resending is rate limited', async () => {
+    initEmailChangeMock
+      .mockResolvedValueOnce([InitEmailChangeError.TooManyRequests]);
+    const person = await renderVerify();
 
-      await person.click(
-        await screen.findByRole('button', { name: 'Resend' }),
+    await person.click(
+      await screen.findByRole('button', { name: 'Resend' }),
+    );
+
+    await vi.waitFor(() => {
+      expect(redirectMock).toHaveBeenCalledWith(
+        `${verifyUrl}?toastDanger=Too+many+requests.+Please+try+again+later.`,
       );
-
-      await vi.waitFor(() => {
-        expect(redirectMock).toHaveBeenCalledWith(
-          `${verifyUrl}?toastDanger=Too+many+requests.+Please+try+again+later.`,
-        );
-      });
     });
+  });
 
   test('render the buttons below the code on mobile', async () => {
     const person = await renderVerify({ isMobile: true });

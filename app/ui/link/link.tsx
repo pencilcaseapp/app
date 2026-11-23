@@ -6,13 +6,7 @@ export type LinkProps<C extends React.ElementType>
   = PolymorphicComponentProp<C, TypographyProps>;
 
 export function Link<C extends React.ElementType = 'a'>(
-  { as = 'a' as C,
-    variant = 'bodySmall',
-    fontWeight = 'semibold',
-    textColorLight = 'grey-900',
-    textColorDark = 'white',
-    className,
-    ...rest }: LinkProps<C>,
+  { as = 'a' as C, variant = 'bodySmall', fontWeight = 'semibold', textColorLight = 'grey-900', textColorDark = 'white', className, ...rest }: LinkProps<C>,
 ) {
   const classes = classNames([
     'inline-block rounded-sm underline transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-pca-blue-500 decoration-inherit transition-all duration-300 ease-in-out',

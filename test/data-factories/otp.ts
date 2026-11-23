@@ -4,7 +4,9 @@ import { otps } from '~/db/schema';
 import { getCanonicalEmail } from '~/utils/email';
 
 export async function createValidOtp(
-  userId: string, email?: string, attempts?: number,
+  userId: string,
+  email?: string,
+  attempts?: number,
 ) {
   const to = email ?? faker.internet.email();
 

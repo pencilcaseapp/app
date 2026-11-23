@@ -50,17 +50,16 @@ test('redirects to the customer portal', async () => {
   expect(getBillingPortalUrlMock).toHaveBeenCalledWith(userFixture);
 });
 
-test('sends a user without a billing account back with a toast',
-  async () => {
-    getBillingPortalUrlMock
-      .mockResolvedValue([GetBillingPortalUrlError.NoCreemCustomer]);
+test('sends a user without a billing account back with a toast', async () => {
+  getBillingPortalUrlMock
+    .mockResolvedValue([GetBillingPortalUrlError.NoCreemCustomer]);
 
-    const response = await callLoader();
+  const response = await callLoader();
 
-    const location = response.headers.get('Location') ?? '';
-    expect(location).toContain(href('/upgrade'));
-    expect(location).toContain('toastDanger');
-  });
+  const location = response.headers.get('Location') ?? '';
+  expect(location).toContain(href('/upgrade'));
+  expect(location).toContain('toastDanger');
+});
 
 test('sends a user back with a toast when the portal fails', async () => {
   getBillingPortalUrlMock

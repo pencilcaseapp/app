@@ -45,23 +45,22 @@ function callLoader(headers?: HeadersInit) {
   } as Route.LoaderArgs);
 }
 
-test('sends the user to the Creem checkout and back to the settings',
-  async () => {
-    getSubscriptionOverviewMock.mockResolvedValue({ kind: 'none' });
-    startProCheckoutMock.mockResolvedValue([
-      null,
-      { checkoutUrl: 'https://creem.invalid/checkout/ch_123' },
-    ]);
+test('sends the user to the Creem checkout and back to the settings', async () => {
+  getSubscriptionOverviewMock.mockResolvedValue({ kind: 'none' });
+  startProCheckoutMock.mockResolvedValue([
+    null,
+    { checkoutUrl: 'https://creem.invalid/checkout/ch_123' },
+  ]);
 
-    const response = await callLoader();
+  const response = await callLoader();
 
-    expect(response.headers.get('Location'))
-      .toBe('https://creem.invalid/checkout/ch_123');
-    expect(startProCheckoutMock).toHaveBeenCalledWith(
-      userFixture,
-      `http://localhost:3000${subscriptionUrl}`,
-    );
-  });
+  expect(response.headers.get('Location'))
+    .toBe('https://creem.invalid/checkout/ch_123');
+  expect(startProCheckoutMock).toHaveBeenCalledWith(
+    userFixture,
+    `http://localhost:3000${subscriptionUrl}`,
+  );
+});
 
 test('starts no checkout for a user with the pro features', async () => {
   getSubscriptionOverviewMock.mockResolvedValue({ kind: 'complimentary' });
@@ -72,17 +71,16 @@ test('starts no checkout for a user with the pro features', async () => {
   expect(startProCheckoutMock).not.toHaveBeenCalled();
 });
 
-test('sends the user back with a toast when the checkout fails',
-  async () => {
-    getSubscriptionOverviewMock.mockResolvedValue({ kind: 'none' });
-    startProCheckoutMock
-      .mockResolvedValue([StartProCheckoutError.CheckoutFailed]);
+test('sends the user back with a toast when the checkout fails', async () => {
+  getSubscriptionOverviewMock.mockResolvedValue({ kind: 'none' });
+  startProCheckoutMock
+    .mockResolvedValue([StartProCheckoutError.CheckoutFailed]);
 
-    const response = await callLoader();
+  const response = await callLoader();
 
-    expect(response.headers.get('Location'))
-      .toContain(`${subscriptionUrl}?toastDanger`);
-  });
+  expect(response.headers.get('Location'))
+    .toContain(`${subscriptionUrl}?toastDanger`);
+});
 
 test('starts no checkout from the native apps', async () => {
   getSubscriptionOverviewMock.mockResolvedValue({ kind: 'none' });

@@ -155,8 +155,7 @@ function matchOptions(options: SlashMenuOption[], query: string | null) {
 
   return options.filter(({ block }) =>
     block.label.toLowerCase().startsWith(needle)
-    || block.keywords.some(keyword => keyword.startsWith(needle)),
-  );
+    || block.keywords.some(keyword => keyword.startsWith(needle)));
 }
 
 const SLASH_QUERY = /^\/(\S*)$/;

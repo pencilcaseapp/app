@@ -217,25 +217,24 @@ describe('EditorPluginImages', () => {
     expect(uploadImage).not.toHaveBeenCalled();
   });
 
-  test('opens the file picker and inserts what was picked at the caret',
-    async () => {
-      uploadImage.mockResolvedValue(image);
-      setParagraphs(['First', 'Second'], 0);
-      const picker = document.querySelector<HTMLInputElement>(
-        'input[type="file"]',
-      )!;
-      const open = vi.spyOn(picker, 'click');
+  test('opens the file picker and inserts what was picked at the caret', async () => {
+    uploadImage.mockResolvedValue(image);
+    setParagraphs(['First', 'Second'], 0);
+    const picker = document.querySelector<HTMLInputElement>(
+      'input[type="file"]',
+    )!;
+    const open = vi.spyOn(picker, 'click');
 
-      act(() => {
-        editor.dispatchCommand(PICK_IMAGES_COMMAND, undefined);
-      });
-      expect(open).toHaveBeenCalled();
-
-      await userEvent.upload(picker, png());
-
-      expect(uploadImage).toHaveBeenCalledWith(expect.any(File));
-      expect(blocks()).toEqual(['First', 'image', 'Second']);
+    act(() => {
+      editor.dispatchCommand(PICK_IMAGES_COMMAND, undefined);
     });
+    expect(open).toHaveBeenCalled();
+
+    await userEvent.upload(picker, png());
+
+    expect(uploadImage).toHaveBeenCalledWith(expect.any(File));
+    expect(blocks()).toEqual(['First', 'image', 'Second']);
+  });
 
   test('pastes an image of another document as a copy', async () => {
     copyImage.mockResolvedValue(image);

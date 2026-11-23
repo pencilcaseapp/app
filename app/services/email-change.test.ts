@@ -237,20 +237,19 @@ describe('verifyEmailChange', () => {
     expect(signOutOtherSessionsMock).not.toHaveBeenCalled();
   });
 
-  it('spends the request and refuses an address taken meanwhile',
-    async () => {
-      getUserByEmailMock
-        .mockResolvedValueOnce({ ...userFixture, id: 'other' });
+  it('spends the request and refuses an address taken meanwhile', async () => {
+    getUserByEmailMock
+      .mockResolvedValueOnce({ ...userFixture, id: 'other' });
 
-      const [error]
-        = await verifyEmailChange(user, request.id, '123456', httpRequest);
+    const [error]
+      = await verifyEmailChange(user, request.id, '123456', httpRequest);
 
-      expect(error).toBe(VerifyEmailChangeError.EmailTaken);
-      expect(markEmailChangeRequestAsUsedMock)
-        .toHaveBeenCalledWith(request.id, 'tx');
-      expect(updateUserMock).not.toHaveBeenCalled();
-      expect(signOutOtherSessionsMock).not.toHaveBeenCalled();
-    });
+    expect(error).toBe(VerifyEmailChangeError.EmailTaken);
+    expect(markEmailChangeRequestAsUsedMock)
+      .toHaveBeenCalledWith(request.id, 'tx');
+    expect(updateUserMock).not.toHaveBeenCalled();
+    expect(signOutOtherSessionsMock).not.toHaveBeenCalled();
+  });
 
   it('moves the user to the new address and signs out the other sessions '
     + 'in one transaction', async () => {

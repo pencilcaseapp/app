@@ -20,7 +20,8 @@ const formSchema = z.object({
 export function loader({ request }: Route.ActionArgs) {
   const email = getOptionalSearchParam(request, SearchParamAuth.Email);
   const isExpired = getOptionalSearchParam<boolean>(
-    request, SearchParamAuth.IsExpired,
+    request,
+    SearchParamAuth.IsExpired,
   );
 
   return {
