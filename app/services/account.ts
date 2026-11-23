@@ -67,15 +67,10 @@ export async function deleteAccount(user: User): Promise<DeleteAccountResult> {
 
   await closeAccountConnections(user.id);
 
-  try {
-    await enqueueJob('send-account-deleted-email', {
-      userId: user.id,
-      deletedAt: deletedAt.toISOString(),
-    });
-  }
-  catch (error) {
-    console.error('Queueing the account deletion e-mail failed', error);
-  }
+  await enqueueJob('send-account-deleted-email', {
+    userId: user.id,
+    deletedAt: deletedAt.toISOString(),
+  });
 
   return [null, { restoreUntil: getAccountRestoreDeadline(deletedAt) }];
 }

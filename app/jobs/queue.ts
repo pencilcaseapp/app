@@ -62,8 +62,9 @@ export function getJobsQueue() {
 
 /**
  * Hands a job to the worker, which retries it with the queue's backoff.
- * Without a jobs Redis (the test environment) nothing runs: tests call
- * the definition's `run` directly.
+ * Best effort: a job that cannot be queued is logged, never thrown, so
+ * the work that queued it stands. Without a jobs Redis (the test
+ * environment) nothing runs: tests call the definition's `run` directly.
  */
 export async function enqueueJob<Name extends OnDemandJobName>(
   name: Name,
@@ -76,7 +77,12 @@ export async function enqueueJob<Name extends OnDemandJobName>(
     return;
   }
 
-  await queue.add(name, data);
+  try {
+    await queue.add(name, data);
+  }
+  catch (error) {
+    console.error(`Queueing ${name} failed`, error);
+  }
 }
 
 export async function closeJobsQueue() {

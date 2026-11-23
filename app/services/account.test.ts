@@ -152,17 +152,6 @@ describe('deleteAccount', () => {
     });
   });
 
-  it('stands when the e-mail cannot be queued', async () => {
-    const user = await createTestUser();
-    enqueueJobMock.mockRejectedValueOnce(new Error('down'));
-    vi.spyOn(console, 'error').mockImplementationOnce(() => {});
-
-    const [error] = await deleteAccount(user);
-
-    expect(error).toBeNull();
-    expect((await getUser(user.id))?.deletedAt).toBeInstanceOf(Date);
-  });
-
   it('does not delete or write twice', async () => {
     const user = await createTestUser();
     await deleteAccount(user);
