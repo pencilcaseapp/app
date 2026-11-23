@@ -12,6 +12,7 @@ import {
   copyImage,
   CopyImageError,
   createDocument,
+  getDocumentList,
   getLatestDocumentId,
   CreateDocumentError,
   deleteDocument,
@@ -136,9 +137,11 @@ vi.mock('~/clients/storage', () => ({
 
 const getUserByEmailMock = vi.fn();
 const getUserMock = vi.fn();
+const getDeletedUserIdsMock = vi.fn().mockResolvedValue([]);
 vi.mock('~/repos/user', () => ({
   getUserByEmail: (...args: unknown[]) => getUserByEmailMock(...args),
   getUser: (...args: unknown[]) => getUserMock(...args),
+  getDeletedUserIds: (...args: unknown[]) => getDeletedUserIdsMock(...args),
 }));
 
 vi.mock('~/db', () => ({
@@ -198,7 +201,6 @@ function viewerDocument(overrides?: Partial<{
   linkAccess: DocumentLinkAccess;
   userId: string;
   deletedAt: Date | null;
-  ownerDeletedAt: Date | null;
   collaborator: Collaborator | null;
 }>) {
   return {
@@ -208,7 +210,6 @@ function viewerDocument(overrides?: Partial<{
     linkAccess: 'view' as DocumentLinkAccess,
     userId: userFixture.id,
     deletedAt: null,
-    ownerDeletedAt: null,
     collaborator: null,
     ...overrides,
   };
@@ -295,8 +296,11 @@ describe('openDocument', () => {
       userId: otherUserId,
       linkShared: true,
       collaborator: linkCollaborator(),
-      ownerDeletedAt: new Date(),
     }));
+    getUserMock.mockResolvedValueOnce({
+      id: otherUserId,
+      deletedAt: new Date(),
+    });
 
     const [error] = await openDocument(documentFixture.id, viewer);
 
@@ -728,8 +732,11 @@ describe('getLiveAccess', () => {
     getDocumentForViewerMock.mockResolvedValue(viewerDocument({
       userId: otherUserId,
       linkShared: true,
-      ownerDeletedAt: new Date(),
     }));
+    getUserMock.mockResolvedValueOnce({
+      id: otherUserId,
+      deletedAt: new Date(),
+    });
 
     expect(await getLiveAccess(documentFixture.id, viewer)).toBeUndefined();
   });
@@ -1005,6 +1012,23 @@ describe('createDocument', () => {
     });
 
     expect(result).toEqual([null, { id: documentFixture.id }]);
+  });
+});
+
+describe('getDocumentList', () => {
+  it('leaves out the documents of a deleted account', async () => {
+    getDocumentListMock.mockResolvedValue([
+      { id: 'own', userId: userFixture.id },
+      { id: 'shared', userId: otherUserId },
+      { id: 'gone', userId: 'deleted-owner' },
+    ]);
+    getDeletedUserIdsMock.mockResolvedValueOnce(['deleted-owner']);
+
+    const list = await getDocumentList(userFixture.id);
+
+    expect(list.map(({ id }) => id)).toStrictEqual(['own', 'shared']);
+    expect(getDeletedUserIdsMock)
+      .toHaveBeenCalledWith([otherUserId, 'deleted-owner']);
   });
 });
 

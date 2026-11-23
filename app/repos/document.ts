@@ -97,7 +97,6 @@ export async function getDocumentForViewer(
     linkAccess: documents.linkAccess,
     userId: documents.userId,
     deletedAt: documents.deletedAt,
-    ownerDeletedAt: users.deletedAt,
     collaborator: {
       id: documentCollaborators.id,
       source: documentCollaborators.source,
@@ -108,7 +107,6 @@ export async function getDocumentForViewer(
     },
   })
     .from(documents)
-    .innerJoin(users, eq(users.id, documents.userId))
     .leftJoin(documentCollaborators, and(
       eq(documentCollaborators.documentId, documents.id),
       isViewer,
@@ -180,8 +178,7 @@ export async function getDocumentTitle(id: string) {
 }
 
 /**
- * The documents the user owns or collaborates on, deleted ones and those
- * of a deleted account left out.
+ * The documents the user owns or collaborates on, deleted ones left out.
  * `inviteShared` says whether anybody was invited to the document by
  * e-mail, which the navigation marks alongside `linkShared`: it rides
  * along as a correlated `EXISTS` so the list still costs one query
@@ -207,10 +204,8 @@ export async function getDocumentList(userId: string) {
     userId: documents.userId,
   })
     .from(documents)
-    .innerJoin(users, eq(users.id, documents.userId))
     .where(and(
       isNull(documents.deletedAt),
-      isNull(users.deletedAt),
       or(
         eq(documents.userId, userId),
         exists(

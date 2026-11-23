@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createUser, createUserSession, deleteSessionsExpiredBefore, expireAllUserSessions, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getUser, getUserByCreemCustomerId, getUserByEmail, getAndRefreshUserSession, getUserIdsDeletedBefore, getUserSession, hardDeleteUser, lockUserDeletedBefore, markUserDeleted, restoreDeletedUser, updateUser } from './user';
+import { createUser, createUserSession, deleteSessionsExpiredBefore, expireAllUserSessions, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getUser, getUserByCreemCustomerId, getUserByEmail, getAndRefreshUserSession, getDeletedUserIds, getUserIdsDeletedBefore, getUserSession, hardDeleteUser, lockUserDeletedBefore, markUserDeleted, restoreDeletedUser, updateUser } from './user';
 import { db, transaction } from '~/db';
 import { users } from '~/db/schema';
 import { eq } from 'drizzle-orm';
@@ -322,6 +322,17 @@ describe('restoreDeletedUser', () => {
     const user = await createTestUser();
 
     expect(await restoreDeletedUser(user.id)).toBe(false);
+  });
+});
+
+describe('getDeletedUserIds', () => {
+  it('returns which of the given users are deleted', async () => {
+    const kept = await createTestUser();
+    const deleted = await createTestUser();
+    await markUserDeleted(deleted.id);
+
+    expect(await getDeletedUserIds([kept.id, deleted.id, 'not-a-uuid']))
+      .toStrictEqual([deleted.id]);
   });
 });
 

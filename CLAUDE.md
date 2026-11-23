@@ -511,7 +511,8 @@ transaction, closes the live connections and queues the confirmation
 e-mail (`send-account-deleted-email`, an on-demand job, so a send that
 fails is retried with backoff). The
 documents of a deleted account are gone for everybody (`isGone` reads
-the owner's `deletedAt`, `getDocumentList` leaves them out) but nothing
+the owner's `deletedAt` through the user repo, and the service's
+`getDocumentList` leaves them out, so the document repo never joins `users`) but nothing
 is removed: signing in again with the same address clears the stamp in
 `verifyMagicCode` and the user lands with a welcome back toast.
 `purge-deleted-accounts` removes accounts past

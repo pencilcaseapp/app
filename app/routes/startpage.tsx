@@ -1,7 +1,7 @@
 import { href, redirect, type MiddlewareFunction } from 'react-router';
 import type { Route } from './+types/startpage';
 import { userSessionContext } from '~/contexts/user-session';
-import { getDocumentList } from '~/repos/document';
+import { getDocumentList } from '~/services/document';
 import { authMiddleware } from '~/middleware/auth';
 
 export const middleware: MiddlewareFunction[] = [

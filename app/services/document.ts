@@ -37,9 +37,9 @@ import {
   getDocument,
   getDocumentAsset,
   getDocumentAssets,
-  getDocumentForViewer,
+  getDocumentForViewer as getDocumentRowForViewer,
   getDocumentIdsDeletedBefore,
-  getDocumentList,
+  getDocumentList as getDocumentRows,
   getInvitedCollaborators,
   getOwnedDocumentIds,
   hardDeleteDocuments,
@@ -61,7 +61,12 @@ import {
   createDocumentReport,
 } from '~/repos/document-report';
 import { countEmailLogsByUser } from '~/repos/email-log';
-import { getUser, getUserByEmail, type User } from '~/repos/user';
+import {
+  getDeletedUserIds,
+  getUser,
+  getUserByEmail,
+  type User,
+} from '~/repos/user';
 import { parseAssetSrc } from '~/utils/asset-src';
 import { signBunnyUrl } from '~/utils/bunny-token';
 import { renderDocumentPreview } from '~/utils/document-preview';
@@ -691,9 +696,41 @@ type DocumentAccessInfo = Pick<
   | 'linkShared'
   | 'linkAccess'
   | 'deletedAt'
-  | 'ownerDeletedAt'
   | 'collaborator'
->;
+> & { ownerDeletedAt: Date | null };
+
+/**
+ * The document as the viewer sees it, with when its owner's account was
+ * deleted, which takes it away from everybody.
+ */
+async function getDocumentForViewer(
+  documentId: string,
+  viewer?: DocumentViewer,
+) {
+  const document = await getDocumentRowForViewer(documentId, viewer);
+
+  if (!document) {
+    return undefined;
+  }
+
+  const owner = await getUser(document.userId);
+
+  return { ...document, ownerDeletedAt: owner?.deletedAt ?? null };
+}
+
+/**
+ * The documents the user owns or collaborates on for the navigation,
+ * without the deleted ones and the ones of a deleted account.
+ */
+export async function getDocumentList(userId: string) {
+  const documents = await getDocumentRows(userId);
+  const ownerIds = [...new Set(documents
+    .map(document => document.userId)
+    .filter(ownerId => ownerId !== userId))];
+  const deletedOwnerIds = new Set(await getDeletedUserIds(ownerIds));
+
+  return documents.filter(document => !deletedOwnerIds.has(document.userId));
+}
 
 function isOwnedBy(document: DocumentAccessInfo, viewer?: DocumentViewer) {
   return !!viewer && document.userId === viewer.id;

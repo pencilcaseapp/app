@@ -18,7 +18,7 @@ vi.mock('react-router', async () => {
 });
 
 const getDocumentListMock = vi.fn();
-vi.mock('~/repos/document', async () => ({
+vi.mock('~/services/document', async () => ({
   getDocumentList: (userId: string) => getDocumentListMock(userId),
 }));
 

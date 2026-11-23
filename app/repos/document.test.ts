@@ -32,8 +32,6 @@ import {
   updateDocument,
 } from './document';
 import { db } from '~/db';
-import { users } from '~/db/schema';
-import { eq } from 'drizzle-orm';
 import {
   connectDocumentCollaborator,
   createDeletedDocument,
@@ -700,7 +698,6 @@ describe('getDocumentForViewer', () => {
         linkAccess: 'view',
         userId: owner.id,
         deletedAt: null,
-        ownerDeletedAt: null,
         collaborator: null,
       });
 
@@ -1324,36 +1321,6 @@ describe('getDocumentAssets', () => {
 
   it('returns nothing without ids', async () => {
     expect(await getDocumentAssets([])).toEqual([]);
-  });
-});
-
-describe('documents of a deleted account', () => {
-  async function deleteAccount(userId: string) {
-    await db.update(users).set({ deletedAt: new Date() })
-      .where(eq(users.id, userId));
-  }
-
-  it('leave the navigation of the people they are shared with', async () => {
-    const owner = await createTestUser();
-    const collaborator = await createTestUser();
-    const document = await createSharedDocument(owner.id);
-    await connectDocumentCollaborator(document.id, collaborator.id);
-
-    await deleteAccount(owner.id);
-
-    expect(await getDocumentList(collaborator.id)).toStrictEqual([]);
-  });
-
-  it('report when their owner was deleted', async () => {
-    const owner = await createTestUser();
-    const document = await createSharedDocument(owner.id);
-
-    await deleteAccount(owner.id);
-
-    expect(await getDocumentForViewer(document.id)).toMatchObject({
-      id: document.id,
-      ownerDeletedAt: expect.any(Date),
-    });
   });
 });
 

@@ -153,6 +153,21 @@ export async function restoreDeletedUser(id: string, executor: Executor = db) {
 }
 
 /** Accounts deleted before the given date, oldest first. */
+/** Which of the given users are deleted, waiting for their purge. */
+export async function getDeletedUserIds(ids: string[]) {
+  const validIds = ids.filter(id => isUuid(id));
+
+  if (validIds.length === 0) {
+    return [];
+  }
+
+  const rows = await db.select({ id: users.id })
+    .from(users)
+    .where(and(inArray(users.id, validIds), isNotNull(users.deletedAt)));
+
+  return rows.map(row => row.id);
+}
+
 export async function getUserIdsDeletedBefore(before: Date) {
   const rows = await db.select({ id: users.id })
     .from(users)

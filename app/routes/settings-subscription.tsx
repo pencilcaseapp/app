@@ -8,7 +8,7 @@ import { SubscriptionUpgrade } from '~/components/subscription-upgrade/subscript
 import { SearchParamToast } from '~/constants/search-params';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
-import { getDocumentList } from '~/repos/document';
+import { getDocumentList } from '~/services/document';
 import {
   completeProCheckout,
   getSubscriptionOverview,
