@@ -13,6 +13,7 @@ export enum EmailTemplate {
   DocumentReport = 'document-report',
   ContactMessage = 'contact-message',
   ContractNotice = 'contract-notice',
+  AccountDeleted = 'account-deleted',
 }
 
 /**
@@ -59,6 +60,9 @@ export enum EmailLogStatus {
  * - `contract-notice` uses an id drawn for the cancellation or withdrawal
  *   when the website's form posts it, plus who gets the e-mail: the
  *   customer's confirmation and our inbox's copy are two sends.
+ * - `account-deleted` uses the user id and the time of the deletion. An
+ *   account restored and deleted again gets the e-mail again, a retry of
+ *   the same deletion does not.
  */
 export function emailIdempotencyKey(template: EmailTemplate, scope: string) {
   return `${template}:${scope}`;

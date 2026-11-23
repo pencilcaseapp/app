@@ -1,6 +1,7 @@
 import { Queue } from 'bullmq';
 import type { ConnectionOptions } from 'bullmq';
 import { getConfig } from '~/config';
+import type { OnDemandJobName, OnDemandJobs } from './job';
 
 export const JOBS_QUEUE_NAME = 'jobs';
 
@@ -57,6 +58,31 @@ export function getJobsQueue() {
   });
 
   return queue;
+}
+
+/**
+ * Hands a job to the worker, which retries it with the queue's backoff.
+ * Best effort: a job that cannot be queued is logged, never thrown, so
+ * the work that queued it stands. Without a jobs Redis (the test
+ * environment) nothing runs: tests call the definition's `run` directly.
+ */
+export async function enqueueJob<Name extends OnDemandJobName>(
+  name: Name,
+  data: OnDemandJobs[Name],
+) {
+  const queue = getJobsQueue();
+
+  if (!queue) {
+    console.warn(`Jobs are off, not running ${name} …`);
+    return;
+  }
+
+  try {
+    await queue.add(name, data);
+  }
+  catch (error) {
+    console.error(`Queueing ${name} failed`, error);
+  }
 }
 
 export async function closeJobsQueue() {

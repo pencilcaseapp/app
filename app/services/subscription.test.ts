@@ -2,6 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  cancelRenewingSubscriptions,
   completeProCheckout,
   CompleteProCheckoutError,
   getBillingPortalUrl,
@@ -36,6 +37,7 @@ const upsertSubscriptionMock = vi.fn();
 const getSubscriptionByCreemIdMock = vi.fn();
 const getSubscriptionWithStatusMock = vi.fn();
 const hasSubscriptionWithStatusMock = vi.fn();
+const getSubscriptionsMock = vi.fn();
 vi.mock('~/repos/subscription', async (importOriginal) => {
   const actual
     = await importOriginal<typeof import('~/repos/subscription')>();
@@ -49,6 +51,8 @@ vi.mock('~/repos/subscription', async (importOriginal) => {
       (...args: unknown[]) => getSubscriptionWithStatusMock(...args),
     hasSubscriptionWithStatus:
       (...args: unknown[]) => hasSubscriptionWithStatusMock(...args),
+    getSubscriptions:
+      (...args: unknown[]) => getSubscriptionsMock(...args),
   };
 });
 
@@ -68,6 +72,7 @@ const createBillingPortalSessionMock = vi.fn();
 const updateCustomerEmailMock = vi.fn();
 const verifyRedirectSignatureMock = vi.fn();
 const verifyWebhookSignatureMock = vi.fn();
+const cancelSubscriptionAtPeriodEndMock = vi.fn();
 vi.mock('~/clients/creem', async (importOriginal) => {
   const actual = await importOriginal<typeof import('~/clients/creem')>();
   return {
@@ -83,6 +88,8 @@ vi.mock('~/clients/creem', async (importOriginal) => {
       (...args: unknown[]) => verifyRedirectSignatureMock(...args),
     verifyWebhookSignature:
       (...args: unknown[]) => verifyWebhookSignatureMock(...args),
+    cancelSubscriptionAtPeriodEnd:
+      (...args: unknown[]) => cancelSubscriptionAtPeriodEndMock(...args),
   };
 });
 
@@ -473,6 +480,23 @@ describe('handleCreemWebhook', () => {
     });
   });
 
+  it('does not write to a deleted account about its subscription', async () => {
+    getUserMock.mockResolvedValue({ ...userFixture, deletedAt: new Date() });
+    hasSubscriptionWithStatusMock.mockResolvedValue(false);
+
+    const [error] = await handleCreemWebhook(
+      webhookEvent(
+        'subscription.canceled',
+        creemSubscription({ status: 'canceled' }),
+      ),
+      'sig',
+    );
+
+    expect(error).toBeNull();
+    expect(upsertSubscriptionMock).toHaveBeenCalled();
+    expect(sendEmailSubscriptionCanceledMock).not.toHaveBeenCalled();
+  });
+
   it('keeps the features on and warns about a failed payment', async () => {
     const [error] = await handleCreemWebhook(
       webhookEvent(
@@ -695,5 +719,48 @@ describe('syncCreemCustomerEmail', () => {
       'Updating the email of the Creem customer failed',
       expect.any(Error),
     );
+  });
+});
+
+describe('cancelRenewingSubscriptions', () => {
+  it('cancels each renewing subscription at period end and stores it', async () => {
+    getSubscriptionsMock.mockResolvedValue([
+      { creemSubscriptionId: 'sub_123' },
+    ]);
+    cancelSubscriptionAtPeriodEndMock.mockResolvedValue(
+      creemSubscription({ status: 'scheduled_cancel' }),
+    );
+
+    expect(await cancelRenewingSubscriptions(userFixture)).toBe(true);
+    expect(getSubscriptionsMock)
+      .toHaveBeenCalledWith(userFixture.id, {
+        statuses: ['active', 'trialing', 'past_due'],
+      });
+    expect(cancelSubscriptionAtPeriodEndMock).toHaveBeenCalledWith('sub_123');
+    expect(upsertSubscriptionMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        creemSubscriptionId: 'sub_123',
+        status: 'scheduled_cancel',
+      }),
+      'tx',
+    );
+  });
+
+  it('has nothing to do without a renewing subscription', async () => {
+    getSubscriptionsMock.mockResolvedValue([]);
+
+    expect(await cancelRenewingSubscriptions(userFixture)).toBe(true);
+    expect(cancelSubscriptionAtPeriodEndMock).not.toHaveBeenCalled();
+  });
+
+  it('reports a failure when Creem refuses', async () => {
+    const log = silenceLog('error');
+    getSubscriptionsMock.mockResolvedValue([
+      { creemSubscriptionId: 'sub_123' },
+    ]);
+    cancelSubscriptionAtPeriodEndMock.mockRejectedValue(new Error('502'));
+
+    expect(await cancelRenewingSubscriptions(userFixture)).toBe(false);
+    expect(log).toHaveBeenCalled();
   });
 });

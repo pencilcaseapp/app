@@ -21,7 +21,7 @@ const isNativeAppRequestMock = vi.fn().mockReturnValue(false);
 const getSubscriptionOverviewMock = vi.fn();
 const completeProCheckoutMock = vi.fn();
 
-vi.mock('~/repos/document', () => ({
+vi.mock('~/services/document', () => ({
   getDocumentList: (...args: unknown[]) => getDocumentListMock(...args),
 }));
 

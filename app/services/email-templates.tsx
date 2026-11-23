@@ -1,6 +1,10 @@
 import { href } from 'react-router';
 import { getConfig } from '~/config';
 import {
+  AccountDeletedEmail,
+  accountDeletedEmailSubject,
+} from '~/emails/templates/account-deleted';
+import {
   ContactMessageEmail,
   contactMessageEmailSubject,
 } from '~/emails/templates/contact-message';
@@ -268,5 +272,32 @@ export async function sendEmailContractNotice(input: {
     email,
     template: EmailTemplate.ContractNotice,
     idempotencyScope: `${noticeId}:inbox`,
+  });
+}
+
+/**
+ * Confirms the deletion of an account and says until when signing in
+ * again restores it.
+ */
+export async function sendEmailAccountDeleted(input: {
+  to: EmailData;
+  userId: string;
+  deletedAt: Date;
+  restoreUntil: string;
+}) {
+  const { to, userId, deletedAt, restoreUntil } = input;
+
+  await sendEmail({
+    to,
+    subject: accountDeletedEmailSubject(),
+    email: (
+      <AccountDeletedEmail
+        restoreUntil={restoreUntil}
+        signInUrl={`${config.appUrl}${href('/signin')}`}
+      />
+    ),
+    template: EmailTemplate.AccountDeleted,
+    idempotencyScope: `${userId}:${deletedAt.toISOString()}`,
+    userId,
   });
 }

@@ -22,4 +22,14 @@ describe('getNormalizedReturnUrl', () => {
     expect(getNormalizedReturnUrl('javascript:alert(1)')).toBe(href('/'));
     expect(getNormalizedReturnUrl()).toBe(href('/'));
   });
+
+  it('falls back to startpage for paths a browser reads as another host', () => {
+    expect(getNormalizedReturnUrl('/\\evil.com')).toBe(href('/'));
+    expect(getNormalizedReturnUrl('/\t/evil.com')).toBe(href('/'));
+  });
+
+  it('keeps the search and hash of a safe path', () => {
+    expect(getNormalizedReturnUrl('/doc/123?toastInfo=hi#top'))
+      .toBe('/doc/123?toastInfo=hi#top');
+  });
 });

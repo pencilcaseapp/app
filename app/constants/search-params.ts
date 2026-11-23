@@ -2,6 +2,7 @@ export enum SearchParamAuth {
   Email = 'email',
   IsExpired = 'isExpired',
   ReturnUrl = 'returnUrl',
+  RestoreUntil = 'restoreUntil',
 }
 
 export enum SearchParamToast {

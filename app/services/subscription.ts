@@ -11,6 +11,7 @@ import {
 import {
   getSubscriptionByCreemId,
   getSubscriptionWithStatus,
+  getSubscriptions,
   hasSubscriptionWithStatus,
   upsertSubscription,
 } from '~/repos/subscription';
@@ -22,6 +23,7 @@ import {
   type User,
 } from '~/repos/user';
 import {
+  cancelSubscriptionAtPeriodEnd,
   createBillingPortalSession,
   createCheckoutSession,
   creemCheckoutSchema,
@@ -233,6 +235,44 @@ export async function syncCreemCustomerEmail(user: User) {
   }
 }
 
+/**
+ * The statuses of a subscription that renews unless it is cancelled.
+ * `scheduled_cancel` already ends with its period.
+ */
+const RENEWING_STATUSES = [
+  SubscriptionStatus.Active,
+  SubscriptionStatus.Trialing,
+  SubscriptionStatus.PastDue,
+];
+
+/**
+ * Cancels every subscription of the user that would renew, at the end of
+ * the period that is paid for, and stores what Creem answers. Returns
+ * whether all of them are cancelled: an account must not be deleted while
+ * Creem could still charge it.
+ */
+export async function cancelRenewingSubscriptions(user: Pick<User, 'id'>) {
+  const renewing = await getSubscriptions(user.id, {
+    statuses: RENEWING_STATUSES,
+  });
+
+  try {
+    for (const subscription of renewing) {
+      const canceled = await cancelSubscriptionAtPeriodEnd(
+        subscription.creemSubscriptionId,
+      );
+
+      await syncCreemSubscription(canceled);
+    }
+
+    return true;
+  }
+  catch (error) {
+    console.error('Cancelling the Creem subscription failed', error);
+    return false;
+  }
+}
+
 export enum HandleCreemWebhookError {
   InvalidSignature,
   MalformedPayload,
@@ -314,7 +354,9 @@ async function processWebhookEvent(
     const creemSubscription = creemSubscriptionSchema.parse(object);
     const synced = await syncCreemSubscription(creemSubscription);
 
-    if (!synced) {
+    // A deleted account is not written to about the subscription its
+    // deletion cancelled.
+    if (!synced || synced.user.deletedAt !== null) {
       return;
     }
 
@@ -420,6 +462,7 @@ async function syncCreemSubscription(creemSubscription: CreemSubscription) {
 
   if (
     inserted
+    && user.deletedAt === null
     && ACCESS_GRANTING_STATUSES
       .includes(creemSubscription.status as SubscriptionStatus)
   ) {

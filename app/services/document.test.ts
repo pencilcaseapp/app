@@ -12,6 +12,7 @@ import {
   copyImage,
   CopyImageError,
   createDocument,
+  getDocumentList,
   getLatestDocumentId,
   CreateDocumentError,
   deleteDocument,
@@ -136,9 +137,11 @@ vi.mock('~/clients/storage', () => ({
 
 const getUserByEmailMock = vi.fn();
 const getUserMock = vi.fn();
+const getDeletedUserIdsMock = vi.fn().mockResolvedValue([]);
 vi.mock('~/repos/user', () => ({
   getUserByEmail: (...args: unknown[]) => getUserByEmailMock(...args),
   getUser: (...args: unknown[]) => getUserMock(...args),
+  getDeletedUserIds: (...args: unknown[]) => getDeletedUserIdsMock(...args),
 }));
 
 vi.mock('~/db', () => ({
@@ -286,6 +289,22 @@ describe('openDocument', () => {
 
     expect(error).toBeNull();
     expect(document).toMatchObject({ isOwner: true, deleted: true });
+  });
+
+  it('returns not found for a document of a deleted account', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      linkShared: true,
+      collaborator: linkCollaborator(),
+    }));
+    getUserMock.mockResolvedValueOnce({
+      id: otherUserId,
+      deletedAt: new Date(),
+    });
+
+    const [error] = await openDocument(documentFixture.id, viewer);
+
+    expect(error).toBe(OpenDocumentError.NotFound);
   });
 
   it('returns not found for a deleted document to anybody else', async () => {
@@ -709,6 +728,19 @@ describe('getLiveAccess', () => {
       .toStrictEqual({ readOnly: false });
   });
 
+  it('rejects everybody from the documents of a deleted account', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      linkShared: true,
+    }));
+    getUserMock.mockResolvedValueOnce({
+      id: otherUserId,
+      deletedAt: new Date(),
+    });
+
+    expect(await getLiveAccess(documentFixture.id, viewer)).toBeUndefined();
+  });
+
   it('lets the owner into a deleted document read-only', async () => {
     getDocumentForViewerMock.mockResolvedValue(
       viewerDocument({ deletedAt: new Date() }),
@@ -983,6 +1015,23 @@ describe('createDocument', () => {
   });
 });
 
+describe('getDocumentList', () => {
+  it('leaves out the documents of a deleted account', async () => {
+    getDocumentListMock.mockResolvedValue([
+      { id: 'own', userId: userFixture.id },
+      { id: 'shared', userId: otherUserId },
+      { id: 'gone', userId: 'deleted-owner' },
+    ]);
+    getDeletedUserIdsMock.mockResolvedValueOnce(['deleted-owner']);
+
+    const list = await getDocumentList(userFixture.id);
+
+    expect(list.map(({ id }) => id)).toStrictEqual(['own', 'shared']);
+    expect(getDeletedUserIdsMock)
+      .toHaveBeenCalledWith([otherUserId, 'deleted-owner']);
+  });
+});
+
 describe('getLatestDocumentId', () => {
   it('returns the document the user worked on last', async () => {
     getDocumentListMock.mockResolvedValue([{ id: 'latest' }, { id: 'older' }]);
@@ -1092,6 +1141,7 @@ describe('invites', () => {
       linkAccess: 'view',
       userId: owner.id,
       deletedAt: null,
+      ownerDeletedAt: null,
       collaborator: null,
       ...overrides,
     };

@@ -6,6 +6,9 @@ import {
   countOwnedDocuments,
   createDocument,
   createDocumentAsset,
+  deleteUserCollaborators,
+  detachUserAssets,
+  getCollaboratingDocumentIds,
   getDeletedDocumentList,
   getDocument,
   getDocumentAsset,
@@ -14,6 +17,7 @@ import {
   getDocumentList,
   getDocumentTitle,
   getInvitedCollaborators,
+  getOwnedDocumentIds,
   inviteCollaborator,
   getDocumentIdsDeletedBefore,
   hardDeleteDocuments,
@@ -1317,5 +1321,71 @@ describe('getDocumentAssets', () => {
 
   it('returns nothing without ids', async () => {
     expect(await getDocumentAssets([])).toEqual([]);
+  });
+});
+
+describe('getOwnedDocumentIds', () => {
+  it('lists every document the user owns, deleted ones too', async () => {
+    const user = await createTestUser();
+    const other = await createTestUser();
+    const kept = await createDocumentWithTitle(user.id);
+    const deleted = await createDeletedDocument(user.id);
+    await createDocumentWithTitle(other.id);
+
+    expect((await getOwnedDocumentIds(user.id)).sort())
+      .toStrictEqual([kept.id, deleted.id].sort());
+  });
+});
+
+describe('getCollaboratingDocumentIds', () => {
+  it('lists the documents of others the user has a row on', async () => {
+    const owner = await createTestUser();
+    const user = await createTestUser();
+    const linked = await createSharedDocument(owner.id);
+    const invited = await createDocumentWithTitle(owner.id);
+    await createDocumentWithTitle(owner.id);
+    await connectDocumentCollaborator(linked.id, user.id);
+    await inviteDocumentCollaborator(invited.id, user.email, {
+      userId: user.id,
+      accepted: true,
+    });
+
+    expect((await getCollaboratingDocumentIds(user.id)).sort())
+      .toStrictEqual([linked.id, invited.id].sort());
+  });
+});
+
+describe('deleteUserCollaborators', () => {
+  it('drops the user\'s rows and the invites to their address', async () => {
+    const owner = await createTestUser();
+    const user = await createTestUser();
+    const other = await createTestUser();
+    const document = await createSharedDocument(owner.id);
+    const pending = await createDocumentWithTitle(owner.id);
+    await connectDocumentCollaborator(document.id, user.id);
+    await inviteDocumentCollaborator(pending.id, user.email);
+    await connectDocumentCollaborator(document.id, other.id);
+
+    expect(await deleteUserCollaborators({
+      userId: user.id,
+      email: user.email,
+    })).toBe(2);
+    expect(await getCollaboratingDocumentIds(other.id))
+      .toStrictEqual([document.id]);
+  });
+});
+
+describe('detachUserAssets', () => {
+  it('keeps the images but forgets who uploaded them', async () => {
+    const owner = await createTestUser();
+    const user = await createTestUser();
+    const document = await createDocumentWithTitle(owner.id);
+    const asset = await createTestAsset(document.id, user.id);
+
+    expect(await detachUserAssets(user.id)).toBe(1);
+    expect(await getDocumentAsset(asset.id)).toMatchObject({
+      id: asset.id,
+      userId: null,
+    });
   });
 });

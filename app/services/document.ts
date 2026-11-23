@@ -17,7 +17,7 @@ import {
 import { EmailTemplate } from '~/constants/email';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
 import { getConfig, type Config } from '~/config';
-import { transaction } from '~/db';
+import { transaction, type Transaction } from '~/db';
 import {
   copyObject,
   deleteObjects,
@@ -31,13 +31,17 @@ import {
   countOwnedDocuments,
   createDocument as createDocumentRow,
   createDocumentAsset,
+  deleteUserCollaborators,
+  detachUserAssets,
+  getCollaboratingDocumentIds,
   getDocument,
   getDocumentAsset,
   getDocumentAssets,
-  getDocumentForViewer,
+  getDocumentForViewer as getDocumentRowForViewer,
   getDocumentIdsDeletedBefore,
-  getDocumentList,
+  getDocumentList as getDocumentRows,
   getInvitedCollaborators,
+  getOwnedDocumentIds,
   hardDeleteDocuments,
   inviteCollaborator as insertInvite,
   removeCollaborator as deleteCollaborator,
@@ -57,7 +61,12 @@ import {
   createDocumentReport,
 } from '~/repos/document-report';
 import { countEmailLogsByUser } from '~/repos/email-log';
-import { getUser, getUserByEmail, type User } from '~/repos/user';
+import {
+  getDeletedUserIds,
+  getUser,
+  getUserByEmail,
+  type User,
+} from '~/repos/user';
 import { parseAssetSrc } from '~/utils/asset-src';
 import { signBunnyUrl } from '~/utils/bunny-token';
 import { renderDocumentPreview } from '~/utils/document-preview';
@@ -683,16 +692,57 @@ export async function reportDocument(
 
 type DocumentAccessInfo = Pick<
   DocumentForViewer,
-  'userId' | 'linkShared' | 'linkAccess' | 'deletedAt' | 'collaborator'
->;
+  | 'userId'
+  | 'linkShared'
+  | 'linkAccess'
+  | 'deletedAt'
+  | 'collaborator'
+> & { ownerDeletedAt: Date | null };
+
+/**
+ * The document as the viewer sees it, with when its owner's account was
+ * deleted, which takes it away from everybody.
+ */
+async function getDocumentForViewer(
+  documentId: string,
+  viewer?: DocumentViewer,
+) {
+  const document = await getDocumentRowForViewer(documentId, viewer);
+
+  if (!document) {
+    return undefined;
+  }
+
+  const owner = await getUser(document.userId);
+
+  return { ...document, ownerDeletedAt: owner?.deletedAt ?? null };
+}
+
+/**
+ * The documents the user owns or collaborates on for the navigation,
+ * without the deleted ones and the ones of a deleted account.
+ */
+export async function getDocumentList(userId: string) {
+  const documents = await getDocumentRows(userId);
+  const ownerIds = [...new Set(documents
+    .map(document => document.userId)
+    .filter(ownerId => ownerId !== userId))];
+  const deletedOwnerIds = new Set(await getDeletedUserIds(ownerIds));
+
+  return documents.filter(document => !deletedOwnerIds.has(document.userId));
+}
 
 function isOwnedBy(document: DocumentAccessInfo, viewer?: DocumentViewer) {
   return !!viewer && document.userId === viewer.id;
 }
 
-/** A deleted document only still exists for its owner. */
+/**
+ * A deleted document only still exists for its owner, and the documents
+ * of a deleted account for nobody until the account is restored.
+ */
 function isGone(document: DocumentAccessInfo, viewer?: DocumentViewer) {
-  return document.deletedAt !== null && !isOwnedBy(document, viewer);
+  return document.ownerDeletedAt !== null
+    || (document.deletedAt !== null && !isOwnedBy(document, viewer));
 }
 
 /** An invite the viewer has not opened the document on yet. */
@@ -831,6 +881,51 @@ export async function purgeDeletedDocuments(before: Date) {
       return deletedCount;
     }
   }
+}
+
+/**
+ * Closes every live connection to the documents of an account that was
+ * just deleted, everybody's on its own documents and its own on the
+ * documents of others, so nobody keeps editing what is gone for them.
+ */
+export async function closeAccountConnections(userId: string) {
+  const [ownedIds, collaboratingIds] = await Promise.all([
+    getOwnedDocumentIds(userId),
+    getCollaboratingDocumentIds(userId),
+  ]);
+
+  for (const documentId of ownedIds) {
+    closeDocumentConnections({ documentId });
+  }
+
+  for (const documentId of collaboratingIds) {
+    closeDocumentConnections({ documentId, userId });
+  }
+}
+
+/**
+ * The document side of purging an account, inside the purge's transaction:
+ * hard deletes every document it owns (deleted or not, with their images'
+ * rows, invites and connections), drops it from the documents of others
+ * and forgets it uploaded the images it added there. Returns the storage
+ * keys of the deleted images, whose files the caller deletes right before
+ * the commit, like `purgeDeletedDocuments` does.
+ */
+export async function deleteAccountDocuments(
+  user: Pick<User, 'id' | 'email'>,
+  tx: Transaction,
+) {
+  const ids = await getOwnedDocumentIds(user.id, tx);
+  const assets = await getDocumentAssets(ids, tx);
+  const deletedCount = await hardDeleteDocuments(ids, tx);
+
+  await deleteUserCollaborators({ userId: user.id, email: user.email }, tx);
+  await detachUserAssets(user.id, tx);
+
+  return {
+    deletedCount,
+    storageKeys: assets.map(asset => asset.storageKey),
+  };
 }
 
 export enum AddImageError {

@@ -18,7 +18,7 @@ vi.mock('react-router', async () => {
 });
 
 const getDocumentListMock = vi.fn();
-vi.mock('~/repos/document', async () => ({
+vi.mock('~/services/document', async () => ({
   getDocumentList: (userId: string) => getDocumentListMock(userId),
 }));
 
@@ -61,4 +61,18 @@ test('redirects to last updated doc if user session exists', async () => {
   expect(redirectMock).toHaveBeenCalledWith(
     href('/doc/:id', { id: 'doc-1' }),
   );
+});
+
+test('hands its search params on to the document it opens', async () => {
+  const context = new RouterContextProvider();
+  context.set(userSessionContext, userFixture);
+  getDocumentListMock.mockResolvedValue([{ ...documentFixture, id: 'doc-1' }]);
+
+  await renderRoute('/', {
+    params: {},
+    context,
+    searchParams: { toastSuccess: 'Welcome back' },
+  });
+
+  expect(redirectMock).toHaveBeenCalledWith('/doc/doc-1?toastSuccess=Welcome+back');
 });

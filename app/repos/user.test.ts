@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createUser, createUserSession, deleteSessionsExpiredBefore, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getUser, getUserByCreemCustomerId, getUserByEmail, getAndRefreshUserSession, getUserSession, updateUser } from './user';
+import { createUser, createUserSession, deleteSessionsExpiredBefore, expireAllUserSessions, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getUser, getUserByCreemCustomerId, getUserByEmail, getAndRefreshUserSession, getDeletedUserIds, getUserIdsDeletedBefore, getUserSession, hardDeleteUser, lockUserDeletedBefore, markUserDeleted, restoreDeletedUser, updateUser } from './user';
+import { db, transaction } from '~/db';
+import { users } from '~/db/schema';
+import { eq } from 'drizzle-orm';
 import { createExpiredUserSession, createTestUser, createValidUserSession } from '~/test/data-factories/user';
 import { faker } from '@faker-js/faker';
 
@@ -24,6 +27,7 @@ describe('createUser', () => {
       creemCustomerId: null,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
+      deletedAt: null,
     });
   });
 });
@@ -87,6 +91,7 @@ describe('getOrCreateUserByEmail', () => {
       creemCustomerId: null,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
+      deletedAt: null,
     });
   });
 });
@@ -282,5 +287,118 @@ describe('deleteSessionsExpiredBefore', () => {
 
     expect(await getUserSession(sessionFixture.id))
       .toStrictEqual(sessionFixture);
+  });
+});
+
+describe('markUserDeleted', () => {
+  it('stamps the account deleted', async () => {
+    const user = await createTestUser();
+
+    const deletedAt = await markUserDeleted(user.id);
+
+    expect(deletedAt).toBeInstanceOf(Date);
+    expect((await getUser(user.id))?.deletedAt).toStrictEqual(deletedAt);
+  });
+
+  it('leaves an account deleted before alone', async () => {
+    const user = await createTestUser();
+    const first = await markUserDeleted(user.id);
+
+    expect(await markUserDeleted(user.id)).toBeUndefined();
+    expect((await getUser(user.id))?.deletedAt).toStrictEqual(first);
+  });
+});
+
+describe('restoreDeletedUser', () => {
+  it('clears the deletion', async () => {
+    const user = await createTestUser();
+    await markUserDeleted(user.id);
+
+    expect(await restoreDeletedUser(user.id)).toBe(true);
+    expect((await getUser(user.id))?.deletedAt).toBeNull();
+  });
+
+  it('says so when there was nothing to restore', async () => {
+    const user = await createTestUser();
+
+    expect(await restoreDeletedUser(user.id)).toBe(false);
+  });
+});
+
+describe('getDeletedUserIds', () => {
+  it('returns which of the given users are deleted', async () => {
+    const kept = await createTestUser();
+    const deleted = await createTestUser();
+    await markUserDeleted(deleted.id);
+
+    expect(await getDeletedUserIds([kept.id, deleted.id, 'not-a-uuid']))
+      .toStrictEqual([deleted.id]);
+  });
+});
+
+describe('getUserIdsDeletedBefore', () => {
+  it('lists the accounts deleted before the date, oldest first', async () => {
+    // Recent dates, so no purge running next to this test takes them.
+    const now = Date.now();
+    const before = new Date(now - 1000);
+    const older = await createTestUser();
+    const newer = await createTestUser();
+    const recent = await createTestUser();
+    await db.update(users).set({ deletedAt: new Date(now - 2000) })
+      .where(eq(users.id, newer.id));
+    await db.update(users).set({ deletedAt: new Date(now - 3000) })
+      .where(eq(users.id, older.id));
+    await db.update(users).set({ deletedAt: new Date(now) })
+      .where(eq(users.id, recent.id));
+
+    const ids = await getUserIdsDeletedBefore(before);
+
+    expect(ids.indexOf(older.id)).toBeGreaterThan(-1);
+    expect(ids.indexOf(older.id)).toBeLessThan(ids.indexOf(newer.id));
+    expect(ids).not.toContain(recent.id);
+  });
+});
+
+describe('lockUserDeletedBefore', () => {
+  it('returns the account only while it is deleted before the date', async () => {
+    const user = await createTestUser();
+    const before = new Date();
+
+    expect(await transaction(tx => lockUserDeletedBefore(user.id, before, tx)))
+      .toBeUndefined();
+
+    await db.update(users).set({ deletedAt: new Date(Date.now() - 1000) })
+      .where(eq(users.id, user.id));
+
+    expect(await transaction(tx => lockUserDeletedBefore(user.id, before, tx)))
+      .toMatchObject({ id: user.id });
+  });
+});
+
+describe('hardDeleteUser', () => {
+  it('deletes the user and their sessions', async () => {
+    const user = await createTestUser();
+    const session = await createValidUserSession(user.id);
+
+    expect(await hardDeleteUser(user.id)).toBe(true);
+    expect(await getUser(user.id)).toBeUndefined();
+    expect(await getUserSession(session.id)).toBeUndefined();
+  });
+});
+
+describe('expireAllUserSessions', () => {
+  it('expires every session of the user and nobody else\'s', async () => {
+    const user = await createTestUser();
+    const other = await createTestUser();
+    const first = await createValidUserSession(user.id);
+    const second = await createValidUserSession(user.id);
+    const others = await createValidUserSession(other.id);
+
+    const expired = await expireAllUserSessions(user.id);
+
+    expect(expired.map(({ id }) => id).sort())
+      .toStrictEqual([first.id, second.id].sort());
+    expect((await getUserSession(others.id))!.expiresAt.getTime())
+      .toBeGreaterThan(Date.now());
   });
 });

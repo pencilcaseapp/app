@@ -1,20 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { href, Link, useActionData, type MiddlewareFunction } from 'react-router';
 import { z } from 'zod';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
+import { DeleteAccountDialog } from '~/components/delete-account-dialog/delete-account-dialog';
 import { SettingsDialogContentInner } from '~/components/settings-dialog/settings-dialog';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
 import { useAppForm } from '~/hooks/use-app-form';
 import { useEmitToast } from '~/hooks/use-toast';
+import { DELETED_ACCOUNT_RETENTION_DAYS } from '~/constants/account';
 import { updateUser } from '~/repos/user';
+import { getAccountRestoreDeadline } from '~/services/account';
+import { DangerZone } from '~/ui/danger-zone/danger-zone';
 import { Button } from '~/ui/button/button';
 import { Icon } from '~/ui/icon/icon';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
 import { ResponsiveDialogClose } from '~/ui/responsive-dialog/responsive-dialog';
 import { Typography } from '~/ui/typography/typography';
 import { UserProfile } from '~/ui/user-profile/user-profile';
+import { formatLongDate } from '~/utils/date';
 import { validateForm } from '~/utils/form';
 import type { Route } from './+types/settings-account';
 
@@ -32,7 +37,10 @@ export const middleware: MiddlewareFunction[] = [
 export function loader({ context }: Route.LoaderArgs) {
   const { name, email, newsletter } = context.get(userSessionContext);
 
-  return { user: { name, email, newsletter } };
+  return {
+    user: { name, email, newsletter },
+    restoreUntil: formatLongDate(getAccountRestoreDeadline(new Date())),
+  };
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -61,11 +69,12 @@ const chevron = (
  * verified flow stacked on this page.
  */
 export default function SettingsAccountRoute({
-  loaderData: { user },
+  loaderData: { user, restoreUntil },
   params,
 }: Route.ComponentProps) {
   const actionData = useActionData() as { saved?: boolean } | undefined;
   const emitToast = useEmitToast();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const form = useAppForm({
     defaultValues: {
@@ -144,8 +153,33 @@ export default function SettingsAccountRoute({
               )}
             </form.AppField>
           </div>
+          <DangerZone
+            title="Danger zone"
+            description={(
+              <>
+                Delete your account and every document in it. Sign in within
+                {` ${DELETED_ACCOUNT_RETENTION_DAYS}\u00A0days `}
+                to get it back.
+              </>
+            )}
+            actionArea={(
+              <Button
+                type="button"
+                colorLight="red-500"
+                className="whitespace-nowrap"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                Delete account
+              </Button>
+            )}
+          />
         </div>
       </ControlledForm>
+      <DeleteAccountDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        restoreUntil={restoreUntil}
+      />
     </SettingsDialogContentInner>
   );
 }

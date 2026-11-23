@@ -119,3 +119,27 @@ test('prefills the address it was sent back with', async () => {
 
   expect(await findByLabelText('E-Mail')).toHaveValue(userFixture.email);
 });
+
+test('says until when a deleted account can be restored', async () => {
+  const { findByText } = await renderRoute('/signin', {
+    params: {},
+    searchParams: { [SearchParamAuth.RestoreUntil]: '2026-12-23' },
+  });
+
+  expect(await findByText('Account scheduled for deletion'))
+    .toBeInTheDocument();
+  expect(await findByText(
+    'Sign in by 23 December 2026 to restore it, with all your documents. '
+    + 'After that it is permanently deleted.',
+  )).toBeInTheDocument();
+});
+
+test('ignores a restore date that is not one', async () => {
+  const { findByText, queryByText } = await renderRoute('/signin', {
+    params: {},
+    searchParams: { [SearchParamAuth.RestoreUntil]: 'tomorrow' },
+  });
+
+  await findByText(commonCopies.actions.continue);
+  expect(queryByText('Account scheduled for deletion')).toBeNull();
+});

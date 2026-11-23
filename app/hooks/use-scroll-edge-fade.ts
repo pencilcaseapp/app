@@ -2,8 +2,15 @@ import { useEffect } from 'react';
 import type { RefObject } from 'react';
 
 /** How far the content dissolves into what sits above and below it. */
-const FADE_TOP = '16px';
-const FADE_BOTTOM = '24px';
+const FADE_TOP = 16;
+const FADE_BOTTOM = 24;
+
+/**
+ * The fade grows with the content behind the edge up to its full size, so
+ * it eases in as the content starts to scroll instead of snapping on.
+ */
+const fadeSize = (distance: number, max: number) =>
+  `${distance > 1 ? Math.min(Math.round(distance), max) : 0}px`;
 
 export interface ScrollEdgeFadeOptions {
   /** Fade the top edge, for a scroll area with something above it. */
@@ -30,17 +37,17 @@ export const useScrollEdgeFade = (
     }
 
     const update = () => {
-      const scrolled = element.scrollTop > 1;
+      const scrolled = element.scrollTop;
       const remaining
-        = element.scrollHeight - element.scrollTop - element.clientHeight > 1;
+        = element.scrollHeight - element.scrollTop - element.clientHeight;
 
       element.style.setProperty(
         '--fade-top',
-        top && scrolled ? FADE_TOP : '0px',
+        top ? fadeSize(scrolled, FADE_TOP) : '0px',
       );
       element.style.setProperty(
         '--fade-bottom',
-        bottom && remaining ? FADE_BOTTOM : '0px',
+        bottom ? fadeSize(remaining, FADE_BOTTOM) : '0px',
       );
     };
 

@@ -1,0 +1,35 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DangerZone > renders a region named by its title 1`] = `
+<div>
+  <section
+    aria-labelledby="_r_0_"
+    class="flex items-center justify-between gap-4 rounded-xl border border-pca-red-500/25 bg-pca-red-100 p-4 max-sm:flex-col max-sm:items-stretch sm:pr-5 dark:border-pca-red-900 dark:bg-pca-red-900/20"
+  >
+    <div
+      class="flex min-w-0 flex-col gap-1"
+    >
+      <h3
+        class="antialiased font-inter text-sm text-pca-red-900 dark:text-pca-red-300 font-semibold"
+        id="_r_0_"
+      >
+        Danger zone
+      </h3>
+      <p
+        class="antialiased font-inter text-xs font-normal text-pca-red-900 dark:text-pca-red-300 text-balance"
+      >
+        Delete your account.
+      </p>
+    </div>
+    <div
+      class="flex shrink-0 flex-col"
+    >
+      <button
+        type="button"
+      >
+        Delete account
+      </button>
+    </div>
+  </section>
+</div>
+`;

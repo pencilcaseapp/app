@@ -28,3 +28,30 @@ export function formatDate(date: Date, request: Request) {
   return new Intl.DateTimeFormat(getRequestLocale(request), dateFormatOptions)
     .format(date);
 }
+
+const longDateFormat = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+/** A calendar date written out, like "23 December 2026", in any locale. */
+export function formatLongDate(date: Date) {
+  return longDateFormat.format(date);
+}
+
+/** A calendar date as `YYYY-MM-DD` (UTC), to hand over in a URL. */
+export function toDateParam(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+/** Reads a `YYYY-MM-DD` date back, or undefined when it is not one. */
+export function parseDateParam(value: string | undefined) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return undefined;
+  }
+
+  const date = new Date(`${value}T00:00:00Z`);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}

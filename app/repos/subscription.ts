@@ -109,3 +109,33 @@ export async function hasSubscriptionWithStatus(
 ) {
   return !!await getSubscriptionWithStatus(userId, statuses, executor);
 }
+
+/** The user's subscriptions, only those in one of `statuses` if given. */
+export async function getSubscriptions(
+  userId: string,
+  { statuses }: { statuses?: SubscriptionStatus[] } = {},
+) {
+  if (!isUuid(userId)) {
+    return [];
+  }
+
+  return db.query.subscriptions.findMany({
+    where: {
+      userId,
+      ...(statuses && { status: { in: statuses } }),
+    },
+  });
+}
+
+/** Deletes the user's subscriptions, for the purge of a deleted account. */
+export async function deleteUserSubscriptions(
+  userId: string,
+  executor: Executor = db,
+) {
+  if (!isUuid(userId)) {
+    return;
+  }
+
+  await executor.delete(subscriptions)
+    .where(eq(subscriptions.userId, userId));
+}

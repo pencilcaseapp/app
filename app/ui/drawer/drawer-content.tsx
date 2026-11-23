@@ -76,8 +76,11 @@ export const DrawerContent: FC<DrawerContentProps>
               {/* While a nested drawer pins the popup to the stack
                   height, this wrapper keeps the drawer's own height so
                   the layout does not reflow into the smaller popup —
-                  the popup clips it instead. */}
-              <div className="flex min-h-0 grow flex-col group-data-nested-drawer-open/popup:h-(--drawer-height) group-data-nested-drawer-open/popup:grow-0 group-data-nested-drawer-open/popup:shrink-0">
+                  the popup clips it instead. Base UI sets that height a
+                  render after it marks the nested drawer open, and an
+                  auto height in between fits the content, which resets
+                  the scroll position. 0px keeps it. */}
+              <div className="flex min-h-0 grow flex-col group-data-nested-drawer-open/popup:h-[var(--drawer-height,0px)] group-data-nested-drawer-open/popup:grow-0 group-data-nested-drawer-open/popup:shrink-0">
                 <div className={classNames('w-12 h-1.5 bg-pca-grey-200 shrink-0 rounded-full dark:bg-pca-grey-800 mx-auto mb-4 mt-4 transition-opacity duration-300', nestedFadeClassName)} />
                 {children}
               </div>

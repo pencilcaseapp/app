@@ -26,10 +26,16 @@ scheduler per definition (idempotent, so every instance doing it is fine),
 removes schedulers whose definition no longer exists, and starts the worker
 that dispatches each job to its `run` by name.
 
-Jobs are currently schedule-only. When something needs an on-demand job with
-a payload, add a typed `data` parameter to `JobDefinition` and an
-`enqueueJob` helper on the queue in `app/jobs/queue.ts` — the worker already
-dispatches by job name.
+## On-demand jobs
+
+Work a service hands off rather than runs on a schedule (an e-mail that
+should be retried when the provider is down, say) is an
+`OnDemandJobDefinition`: a name and a `run` that takes the job's data. Add
+the name and the shape of its data to `OnDemandJobs` in `app/jobs/job.ts`,
+register the definition in `onDemandJobDefinitions` and queue it with
+`enqueueJob(name, data)` from `app/jobs/queue.ts`. The data goes through
+Redis, so keep it JSON (a date travels as an ISO string). Without a jobs
+Redis `enqueueJob` runs nothing; tests call `run` directly.
 
 ## Failure handling
 

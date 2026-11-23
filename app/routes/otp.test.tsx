@@ -95,6 +95,42 @@ test('redirects to onboarding on successful verification', async () => {
   });
 });
 
+test('welcomes back the owner of a restored account', async () => {
+  getValidOtpMock.mockResolvedValueOnce(otpFixture);
+  verifyMagicCodeMock.mockResolvedValueOnce(
+    [null, { otp: otpFixture, user: userFixture, restored: true }],
+  );
+  createSessionCookieMock.mockResolvedValueOnce(userSessionFixture);
+
+  const { findByLabelText, findByText } = await renderRoute('/otp/:otpId', {
+    params: {
+      otpId: otpFixture.id,
+    },
+    searchParams: {
+      [SearchParamAuth.Email]: userFixture.email,
+      [SearchParamAuth.ReturnUrl]: '/doc/1?a=b',
+    },
+  });
+
+  await userEvent.type(await findByLabelText('One-Time Password'), '123456');
+
+  await act(async () => {
+    await fireEvent.submit(await findByText('Continue'));
+  });
+
+  await vi.waitFor(() => {
+    expect(redirectMock).toHaveBeenCalledWith(withSearchParams(
+      href('/onboarding'),
+      {
+        [SearchParamAuth.ReturnUrl]: withSearchParams('/doc/1', {
+          a: 'b',
+          toastSuccess: 'Welcome back, account restored',
+        }),
+      },
+    ));
+  });
+});
+
 test('redirects to signin with expired param', async () => {
   getValidOtpMock.mockResolvedValueOnce(null);
 

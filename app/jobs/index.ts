@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import { jobDefinitions } from './definitions';
+import { jobDefinitions, onDemandJobDefinitions } from './definitions';
 import {
   closeJobsQueue,
   createJobsConnection,
@@ -45,13 +45,18 @@ export async function startJobs() {
   worker = new Worker(
     JOBS_QUEUE_NAME,
     async (job) => {
-      const definition = jobDefinitions.find(({ name }) => name === job.name);
+      const scheduled = jobDefinitions.find(({ name }) => name === job.name);
 
-      if (!definition) {
-        throw new Error(`Unknown job: ${job.name}`);
+      if (scheduled) {
+        return scheduled.run();
       }
 
-      await definition.run();
+      if (Object.hasOwn(onDemandJobDefinitions, job.name)) {
+        const name = job.name as keyof typeof onDemandJobDefinitions;
+        return onDemandJobDefinitions[name].run(job.data);
+      }
+
+      throw new Error(`Unknown job: ${job.name}`);
     },
     { prefix: JOBS_PREFIX, connection },
   );

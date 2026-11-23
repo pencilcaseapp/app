@@ -28,9 +28,11 @@ import { optionalUserSessionContext } from '~/contexts/user-session';
 import {
   countOwnedDocuments,
   getDeletedDocumentList,
-  getDocumentList,
 } from '~/repos/document';
-import { hasReachedDocumentLimit } from '~/services/document';
+import {
+  getDocumentList,
+  hasReachedDocumentLimit,
+} from '~/services/document';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { useStableOrder } from '~/hooks/use-stable-order';
 import { useLiveTitles } from '~/hooks/use-live-titles';

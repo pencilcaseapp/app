@@ -98,7 +98,8 @@ exports[`DialogContent > matches the snapshot with every area filled 1`] = `
       class="flex min-h-0 min-w-0 flex-1 flex-col"
     >
       <div
-        class="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4"
+        class="scroll-edge-fade min-h-0 flex-1 scroll-pt-6 scroll-pb-8 overflow-y-auto overscroll-contain p-4"
+        style="--fade-top: 0px; --fade-bottom: 0px;"
       >
         <p>
           Body content

@@ -3,6 +3,7 @@ import { faker } from '@faker-js/faker';
 import { SubscriptionStatus } from '~/constants/subscription';
 import {
   getSubscriptionByCreemId,
+  getSubscriptions,
   getSubscriptionWithStatus,
   hasSubscriptionWithStatus,
   upsertSubscription,
@@ -133,6 +134,26 @@ describe('getSubscriptionByCreemId', () => {
     const subscription = await getSubscriptionByCreemId('sub_unknown');
 
     expect(subscription).toBeUndefined();
+  });
+});
+
+describe('getSubscriptions', () => {
+  it('returns the user\'s subscriptions, filtered by status', async () => {
+    const user = await createTestUser();
+    const active = await createTestSubscription(user.id, { status: 'active' });
+    const canceled = await createTestSubscription(user.id, {
+      status: 'canceled',
+    });
+    await createTestSubscription((await createTestUser()).id);
+
+    const all = await getSubscriptions(user.id);
+    const renewing = await getSubscriptions(user.id, {
+      statuses: [SubscriptionStatus.Active],
+    });
+
+    expect(all.map(row => row.id).sort())
+      .toEqual([active.id, canceled.id].sort());
+    expect(renewing.map(row => row.id)).toEqual([active.id]);
   });
 });
 

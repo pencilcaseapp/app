@@ -121,4 +121,19 @@ describe('useScrollEdgeFade', () => {
 
     expect(fades(element)).toEqual({ top: '16px', bottom: '0px' });
   });
+
+  test('eases the fade in over the first pixels of content', () => {
+    const element = scrollArea({
+      scrollTop: 6,
+      clientHeight: 400,
+      scrollHeight: 416,
+    });
+
+    renderHook(() => useScrollEdgeFade({ current: element }, {
+      top: true,
+      bottom: true,
+    }));
+
+    expect(fades(element)).toEqual({ top: '6px', bottom: '10px' });
+  });
 });
