@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { useEffect, useRef } from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import { FADE_TOP, fadeSize } from '~/hooks/use-scroll-edge-fade';
+import { SCROLL_FADE_TOP, scrollFadeSize } from '~/utils/scroll-fade';
 
 /**
  * Keeps its content on top of the sidebar while the list scrolls. It
@@ -31,7 +31,7 @@ export const SidebarStickyHeader: FC<PropsWithChildren> = ({ children }) => {
     const container = scroller;
     const update = () => header.style.setProperty(
       '--fade-under',
-      fadeSize(container.scrollTop, FADE_TOP),
+      scrollFadeSize(container.scrollTop, SCROLL_FADE_TOP),
     );
 
     update();
