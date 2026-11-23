@@ -200,7 +200,7 @@ const FOLDER_LABELS: Record<DocumentFolder, string> = {
 
 const EMPTY_FOLDER_COPIES: Record<DocumentFolder, string> = {
   all: 'No documents',
-  shared: 'No documents shared with you',
+  shared: 'No shared documents',
   deleted: 'No deleted documents',
 };
 

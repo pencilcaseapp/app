@@ -152,7 +152,7 @@ export const Default: Story = {
                     : (
                         <DocumentListEmpty icon="no-docs">
                           {folder === 'shared'
-                            ? 'No documents shared with you'
+                            ? 'No shared documents'
                             : 'No deleted documents'}
                         </DocumentListEmpty>
                       )}
