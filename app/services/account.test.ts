@@ -37,7 +37,13 @@ import {
   deleteAccount,
   DeleteAccountError,
   purgeDeletedAccounts,
+  sendAccountDeletedEmail,
 } from './account';
+
+const enqueueJobMock = vi.fn();
+vi.mock('~/jobs/queue', () => ({
+  enqueueJob: (...args: unknown[]) => enqueueJobMock(...args),
+}));
 
 const cancelRenewingSubscriptionsMock = vi.fn(() => Promise.resolve(true));
 vi.mock('./subscription', () => ({
@@ -134,27 +140,21 @@ describe('deleteAccount', () => {
       .toHaveBeenCalledWith({ documentId: theirs.id, userId: user.id });
   });
 
-  it('confirms the deletion by e-mail with the last day to restore', async () => {
+  it('hands the confirmation e-mail to a background job', async () => {
     const user = await createTestUser();
 
-    const [, result] = await deleteAccount(user);
+    await deleteAccount(user);
 
-    expect(sendEmailAccountDeletedMock).toHaveBeenCalledWith({
-      to: { email: user.email, name: user.name },
+    const { deletedAt } = (await getUser(user.id))!;
+    expect(enqueueJobMock).toHaveBeenCalledWith('send-account-deleted-email', {
       userId: user.id,
-      deletedAt: expect.any(Date),
-      restoreUntil: new Intl.DateTimeFormat('en-GB', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'UTC',
-      }).format(result!.restoreUntil),
+      deletedAt: deletedAt!.toISOString(),
     });
   });
 
-  it('stands when the e-mail cannot be sent', async () => {
+  it('stands when the e-mail cannot be queued', async () => {
     const user = await createTestUser();
-    sendEmailAccountDeletedMock.mockRejectedValueOnce(new Error('down'));
+    enqueueJobMock.mockRejectedValueOnce(new Error('down'));
     vi.spyOn(console, 'error').mockImplementationOnce(() => {});
 
     const [error] = await deleteAccount(user);
@@ -172,7 +172,45 @@ describe('deleteAccount', () => {
 
     expect(error).toBeNull();
     expect((await getUser(user.id))?.deletedAt).toStrictEqual(deletedAt);
-    expect(sendEmailAccountDeletedMock).toHaveBeenCalledTimes(1);
+    expect(enqueueJobMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('sendAccountDeletedEmail', () => {
+  it('confirms the deletion with the last day to restore', async () => {
+    const user = await createTestUser();
+    const deletedAt = new Date('2026-11-23T17:00:00Z');
+    await deleteUserAt(user.id, deletedAt);
+
+    await sendAccountDeletedEmail(user.id, deletedAt);
+
+    expect(sendEmailAccountDeletedMock).toHaveBeenCalledWith({
+      to: { email: user.email, name: user.name },
+      userId: user.id,
+      deletedAt,
+      restoreUntil: '23 December 2026',
+    });
+  });
+
+  it('skips an account restored or deleted again since', async () => {
+    const user = await createTestUser();
+    const deletedAt = new Date('2026-11-23T17:00:00Z');
+
+    await sendAccountDeletedEmail(user.id, deletedAt);
+    await deleteUserAt(user.id, new Date('2026-11-24T08:00:00Z'));
+    await sendAccountDeletedEmail(user.id, deletedAt);
+
+    expect(sendEmailAccountDeletedMock).not.toHaveBeenCalled();
+  });
+
+  it('throws when the send fails, so the job retries', async () => {
+    const user = await createTestUser();
+    const deletedAt = new Date('2026-11-23T17:00:00Z');
+    await deleteUserAt(user.id, deletedAt);
+    sendEmailAccountDeletedMock.mockRejectedValueOnce(new Error('down'));
+
+    await expect(sendAccountDeletedEmail(user.id, deletedAt))
+      .rejects.toThrow('down');
   });
 });
 

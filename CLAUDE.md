@@ -176,7 +176,10 @@ UTC cron `schedule`, `run`) in `app/jobs/definitions/`, registered in
 `app/jobs/definitions/index.ts`; `server.ts` calls `startJobs()` on boot,
 which upserts the schedulers and starts the worker in-process, and
 `stopJobs()` on `SIGTERM` so a running job finishes before the instance
-goes away. Leaving `jobs.redis` out of the config (test) disables jobs;
+goes away. A service hands work off with `enqueueJob(name, data)`
+(`app/jobs/queue.ts`) to an `OnDemandJobDefinition`, typed by
+`OnDemandJobs` in `app/jobs/job.ts` and registered in
+`onDemandJobDefinitions`. Leaving `jobs.redis` out of the config (test) disables jobs;
 tests call `run` directly. Bull Board is mounted at `/dev/bullmq` in
 development only. Keep `run` idempotent — the queue retries three times
 with backoff.
@@ -504,7 +507,9 @@ connection behind the dialog, and the revalidation that sets off would
 beat a fetcher's redirect). `deleteAccount` cancels every renewing
 Creem subscription at period end first and refuses to go on if Creem
 fails, then stamps `users.deleted_at` and expires every session in one
-transaction, closes the live connections and mails the confirmation. The
+transaction, closes the live connections and queues the confirmation
+e-mail (`send-account-deleted-email`, an on-demand job, so a send that
+fails is retried with backoff). The
 documents of a deleted account are gone for everybody (`isGone` reads
 the owner's `deletedAt`, `getDocumentList` leaves them out) but nothing
 is removed: signing in again with the same address clears the stamp in

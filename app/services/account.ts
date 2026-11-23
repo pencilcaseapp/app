@@ -1,6 +1,7 @@
 import { deleteObjects } from '~/clients/storage';
 import { DELETED_ACCOUNT_RETENTION_MS } from '~/constants/account';
 import { transaction } from '~/db';
+import { enqueueJob } from '~/jobs/queue';
 import { incrementDailyStat } from '~/repos/daily-stat';
 import { deleteUserEmailChangeRequests } from '~/repos/email-change-request';
 import { deleteUserEmailLogs } from '~/repos/email-log';
@@ -8,6 +9,7 @@ import { deleteUserOtps } from '~/repos/otp';
 import { deleteUserSubscriptions } from '~/repos/subscription';
 import {
   expireAllUserSessions,
+  getUser,
   getUserIdsDeletedBefore,
   hardDeleteUser,
   lockUserDeletedBefore,
@@ -38,9 +40,11 @@ export type DeleteAccountResult
  * could still charge must not go, then the account is marked deleted and
  * signed out everywhere in one transaction. Its live connections close
  * after the commit, which is when its documents are gone for everybody,
- * and the confirmation e-mail goes out last: the deletion stands whether
- * or not it arrives. Signing in again before `restoreUntil` takes it back
- * (`verifyMagicCode`), after that `purgeDeletedAccounts` removes it.
+ * and the confirmation e-mail is handed to a background job last
+ * (`sendAccountDeletedEmail`), which retries it with backoff: the
+ * deletion stands whether or not it arrives. Signing in again before
+ * `restoreUntil` takes it back (`verifyMagicCode`), after that
+ * `purgeDeletedAccounts` removes it.
  */
 export async function deleteAccount(user: User): Promise<DeleteAccountResult> {
   if (!await cancelRenewingSubscriptions(user)) {
@@ -63,21 +67,40 @@ export async function deleteAccount(user: User): Promise<DeleteAccountResult> {
 
   await closeAccountConnections(user.id);
 
-  const restoreUntil = getAccountRestoreDeadline(deletedAt);
-
   try {
-    await sendEmailAccountDeleted({
-      to: { email: user.email, name: user.name ?? undefined },
+    await enqueueJob('send-account-deleted-email', {
       userId: user.id,
-      deletedAt,
-      restoreUntil: formatLongDate(restoreUntil),
+      deletedAt: deletedAt.toISOString(),
     });
   }
   catch (error) {
-    console.error('Sending the account deletion e-mail failed', error);
+    console.error('Queueing the account deletion e-mail failed', error);
   }
 
-  return [null, { restoreUntil }];
+  return [null, { restoreUntil: getAccountRestoreDeadline(deletedAt) }];
+}
+
+/**
+ * Sends the confirmation of the deletion stamped at `deletedAt`, unless
+ * the account has been restored (or deleted again, which queued its own)
+ * since. Throws when the send fails, so the job retries it.
+ */
+export async function sendAccountDeletedEmail(
+  userId: string,
+  deletedAt: Date,
+) {
+  const user = await getUser(userId);
+
+  if (user?.deletedAt?.getTime() !== deletedAt.getTime()) {
+    return;
+  }
+
+  await sendEmailAccountDeleted({
+    to: { email: user.email, name: user.name ?? undefined },
+    userId: user.id,
+    deletedAt,
+    restoreUntil: formatLongDate(getAccountRestoreDeadline(deletedAt)),
+  });
 }
 
 /**

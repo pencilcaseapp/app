@@ -12,3 +12,20 @@ export interface JobDefinition {
 
   run: () => Promise<void>;
 }
+
+/**
+ * The jobs a service hands off with `enqueueJob` instead of on a schedule,
+ * by name, with the data each one takes. Keep the data JSON: it goes
+ * through Redis.
+ */
+export interface OnDemandJobs {
+  'send-account-deleted-email': { userId: string; deletedAt: string };
+}
+
+export type OnDemandJobName = keyof OnDemandJobs;
+
+/** Registered in `./definitions` next to the scheduled ones. */
+export interface OnDemandJobDefinition<Name extends OnDemandJobName> {
+  name: Name;
+  run: (data: OnDemandJobs[Name]) => Promise<void>;
+}
