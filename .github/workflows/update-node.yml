@@ -1,0 +1,38 @@
+name: ⬆️ Update Node.js
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+      - name: Bump to the latest LTS
+        id: node
+        run: node .github/scripts/update-node.mjs
+      - name: Update the lockfile
+        if: steps.node.outputs.changed == 'true'
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Open a pull request
+        if: steps.node.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: update-node
+          commit-message: "build(deps): bump node to ${{ steps.node.outputs.version }}"
+          title: "build(deps): bump node to ${{ steps.node.outputs.version }}"
+          body: |
+            Moves `.nvmrc`, `engines.node` (what Clever Cloud deploys) and, on a new major, `@types/node` to Node.js ${{ steps.node.outputs.version }}, the latest LTS.
+
+            ⚠️ CI doesn't start on a pull request opened by this workflow. Close and reopen it to run the checks before merging.

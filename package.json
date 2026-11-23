@@ -2,6 +2,9 @@
   "name": "app",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "26.13.1"
+  },
   "scripts": {
     "start": "cross-env NODE_ENV=production node ./server.js",
     "docker:up": "docker compose up -d --wait",
@@ -9,7 +12,7 @@
     "dev": "cross-env ENV=development tsx ./server.ts",
     "build": "run-p \"build:*\"",
     "build:react-router": "react-router build",
-    "build:server": "esbuild ./server.ts --outdir=./ --bundle --format=esm --platform=node --target=node24 --packages=external --external:./build/server/index.js",
+    "build:server": "esbuild ./server.ts --outdir=./ --bundle --format=esm --platform=node --target=node26 --packages=external --external:./build/server/index.js",
     "test": "vitest",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",

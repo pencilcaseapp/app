@@ -72,6 +72,15 @@ through the container's egress proxy, and the config's proxy arguments
 also cap TLS at 1.2 because the relay cannot digest Chromium's TLS 1.3
 client hello.
 
+**Node.js version.** The latest LTS, pinned exactly in `.nvmrc` (nvm and
+fnm locally, `setup-node` in CI and CD) and in `engines.node` (what Clever
+Cloud deploys: it deletes `.nvmrc`, and a `CC_NODE_VERSION` in its console
+would override `engines`). Change both together, with the esbuild
+`--target` of `build:server`. Every Monday `update-node.yml` runs
+`.github/scripts/update-node.mjs` and opens a PR when a newer LTS is out,
+moving `@types/node` along on a new major (Dependabot ignores its majors).
+CI doesn't start on a PR opened by a workflow: close and reopen it.
+
 CI (`.github/workflows/ci.yml`) runs lint, test, e2e, typecheck, build, and
 build-storybook; the test and e2e jobs start their databases with the same
 `npm run docker:up` as local dev. Pushing to `main` deploys to production via
