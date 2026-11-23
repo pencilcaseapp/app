@@ -28,7 +28,7 @@ export class Sidebar {
     await this.page
       .getByRole('option', { name: new RegExp(`^${folder}`) })
       .click();
-    await expect(this.list).toHaveAttribute('aria-busy', 'false');
+    await expect(this.page.locator('nav [aria-busy=true]')).toHaveCount(0);
   }
 
   /**
@@ -66,7 +66,7 @@ export class Sidebar {
 
   /** The documents of the open folder, below the switch. */
   private get list(): Locator {
-    return this.page.locator('nav [aria-busy]');
+    return this.page.locator('nav ul[aria-label]');
   }
 
   /**

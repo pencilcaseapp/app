@@ -59,6 +59,7 @@ const FolderCount = ({ count, className }: {
     )}
   >
     {count}
+    <span className="sr-only"> documents</span>
   </span>
 );
 
@@ -145,6 +146,7 @@ const FolderSwitchSelect = <Value extends string>({
       onValueChange={next => next !== null && onValueChange(next)}
     >
       <BaseSelect.Trigger
+        aria-label="Folder"
         render={current && <FolderSwitchTrigger item={current} />}
       />
       <BaseSelect.Portal>
@@ -162,7 +164,10 @@ const FolderSwitchSelect = <Value extends string>({
               'data-open:animate-scale-in data-closed:animate-scale-out',
             )}
           >
-            <BaseSelect.List className="flex flex-col gap-0.5">
+            <BaseSelect.List
+              aria-label="Folders"
+              className="flex flex-col gap-0.5"
+            >
               {withSeparators(
                 groups,
                 item => (

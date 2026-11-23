@@ -2,12 +2,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MemoryRouter, NavLink } from 'react-router';
 import { Sidebar } from './sidebar';
+import { SidebarStickyHeader } from './sidebar-sticky-header';
 import { SidebarProvider } from '../sidebar-context/sidebar-provider';
 import { useSidebarContext } from '../sidebar-context/use-sidebar-context';
 import { Logo } from '../logo/logo';
 import { Topbar } from '../topbar/topbar';
 import { Button } from '../button/button';
-import { DocumentGroupEmpty } from '../document-group/document-group-empty';
+import { DocumentListEmpty } from '../document-list-empty/document-list-empty';
 import { DocumentItem } from '../document-item/document-item';
 import { FolderSwitch } from '../folder-switch/folder-switch';
 import type { FolderSwitchItem } from '../folder-switch/folder-switch';
@@ -117,13 +118,13 @@ export const Default: Story = {
             <>
               <NavigationItem as="button" onClick={() => console.log('Search...')} icon="search" title="Search" />
               <div>
-                <div className="sticky top-0 z-10 bg-pca-white pb-1.5 dark:bg-pca-grey-900">
+                <SidebarStickyHeader>
                   <FolderSwitch
                     groups={folderGroups}
                     value={folder}
                     onValueChange={setFolder}
                   />
-                </div>
+                </SidebarStickyHeader>
                 <div className="flex flex-col gap-1.5">
                   {folder === 'all'
                     ? navigation.map(item => (
@@ -149,11 +150,11 @@ export const Default: Story = {
                         </DocumentItem>
                       ))
                     : (
-                        <DocumentGroupEmpty icon="no-docs">
+                        <DocumentListEmpty icon="no-docs">
                           {folder === 'shared'
                             ? 'No documents shared with you'
                             : 'No deleted documents'}
-                        </DocumentGroupEmpty>
+                        </DocumentListEmpty>
                       )}
                 </div>
               </div>

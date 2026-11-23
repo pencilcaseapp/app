@@ -1,17 +1,17 @@
 import { describe, expect, test } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { DocumentGroupEmpty } from './document-group-empty';
+import { DocumentListEmpty } from './document-list-empty';
 
-describe('DocumentGroupEmpty', () => {
+describe('DocumentListEmpty', () => {
   test('renders the message', () => {
-    render(<DocumentGroupEmpty>No deleted documents</DocumentGroupEmpty>);
+    render(<DocumentListEmpty>No deleted documents</DocumentListEmpty>);
 
     expect(screen.getByText('No deleted documents')).toBeInTheDocument();
   });
 
   test('renders no icon when omitted', () => {
     const { container } = render(
-      <DocumentGroupEmpty>No deleted documents</DocumentGroupEmpty>,
+      <DocumentListEmpty>No deleted documents</DocumentListEmpty>,
     );
 
     expect(container.querySelector('svg')).not.toBeInTheDocument();
@@ -19,9 +19,9 @@ describe('DocumentGroupEmpty', () => {
 
   test('renders the icon when provided', () => {
     const { container } = render(
-      <DocumentGroupEmpty icon="trash">
+      <DocumentListEmpty icon="trash">
         No deleted documents
-      </DocumentGroupEmpty>,
+      </DocumentListEmpty>,
     );
 
     expect(container.querySelector('svg')).toBeInTheDocument();
@@ -29,11 +29,11 @@ describe('DocumentGroupEmpty', () => {
 
   test('renders the actionArea when provided', () => {
     render(
-      <DocumentGroupEmpty
+      <DocumentListEmpty
         actionArea={<button data-testid="action-area">Create Doc</button>}
       >
         Nothing here yet
-      </DocumentGroupEmpty>,
+      </DocumentListEmpty>,
     );
 
     expect(screen.getByTestId('action-area')).toBeInTheDocument();
@@ -41,9 +41,9 @@ describe('DocumentGroupEmpty', () => {
 
   test('should match snapshot', () => {
     const { container } = render(
-      <DocumentGroupEmpty icon="trash">
+      <DocumentListEmpty icon="trash">
         No deleted documents
-      </DocumentGroupEmpty>,
+      </DocumentListEmpty>,
     );
 
     expect(container).toMatchSnapshot();

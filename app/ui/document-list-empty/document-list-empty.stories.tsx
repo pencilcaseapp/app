@@ -1,16 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { DocumentGroupEmpty } from './document-group-empty';
+import { DocumentListEmpty } from './document-list-empty';
 import { Button } from '../button/button';
 
 /**
- * `DocumentGroupEmpty` is the empty state of a folder in the navigation,
+ * `DocumentListEmpty` is the empty state of a folder in the navigation,
  * rendered in place of its documents when it has none. It is generic on
  * purpose: every folder passes its own icon, message, and optional call
  * to action.
  */
-const meta: Meta<typeof DocumentGroupEmpty> = {
-  title: 'Navigation/DocumentGroupEmpty',
-  component: DocumentGroupEmpty,
+const meta: Meta<typeof DocumentListEmpty> = {
+  title: 'Navigation/DocumentListEmpty',
+  component: DocumentListEmpty,
   parameters: {
     layout: 'fullscreen',
   },
@@ -24,7 +24,7 @@ const meta: Meta<typeof DocumentGroupEmpty> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof DocumentGroupEmpty>;
+type Story = StoryObj<typeof DocumentListEmpty>;
 
 /**
  * The plain message-only empty state.

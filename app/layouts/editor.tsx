@@ -12,7 +12,7 @@ import {
   useActiveDocumentTitle,
 } from '~/contexts/document-title';
 import { SocketClientProvider } from '~/contexts/socket-client';
-import { DocumentGroupEmpty } from '~/ui/document-group/document-group-empty';
+import { DocumentListEmpty } from '~/ui/document-list-empty/document-list-empty';
 import { DocumentItem } from '~/ui/document-item/document-item';
 import { DropdownMenu } from '~/ui/dropdown-menu/dropdown-menu';
 import { DropdownMenuContent } from '~/ui/dropdown-menu/dropdown-menu-content';
@@ -22,6 +22,7 @@ import { DropdownMenuTrigger } from '~/ui/dropdown-menu/dropdown-menu-trigger';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
 import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import { Sidebar } from '~/ui/sidebar/sidebar';
+import { SidebarStickyHeader } from '~/ui/sidebar/sidebar-sticky-header';
 import type { Route } from './+types/editor';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import {
@@ -312,76 +313,79 @@ function EditorSidebar({
       <Sidebar
         content={(
           <>
-            <div>
-              <div className="sticky top-0 z-10 bg-pca-white pb-1.5 dark:bg-pca-grey-900">
-                <FolderSwitch
-                  groups={folderGroups}
-                  value={pendingFolder ?? folder}
-                  onValueChange={folder => void switchFolder(folder)}
-                />
-              </div>
-              <div
-                // A new list for every folder, so the rows of one do
-                // not glide into the places of the other.
-                key={folder}
-                aria-busy={isSwitchingFolder}
-                className="flex flex-col gap-1.5"
-              >
-                {stableNavigation.length === 0 && (
-                  <DocumentGroupEmpty icon="no-docs">
+            <SidebarStickyHeader>
+              <FolderSwitch
+                groups={folderGroups}
+                value={pendingFolder ?? folder}
+                onValueChange={folder => void switchFolder(folder)}
+              />
+            </SidebarStickyHeader>
+            {stableNavigation.length === 0
+              ? (
+                  <DocumentListEmpty icon="no-docs">
                     {EMPTY_FOLDER_COPIES[folder]}
-                  </DocumentGroupEmpty>
-                )}
-                {stableNavigation.map((item) => {
-                  const label = liveTitles.get(item.id) ?? item.label;
+                  </DocumentListEmpty>
+                )
+              : (
+                  <ul
+                    // A new list for every folder, so the rows of one do
+                    // not glide into the places of the other.
+                    key={folder}
+                    aria-label={FOLDER_LABELS[folder]}
+                    aria-busy={isSwitchingFolder}
+                    className="flex flex-col gap-1.5"
+                  >
+                    {stableNavigation.map((item) => {
+                      const label = liveTitles.get(item.id) ?? item.label;
 
-                  return (
-                    <DocumentItem
-                      title={label}
-                      shareState={item.shareState}
-                      as={NavLink}
-                      to={item.to}
-                      key={item.to}
-                      onClick={closeOnNavigate}
-                      actionArea={folder === 'deleted'
-                        ? <RestoreDocumentMenu documentId={item.id} />
-                        : (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger
-                                iconTitle="Item options"
-                              />
-                              <DropdownMenuPortal>
-                                <DropdownMenuContent
-                                  align={isMobile ? 'end' : 'start'}
-                                >
-                                  <DropdownMenuItem
-                                    as="button"
-                                    onClick={() => {
-                                      setDocumentToDelete({
-                                        id: item.id,
-                                        title: label,
-                                        shared:
-                                          item.shareState !== 'private',
-                                        isOwner: item.isOwner,
-                                      });
-                                      setIsDeleteDialogOpen(true);
-                                    }}
-                                    color="danger"
-                                    icon="trash"
-                                  >
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenuPortal>
-                            </DropdownMenu>
-                          )}
-                    >
-                      {label}
-                    </DocumentItem>
-                  );
-                })}
-              </div>
-            </div>
+                      return (
+                        <li key={item.to}>
+                          <DocumentItem
+                            title={label}
+                            shareState={item.shareState}
+                            as={NavLink}
+                            to={item.to}
+                            onClick={closeOnNavigate}
+                            actionArea={folder === 'deleted'
+                              ? <RestoreDocumentMenu documentId={item.id} />
+                              : (
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger
+                                      iconTitle="Item options"
+                                    />
+                                    <DropdownMenuPortal>
+                                      <DropdownMenuContent
+                                        align={isMobile ? 'end' : 'start'}
+                                      >
+                                        <DropdownMenuItem
+                                          as="button"
+                                          onClick={() => {
+                                            setDocumentToDelete({
+                                              id: item.id,
+                                              title: label,
+                                              shared:
+                                                item.shareState !== 'private',
+                                              isOwner: item.isOwner,
+                                            });
+                                            setIsDeleteDialogOpen(true);
+                                          }}
+                                          color="danger"
+                                          icon="trash"
+                                        >
+                                          Delete
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenuPortal>
+                                  </DropdownMenu>
+                                )}
+                          >
+                            {label}
+                          </DocumentItem>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
             <DeleteDocumentDialog
               document={documentToDelete}
               open={isDeleteDialogOpen}

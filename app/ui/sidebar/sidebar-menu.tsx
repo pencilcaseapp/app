@@ -40,7 +40,7 @@ export const SidebarMenu: FC<SidebarMenuProps> = ({
         ])}
       >
         <nav className="top-0 left-0 h-[100dvh-56px] flex justify-between flex-col w-full max-w-none sm:max-w-62.5 overflow-hidden overscroll-y-none overflow-x-hidden">
-          <div className="flex gap-2 flex-col px-1.5 pt-4 grow overflow-scroll scrollbar-none pb-56">
+          <div className="px-1.5 pt-4 grow overflow-scroll scrollbar-none pb-56">
             {content}
           </div>
           {bottomArea && (
