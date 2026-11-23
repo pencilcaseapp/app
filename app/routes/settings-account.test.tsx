@@ -142,7 +142,7 @@ describe('the settings account route', () => {
       name: 'Delete your account?',
     });
     expect(dialog).toHaveTextContent(
-      'Sign in again by 23 December 2026 and your account is restored.',
+      'Changed your mind? Sign in again by 23 December 2026 to restore everything.',
     );
     expect(
       within(dialog).getByRole('button', { name: 'Delete account' }),

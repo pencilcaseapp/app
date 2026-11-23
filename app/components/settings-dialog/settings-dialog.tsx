@@ -35,7 +35,8 @@ export const settingsSections: {
  * around its outlet so it stays mounted while the section routes swap
  * the structure within. Below `sm` it is a full height drawer, from
  * `sm` a centered dialog that narrows once the section navigation is
- * not taking up the side area.
+ * not taking up the side area. It is taller than other dialogs, so the
+ * top of the account section's danger zone peeks out above the footer.
  */
 export const SettingsDialogContent: FC<PropsWithChildren> = ({ children }) => {
   const hasSideNavigation = useMedia(SETTINGS_SIDE_NAVIGATION_QUERY, false);
@@ -45,7 +46,7 @@ export const SettingsDialogContent: FC<PropsWithChildren> = ({ children }) => {
       size="large"
       isFullHeight
       maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
-      className={hasSideNavigation ? undefined : 'max-w-2xl!'}
+      className={hasSideNavigation ? 'h-144!' : 'h-144! max-w-2xl!'}
     >
       {children}
     </ResponsiveDialogContent>

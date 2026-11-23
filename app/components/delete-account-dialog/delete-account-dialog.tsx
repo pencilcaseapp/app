@@ -94,19 +94,19 @@ export const DeleteAccountDialog: FC<DeleteAccountDialogProps> = ({
             )}
           >
             <p>
-              You are signed out everywhere and your shared documents close
-              for everybody you shared them with.
+              This signs you out on all your devices. Documents you shared
+              are no longer available to the people you shared them with.
             </p>
             <p>
               <strong className="font-semibold text-pca-grey-900 dark:text-pca-white">
-                Sign in again by
+                Changed your mind? Sign in again by
                 {' '}
                 {restoreUntil}
                 {' '}
-                and your account is restored.
+                to restore everything.
               </strong>
               {' '}
-              After that your documents, their images and your account are
+              After that your account, your documents and their images are
               permanently deleted.
             </p>
           </ResponsiveDialogDescription>
