@@ -5,7 +5,7 @@ import { Typography } from '../ui/typography/typography';
 
 const received = 'We received your request to delete your pencil case '
   + `account. In ${DELETED_ACCOUNT_RETENTION_DAYS} days we permanently `
-  + 'delete your account, your documents and their images.';
+  + 'delete your account and your documents.';
 
 export interface AccountDeletedEmailProps {
   /** The last day the account can be restored, written out. */

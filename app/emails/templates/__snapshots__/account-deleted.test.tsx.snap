@@ -4,7 +4,7 @@ exports[`AccountDeletedEmail > matches the plain text body 1`] = `
 "SAD TO
 SEE YOU GO
 
-We received your request to delete your pencil case account. In 30 days we permanently delete your account, your documents and their images.
+We received your request to delete your pencil case account. In 30 days we permanently delete your account and your documents.
 
 Until then you can always restore it. Sign in with this e-mail address by 23 December 2026 and your account is back, with all your documents.
 
@@ -88,8 +88,8 @@ exports[`AccountDeletedEmail > matches the rendered markup 1`] = `
                     <p
                       style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);text-align:center;margin-bottom:24px;margin-top:0;margin-left:0;margin-right:0'>
                       We received your request to delete your pencil case
-                      account. In 30 days we permanently delete your account,
-                      your documents and their images.
+                      account. In 30 days we permanently delete your account and
+                      your documents.
                     </p>
                     <p
                       style='font-size:14px;line-height:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;font-weight:400;color:rgb(16,16,16);text-align:center;margin-bottom:24px;margin-top:0;margin-left:0;margin-right:0'>

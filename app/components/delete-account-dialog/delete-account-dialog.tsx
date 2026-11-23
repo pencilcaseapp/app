@@ -106,8 +106,8 @@ export const DeleteAccountDialog: FC<DeleteAccountDialogProps> = ({
                 to restore everything.
               </strong>
               {' '}
-              After that your account, your documents and their images are
-              permanently deleted.
+              After that your account and your documents are permanently
+              deleted.
             </p>
           </ResponsiveDialogDescription>
         </ResponsiveDialogContentInner>
