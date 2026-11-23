@@ -4,9 +4,12 @@ import {
   matchPath,
   NavLink,
   Outlet,
+  useFetchers,
   useLocation,
   useRevalidator,
+  useSubmit,
 } from 'react-router';
+import { useAuthenticityToken } from 'remix-utils/csrf/react';
 import {
   DocumentTitleProvider,
   useActiveDocumentTitle,
@@ -18,11 +21,17 @@ import { DropdownMenu } from '~/ui/dropdown-menu/dropdown-menu';
 import { DropdownMenuContent } from '~/ui/dropdown-menu/dropdown-menu-content';
 import { DropdownMenuItem } from '~/ui/dropdown-menu/dropdown-menu-item';
 import { DropdownMenuPortal } from '~/ui/dropdown-menu/dropdown-menu-portal';
+import { DropdownMenuSeparator } from '~/ui/dropdown-menu/dropdown-menu-separator';
 import { DropdownMenuTrigger } from '~/ui/dropdown-menu/dropdown-menu-trigger';
+import { Icon } from '~/ui/icon/icon';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
+import { Separator } from '~/ui/separator/separator';
 import { SidebarProvider } from '~/ui/sidebar-context/sidebar-provider';
 import { Sidebar } from '~/ui/sidebar/sidebar';
-import { SidebarStickyHeader } from '~/ui/sidebar/sidebar-sticky-header';
+import {
+  scrollSidebarToTop,
+  SidebarStickyHeader,
+} from '~/ui/sidebar/sidebar-sticky-header';
 import type { Route } from './+types/editor';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import {
@@ -40,9 +49,11 @@ import {
 import { LeavingDocumentProvider } from '~/contexts/leaving-document';
 import {
   useEffect,
+  useRef,
   useState,
   type PropsWithChildren,
 } from 'react';
+import { useEmitToast } from '~/hooks/use-toast';
 import {
   DeleteDocumentDialog,
   type DocumentToDelete,
@@ -104,6 +115,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
     to: href('/doc/:id', { id: doc.id }),
     shareState: getShareState(doc),
     isOwner: doc.userId === user?.id,
+    pinnedAt: doc.pinnedAt ?? null,
   }));
 
   return {
@@ -172,6 +184,7 @@ type NavigationItemData = {
   to: string;
   shareState: DocumentShareState;
   isOwner: boolean;
+  pinnedAt: Date | null;
 };
 
 export interface EditorSidebarProps extends PropsWithChildren {
@@ -189,6 +202,7 @@ export interface EditorSidebarProps extends PropsWithChildren {
 }
 
 const getNavigationKey = (item: NavigationItemData) => item.to;
+const PIN_FETCHER_PREFIX = 'pin:';
 const getItemId = (item: { id: string }) => item.id;
 const getItemLabel = (item: { label: string }) => item.label;
 
@@ -217,6 +231,11 @@ function EditorSidebar({
   const location = useLocation();
   const isMobile = useIsMobile();
   const revalidator = useRevalidator();
+  const submit = useSubmit();
+  const fetchers = useFetchers();
+  const csrfToken = useAuthenticityToken();
+  const emitToast = useEmitToast();
+  const listRef = useRef<HTMLUListElement>(null);
   const activeDocument = useActiveDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
   const { editedDocumentId } = useEditedDocument();
@@ -241,6 +260,28 @@ function EditorSidebar({
     setPendingFolder(undefined);
   }
   const isSwitchingFolder = pendingFolder !== undefined;
+  // A row moves the moment it is pinned or unpinned, ahead of the action
+  // and the navigation it reloads. A pin still on its way is the newest.
+  const pinnedTimes = new Map(stableNavigation.map(item => [
+    item.id,
+    item.pinnedAt?.getTime() ?? null,
+  ]));
+  fetchers.forEach((fetcher) => {
+    const pinned = fetcher.formData?.get('pinned');
+
+    if (fetcher.key.startsWith(PIN_FETCHER_PREFIX) && pinned) {
+      pinnedTimes.set(
+        fetcher.key.slice(PIN_FETCHER_PREFIX.length),
+        pinned === 'true' ? Number.MAX_SAFE_INTEGER : null,
+      );
+    }
+  });
+  const isPinned = (item: NavigationItemData) =>
+    pinnedTimes.get(item.id) != null;
+  const pinnedItems = stableNavigation
+    .filter(isPinned)
+    .sort((a, b) => pinnedTimes.get(b.id)! - pinnedTimes.get(a.id)!);
+  const unpinnedItems = stableNavigation.filter(item => !isPinned(item));
   // The document stays set while the dialog animates out, so its
   // title does not vanish from the copy mid-close.
   const [documentToDelete, setDocumentToDelete]
@@ -300,6 +341,80 @@ function EditorSidebar({
     moveToTop(href('/doc/:id', { id: editedDocumentId }));
   }, [editedDocumentId, moveToTop]);
 
+  const setPinned = (item: NavigationItemData, title: string) => {
+    const pinned = !isPinned(item);
+
+    if (pinned && listRef.current) {
+      // The row goes to the top of the list, so the list follows it.
+      scrollSidebarToTop(listRef.current);
+    }
+
+    if (!pinned) {
+      emitToast({ type: 'success', title: `Unpinned “${title}”` });
+    }
+
+    void submit({ pinned: String(pinned), csrf: csrfToken }, {
+      method: 'post',
+      action: href('/doc/:id/pin', { id: item.id }),
+      navigate: false,
+      fetcherKey: `${PIN_FETCHER_PREFIX}${item.id}`,
+    });
+  };
+
+  const renderItem = (item: NavigationItemData) => {
+    const label = liveTitles.get(item.id) ?? item.label;
+
+    return (
+      <li key={item.to}>
+        <DocumentItem
+          title={label}
+          shareState={item.shareState}
+          isPinned={isPinned(item)}
+          as={NavLink}
+          to={item.to}
+          onClick={closeOnNavigate}
+          actionArea={folder === 'deleted'
+            ? <RestoreDocumentMenu documentId={item.id} />
+            : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger iconTitle="Item options" />
+                  <DropdownMenuPortal>
+                    <DropdownMenuContent align={isMobile ? 'end' : 'start'}>
+                      <DropdownMenuItem
+                        as="button"
+                        onClick={() => setPinned(item, label)}
+                        icon="pin"
+                      >
+                        {isPinned(item) ? 'Unpin' : 'Pin'}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        as="button"
+                        onClick={() => {
+                          setDocumentToDelete({
+                            id: item.id,
+                            title: label,
+                            shared: item.shareState !== 'private',
+                            isOwner: item.isOwner,
+                          });
+                          setIsDeleteDialogOpen(true);
+                        }}
+                        color="danger"
+                        icon="trash"
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenuPortal>
+                </DropdownMenu>
+              )}
+        >
+          {label}
+        </DocumentItem>
+      </li>
+    );
+  };
+
   const switchFolder = async (nextFolder: DocumentFolder) => {
     setPendingFolder(nextFolder);
     // The loader reads the folder from the cookie, so it is stored
@@ -331,59 +446,36 @@ function EditorSidebar({
                     // A new list for every folder, so the rows of one do
                     // not glide into the places of the other.
                     key={folder}
+                    ref={listRef}
                     aria-label={FOLDER_LABELS[folder]}
                     aria-busy={isSwitchingFolder}
                     className="flex flex-col gap-1.5"
                   >
-                    {stableNavigation.map((item) => {
-                      const label = liveTitles.get(item.id) ?? item.label;
-
-                      return (
-                        <li key={item.to}>
-                          <DocumentItem
-                            title={label}
-                            shareState={item.shareState}
-                            as={NavLink}
-                            to={item.to}
-                            onClick={closeOnNavigate}
-                            actionArea={folder === 'deleted'
-                              ? <RestoreDocumentMenu documentId={item.id} />
-                              : (
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger
-                                      iconTitle="Item options"
-                                    />
-                                    <DropdownMenuPortal>
-                                      <DropdownMenuContent
-                                        align={isMobile ? 'end' : 'start'}
-                                      >
-                                        <DropdownMenuItem
-                                          as="button"
-                                          onClick={() => {
-                                            setDocumentToDelete({
-                                              id: item.id,
-                                              title: label,
-                                              shared:
-                                                item.shareState !== 'private',
-                                              isOwner: item.isOwner,
-                                            });
-                                            setIsDeleteDialogOpen(true);
-                                          }}
-                                          color="danger"
-                                          icon="trash"
-                                        >
-                                          Delete
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenuPortal>
-                                  </DropdownMenu>
-                                )}
-                          >
-                            {label}
-                          </DocumentItem>
+                    {/*
+                      One array for both, so a row keeps its element (and
+                      its menu's focus) and glides to its new place when
+                      it is pinned or unpinned. The heading and the rule
+                      are decorative: each pinned row says so itself.
+                    */}
+                    {[
+                      pinnedItems.length > 0 && (
+                        <li
+                          key="pinned-heading"
+                          aria-hidden="true"
+                          className="flex h-8 items-center gap-2 pl-3 text-xs text-pca-grey-500"
+                        >
+                          <Icon icon="pin" className="size-4 shrink-0" />
+                          Pinned
                         </li>
-                      );
-                    })}
+                      ),
+                      ...pinnedItems.map(renderItem),
+                      pinnedItems.length > 0 && unpinnedItems.length > 0 && (
+                        <li key="pinned-separator" aria-hidden="true">
+                          <Separator decorative className="my-1" />
+                        </li>
+                      ),
+                      ...unpinnedItems.map(renderItem),
+                    ]}
                   </ul>
                 )}
             <DeleteDocumentDialog

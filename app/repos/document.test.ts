@@ -7,7 +7,9 @@ import {
   countOwnedDocuments,
   createDocument,
   createDocumentAsset,
+  deleteDocumentPins,
   deleteUserCollaborators,
+  deleteUserPins,
   detachUserAssets,
   getCollaboratingDocumentIds,
   getDeletedDocumentList,
@@ -22,6 +24,8 @@ import {
   getSharedDocumentList,
   inviteCollaborator,
   getDocumentIdsDeletedBefore,
+  pinDocument,
+  unpinDocument,
   hardDeleteDocuments,
   removeCollaborator,
   removeLinkCollaborators,
@@ -41,9 +45,16 @@ import {
   createEmptyDocument,
   createSharedDocument,
   inviteDocumentCollaborator,
+  pinTestDocument,
 } from '~/test/data-factories/document';
 import { createTestAsset } from '~/test/data-factories/document-asset';
 import { createTestUser } from '~/test/data-factories/user';
+
+async function getPins(userId: string) {
+  const pins = await db.query.documentPins.findMany({ where: { userId } });
+
+  return pins.map(pin => pin.documentId);
+}
 
 function viewerOf(user: { id: string; email: string }) {
   return { id: user.id, email: user.email };
@@ -309,6 +320,7 @@ describe('getDocumentList', () => {
         linkShared: false,
         inviteShared: false,
         userId: user.id,
+        pinnedAt: null,
       },
       {
         id: document1.id,
@@ -316,6 +328,7 @@ describe('getDocumentList', () => {
         linkShared: false,
         inviteShared: false,
         userId: user.id,
+        pinnedAt: null,
       },
     ]);
   });
@@ -335,6 +348,7 @@ describe('getDocumentList', () => {
       linkShared: false,
       inviteShared: false,
       userId: collaborator.id,
+      pinnedAt: null,
     });
     expect(documents).toContainEqual({
       id: sharedDocument.id,
@@ -342,6 +356,7 @@ describe('getDocumentList', () => {
       linkShared: true,
       inviteShared: false,
       userId: owner.id,
+      pinnedAt: null,
     });
   });
 
@@ -369,6 +384,7 @@ describe('getDocumentList', () => {
         linkShared: false,
         inviteShared: false,
         userId: user.id,
+        pinnedAt: null,
       },
     ]);
     expect(documents).not.toContainEqual(
@@ -416,6 +432,23 @@ describe('getDocumentList', () => {
       id: document.id,
       inviteShared: false,
     });
+  });
+
+  it('reports when the user pinned a document', async () => {
+    const user = await createTestUser();
+    const other = await createTestUser();
+    const pinned = await createSharedDocument(user.id);
+    const unpinned = await createDocumentWithTitle(user.id);
+    await connectDocumentCollaborator(pinned.id, other.id);
+    const pin = await pinTestDocument(pinned.id, user.id);
+    await pinTestDocument(unpinned.id, other.id);
+
+    const documents = await getDocumentList(user.id);
+    const byId = new Map(documents.map(item => [item.id, item.pinnedAt]));
+
+    expect(documents).toHaveLength(2);
+    expect(byId.get(pinned.id)).toStrictEqual(pin.pinnedAt);
+    expect(byId.get(unpinned.id)).toBeNull();
   });
 
   it('reports the invites of one document only', async () => {
@@ -471,12 +504,31 @@ describe('getSharedDocumentList', () => {
       id: linked.id,
       title: linked.title,
       userId: owner.id,
+      pinnedAt: null,
     });
     expect(documents).toContainEqual({
       id: invited.id,
       title: invited.title,
       userId: owner.id,
+      pinnedAt: null,
     });
+  });
+
+  it('reports the user\'s pins and nobody else\'s', async () => {
+    const owner = await createTestUser();
+    const user = await createTestUser();
+    const pinned = await createSharedDocument(owner.id);
+    const pinnedByOwner = await createSharedDocument(owner.id);
+    await connectDocumentCollaborator(pinned.id, user.id);
+    await connectDocumentCollaborator(pinnedByOwner.id, user.id);
+    const pin = await pinTestDocument(pinned.id, user.id);
+    await pinTestDocument(pinnedByOwner.id, owner.id);
+
+    const documents = await getSharedDocumentList(user.id);
+    const byId = new Map(documents.map(item => [item.id, item.pinnedAt]));
+
+    expect(byId.get(pinned.id)).toStrictEqual(pin.pinnedAt);
+    expect(byId.get(pinnedByOwner.id)).toBeNull();
   });
 
   it('leaves out the user\'s own and deleted documents', async () => {
@@ -1307,8 +1359,95 @@ describe('hardDeleteDocuments', () => {
     })).toHaveLength(0);
   });
 
+  it('deletes the pins of the documents', async () => {
+    const owner = await createTestUser();
+    const deleted = await createDeletedDocument(owner.id);
+    const other = await createDocumentWithTitle(owner.id);
+    await pinTestDocument(deleted.id, owner.id);
+    await pinTestDocument(other.id, owner.id);
+
+    await hardDeleteDocuments([deleted.id]);
+
+    expect(await getPins(owner.id)).toStrictEqual([other.id]);
+  });
+
   it('does nothing without ids', async () => {
     await expect(hardDeleteDocuments([])).resolves.toBe(0);
+  });
+});
+
+describe('pinDocument', () => {
+  it('pins the document for the user', async () => {
+    const user = await createTestUser();
+    const document = await createDocumentWithTitle(user.id);
+
+    await pinDocument({ documentId: document.id, userId: user.id });
+
+    expect(await getPins(user.id)).toStrictEqual([document.id]);
+  });
+
+  it('keeps the time a document was first pinned', async () => {
+    const user = await createTestUser();
+    const document = await createDocumentWithTitle(user.id);
+    const pin = await pinTestDocument(document.id, user.id);
+
+    await pinDocument({ documentId: document.id, userId: user.id });
+
+    const [item] = await getDocumentList(user.id);
+    expect(item.pinnedAt).toStrictEqual(pin.pinnedAt);
+  });
+
+  it('does nothing for an invalid id', async () => {
+    await expect(pinDocument({ documentId: 'nope', userId: 'nope' }))
+      .resolves.toBeUndefined();
+  });
+});
+
+describe('unpinDocument', () => {
+  it('removes the user\'s pin and leaves the others', async () => {
+    const owner = await createTestUser();
+    const user = await createTestUser();
+    const document = await createSharedDocument(owner.id);
+    await pinTestDocument(document.id, owner.id);
+    await pinTestDocument(document.id, user.id);
+
+    expect(await unpinDocument({ documentId: document.id, userId: user.id }))
+      .toBe(1);
+
+    expect(await getPins(user.id)).toStrictEqual([]);
+    expect(await getPins(owner.id)).toStrictEqual([document.id]);
+  });
+});
+
+describe('deleteDocumentPins', () => {
+  it('unpins the document for everybody', async () => {
+    const owner = await createTestUser();
+    const user = await createTestUser();
+    const document = await createSharedDocument(owner.id);
+    const other = await createDocumentWithTitle(owner.id);
+    await pinTestDocument(document.id, owner.id);
+    await pinTestDocument(document.id, user.id);
+    await pinTestDocument(other.id, owner.id);
+
+    expect(await deleteDocumentPins(document.id)).toBe(2);
+
+    expect(await getPins(owner.id)).toStrictEqual([other.id]);
+    expect(await getPins(user.id)).toStrictEqual([]);
+  });
+});
+
+describe('deleteUserPins', () => {
+  it('removes every pin of the user', async () => {
+    const owner = await createTestUser();
+    const user = await createTestUser();
+    const document = await createSharedDocument(owner.id);
+    await pinTestDocument(document.id, owner.id);
+    await pinTestDocument(document.id, user.id);
+
+    expect(await deleteUserPins(user.id)).toBe(1);
+
+    expect(await getPins(user.id)).toStrictEqual([]);
+    expect(await getPins(owner.id)).toStrictEqual([document.id]);
   });
 });
 

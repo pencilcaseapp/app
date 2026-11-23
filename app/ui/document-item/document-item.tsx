@@ -27,12 +27,14 @@ export type DocumentItemProps<C extends React.ElementType>
       title: string;
       /** Who can open the document, marked before the title. */
       shareState?: DocumentShareState;
+      /** Read out after the title, the section heading being decorative. */
+      isPinned?: boolean;
       actionArea?: React.ReactNode;
     }
   >;
 
 export function DocumentItem<C extends React.ElementType = 'a'>(
-  { as = 'a' as C, title, shareState = 'private', actionArea, className, ref, ...rest }: DocumentItemProps<C>,
+  { as = 'a' as C, title, shareState = 'private', isPinned, actionArea, className, ref, ...rest }: DocumentItemProps<C>,
 ) {
   const shouldReduceMotion = useReducedMotion();
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -147,6 +149,7 @@ export function DocumentItem<C extends React.ElementType = 'a'>(
             {`, ${shareMark.label}`}
           </span>
         )}
+        {isPinned && <span className="sr-only">, pinned</span>}
       </Component>
       {actionArea && (
         <div className={classNames([

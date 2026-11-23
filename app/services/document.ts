@@ -33,7 +33,9 @@ import {
   countOwnedDocuments,
   createDocument as createDocumentRow,
   createDocumentAsset,
+  deleteDocumentPins,
   deleteUserCollaborators,
+  deleteUserPins,
   detachUserAssets,
   getCollaboratingDocumentIds,
   getDocument,
@@ -48,6 +50,7 @@ import {
   getSharedDocumentList as getSharedDocumentRows,
   hardDeleteDocuments,
   inviteCollaborator as insertInvite,
+  pinDocument as insertPin,
   removeCollaborator as deleteCollaborator,
   removeLinkCollaborators,
   removeViewerCollaborators,
@@ -56,6 +59,7 @@ import {
   setDocumentLinkAccess,
   setDocumentLinkShared,
   softDeleteDocument,
+  unpinDocument as deletePin,
   type DocumentForViewer,
   type DocumentViewer,
 } from '~/repos/document';
@@ -551,6 +555,8 @@ export async function deleteDocument(
 
     if (row) {
       await removeLinkCollaborators(row.id, tx);
+      // A deleted document is never pinned, and it comes back unpinned.
+      await deleteDocumentPins(row.id, tx);
     }
 
     return row;
@@ -612,13 +618,52 @@ export async function leaveDocument(
     return [LeaveDocumentError.PermissionDenied];
   }
 
-  await removeViewerCollaborators({ documentId: document.id, viewer });
+  await transaction(async (tx) => {
+    await removeViewerCollaborators({ documentId: document.id, viewer }, tx);
+    await deletePin({ documentId: document.id, userId: viewer.id }, tx);
+  });
 
   if (!document.linkShared) {
     closeDocumentConnections({ documentId: document.id, userId: viewer.id });
   }
 
   return [null, { id: document.id }];
+}
+
+export enum PinDocumentError {
+  NotFound,
+}
+
+export type PinDocumentResult = [PinDocumentError] | [null];
+
+/**
+ * Pins a document to the top of the user's navigation, for them alone.
+ * Only a document the navigation lists can be pinned: one the user owns
+ * or was given, and never a deleted one.
+ */
+export async function pinDocument(
+  documentId: string,
+  viewer: DocumentViewer,
+): Promise<PinDocumentResult> {
+  const document = await getDocumentForViewer(documentId, viewer);
+
+  if (
+    !document
+    || document.deletedAt !== null
+    || isGone(document, viewer)
+    || (!isOwnedBy(document, viewer) && !document.collaborator)
+  ) {
+    return [PinDocumentError.NotFound];
+  }
+
+  await insertPin({ documentId: document.id, userId: viewer.id });
+
+  return [null];
+}
+
+/** Takes the user's pin off the document, if there is one. */
+export async function unpinDocument(documentId: string, userId: string) {
+  await deletePin({ documentId, userId });
 }
 
 export enum ReportDocumentError {
@@ -765,6 +810,8 @@ export interface NavigationDocument {
   userId: string;
   linkShared?: boolean;
   inviteShared?: boolean;
+  /** When the user pinned it, never set for a deleted document. */
+  pinnedAt?: Date | null;
 }
 
 export interface DocumentNavigation {
@@ -993,8 +1040,9 @@ export async function closeAccountConnections(userId: string) {
 /**
  * The document side of purging an account, inside the purge's transaction:
  * hard deletes every document it owns (deleted or not, with their images'
- * rows, invites and connections), drops it from the documents of others
- * and forgets it uploaded the images it added there. Returns the storage
+ * rows, invites, connections and pins), drops it from the documents of
+ * others, removes its pins and forgets it uploaded the images it added
+ * there. Returns the storage
  * keys of the deleted images, whose files the caller deletes right before
  * the commit, like `purgeDeletedDocuments` does.
  */
@@ -1007,6 +1055,7 @@ export async function deleteAccountDocuments(
   const deletedCount = await hardDeleteDocuments(ids, tx);
 
   await deleteUserCollaborators({ userId: user.id, email: user.email }, tx);
+  await deleteUserPins(user.id, tx);
   await detachUserAssets(user.id, tx);
 
   return {

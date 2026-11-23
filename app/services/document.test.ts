@@ -29,6 +29,8 @@ import {
   OpenAssetError,
   openDocument,
   OpenDocumentError,
+  pinDocument,
+  PinDocumentError,
   purgeDeletedDocuments,
   removeCollaborator,
   RemoveCollaboratorError,
@@ -38,6 +40,7 @@ import {
   shareDocument,
   ShareDocumentError,
   signAssetUrl,
+  unpinDocument,
 } from './document';
 import {
   DOCUMENT_INVITE_LIMIT,
@@ -94,7 +97,14 @@ const removeViewerCollaboratorsMock = vi.fn();
 const createDocumentAssetMock = vi.fn();
 const getDocumentAssetMock = vi.fn();
 const getDocumentAssetsMock = vi.fn();
+const insertPinMock = vi.fn();
+const deletePinMock = vi.fn();
+const deleteDocumentPinsMock = vi.fn();
 vi.mock('~/repos/document', () => ({
+  pinDocument: (...args: unknown[]) => insertPinMock(...args),
+  unpinDocument: (...args: unknown[]) => deletePinMock(...args),
+  deleteDocumentPins: (...args: unknown[]) =>
+    deleteDocumentPinsMock(...args),
   countOwnedDocuments: (...args: unknown[]) => countOwnedDocumentsMock(...args),
   createDocument: (...args: unknown[]) => createDocumentRowMock(...args),
   getDocumentForViewer: (...args: unknown[]) =>
@@ -874,6 +884,18 @@ describe('deleteDocument', () => {
     });
   });
 
+  it('unpins it for everybody', async () => {
+    softDeleteDocumentMock.mockResolvedValue({
+      id: documentFixture.id,
+      deletedAt: new Date(),
+    });
+
+    await deleteDocument(documentFixture.id, userFixture.id);
+
+    expect(deleteDocumentPinsMock)
+      .toHaveBeenCalledWith(documentFixture.id, 'tx');
+  });
+
   it('denies somebody who does not own the document', async () => {
     softDeleteDocumentMock.mockResolvedValue(undefined);
 
@@ -899,7 +921,11 @@ describe('leaveDocument', () => {
     expect(removeViewerCollaboratorsMock).toHaveBeenCalledWith({
       documentId: documentFixture.id,
       viewer,
-    });
+    }, 'tx');
+    expect(deletePinMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      userId: viewer.id,
+    }, 'tx');
     expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
       documentId: documentFixture.id,
       userId: viewer.id,
@@ -935,6 +961,77 @@ describe('leaveDocument', () => {
     const [error] = await leaveDocument(documentFixture.id, viewer);
 
     expect(error).toBe(LeaveDocumentError.PermissionDenied);
+  });
+});
+
+describe('pinDocument', () => {
+  it('pins a document the user owns', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: viewer.id,
+    }));
+
+    const [error] = await pinDocument(documentFixture.id, viewer);
+
+    expect(error).toBeNull();
+    expect(insertPinMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      userId: viewer.id,
+    });
+  });
+
+  it('pins a document shared with the user, for them alone', async () => {
+    getDocumentForViewerMock.mockResolvedValue({
+      ...linkDocument('view'),
+      collaborator: linkCollaborator(),
+    });
+
+    const [error] = await pinDocument(documentFixture.id, viewer);
+
+    expect(error).toBeNull();
+    expect(insertPinMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      userId: viewer.id,
+    });
+  });
+
+  it('refuses a deleted document', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: viewer.id,
+      deletedAt: new Date(),
+    }));
+
+    const [error] = await pinDocument(documentFixture.id, viewer);
+
+    expect(error).toBe(PinDocumentError.NotFound);
+    expect(insertPinMock).not.toHaveBeenCalled();
+  });
+
+  it('refuses a document the user never opened', async () => {
+    getDocumentForViewerMock.mockResolvedValue(linkDocument('edit'));
+
+    const [error] = await pinDocument(documentFixture.id, viewer);
+
+    expect(error).toBe(PinDocumentError.NotFound);
+    expect(insertPinMock).not.toHaveBeenCalled();
+  });
+
+  it('refuses a document that does not exist', async () => {
+    getDocumentForViewerMock.mockResolvedValue(undefined);
+
+    const [error] = await pinDocument(documentFixture.id, viewer);
+
+    expect(error).toBe(PinDocumentError.NotFound);
+  });
+});
+
+describe('unpinDocument', () => {
+  it('removes the user\'s pin', async () => {
+    await unpinDocument(documentFixture.id, viewer.id);
+
+    expect(deletePinMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      userId: viewer.id,
+    });
   });
 });
 

@@ -102,7 +102,7 @@ export async function sendAccountDeletedEmail(
  *
  * - its documents, deleted or not, with their images, invites and the
  *   connections others made to them, and its own invites and connections
- *   to the documents of others (`deleteAccountDocuments`),
+ *   to the documents of others and its pins (`deleteAccountDocuments`),
  * - its sessions, codes, e-mail change requests and e-mail logs, the
  *   codes and logs sent to its address included,
  * - its subscriptions (the stored Creem events go after 30 days with
