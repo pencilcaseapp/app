@@ -92,7 +92,7 @@ export default function SignIn({ loaderData }: Route.ComponentProps) {
         <br />
         with Magic
       </Typography>
-      <Typography variant="bodySmall" textColorLight="grey-900" textColorDark="white" className="mb-6 text-center px-10">
+      <Typography variant="bodySmall" textColorLight="grey-900" textColorDark="white" className="mb-6 px-4 text-center text-balance">
         Enter your e-mail address to receive a one-time verification code.
       </Typography>
       {loaderData.restoreUntil && (
