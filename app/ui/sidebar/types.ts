@@ -1,12 +1,8 @@
 import type { ReactNode } from 'react';
 
-export type SidebarMenuItem = {
-  key: string;
-  content: ReactNode;
-};
-
 export type SidebarBaseProps = {
   bottomArea?: ReactNode;
-  items: SidebarMenuItem[];
+  /** What the sidebar lists above the bottom area. */
+  content: ReactNode;
   showSlimSidebar?: boolean;
 };

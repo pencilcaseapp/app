@@ -9,6 +9,7 @@ import {
   isNotNull,
   isNull,
   lt,
+  ne,
   or,
   sql,
   type InferSelectModel,
@@ -233,6 +234,7 @@ export async function getDeletedDocumentList(userId: string) {
   return db.select({
     id: documents.id,
     title: documents.title,
+    userId: documents.userId,
   })
     .from(documents)
     .where(and(
@@ -240,6 +242,54 @@ export async function getDeletedDocumentList(userId: string) {
       isNotNull(documents.deletedAt),
     ))
     .orderBy(desc(documents.deletedAt));
+}
+
+/**
+ * The documents of others the user has a collaborator row on, through an
+ * invite or the link, most recently edited first. The owner's account may
+ * be deleted, which only the user repo knows, so the service filters those.
+ */
+export async function getSharedDocumentList(userId: string) {
+  if (!isUuid(userId)) {
+    return [];
+  }
+
+  // One collaborator row per user and document (a unique index), so the
+  // join lists each document once.
+  return db.select({
+    id: documents.id,
+    title: documents.title,
+    userId: documents.userId,
+  })
+    .from(documentCollaborators)
+    .innerJoin(documents, eq(documents.id, documentCollaborators.documentId))
+    .where(and(
+      eq(documentCollaborators.userId, userId),
+      ne(documents.userId, userId),
+      isNull(documents.deletedAt),
+    ))
+    .orderBy(desc(documents.updatedAt));
+}
+
+/**
+ * The user's own documents counted in one pass: the ones in use and the
+ * deleted ones.
+ */
+export async function countDocuments(userId: string) {
+  if (!isUuid(userId)) {
+    return { owned: 0, deleted: 0 };
+  }
+
+  const [row] = await db.select({
+    owned: sql`count(*) filter (where ${documents.deletedAt} is null)`
+      .mapWith(Number),
+    deleted: sql`count(*) filter (where ${documents.deletedAt} is not null)`
+      .mapWith(Number),
+  })
+    .from(documents)
+    .where(eq(documents.userId, userId));
+
+  return { owned: row?.owned ?? 0, deleted: row?.deleted ?? 0 };
 }
 
 /**

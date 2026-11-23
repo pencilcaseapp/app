@@ -11,6 +11,7 @@ import {
   DOCUMENT_REPORT_LIMIT,
   DOCUMENT_REPORT_WINDOW_MS,
   type DocumentAccess,
+  type DocumentFolder,
   type DocumentLinkAccess,
   type DocumentReportReason,
 } from '~/constants/document';
@@ -28,6 +29,7 @@ import { closeDocumentConnections } from '~/live/connections';
 import {
   acceptInvite,
   connectCollaborator,
+  countDocuments,
   countOwnedDocuments,
   createDocument as createDocumentRow,
   createDocumentAsset,
@@ -38,10 +40,12 @@ import {
   getDocumentAsset,
   getDocumentAssets,
   getDocumentForViewer as getDocumentRowForViewer,
+  getDeletedDocumentList,
   getDocumentIdsDeletedBefore,
   getDocumentList as getDocumentRows,
   getInvitedCollaborators,
   getOwnedDocumentIds,
+  getSharedDocumentList as getSharedDocumentRows,
   hardDeleteDocuments,
   inviteCollaborator as insertInvite,
   removeCollaborator as deleteCollaborator,
@@ -718,18 +722,101 @@ async function getDocumentForViewer(
   return { ...document, ownerDeletedAt: owner?.deletedAt ?? null };
 }
 
-/**
- * The documents the user owns or collaborates on for the navigation,
- * without the deleted ones and the ones of a deleted account.
- */
-export async function getDocumentList(userId: string) {
-  const documents = await getDocumentRows(userId);
+/** Leaves out the documents of others whose account is deleted. */
+async function withoutDeletedOwners<T extends { userId: string }>(
+  userId: string,
+  documents: T[],
+) {
   const ownerIds = [...new Set(documents
     .map(document => document.userId)
     .filter(ownerId => ownerId !== userId))];
   const deletedOwnerIds = new Set(await getDeletedUserIds(ownerIds));
 
   return documents.filter(document => !deletedOwnerIds.has(document.userId));
+}
+
+/**
+ * The documents the user owns or collaborates on for the navigation,
+ * without the deleted ones and the ones of a deleted account.
+ */
+export async function getDocumentList(userId: string) {
+  return await withoutDeletedOwners(userId, await getDocumentRows(userId));
+}
+
+/**
+ * The documents of others shared with the user, without the deleted ones
+ * and the ones of a deleted account.
+ */
+export async function getSharedDocumentList(userId: string) {
+  return await withoutDeletedOwners(
+    userId,
+    await getSharedDocumentRows(userId),
+  );
+}
+
+/**
+ * A document in the navigation. Only all documents says who else can
+ * open it: the shared ones are shared by definition and the deleted ones
+ * no longer are.
+ */
+export interface NavigationDocument {
+  id: string;
+  title: string | null;
+  userId: string;
+  linkShared?: boolean;
+  inviteShared?: boolean;
+}
+
+export interface DocumentNavigation {
+  documents: NavigationDocument[];
+  ownedCount: number;
+  counts: Record<DocumentFolder, number>;
+}
+
+/**
+ * The documents of one folder of the navigation and how many each folder
+ * holds. Only the open folder's documents are loaded: all documents
+ * holds the user's own and the shared ones, so its count is the sum of
+ * the two and does not need its list. `ownedCount` is what the free
+ * plan's meter counts.
+ */
+export async function getDocumentNavigation(
+  userId: string,
+  folder: DocumentFolder,
+): Promise<DocumentNavigation> {
+  if (folder === 'all') {
+    const [counts, documents] = await Promise.all([
+      countDocuments(userId),
+      getDocumentList(userId),
+    ]);
+    const shared = documents.filter(document => document.userId !== userId);
+
+    return {
+      documents,
+      ownedCount: counts.owned,
+      counts: {
+        all: documents.length,
+        shared: shared.length,
+        deleted: counts.deleted,
+      },
+    };
+  }
+
+  const [counts, shared, deleted] = await Promise.all([
+    countDocuments(userId),
+    getSharedDocumentList(userId),
+    folder === 'deleted' ? getDeletedDocumentList(userId) : [],
+  ]);
+
+  return {
+    documents: folder === 'shared' ? shared : deleted,
+    ownedCount: counts.owned,
+    counts: {
+      all: counts.owned + shared.length,
+      shared: shared.length,
+      deleted: counts.deleted,
+    },
+  };
 }
 
 function isOwnedBy(document: DocumentAccessInfo, viewer?: DocumentViewer) {

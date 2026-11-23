@@ -9,7 +9,7 @@ test.describe('documents', () => {
     await user.document.typeLines(heading, 'Hello from Playwright.');
 
     await expect(user.document.editor).toContainText(heading);
-    await expect(user.sidebar.documentInAllDocs(heading)).toBeVisible();
+    await expect(user.sidebar.document(heading)).toBeVisible();
 
     // Typing reaches the live server over the websocket, so the very last
     // keystrokes can still be in flight on the first reload — reload again
@@ -22,7 +22,7 @@ test.describe('documents', () => {
 
     await expect(user.document.editor).toContainText(heading);
     // Still listed after a fresh load, now from the document list.
-    await expect(user.sidebar.documentInAllDocs(heading)).toBeVisible();
+    await expect(user.sidebar.document(heading)).toBeVisible();
   });
 });
 
@@ -63,7 +63,7 @@ test.describe('sharing', () => {
 
     await userB.document.open(shareUrl);
     await expect(userB.document.editor).toContainText('Written by User A.');
-    await expect(userB.sidebar.documentInAllDocs(heading)).toBeVisible();
+    await expect(userB.sidebar.document(heading)).toBeVisible();
 
     await userB.document.appendLinesAfter('Written by User A.', 'Written by User B.');
 
@@ -153,31 +153,33 @@ test.describe('deletion', () => {
     const url = await userA.document.create();
     const heading = `Deleted doc ${Date.now()}`;
     await userA.document.typeLines(heading);
-    await expect(userA.sidebar.documentInAllDocs(heading)).toBeVisible();
+    await expect(userA.sidebar.document(heading)).toBeVisible();
 
     await userA.sidebar.deleteDocument(heading);
 
     // It was the only document, so the start page opens a new one.
     await expect(userA.page).not.toHaveURL(url);
-    await expect(userA.sidebar.documentInAllDocs(heading)).toBeHidden();
-    await userA.sidebar.openDeletedDocs();
-    await expect(userA.sidebar.documentInDeleted(heading)).toBeVisible();
+    await expect(userA.sidebar.document(heading)).toBeHidden();
+    await userA.sidebar.openFolder('Deleted');
+    await expect(userA.sidebar.document(heading)).toBeVisible();
 
     // It opens read-only from Deleted, with the notice on top.
-    await userA.sidebar.documentInDeleted(heading).click();
+    await userA.sidebar.document(heading).click();
     await expect(userA.page).toHaveURL(url);
     await expect(userA.document.deletedNotice).toBeVisible();
     await expect(userA.document.content).toHaveAttribute('contenteditable', 'false');
     await expect(userA.document.content).toContainText(heading);
 
-    // It stays that way after a reload.
+    // It stays that way after a reload, and so does the folder.
     await userA.page.reload();
     await expect(userA.document.deletedNotice).toBeVisible();
+    await expect(userA.sidebar.document(heading)).toBeVisible();
 
     await userA.sidebar.restoreDocument(heading);
 
-    await expect(userA.sidebar.documentInDeleted(heading)).toBeHidden();
-    await expect(userA.sidebar.documentInAllDocs(heading)).toBeVisible();
+    await expect(userA.sidebar.document(heading)).toBeHidden();
+    await userA.sidebar.openFolder('All Docs');
+    await expect(userA.sidebar.document(heading)).toBeVisible();
     await expect(userA.document.deletedNotice).toBeHidden();
     await expect(userA.document.editor).toContainText(heading);
 
@@ -203,7 +205,7 @@ test.describe('deletion', () => {
 
     // User B is disconnected and the document is gone for them.
     await expect(userB.document.content).toBeHidden({ timeout: 10_000 });
-    await expect(userB.sidebar.documentInAllDocs(heading)).toBeHidden();
+    await expect(userB.sidebar.document(heading)).toBeHidden();
     await userB.page.goto(shareUrl);
     await expect(
       userB.page.getByRole('heading', { name: 'Not Found' }),
@@ -215,7 +217,7 @@ test.describe('deletion', () => {
     await expect(
       userB.page.getByRole('heading', { name: 'Permission Denied' }),
     ).toBeVisible();
-    await userB.sidebar.openDeletedDocs();
-    await expect(userB.sidebar.documentInDeleted(heading)).toHaveCount(0);
+    await userB.sidebar.openFolder('Deleted');
+    await expect(userB.sidebar.document(heading)).toHaveCount(0);
   });
 });

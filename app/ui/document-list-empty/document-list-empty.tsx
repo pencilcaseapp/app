@@ -3,12 +3,12 @@ import type { IconName } from '../icon/icons';
 import { Icon } from '../icon/icon';
 import { Typography } from '../typography/typography';
 
-export type DocumentGroupEmptyProps = {
+export type DocumentListEmptyProps = {
   icon?: IconName;
   actionArea?: React.ReactNode;
 } & PropsWithChildren;
 
-export const DocumentGroupEmpty: FC<DocumentGroupEmptyProps>
+export const DocumentListEmpty: FC<DocumentListEmptyProps>
   = ({ icon, actionArea, children }) => (
     <div className="flex flex-col items-center gap-2 px-3 py-4 text-center">
       {icon && (
