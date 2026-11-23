@@ -7,6 +7,7 @@ import { DrawerContentInner } from '../drawer/drawer-content-inner';
 import { useSidebarContext } from '../sidebar-context/use-sidebar-context';
 import type { SidebarBaseProps } from './types';
 import { SidebarMenu } from './sidebar-menu';
+import { updateFadeUnder } from './sidebar-sticky-header';
 
 /**
  * `children` is the page the sidebar sits next to. On mobile it renders
@@ -54,6 +55,7 @@ export const Sidebar: FC<SidebarProps> = ({
               maxHeight={SIDEBAR_DRAWER_MAX_HEIGHT}
             >
               <DrawerContentInner
+                drawerContentProps={{ onScroll: updateFadeUnder }}
                 reservedFooterHeight={reservedFooterHeight}
                 gutterClassName="px-3"
                 contentClassName="px-3 pb-6"
