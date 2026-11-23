@@ -44,7 +44,7 @@ export const SidebarMenu: FC<SidebarMenuProps> = ({
             {content}
           </div>
           {bottomArea && (
-            <StickyBottomArea>
+            <StickyBottomArea solid>
               {bottomArea}
             </StickyBottomArea>
           )}

@@ -28,7 +28,7 @@ exports[`Sidebar > matches the snapshot on desktop 1`] = `
           </div>
         </div>
         <div
-          class="absolute w-full bottom-0 left-0 flex gap-1.5 flex-col glass-surface border-white dark:border-pca-grey-900 border px-1.5 pb-3 pt-1.5 z-10 rounded-t-xl"
+          class="absolute w-full bottom-0 left-0 flex gap-1.5 flex-col px-1.5 pb-3 pt-1.5 z-10 bg-pca-white dark:bg-pca-grey-900 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-6 before:bg-linear-to-t before:from-pca-white before:to-pca-white/0 dark:before:from-pca-grey-900 dark:before:to-pca-grey-900/0"
         >
           Create Doc
         </div>
@@ -42,7 +42,7 @@ exports[`Sidebar > matches the snapshot on desktop 1`] = `
         class=" relative flex flex-col grow"
       >
         <div
-          class="absolute w-full bottom-0 left-0 flex gap-1.5 flex-col glass-surface border-white dark:border-pca-grey-900 border px-1.5 pb-3 pt-1.5 z-10 rounded-t-xl"
+          class="absolute w-full bottom-0 left-0 flex gap-1.5 flex-col px-1.5 pb-3 pt-1.5 z-10 glass-surface border-white dark:border-pca-grey-900 border rounded-t-xl"
         >
           Create Doc
         </div>
