@@ -354,6 +354,25 @@ body {
   -webkit-mask-image: var(--scroll-edge-mask);
 }
 
+/* The fade below a sticky header: it grows with the scroll of the nearest
+   scroll container over its first 1rem, so it is only there while content
+   sits behind the header. Where scroll-driven animations are missing the
+   header simply ends in a hard edge. */
+@keyframes scroll-fade-under {
+  from { height: 0; }
+  to { height: 1rem; }
+}
+
+@utility scroll-fade-under {
+  height: 0;
+
+  @supports (animation-timeline: scroll()) {
+    animation: scroll-fade-under linear both;
+    animation-timeline: scroll();
+    animation-range: 0 1rem;
+  }
+}
+
 @utility glass-surface {
   @apply bg-pca-white/75 dark:bg-pca-grey-900/55 backdrop-blur-lg backdrop-saturate-150;
 }
