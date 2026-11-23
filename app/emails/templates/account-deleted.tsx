@@ -50,7 +50,7 @@ export function AccountDeletedEmail({
         and your account is back, with all your documents.
       </Typography>
       <LinkButton href={signInUrl}>
-        Sign in
+        Restore account
       </LinkButton>
     </Layout>
   );
