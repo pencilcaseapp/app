@@ -16,7 +16,6 @@ import {
   markUserDeleted,
   type User,
 } from '~/repos/user';
-import { formatLongDate } from '~/utils/date';
 import { closeAccountConnections, deleteAccountDocuments } from './document';
 import { sendEmailAccountDeleted } from './email-templates';
 import { cancelRenewingSubscriptions } from './subscription';
@@ -93,7 +92,7 @@ export async function sendAccountDeletedEmail(
     to: { email: user.email, name: user.name ?? undefined },
     userId: user.id,
     deletedAt,
-    restoreUntil: formatLongDate(getAccountRestoreDeadline(deletedAt)),
+    restoreUntil: getAccountRestoreDeadline(deletedAt),
   });
 }
 
