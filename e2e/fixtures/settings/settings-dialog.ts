@@ -32,4 +32,14 @@ export class SettingsDialog {
     await expect(this.page.getByText('Your account has been updated'))
       .toBeVisible();
   }
+
+  /** Deletes the account through the danger zone and its confirmation. */
+  async deleteAccount(): Promise<void> {
+    await this.page.getByRole('region', { name: 'Danger zone' })
+      .getByRole('button', { name: 'Delete account' })
+      .click();
+    await this.page.getByRole('dialog', { name: 'Delete your account?' })
+      .getByRole('button', { name: 'Delete account' })
+      .click();
+  }
 }

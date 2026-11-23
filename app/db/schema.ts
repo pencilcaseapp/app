@@ -18,9 +18,14 @@ export const users = pgTable('users', {
   creemCustomerId: text('creem_customer_id'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  // The user asked to delete the account: it is signed out and hidden
+  // until it is purged `DELETED_ACCOUNT_RETENTION_DAYS` later, unless the
+  // user signs in again before, which clears it.
+  deletedAt: timestamp('deleted_at'),
 }, table => [
   uniqueIndex('users_email_idx').on(table.email),
   uniqueIndex('users_creem_customer_id_idx').on(table.creemCustomerId),
+  index('users_deleted_at_idx').on(table.deletedAt),
 ]);
 
 export const otps = pgTable('otps', {

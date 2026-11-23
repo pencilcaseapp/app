@@ -5,6 +5,7 @@ import { cleanUpExpiredOtps } from './clean-up-expired-otps';
 import { cleanUpExpiredSessions } from './clean-up-expired-sessions';
 import { cleanUpOldDocumentReports } from './clean-up-old-document-reports';
 import { cleanUpOldEmailLogs } from './clean-up-old-email-logs';
+import { purgeDeletedAccounts } from './purge-deleted-accounts';
 import { purgeDeletedDocuments } from './purge-deleted-documents';
 
 export const jobDefinitions: JobDefinition[] = [
@@ -15,4 +16,5 @@ export const jobDefinitions: JobDefinition[] = [
   cleanUpOldCreemWebhookEvents,
   cleanUpOldDocumentReports,
   purgeDeletedDocuments,
+  purgeDeletedAccounts,
 ];

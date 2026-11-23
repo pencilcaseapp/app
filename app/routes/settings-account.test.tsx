@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { RouterContextProvider } from 'react-router';
 import { afterEach, describe, expect, test, vi } from 'vitest';
@@ -116,5 +116,39 @@ describe('the settings account route', () => {
     expect(
       await screen.findByText('Your account has been updated'),
     ).toBeInTheDocument();
+  });
+
+  test('offer to delete the account in the danger zone', async () => {
+    await renderAccount();
+
+    const dangerZone = await screen.findByRole('region', {
+      name: 'Danger zone',
+    });
+    expect(dangerZone).toHaveTextContent(
+      'Delete your account and every document in it. '
+      + 'Sign in within 30 days to get it back.',
+    );
+  });
+
+  test('ask before deleting the account', async () => {
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-11-23T16:00Z') });
+    const person = await renderAccount();
+
+    await person.click(
+      await screen.findByRole('button', { name: 'Delete account' }),
+    );
+
+    const dialog = await screen.findByRole('dialog', {
+      name: 'Delete your account?',
+    });
+    expect(dialog).toHaveTextContent(
+      'Sign in again by 23 December 2026 and your account is restored.',
+    );
+    expect(
+      within(dialog).getByRole('button', { name: 'Delete account' }),
+    ).toHaveAttribute('type', 'submit');
+    expect(dialog.querySelector('form'))
+      .toHaveAttribute('action', '/account/delete');
+    vi.useRealTimers();
   });
 });

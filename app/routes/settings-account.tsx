@@ -1,20 +1,24 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { href, Link, useActionData, type MiddlewareFunction } from 'react-router';
 import { z } from 'zod';
 import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
+import { DeleteAccountDialog } from '~/components/delete-account-dialog/delete-account-dialog';
 import { SettingsDialogContentInner } from '~/components/settings-dialog/settings-dialog';
 import { userSessionContext } from '~/contexts/user-session';
 import { authMiddleware } from '~/middleware/auth';
 import { useAppForm } from '~/hooks/use-app-form';
 import { useEmitToast } from '~/hooks/use-toast';
+import { DELETED_ACCOUNT_RETENTION_DAYS } from '~/constants/account';
 import { updateUser } from '~/repos/user';
+import { getAccountRestoreDeadline } from '~/services/account';
 import { Button } from '~/ui/button/button';
 import { Icon } from '~/ui/icon/icon';
 import { NavigationItem } from '~/ui/navigation-item/navigation-item';
 import { ResponsiveDialogClose } from '~/ui/responsive-dialog/responsive-dialog';
 import { Typography } from '~/ui/typography/typography';
 import { UserProfile } from '~/ui/user-profile/user-profile';
+import { formatLongDate } from '~/utils/date';
 import { validateForm } from '~/utils/form';
 import type { Route } from './+types/settings-account';
 
@@ -32,7 +36,10 @@ export const middleware: MiddlewareFunction[] = [
 export function loader({ context }: Route.LoaderArgs) {
   const { name, email, newsletter } = context.get(userSessionContext);
 
-  return { user: { name, email, newsletter } };
+  return {
+    user: { name, email, newsletter },
+    restoreUntil: formatLongDate(getAccountRestoreDeadline(new Date())),
+  };
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -60,12 +67,18 @@ const chevron = (
  * through the footer's save button, the e-mail changes through the
  * verified flow stacked on this page.
  */
+const dangerZoneTextColor = {
+  textColorLight: 'red-900',
+  textColorDark: 'red-300',
+} as const;
+
 export default function SettingsAccountRoute({
-  loaderData: { user },
+  loaderData: { user, restoreUntil },
   params,
 }: Route.ComponentProps) {
   const actionData = useActionData() as { saved?: boolean } | undefined;
   const emitToast = useEmitToast();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const form = useAppForm({
     defaultValues: {
@@ -144,8 +157,46 @@ export default function SettingsAccountRoute({
               )}
             </form.AppField>
           </div>
+          <section
+            aria-labelledby="danger-zone"
+            className="flex items-center justify-between gap-4 rounded-xl border border-pca-red-500/25 bg-pca-red-100 p-4 max-sm:flex-col max-sm:items-stretch sm:pr-5 dark:border-pca-red-900 dark:bg-pca-red-900/20"
+          >
+            <div className="flex min-w-0 flex-col gap-1">
+              <Typography
+                id="danger-zone"
+                variant="bodySmall"
+                fontWeight="semibold"
+                as="h3"
+                {...dangerZoneTextColor}
+              >
+                Danger zone
+              </Typography>
+              <Typography
+                variant="bodyTiny"
+                className="text-balance"
+                {...dangerZoneTextColor}
+              >
+                Delete your account and every document in it. Sign in within
+                {` ${DELETED_ACCOUNT_RETENTION_DAYS}\u00A0days `}
+                to get it back.
+              </Typography>
+            </div>
+            <Button
+              type="button"
+              colorLight="red-500"
+              className="shrink-0 whitespace-nowrap"
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              Delete account
+            </Button>
+          </section>
         </div>
       </ControlledForm>
+      <DeleteAccountDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        restoreUntil={restoreUntil}
+      />
     </SettingsDialogContentInner>
   );
 }

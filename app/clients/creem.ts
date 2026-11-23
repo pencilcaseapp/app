@@ -82,6 +82,16 @@ export async function getSubscription(subscriptionId: string) {
   return toCreemSubscription(await creem.subscriptions.get(subscriptionId));
 }
 
+/**
+ * Cancels the subscription at the end of the period that is paid for:
+ * it stays active until then and does not renew.
+ */
+export async function cancelSubscriptionAtPeriodEnd(subscriptionId: string) {
+  return toCreemSubscription(
+    await creem.subscriptions.cancel(subscriptionId, { mode: 'scheduled' }),
+  );
+}
+
 export async function createBillingPortalSession(customerId: string) {
   return creem.customers.generateBillingLinks({ customerId });
 }

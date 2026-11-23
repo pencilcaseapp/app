@@ -32,6 +32,7 @@ const getAndRefreshUserSessionMock = vi.fn();
 const expireUserSessionMock = vi.fn();
 const expireOtherUserSessionsMock = vi.fn();
 const updateUserMock = vi.fn();
+const restoreDeletedUserMock = vi.fn(() => Promise.resolve(true));
 const getOrCreateUserByEmailMock = vi.fn(
   () => ({ user: userFixture, created: false }),
 );
@@ -48,6 +49,8 @@ vi.mock('~/repos/user', () => ({
   expireOtherUserSessions: (...args: unknown[]) =>
     expireOtherUserSessionsMock(...args),
   updateUser: (...args: unknown[]) => updateUserMock(...args),
+  restoreDeletedUser: (...args: unknown[]) =>
+    restoreDeletedUserMock(...args as []),
 }));
 
 vi.mock('~/db', () => ({
@@ -363,6 +366,35 @@ describe('initMagicCode', () => {
           codeHash,
         },
         user: userFixture,
+        restored: false,
+      });
+    });
+
+    it('restores a deleted account in the same transaction', async () => {
+      const code = '123456';
+      const codeHash = await argon2.hash(code);
+
+      getValidOtpMock.mockResolvedValueOnce({
+        ...otpFixture,
+        codeHash,
+      });
+      getOrCreateUserByEmailMock.mockResolvedValueOnce({
+        user: { ...userFixture, deletedAt: new Date() },
+        created: false,
+      });
+
+      const [error, result] = await verifyMagicCode(
+        otpFixture.id,
+        otpFixture.email,
+        code,
+      );
+
+      expect(error).toBeNull();
+      expect(restoreDeletedUserMock)
+        .toHaveBeenCalledWith(userFixture.id, 'tx');
+      expect(result).toMatchObject({
+        user: { id: userFixture.id, deletedAt: null },
+        restored: true,
       });
     });
 

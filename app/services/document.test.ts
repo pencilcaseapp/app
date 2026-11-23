@@ -198,6 +198,7 @@ function viewerDocument(overrides?: Partial<{
   linkAccess: DocumentLinkAccess;
   userId: string;
   deletedAt: Date | null;
+  ownerDeletedAt: Date | null;
   collaborator: Collaborator | null;
 }>) {
   return {
@@ -207,6 +208,7 @@ function viewerDocument(overrides?: Partial<{
     linkAccess: 'view' as DocumentLinkAccess,
     userId: userFixture.id,
     deletedAt: null,
+    ownerDeletedAt: null,
     collaborator: null,
     ...overrides,
   };
@@ -286,6 +288,19 @@ describe('openDocument', () => {
 
     expect(error).toBeNull();
     expect(document).toMatchObject({ isOwner: true, deleted: true });
+  });
+
+  it('returns not found for a document of a deleted account', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      linkShared: true,
+      collaborator: linkCollaborator(),
+      ownerDeletedAt: new Date(),
+    }));
+
+    const [error] = await openDocument(documentFixture.id, viewer);
+
+    expect(error).toBe(OpenDocumentError.NotFound);
   });
 
   it('returns not found for a deleted document to anybody else', async () => {
@@ -709,6 +724,16 @@ describe('getLiveAccess', () => {
       .toStrictEqual({ readOnly: false });
   });
 
+  it('rejects everybody from the documents of a deleted account', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      linkShared: true,
+      ownerDeletedAt: new Date(),
+    }));
+
+    expect(await getLiveAccess(documentFixture.id, viewer)).toBeUndefined();
+  });
+
   it('lets the owner into a deleted document read-only', async () => {
     getDocumentForViewerMock.mockResolvedValue(
       viewerDocument({ deletedAt: new Date() }),
@@ -1092,6 +1117,7 @@ describe('invites', () => {
       linkAccess: 'view',
       userId: owner.id,
       deletedAt: null,
+      ownerDeletedAt: null,
       collaborator: null,
       ...overrides,
     };

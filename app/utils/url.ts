@@ -8,6 +8,20 @@ export function withSearchParams(
   return `${path}?${searchParamsString}`;
 }
 
+/** Adds search params to a path that may have some already. */
+export function addSearchParams(
+  path: string,
+  searchParams: Record<string, string>,
+): string {
+  const url = new URL(path, 'http://localhost');
+
+  for (const [name, value] of Object.entries(searchParams)) {
+    url.searchParams.set(name, value);
+  }
+
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 export function getRequiredSearchParam<Param = string>(
   request: Request,
   name: string,

@@ -2,9 +2,10 @@ import {
   eq,
   inArray,
   lt,
+  sql,
   type InferSelectModel,
 } from 'drizzle-orm';
-import { db } from '~/db';
+import { db, type Executor } from '~/db';
 import { creemWebhookEvents } from '~/db/schema';
 
 export type CreemWebhookEventRecord
@@ -69,4 +70,30 @@ export async function deleteWebhookEventsReceivedBefore(before: Date) {
       return deletedCount;
     }
   }
+}
+
+/**
+ * Deletes the events that carry any of the given values anywhere in their
+ * payload, matched as whole values rather than as text, for the purge of a
+ * deleted account: its user id (the checkout metadata), its Creem
+ * customer ids and its address.
+ */
+export async function deleteWebhookEventsMentioning(
+  values: string[],
+  executor: Executor = db,
+) {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  const deleted = await executor
+    .delete(creemWebhookEvents)
+    .where(sql`jsonb_path_exists(
+      ${creemWebhookEvents.payload},
+      '$.** ? (@ == $values[*])',
+      jsonb_build_object('values', ${JSON.stringify(values)}::jsonb)
+    )`)
+    .returning({ id: creemWebhookEvents.id });
+
+  return deleted.length;
 }

@@ -97,6 +97,7 @@ export async function getDocumentForViewer(
     linkAccess: documents.linkAccess,
     userId: documents.userId,
     deletedAt: documents.deletedAt,
+    ownerDeletedAt: users.deletedAt,
     collaborator: {
       id: documentCollaborators.id,
       source: documentCollaborators.source,
@@ -107,6 +108,7 @@ export async function getDocumentForViewer(
     },
   })
     .from(documents)
+    .innerJoin(users, eq(users.id, documents.userId))
     .leftJoin(documentCollaborators, and(
       eq(documentCollaborators.documentId, documents.id),
       isViewer,
@@ -178,7 +180,8 @@ export async function getDocumentTitle(id: string) {
 }
 
 /**
- * The documents the user owns or collaborates on, deleted ones left out.
+ * The documents the user owns or collaborates on, deleted ones and those
+ * of a deleted account left out.
  * `inviteShared` says whether anybody was invited to the document by
  * e-mail, which the navigation marks alongside `linkShared`: it rides
  * along as a correlated `EXISTS` so the list still costs one query
@@ -204,8 +207,10 @@ export async function getDocumentList(userId: string) {
     userId: documents.userId,
   })
     .from(documents)
+    .innerJoin(users, eq(users.id, documents.userId))
     .where(and(
       isNull(documents.deletedAt),
+      isNull(users.deletedAt),
       or(
         eq(documents.userId, userId),
         exists(
@@ -744,4 +749,88 @@ export async function getDocumentAssets(
     .select()
     .from(documentAssets)
     .where(inArray(documentAssets.documentId, documentIds));
+}
+
+/**
+ * Every document the user owns, deleted or not. With an executor the rows
+ * stay locked until its transaction ends, like the purge of deleted
+ * documents does.
+ */
+export async function getOwnedDocumentIds(
+  userId: string,
+  executor?: Executor,
+) {
+  if (!isUuid(userId)) {
+    return [];
+  }
+
+  const query = (executor ?? db)
+    .select({ id: documents.id })
+    .from(documents)
+    .where(eq(documents.userId, userId));
+  const rows = executor ? await query.for('update') : await query;
+
+  return rows.map(row => row.id);
+}
+
+/** The documents of others the user has a collaborator row on. */
+export async function getCollaboratingDocumentIds(userId: string) {
+  if (!isUuid(userId)) {
+    return [];
+  }
+
+  const rows = await db
+    .selectDistinct({ id: documentCollaborators.documentId })
+    .from(documentCollaborators)
+    .where(eq(documentCollaborators.userId, userId));
+
+  return rows.map(row => row.id);
+}
+
+/**
+ * Drops the user from the documents of others, every row that is theirs
+ * by user id and every invite to their address, for the purge of a
+ * deleted account.
+ */
+export async function deleteUserCollaborators(
+  input: { userId: string; email: string },
+  executor: Executor = db,
+) {
+  const { userId, email } = input;
+
+  if (!isUuid(userId)) {
+    return 0;
+  }
+
+  const deleted = await executor.delete(documentCollaborators)
+    .where(or(
+      eq(documentCollaborators.userId, userId),
+      and(
+        eq(documentCollaborators.source, 'invite'),
+        eq(documentCollaborators.email, email),
+      ),
+    ))
+    .returning({ id: documentCollaborators.id });
+
+  return deleted.length;
+}
+
+/**
+ * Forgets who uploaded the images the user added to the documents of
+ * others: the images belong to those documents and stay with them.
+ */
+export async function detachUserAssets(
+  userId: string,
+  executor: Executor = db,
+) {
+  if (!isUuid(userId)) {
+    return 0;
+  }
+
+  const updated = await executor.update(documentAssets)
+    .set({ userId: null })
+    .where(eq(documentAssets.userId, userId))
+    .returning({ id: documentAssets.id });
+
+  return updated.length;
 }

@@ -405,8 +405,8 @@ write, and the repos only take that transaction: `auth.ts` when
 `getOrCreateUserByEmail` reports it inserted the row (`xmax = 0`), and
 `document.ts` in `createDocument` and `purgeDeletedDocuments`, so a
 document counts as deleted when it is purged, not when it is soft
-deleted. Account deletion is not built yet; its purge should count
-`accountsDeleted` the same way.
+deleted. `purgeDeletedAccounts` (`account.ts`) counts `accountsDeleted`
+the same way, along with the documents it purges.
 
 **Who may open a document — `documents.link_shared`,
 `document_collaborators.source`.** Access comes from two independent
@@ -496,6 +496,26 @@ owner's share panel and stays as it is for everybody else, with no way back
 but the link or a new invite. Opening a shared document connects the viewer
 again, so the doc route's `shouldRevalidate` skips the reload after leaving
 the open one.
+
+**Account deletion — `app/services/account.ts`.** The danger zone of the
+account section opens `DeleteAccountDialog`, which posts to
+`/account/delete` as a document request (the deletion closes the live
+connection behind the dialog, and the revalidation that sets off would
+beat a fetcher's redirect). `deleteAccount` cancels every renewing
+Creem subscription at period end first and refuses to go on if Creem
+fails, then stamps `users.deleted_at` and expires every session in one
+transaction, closes the live connections and mails the confirmation. The
+documents of a deleted account are gone for everybody (`isGone` reads
+the owner's `deletedAt`, `getDocumentList` leaves them out) but nothing
+is removed: signing in again with the same address clears the stamp in
+`verifyMagicCode` and the user lands with a welcome back toast.
+`purge-deleted-accounts` removes accounts past
+`DELETED_ACCOUNT_RETENTION_DAYS`, one transaction each, with every row
+tied to them (documents, images and their files, collaborators and
+invites, sessions, codes, email change requests, email logs,
+subscriptions, the Creem events naming them); reports keep their row
+with the reporter set null. Anything new that stores data about a user
+joins that purge.
 
 **Sidebar ordering — `app/layouts/editor.tsx`.** `getDocumentList` sorts by
 `updatedAt`, and the live server bumps it on every persist, so the raw loader

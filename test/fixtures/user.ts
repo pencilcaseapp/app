@@ -13,6 +13,7 @@ export const userFixture: User = {
   creemCustomerId: null,
   createdAt: faker.date.past(),
   updatedAt: faker.date.past(),
+  deletedAt: null,
 };
 
 export const userSessionFixture: UserSession = {

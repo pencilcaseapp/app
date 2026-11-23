@@ -42,6 +42,7 @@ export default [
     route('onboarding', 'routes/onboarding.tsx'),
   ]),
   route('signout', 'routes/signout.ts'),
+  route('account/delete', 'routes/account-delete.ts'),
   route('upgrade', 'routes/upgrade.ts'),
   route('checkout', 'routes/checkout.ts'),
   route('contact', 'routes/contact.ts'),

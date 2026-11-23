@@ -8,8 +8,9 @@ import type { Route } from './+types/otp';
 import { returnFormError, validateForm } from '~/utils/form';
 import { createSessionCookie, initMagicCode, verifyMagicCode, VerifyMagicCodeError } from '~/services/auth';
 import { href, redirect, Link as ReactRouterLink } from 'react-router';
-import { SearchParamAuth } from '~/constants/search-params';
-import { getNormalizedReturnUrl, getOptionalSearchParam, getRequiredSearchParam, withSearchParams } from '~/utils/url';
+import { accountCopies } from '~/constants/account';
+import { SearchParamAuth, SearchParamToast } from '~/constants/search-params';
+import { addSearchParams, getNormalizedReturnUrl, getOptionalSearchParam, getRequiredSearchParam, withSearchParams } from '~/utils/url';
 import { Link } from '~/ui/link/link';
 import { getValidOtp } from '~/repos/otp';
 
@@ -96,6 +97,13 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
         }
       }
 
+      // The welcome back toast rides along to wherever the user lands.
+      const landingUrl = result.restored
+        ? addSearchParams(returnUrl, {
+            [SearchParamToast.ToastSuccess]: accountCopies.restored,
+          })
+        : returnUrl;
+
       const userAgent = request.headers.get('user-agent') ?? undefined;
       const sessionCookie = await createSessionCookie({
         request,
@@ -107,7 +115,7 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
         withSearchParams(
           href('/onboarding'),
           {
-            [SearchParamAuth.ReturnUrl]: returnUrl,
+            [SearchParamAuth.ReturnUrl]: landingUrl,
           },
         ),
         {

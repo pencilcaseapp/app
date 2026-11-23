@@ -1,6 +1,6 @@
 import { claimOtpAttempt, createOtp, canRequestNewOtp, type Otp, expireAllValidOtps, expireOtp, getValidOtp, markOtpAsUsed } from '~/repos/otp';
 import { incrementDailyStat } from '~/repos/daily-stat';
-import { createUserSession, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getAndRefreshUserSession, updateUser, type User } from '~/repos/user';
+import { createUserSession, expireOtherUserSessions, expireUserSession, getOrCreateUserByEmail, getAndRefreshUserSession, restoreDeletedUser, updateUser, type User } from '~/repos/user';
 import { sendEmailMagicCode } from './email-templates';
 import argon2 from 'argon2';
 import { createHash, randomBytes, randomInt } from 'node:crypto';
@@ -80,7 +80,8 @@ export enum VerifyMagicCodeError {
 }
 
 export type VerifyMagicCodeResult
-  = [VerifyMagicCodeError] | [null, { otp: Otp; user: User }];
+  = [VerifyMagicCodeError]
+    | [null, { otp: Otp; user: User; restored: boolean }];
 
 export async function verifyMagicCode(
   id: string,
@@ -109,20 +110,25 @@ export async function verifyMagicCode(
   }
 
   // The user row only exists once the address is proven, so unverified
-  // sign-in requests leave nothing behind but the OTP row.
-  const user = await transaction(async (tx) => {
+  // sign-in requests leave nothing behind but the OTP row. Signing in to
+  // a deleted account is what restores it.
+  const signedIn = await transaction(async (tx) => {
     if (!await markOtpAsUsed(otp.id, tx)) {
       return undefined;
     }
 
-    return getOrCreateUser(otp.email, tx);
+    const user = await getOrCreateUser(otp.email, tx);
+    const restored = user.deletedAt !== null
+      && await restoreDeletedUser(user.id, tx);
+
+    return { user: { ...user, deletedAt: null }, restored };
   });
 
-  if (!user) {
+  if (!signedIn) {
     return [VerifyMagicCodeError.Expired];
   }
 
-  return [null, { otp, user }];
+  return [null, { otp, ...signedIn }];
 }
 
 export async function getAuthSession(

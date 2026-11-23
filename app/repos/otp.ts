@@ -1,4 +1,4 @@
-import { eq, and, gt, lt, inArray, sql, type InferSelectModel, isNull } from 'drizzle-orm';
+import { eq, and, gt, lt, inArray, or, sql, type InferSelectModel, isNull } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
 import { db, type Executor } from '~/db';
 import { otps } from '~/db/schema';
@@ -153,6 +153,30 @@ export async function deleteOtpsExpiredBefore(before: Date) {
       return deletedCount;
     }
   }
+}
+
+/**
+ * Deletes every code of the account and every code sent to its address,
+ * for the purge of a deleted account.
+ */
+export async function deleteUserOtps(
+  input: { userId: string; canonicalEmail: string },
+  executor: Executor = db,
+) {
+  const { userId, canonicalEmail } = input;
+
+  if (!isUuid(userId)) {
+    return 0;
+  }
+
+  const deleted = await executor.delete(otps)
+    .where(or(
+      eq(otps.userId, userId),
+      eq(otps.canonicalEmail, canonicalEmail),
+    ))
+    .returning({ id: otps.id });
+
+  return deleted.length;
 }
 
 export async function canRequestNewOtp(canonicalEmail: string) {

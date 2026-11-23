@@ -4,10 +4,11 @@ import {
   gt,
   inArray,
   lt,
+  or,
   type InferSelectModel,
 } from 'drizzle-orm';
 import { validate as isUuid } from 'uuid';
-import { db } from '~/db';
+import { db, type Executor } from '~/db';
 import { emailLogs } from '~/db/schema';
 import { EmailLogStatus, type EmailTemplate } from '~/constants/email';
 
@@ -176,4 +177,26 @@ export async function deleteEmailLogsCreatedBefore(before: Date) {
       return deletedCount;
     }
   }
+}
+
+/**
+ * Deletes the log of every e-mail the user sent or was sent, the ones
+ * logged against the account and the ones sent to its address, for the
+ * purge of a deleted account.
+ */
+export async function deleteUserEmailLogs(
+  input: { userId: string; email: string },
+  executor: Executor = db,
+) {
+  const { userId, email } = input;
+
+  if (!isUuid(userId)) {
+    return 0;
+  }
+
+  const deleted = await executor.delete(emailLogs)
+    .where(or(eq(emailLogs.userId, userId), eq(emailLogs.email, email)))
+    .returning({ id: emailLogs.id });
+
+  return deleted.length;
 }

@@ -109,3 +109,41 @@ export async function hasSubscriptionWithStatus(
 ) {
   return !!await getSubscriptionWithStatus(userId, statuses, executor);
 }
+
+/** All of the user's subscriptions in one of the given statuses. */
+export async function getSubscriptionsWithStatus(
+  userId: string,
+  statuses: SubscriptionStatus[],
+) {
+  if (!isUuid(userId)) {
+    return [];
+  }
+
+  return db.query.subscriptions.findMany({
+    where: {
+      userId,
+      status: {
+        in: statuses,
+      },
+    },
+  });
+}
+
+/**
+ * Deletes the user's subscriptions, for the purge of a deleted account.
+ * Returns the Creem customer ids they were paid through.
+ */
+export async function deleteUserSubscriptions(
+  userId: string,
+  executor: Executor = db,
+) {
+  if (!isUuid(userId)) {
+    return [];
+  }
+
+  const deleted = await executor.delete(subscriptions)
+    .where(eq(subscriptions.userId, userId))
+    .returning({ creemCustomerId: subscriptions.creemCustomerId });
+
+  return deleted.map(row => row.creemCustomerId);
+}

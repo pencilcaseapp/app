@@ -174,3 +174,19 @@ export async function deleteEmailChangeRequestsExpiredBefore(before: Date) {
     }
   }
 }
+
+/** Deletes the user's requests, for the purge of a deleted account. */
+export async function deleteUserEmailChangeRequests(
+  userId: string,
+  executor: Executor = db,
+) {
+  if (!isUuid(userId)) {
+    return 0;
+  }
+
+  const deleted = await executor.delete(emailChangeRequests)
+    .where(eq(emailChangeRequests.userId, userId))
+    .returning({ id: emailChangeRequests.id });
+
+  return deleted.length;
+}

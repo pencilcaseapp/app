@@ -28,3 +28,15 @@ export function formatDate(date: Date, request: Request) {
   return new Intl.DateTimeFormat(getRequestLocale(request), dateFormatOptions)
     .format(date);
 }
+
+const longDateFormat = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+/** A calendar date written out, like "23 December 2026", in any locale. */
+export function formatLongDate(date: Date) {
+  return longDateFormat.format(date);
+}

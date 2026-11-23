@@ -8,7 +8,9 @@ import { otpCodeEmailSubject } from '~/emails/templates/otp-code';
 import { EmailTemplate } from '~/constants/email';
 import { documentReportEmailSubject } from '~/emails/templates/document-report';
 import { contactMessageEmailSubject } from '~/emails/templates/contact-message';
+import { accountDeletedEmailSubject } from '~/emails/templates/account-deleted';
 import {
+  sendEmailAccountDeleted,
   sendEmailChangeCode,
   sendEmailContactMessage,
   sendEmailContractNotice,
@@ -231,5 +233,31 @@ describe('sendEmailContractNotice', () => {
       template: EmailTemplate.ContractNotice,
       idempotencyScope: 'notice-id:inbox',
     });
+  });
+});
+
+describe('sendEmailAccountDeleted', () => {
+  it('scopes the key to the deletion, so a second deletion is mailed '
+    + 'again', async () => {
+    await sendEmailAccountDeleted({
+      to: { email: 'test@example.com' },
+      userId: 'user-id',
+      deletedAt: new Date('2026-11-23T16:00:00.000Z'),
+      restoreUntil: '23 December 2026',
+    });
+
+    expect(sendEMailMock).toHaveBeenCalledWith({
+      to: { email: 'test@example.com' },
+      subject: accountDeletedEmailSubject(),
+      email: expect.anything(),
+      template: EmailTemplate.AccountDeleted,
+      idempotencyScope: 'user-id:2026-11-23T16:00:00.000Z',
+      userId: 'user-id',
+    });
+
+    const [{ email }] = sendEMailMock.mock.calls[0];
+    const text = await render(email, { plainText: true });
+    expect(text).toContain('23 December 2026');
+    expect(text).toContain('/signin');
   });
 });

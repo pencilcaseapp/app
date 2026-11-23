@@ -62,3 +62,17 @@ test('redirects to last updated doc if user session exists', async () => {
     href('/doc/:id', { id: 'doc-1' }),
   );
 });
+
+test('hands its search params on to the document it opens', async () => {
+  const context = new RouterContextProvider();
+  context.set(userSessionContext, userFixture);
+  getDocumentListMock.mockResolvedValue([{ ...documentFixture, id: 'doc-1' }]);
+
+  await renderRoute('/', {
+    params: {},
+    context,
+    searchParams: { toastSuccess: 'Welcome back' },
+  });
+
+  expect(redirectMock).toHaveBeenCalledWith('/doc/doc-1?toastSuccess=Welcome+back');
+});

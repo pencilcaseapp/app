@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '~/db';
 import { creemWebhookEvents } from '~/db/schema';
 import {
+  deleteWebhookEventsMentioning,
   deleteWebhookEventsReceivedBefore,
   getWebhookEvent,
   markWebhookEventProcessed,
@@ -104,5 +105,32 @@ describe('deleteWebhookEventsReceivedBefore', () => {
     await deleteWebhookEventsReceivedBefore(new Date(Date.now() - 7 * days));
 
     expect(await getWebhookEvent(input.id)).toBeDefined();
+  });
+});
+
+describe('deleteWebhookEventsMentioning', () => {
+  it('deletes the events that carry one of the values anywhere', async () => {
+    const customerId = `cust_${faker.string.alphanumeric(21)}`;
+    const userId = faker.string.uuid();
+    const byCustomer = eventInput();
+    const byMetadata = eventInput();
+    const unrelated = eventInput();
+    await recordWebhookEvent({
+      ...byCustomer,
+      payload: { object: { customer: { id: customerId } } },
+    });
+    await recordWebhookEvent({
+      ...byMetadata,
+      payload: { object: { subscription: { metadata: { userId } } } },
+    });
+    await recordWebhookEvent({
+      ...unrelated,
+      payload: { object: { customer: { id: `${customerId}0` } } },
+    });
+
+    expect(await deleteWebhookEventsMentioning([customerId, userId])).toBe(2);
+    expect(await getWebhookEvent(byCustomer.id)).toBeUndefined();
+    expect(await getWebhookEvent(byMetadata.id)).toBeUndefined();
+    expect(await getWebhookEvent(unrelated.id)).toBeDefined();
   });
 });
