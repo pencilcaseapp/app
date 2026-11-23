@@ -9,6 +9,11 @@ import { Button } from '../button/button';
 const meta: Meta<typeof DangerZone> = {
   title: 'Feedback/DangerZone',
   component: DangerZone,
+  argTypes: {
+    actionArea: {
+      control: false,
+    },
+  },
   decorators: story => <div className="max-w-xl">{story()}</div>,
 };
 
