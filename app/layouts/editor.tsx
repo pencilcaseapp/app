@@ -42,7 +42,6 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import classNames from 'classnames';
 import {
   DeleteDocumentDialog,
   type DocumentToDelete,
@@ -233,11 +232,14 @@ function EditorSidebar({
     getItemLabel,
     activeDocument,
   );
-  // The switch shows the picked folder straight away, while the list
-  // waits for the loader to list it.
+  // The switch shows the picked folder straight away and keeps showing
+  // it until the loader lists that folder. The revalidation settles a
+  // moment before its data renders, so it cannot be the signal.
   const [pendingFolder, setPendingFolder] = useState<DocumentFolder>();
-  const isSwitchingFolder
-    = pendingFolder !== undefined && pendingFolder !== folder;
+  if (pendingFolder === folder) {
+    setPendingFolder(undefined);
+  }
+  const isSwitchingFolder = pendingFolder !== undefined;
   // The document stays set while the dialog animates out, so its
   // title does not vanish from the copy mid-close.
   const [documentToDelete, setDocumentToDelete]
@@ -303,7 +305,6 @@ function EditorSidebar({
     // before the navigation is loaded again.
     await storeUserPrefs({ folder: nextFolder });
     await revalidator.revalidate();
-    setPendingFolder(undefined);
   };
 
   return (
@@ -327,10 +328,7 @@ function EditorSidebar({
                     // not glide into the places of the other.
                     key={folder}
                     aria-busy={isSwitchingFolder}
-                    className={classNames(
-                      'flex flex-col gap-1.5 transition-opacity',
-                      isSwitchingFolder && 'opacity-50',
-                    )}
+                    className="flex flex-col gap-1.5"
                   >
                     {stableNavigation.length === 0 && (
                       <DocumentGroupEmpty icon="no-docs">
