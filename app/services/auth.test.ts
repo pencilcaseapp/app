@@ -517,6 +517,24 @@ describe('getAuthSession', () => {
   });
 });
 
+describe('getAuthSession of a deleted account', () => {
+  it('returns null even if a session is still valid', async () => {
+    getAndRefreshUserSessionMock.mockResolvedValueOnce({
+      session: userSessionFixture,
+      user: { ...userFixture, deletedAt: new Date() },
+      isRefreshed: false,
+    });
+
+    const request = new Request('http://localhost', {
+      headers: {
+        Cookie: validSessionCookie,
+      },
+    });
+
+    expect(await getAuthSession(request)).toBeNull();
+  });
+});
+
 describe('signOut', () => {
   it('expires the session and clears the cookie', async () => {
     const request = new Request('http://localhost', {

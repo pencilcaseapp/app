@@ -17,7 +17,6 @@ import {
   type User,
 } from '~/repos/user';
 import { formatLongDate } from '~/utils/date';
-import { getCanonicalEmail } from '~/utils/email';
 import { closeAccountConnections, deleteAccountDocuments } from './document';
 import { sendEmailAccountDeleted } from './email-templates';
 import { cancelRenewingSubscriptions } from './subscription';
@@ -147,7 +146,7 @@ async function purgeDeletedAccount(id: string, before: Date) {
 
     await deleteUserOtps({
       userId: user.id,
-      canonicalEmail: getCanonicalEmail(user.email),
+      email: user.email,
     }, tx);
     await deleteUserEmailChangeRequests(user.id, tx);
     await deleteUserEmailLogs({ userId: user.id, email: user.email }, tx);

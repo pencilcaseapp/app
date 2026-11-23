@@ -49,9 +49,16 @@ export function getOptionalSearchParam<Param = string>(
 }
 
 export function getNormalizedReturnUrl(returnUrl?: string | null): string {
-  if (!returnUrl || !returnUrl.startsWith('/') || returnUrl.startsWith('//')) {
+  if (!returnUrl?.startsWith('/')) {
     return href('/');
   }
 
-  return returnUrl;
+  // Browsers read `/\evil.com` and `/\t/evil.com` as another host, like
+  // `//evil.com`, so only a path that stays on our origin is kept.
+  const base = 'http://localhost';
+  const url = new URL(returnUrl, base);
+
+  return url.origin === base
+    ? `${url.pathname}${url.search}${url.hash}`
+    : href('/');
 }

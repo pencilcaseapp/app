@@ -259,6 +259,8 @@ export async function getAndRefreshUserSession(tokenHash: string) {
   const refreshThreshold = new Date(Date.now() + SESSION_REFRESH_THRESHOLD_MS);
 
   if (session.expiresAt < refreshThreshold) {
+    // Only while it is still valid: a session expired in the meantime (a
+    // sign out everywhere, an account deletion) must stay expired.
     const [updateResponse] = await db
       .update(sessions)
       .set({
@@ -266,8 +268,13 @@ export async function getAndRefreshUserSession(tokenHash: string) {
       })
       .where(and(
         eq(sessions.id, session.id),
+        gt(sessions.expiresAt, sql`CURRENT_TIMESTAMP`),
       ))
       .returning();
+
+    if (!updateResponse) {
+      return null;
+    }
 
     refreshedSession = updateResponse;
   }

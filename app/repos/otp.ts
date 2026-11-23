@@ -156,14 +156,15 @@ export async function deleteOtpsExpiredBefore(before: Date) {
 }
 
 /**
- * Deletes every code of the account and every code sent to its address,
- * for the purge of a deleted account.
+ * Deletes every code of the account and every code sent to its address
+ * (the exact one: another mailbox can share its canonical form), for the
+ * purge of a deleted account.
  */
 export async function deleteUserOtps(
-  input: { userId: string; canonicalEmail: string },
+  input: { userId: string; email: string },
   executor: Executor = db,
 ) {
-  const { userId, canonicalEmail } = input;
+  const { userId, email } = input;
 
   if (!isUuid(userId)) {
     return 0;
@@ -172,7 +173,7 @@ export async function deleteUserOtps(
   const deleted = await executor.delete(otps)
     .where(or(
       eq(otps.userId, userId),
-      eq(otps.canonicalEmail, canonicalEmail),
+      eq(otps.email, email),
     ))
     .returning({ id: otps.id });
 

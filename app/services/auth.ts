@@ -244,7 +244,8 @@ async function readUserSession(cookieHeader: string | null) {
 
   const tokenHash = hashUserSessionToken(token);
   const userSession = await getAndRefreshUserSession(tokenHash);
-  if (!userSession) {
+  // Deleting an account expires its sessions, this holds for any it missed.
+  if (!userSession || userSession.user.deletedAt !== null) {
     return null;
   }
 
