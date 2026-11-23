@@ -23,6 +23,7 @@ import { useToast } from './hooks/use-toast';
 import { useNativeOpenLink } from './hooks/use-native-open-link';
 import { useNativePullToRefresh } from './hooks/use-native-pull-to-refresh';
 import { useBlurInBackground } from './hooks/use-blur-in-background';
+import { FAVICON_SCRIPT } from './utils/favicon';
 import {
   HIDE_NATIVE_SPLASH_SCREEN_SCRIPT,
   isNativeAppRequest,
@@ -39,6 +40,13 @@ const NativeSplashScreenScript = () => (
   <script
     // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
     dangerouslySetInnerHTML={{ __html: HIDE_NATIVE_SPLASH_SCREEN_SCRIPT }}
+  />
+);
+
+const FaviconScript = () => (
+  <script
+    // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
+    dangerouslySetInnerHTML={{ __html: FAVICON_SCRIPT }}
   />
 );
 
@@ -82,6 +90,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101010" />
         <Meta />
         <Links />
+        <FaviconScript />
       </head>
       <body className={classNames(...routeBodyClassNames)}>
         <ToastProvider>
