@@ -5,7 +5,11 @@ import type { ComponentPropsWithoutRef, ReactNode, Ref } from 'react';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 import { Icon } from '../icon/icon';
 import type { IconName } from '../icon/icons';
-import { menuItemClasses } from '../menu-surface/menu-surface';
+import {
+  menuItemClasses,
+  menuShellClasses,
+  menuSurfaceClasses,
+} from '../menu-surface/menu-surface';
 import {
   ResponsiveDialog,
   ResponsiveDialogTrigger,
@@ -152,15 +156,13 @@ const FolderSwitchSelect = <Value extends string>({
         >
           <BaseSelect.Popup
             className={classNames(
-              'flex w-(--anchor-width) flex-col gap-0.5 rounded-2xl p-1.5 outline-0',
-              'border border-pca-grey-200 bg-pca-white shadow-glass',
-              'dark:border-pca-grey-700 dark:bg-pca-grey-800 dark:shadow-glass-dark',
-              'transition-[scale,opacity] duration-150 ease-out motion-reduce:transition-none',
-              'data-ending-style:scale-[0.96] data-ending-style:opacity-0',
-              'data-starting-style:scale-[0.96] data-starting-style:opacity-0',
+              menuShellClasses,
+              menuSurfaceClasses.solid,
+              'w-(--anchor-width) origin-top-left outline-0',
+              'data-open:animate-scale-in data-closed:animate-scale-out',
             )}
           >
-            <BaseSelect.List>
+            <BaseSelect.List className="flex flex-col gap-0.5">
               {withSeparators(
                 groups,
                 item => (
