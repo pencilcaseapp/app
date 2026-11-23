@@ -106,44 +106,42 @@ describe('page', () => {
       .not.toBeInTheDocument();
   });
 
-  test('tells a free user at the limit that all docs are in use',
-    async () => {
-      getDocumentListMock.mockResolvedValue(
-        Array.from({ length: FREE_DOCUMENT_LIMIT }, () => ({})),
-      );
+  test('tells a free user at the limit that all docs are in use', async () => {
+    getDocumentListMock.mockResolvedValue(
+      Array.from({ length: FREE_DOCUMENT_LIMIT }, () => ({})),
+    );
 
-      await renderSubscription(userFixture, { kind: 'none' });
+    await renderSubscription(userFixture, { kind: 'none' });
 
-      expect(await screen.findByText(
-        `You’ve used all ${FREE_DOCUMENT_LIMIT} of your free docs.`,
-      )).toBeInTheDocument();
+    expect(await screen.findByText(
+      `You’ve used all ${FREE_DOCUMENT_LIMIT} of your free docs.`,
+    )).toBeInTheDocument();
+  });
+
+  test('shows the running subscription with the customer portal', async () => {
+    await renderSubscription(subscriber, activeSubscription);
+
+    expect(await screen.findByText('You’re on Pencil Case Pro.'))
+      .toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.getByRole('rowheader', { name: 'Renews at' }))
+      .toBeInTheDocument();
+    expect(screen.getByText(/2026$/)).toBeInTheDocument();
+    for (const badge of screen.getAllByText('Current')) {
+      expect(badge.closest('.bg-pca-yellow-500')).toBeInTheDocument();
+    }
+    expect(screen.queryByRole('rowheader', { name: 'Docs' }))
+      .not.toBeInTheDocument();
+
+    const portal = screen.getByRole('link', {
+      name: 'Manage subscription',
     });
-
-  test('shows the running subscription with the customer portal',
-    async () => {
-      await renderSubscription(subscriber, activeSubscription);
-
-      expect(await screen.findByText('You’re on Pencil Case Pro.'))
-        .toBeInTheDocument();
-      expect(screen.getByText('Active')).toBeInTheDocument();
-      expect(screen.getByRole('rowheader', { name: 'Renews at' }))
-        .toBeInTheDocument();
-      expect(screen.getByText(/2026$/)).toBeInTheDocument();
-      for (const badge of screen.getAllByText('Current')) {
-        expect(badge.closest('.bg-pca-yellow-500')).toBeInTheDocument();
-      }
-      expect(screen.queryByRole('rowheader', { name: 'Docs' }))
-        .not.toBeInTheDocument();
-
-      const portal = screen.getByRole('link', {
-        name: 'Manage subscription',
-      });
-      expect(portal).toHaveAttribute('href', href('/billing-portal'));
-      expect(portal).toHaveAttribute('target', '_blank');
-      expect(screen.queryByRole('link', { name: 'Upgrade to Pro' }))
-        .not.toBeInTheDocument();
-      expect(getDocumentListMock).not.toHaveBeenCalled();
-    });
+    expect(portal).toHaveAttribute('href', href('/billing-portal'));
+    expect(portal).toHaveAttribute('target', '_blank');
+    expect(screen.queryByRole('link', { name: 'Upgrade to Pro' }))
+      .not.toBeInTheDocument();
+    expect(getDocumentListMock).not.toHaveBeenCalled();
+  });
 
   test('shows a cancelled subscription until it runs out', async () => {
     await renderSubscription(subscriber, {
@@ -239,25 +237,24 @@ describe('loader', () => {
     expect(getDocumentListMock).toHaveBeenCalledWith(userFixture.id);
   });
 
-  test('confirms the checkout Creem sends the user back from',
-    async () => {
-      completeProCheckoutMock.mockResolvedValue([null]);
+  test('confirms the checkout Creem sends the user back from', async () => {
+    completeProCheckoutMock.mockResolvedValue([null]);
 
-      const response = await callLoader({
-        checkout_id: 'ch_123',
-        subscription_id: 'sub_123',
-        signature: 'sig',
-      }) as Response;
+    const response = await callLoader({
+      checkout_id: 'ch_123',
+      subscription_id: 'sub_123',
+      signature: 'sig',
+    }) as Response;
 
-      const location = response.headers.get('Location') ?? '';
-      expect(location).toContain(`${subscriptionUrl}?toastSuccess`);
-      expect(location).not.toContain('checkout_id');
+    const location = response.headers.get('Location') ?? '';
+    expect(location).toContain(`${subscriptionUrl}?toastSuccess`);
+    expect(location).not.toContain('checkout_id');
 
-      const searchParams
-        = completeProCheckoutMock.mock.calls[0][0] as URLSearchParams;
-      expect(searchParams.get('subscription_id')).toBe('sub_123');
-      expect(getSubscriptionOverviewMock).not.toHaveBeenCalled();
-    });
+    const searchParams
+      = completeProCheckoutMock.mock.calls[0][0] as URLSearchParams;
+    expect(searchParams.get('subscription_id')).toBe('sub_123');
+    expect(getSubscriptionOverviewMock).not.toHaveBeenCalled();
+  });
 
   test('reports a checkout it cannot confirm', async () => {
     completeProCheckoutMock

@@ -12,11 +12,11 @@ vi.mock('~/hooks/use-is-mobile');
 
 function renderResponsivePanel(
   { contentProps, defaultOpen, onOpenChange }:
-  {
-    contentProps?: Partial<ResponsivePanelContentProps>;
-    defaultOpen?: boolean;
-    onOpenChange?: (open: boolean) => void;
-  } = {},
+    {
+      contentProps?: Partial<ResponsivePanelContentProps>;
+      defaultOpen?: boolean;
+      onOpenChange?: (open: boolean) => void;
+    } = {},
 ) {
   return render(
     <ResponsivePanel defaultOpen={defaultOpen} onOpenChange={onOpenChange}>

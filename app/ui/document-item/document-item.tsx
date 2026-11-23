@@ -32,13 +32,7 @@ export type DocumentItemProps<C extends React.ElementType>
   >;
 
 export function DocumentItem<C extends React.ElementType = 'a'>(
-  { as = 'a' as C,
-    title,
-    shareState = 'private',
-    actionArea,
-    className,
-    ref,
-    ...rest }: DocumentItemProps<C>,
+  { as = 'a' as C, title, shareState = 'private', actionArea, className, ref, ...rest }: DocumentItemProps<C>,
 ) {
   const shouldReduceMotion = useReducedMotion();
   const wrapperRef = useRef<HTMLDivElement>(null);

@@ -121,32 +121,31 @@ describe('the settings routes', () => {
       ).not.toBeInTheDocument();
     });
 
-    test('navigate into a section and back through the topbar',
-      async () => {
-        const person = await renderSettings('/doc/:id/settings', 'tablet');
+    test('navigate into a section and back through the topbar', async () => {
+      const person = await renderSettings('/doc/:id/settings', 'tablet');
 
-        await person.click(
-          await screen.findByRole('link', { name: 'Account' }),
-        );
+      await person.click(
+        await screen.findByRole('link', { name: 'Account' }),
+      );
 
-        expect(
-          await screen.findByRole('dialog', { name: 'Account' }),
-        ).toBeInTheDocument();
-        expect(screen.getByLabelText('Name'))
-          .toHaveValue(userFixture.name);
-        expect(
-          screen.getByRole('button', { name: 'Save' }),
-        ).toBeInTheDocument();
+      expect(
+        await screen.findByRole('dialog', { name: 'Account' }),
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText('Name'))
+        .toHaveValue(userFixture.name);
+      expect(
+        screen.getByRole('button', { name: 'Save' }),
+      ).toBeInTheDocument();
 
-        await person.click(screen.getByRole('button', { name: 'Back' }));
+      await person.click(screen.getByRole('button', { name: 'Back' }));
 
-        expect(
-          await screen.findByRole('dialog', { name: 'Settings' }),
-        ).toBeInTheDocument();
-        expect(
-          screen.queryByRole('button', { name: 'Back' }),
-        ).not.toBeInTheDocument();
-      });
+      expect(
+        await screen.findByRole('dialog', { name: 'Settings' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'Back' }),
+      ).not.toBeInTheDocument();
+    });
 
     test('link to support through a mailto', async () => {
       await renderSettings('/doc/:id/settings/support', 'tablet');
@@ -170,54 +169,51 @@ describe('the settings routes', () => {
       ).not.toBeInTheDocument();
     });
 
-    test('close through the cancel button and return to the document',
-      async () => {
-        const person
-          = await renderSettings('/doc/:id/settings/account', 'tablet');
+    test('close through the cancel button and return to the document', async () => {
+      const person
+        = await renderSettings('/doc/:id/settings/account', 'tablet');
 
-        await person.click(
-          await screen.findByRole('button', { name: 'Cancel' }),
-        );
+      await person.click(
+        await screen.findByRole('button', { name: 'Cancel' }),
+      );
 
-        await waitFor(() => {
-          expect(
-            screen.queryByRole('dialog'),
-          ).not.toBeInTheDocument();
-        });
+      await waitFor(() => {
         expect(
-          screen.getByRole('button', { name: 'Share' }),
-        ).toBeInTheDocument();
+          screen.queryByRole('dialog'),
+        ).not.toBeInTheDocument();
       });
+      expect(
+        screen.getByRole('button', { name: 'Share' }),
+      ).toBeInTheDocument();
+    });
   });
 
   describe('with the side navigation', () => {
     // The sidebar links straight into the account section off mobile,
     // which is the same URL a section deep link opens.
-    test('open the account section without the back button',
-      async () => {
-        await renderSettings('/doc/:id/settings/account', 'desktop');
+    test('open the account section without the back button', async () => {
+      await renderSettings('/doc/:id/settings/account', 'desktop');
 
-        expect(await screen.findByLabelText('Name'))
-          .toHaveValue(userFixture.name);
-        expect(
-          screen.getByRole('link', { name: 'Account' }),
-        ).toHaveAttribute('aria-current', 'page');
-        expect(
-          screen.queryByRole('button', { name: 'Back' }),
-        ).not.toBeInTheDocument();
-      });
+      expect(await screen.findByLabelText('Name'))
+        .toHaveValue(userFixture.name);
+      expect(
+        screen.getByRole('link', { name: 'Account' }),
+      ).toHaveAttribute('aria-current', 'page');
+      expect(
+        screen.queryByRole('button', { name: 'Back' }),
+      ).not.toBeInTheDocument();
+    });
 
-    test('still render the menu page for the settings URL itself',
-      async () => {
-        await renderSettings('/doc/:id/settings', 'desktop');
+    test('still render the menu page for the settings URL itself', async () => {
+      await renderSettings('/doc/:id/settings', 'desktop');
 
-        expect(
-          await screen.findByRole('dialog', { name: 'Settings' }),
-        ).toBeInTheDocument();
-        expect(
-          screen.getByRole('link', { name: 'Account' }),
-        ).toBeInTheDocument();
-      });
+      expect(
+        await screen.findByRole('dialog', { name: 'Settings' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: 'Account' }),
+      ).toBeInTheDocument();
+    });
 
     test('switch sections through the side navigation', async () => {
       const person

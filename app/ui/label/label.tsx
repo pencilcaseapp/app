@@ -11,14 +11,7 @@ export interface Label extends PropsWithChildren {
 }
 
 export const Label: React.FC<Label>
-  = ({ htmlFor,
-    id,
-    disabled,
-    className,
-    variant = 'bodySmall',
-    fontWeight = 'semibold',
-    children,
-  }) => {
+  = ({ htmlFor, id, disabled, className, variant = 'bodySmall', fontWeight = 'semibold', children }) => {
     return (
       <Typography
         id={id}

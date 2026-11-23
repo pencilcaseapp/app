@@ -204,16 +204,15 @@ describe('getSubscriptionOverview', () => {
     );
   });
 
-  it('reports pro features without a subscription behind them',
-    async () => {
-      getSubscriptionWithStatusMock.mockResolvedValue(undefined);
+  it('reports pro features without a subscription behind them', async () => {
+    getSubscriptionWithStatusMock.mockResolvedValue(undefined);
 
-      const overview = await getSubscriptionOverview(
-        { ...userFixture, hasSubscription: true },
-      );
+    const overview = await getSubscriptionOverview(
+      { ...userFixture, hasSubscription: true },
+    );
 
-      expect(overview).toStrictEqual({ kind: 'complimentary' });
-    });
+    expect(overview).toStrictEqual({ kind: 'complimentary' });
+  });
 });
 
 describe('startProCheckout', () => {
@@ -368,22 +367,21 @@ describe('handleCreemWebhook', () => {
     expect(error).toBe(HandleCreemWebhookError.MalformedPayload);
   });
 
-  it('acknowledges an already processed event without reprocessing',
-    async () => {
-      recordWebhookEventMock.mockResolvedValue(undefined);
-      getWebhookEventMock.mockResolvedValue({
-        id: 'evt_123',
-        processedAt: new Date(),
-      });
-
-      const [error] = await handleCreemWebhook(
-        webhookEvent('subscription.paid', creemSubscription()),
-        'sig',
-      );
-
-      expect(error).toBeNull();
-      expect(upsertSubscriptionMock).not.toHaveBeenCalled();
+  it('acknowledges an already processed event without reprocessing', async () => {
+    recordWebhookEventMock.mockResolvedValue(undefined);
+    getWebhookEventMock.mockResolvedValue({
+      id: 'evt_123',
+      processedAt: new Date(),
     });
+
+    const [error] = await handleCreemWebhook(
+      webhookEvent('subscription.paid', creemSubscription()),
+      'sig',
+    );
+
+    expect(error).toBeNull();
+    expect(upsertSubscriptionMock).not.toHaveBeenCalled();
+  });
 
   it('reprocesses an event whose first attempt crashed', async () => {
     recordWebhookEventMock.mockResolvedValue(undefined);
@@ -420,35 +418,33 @@ describe('handleCreemWebhook', () => {
     expect(markWebhookEventProcessedMock).toHaveBeenCalledWith('evt_123');
   });
 
-  it('sends no welcome email for a subscription already stored',
-    async () => {
-      upsertSubscriptionMock
-        .mockResolvedValue({ subscription: {}, inserted: false });
+  it('sends no welcome email for a subscription already stored', async () => {
+    upsertSubscriptionMock
+      .mockResolvedValue({ subscription: {}, inserted: false });
 
-      await handleCreemWebhook(
-        webhookEvent('subscription.paid', creemSubscription()),
-        'sig',
-      );
+    await handleCreemWebhook(
+      webhookEvent('subscription.paid', creemSubscription()),
+      'sig',
+    );
 
-      expect(sendEmailSubscriptionStartedMock).not.toHaveBeenCalled();
-    });
+    expect(sendEmailSubscriptionStartedMock).not.toHaveBeenCalled();
+  });
 
-  it('sends no welcome email when the first stored state is canceled',
-    async () => {
-      upsertSubscriptionMock
-        .mockResolvedValue({ subscription: {}, inserted: true });
-      hasSubscriptionWithStatusMock.mockResolvedValue(false);
+  it('sends no welcome email when the first stored state is canceled', async () => {
+    upsertSubscriptionMock
+      .mockResolvedValue({ subscription: {}, inserted: true });
+    hasSubscriptionWithStatusMock.mockResolvedValue(false);
 
-      await handleCreemWebhook(
-        webhookEvent(
-          'subscription.canceled',
-          creemSubscription({ status: 'canceled' }),
-        ),
-        'sig',
-      );
+    await handleCreemWebhook(
+      webhookEvent(
+        'subscription.canceled',
+        creemSubscription({ status: 'canceled' }),
+      ),
+      'sig',
+    );
 
-      expect(sendEmailSubscriptionStartedMock).not.toHaveBeenCalled();
-    });
+    expect(sendEmailSubscriptionStartedMock).not.toHaveBeenCalled();
+  });
 
   it('switches the features off and confirms a cancellation', async () => {
     hasSubscriptionWithStatusMock.mockResolvedValue(false);
@@ -505,34 +501,32 @@ describe('handleCreemWebhook', () => {
     });
   });
 
-  it('stores the subscription delivered with checkout.completed',
-    async () => {
-      const [error] = await handleCreemWebhook(
-        webhookEvent('checkout.completed', {
-          id: 'ch_123',
-          subscription: creemSubscription(),
-        }),
-        'sig',
-      );
+  it('stores the subscription delivered with checkout.completed', async () => {
+    const [error] = await handleCreemWebhook(
+      webhookEvent('checkout.completed', {
+        id: 'ch_123',
+        subscription: creemSubscription(),
+      }),
+      'sig',
+    );
 
-      expect(error).toBeNull();
-      expect(upsertSubscriptionMock).toHaveBeenCalled();
-    });
+    expect(error).toBeNull();
+    expect(upsertSubscriptionMock).toHaveBeenCalled();
+  });
 
-  it('skips a checkout that only references its subscription by id',
-    async () => {
-      const [error] = await handleCreemWebhook(
-        webhookEvent('checkout.completed', {
-          id: 'ch_123',
-          subscription: 'sub_123',
-        }),
-        'sig',
-      );
+  it('skips a checkout that only references its subscription by id', async () => {
+    const [error] = await handleCreemWebhook(
+      webhookEvent('checkout.completed', {
+        id: 'ch_123',
+        subscription: 'sub_123',
+      }),
+      'sig',
+    );
 
-      expect(error).toBeNull();
-      expect(upsertSubscriptionMock).not.toHaveBeenCalled();
-      expect(markWebhookEventProcessedMock).toHaveBeenCalled();
-    });
+    expect(error).toBeNull();
+    expect(upsertSubscriptionMock).not.toHaveBeenCalled();
+    expect(markWebhookEventProcessedMock).toHaveBeenCalled();
+  });
 
   it('syncs the subscription embedded in a refund', async () => {
     hasSubscriptionWithStatusMock.mockResolvedValue(false);
@@ -561,22 +555,21 @@ describe('handleCreemWebhook', () => {
     expect(markWebhookEventProcessedMock).toHaveBeenCalledWith('evt_123');
   });
 
-  it('resolves the user through the stored subscription first',
-    async () => {
-      getSubscriptionByCreemIdMock
-        .mockResolvedValue({ userId: userFixture.id });
+  it('resolves the user through the stored subscription first', async () => {
+    getSubscriptionByCreemIdMock
+      .mockResolvedValue({ userId: userFixture.id });
 
-      await handleCreemWebhook(
-        webhookEvent(
-          'subscription.paid',
-          creemSubscription({ metadata: null }),
-        ),
-        'sig',
-      );
+    await handleCreemWebhook(
+      webhookEvent(
+        'subscription.paid',
+        creemSubscription({ metadata: null }),
+      ),
+      'sig',
+    );
 
-      expect(getUserMock).toHaveBeenCalledWith(userFixture.id);
-      expect(upsertSubscriptionMock).toHaveBeenCalled();
-    });
+    expect(getUserMock).toHaveBeenCalledWith(userFixture.id);
+    expect(upsertSubscriptionMock).toHaveBeenCalled();
+  });
 
   it('resolves the user through the linked Creem customer', async () => {
     getUserMock.mockResolvedValue(undefined);
@@ -610,25 +603,24 @@ describe('handleCreemWebhook', () => {
       .toHaveBeenCalledWith('No user found for Creem subscription sub_123');
   });
 
-  it('never links a Creem customer another user already holds',
-    async () => {
-      const log = silenceLog('warn');
-      getUserByCreemCustomerIdMock
-        .mockResolvedValue({ ...userFixture, id: 'other-user' });
+  it('never links a Creem customer another user already holds', async () => {
+    const log = silenceLog('warn');
+    getUserByCreemCustomerIdMock
+      .mockResolvedValue({ ...userFixture, id: 'other-user' });
 
-      await handleCreemWebhook(
-        webhookEvent('subscription.paid', creemSubscription()),
-        'sig',
-      );
+    await handleCreemWebhook(
+      webhookEvent('subscription.paid', creemSubscription()),
+      'sig',
+    );
 
-      expect(updateUserMock).toHaveBeenCalledWith(userFixture.id, {
-        hasSubscription: true,
-        creemCustomerId: undefined,
-      }, 'tx');
-      expect(log).toHaveBeenCalledWith(
-        'Creem customer cust_123 is already linked to another user',
-      );
-    });
+    expect(updateUserMock).toHaveBeenCalledWith(userFixture.id, {
+      hasSubscription: true,
+      creemCustomerId: undefined,
+    }, 'tx');
+    expect(log).toHaveBeenCalledWith(
+      'Creem customer cust_123 is already linked to another user',
+    );
+  });
 });
 
 describe('getBillingPortalUrl', () => {

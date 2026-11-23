@@ -280,7 +280,8 @@ describe('openDocument', () => {
     );
 
     const [error, document] = await openDocument(
-      documentFixture.id, viewer,
+      documentFixture.id,
+      viewer,
     );
 
     expect(error).toBeNull();
@@ -316,7 +317,8 @@ describe('openDocument', () => {
     getDocumentForViewerMock.mockResolvedValue(viewerDocument());
 
     const [error, document] = await openDocument(
-      documentFixture.id, viewer,
+      documentFixture.id,
+      viewer,
     );
 
     expect(error).toBeNull();
@@ -440,7 +442,8 @@ describe('openDocument', () => {
     );
 
     const [error, document] = await openDocument(
-      documentFixture.id, viewer,
+      documentFixture.id,
+      viewer,
     );
 
     expect(error).toBeNull();
@@ -460,7 +463,8 @@ describe('openDocument', () => {
     }));
 
     const [, document] = await openDocument(
-      documentFixture.id, viewer,
+      documentFixture.id,
+      viewer,
     );
 
     expect(document?.hasJoined).toBe(false);
@@ -803,7 +807,8 @@ describe('deleteDocument', () => {
     });
 
     const [error, result] = await deleteDocument(
-      documentFixture.id, userFixture.id,
+      documentFixture.id,
+      userFixture.id,
     );
 
     expect(error).toBeNull();
@@ -839,26 +844,25 @@ describe('deleteDocument', () => {
 });
 
 describe('leaveDocument', () => {
-  it('removes an invited person\'s rows and closes their connections',
-    async () => {
-      getDocumentForViewerMock.mockResolvedValue(viewerDocument({
-        userId: otherUserId,
-        collaborator: invite('edit', { accepted: true }),
-      }));
+  it('removes an invited person\'s rows and closes their connections', async () => {
+    getDocumentForViewerMock.mockResolvedValue(viewerDocument({
+      userId: otherUserId,
+      collaborator: invite('edit', { accepted: true }),
+    }));
 
-      const [error, result] = await leaveDocument(documentFixture.id, viewer);
+    const [error, result] = await leaveDocument(documentFixture.id, viewer);
 
-      expect(error).toBeNull();
-      expect(result).toStrictEqual({ id: documentFixture.id });
-      expect(removeViewerCollaboratorsMock).toHaveBeenCalledWith({
-        documentId: documentFixture.id,
-        viewer,
-      });
-      expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
-        documentId: documentFixture.id,
-        userId: viewer.id,
-      });
+    expect(error).toBeNull();
+    expect(result).toStrictEqual({ id: documentFixture.id });
+    expect(removeViewerCollaboratorsMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      viewer,
     });
+    expect(closeDocumentConnectionsMock).toHaveBeenCalledWith({
+      documentId: documentFixture.id,
+      userId: viewer.id,
+    });
+  });
 
   it('leaves the connections open while the link is on', async () => {
     getDocumentForViewerMock.mockResolvedValue({
@@ -900,7 +904,8 @@ describe('restoreDocument', () => {
     });
 
     const [error, result] = await restoreDocument(
-      documentFixture.id, userFixture.id,
+      documentFixture.id,
+      userFixture.id,
     );
 
     expect(error).toBeNull();

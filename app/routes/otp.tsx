@@ -34,7 +34,8 @@ export async function loader({ request, params: { otpId } }: Route.ActionArgs) {
   if (!otp) {
     return redirect(
       withSearchParams(
-        href('/signin'), {
+        href('/signin'),
+        {
           [SearchParamAuth.IsExpired]: 'true',
         },
       ),
@@ -61,7 +62,8 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
   switch (form.data.action) {
     case 'verify': {
       const [error, result] = await verifyMagicCode(
-        otpId, email,
+        otpId,
+        email,
         form.data.otp,
       );
 
@@ -78,7 +80,8 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
           case VerifyMagicCodeError.Expired: {
             return redirect(
               withSearchParams(
-                href('/signin'), {
+                href('/signin'),
+                {
                   [SearchParamAuth.IsExpired]: 'true',
                   [SearchParamAuth.ReturnUrl]: returnUrl,
                 },
@@ -105,7 +108,8 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
           href('/onboarding'),
           {
             [SearchParamAuth.ReturnUrl]: returnUrl,
-          }),
+          },
+        ),
         {
           headers: {
             'Set-Cookie': sessionCookie,

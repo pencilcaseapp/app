@@ -27,9 +27,8 @@ export const Topbar: React.FC<TopbarProps>
           ? (rightRef.current.offsetWidth + 6)
           : 0;
 
-        // eslint-disable-next-line @eslint-react/set-state-in-effect
         setLeftWidth(leftElement);
-        // eslint-disable-next-line @eslint-react/set-state-in-effect
+
         setRightWidth(rightElement);
       };
 

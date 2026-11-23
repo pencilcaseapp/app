@@ -137,30 +137,29 @@ describe('getSubscriptionByCreemId', () => {
 });
 
 describe('getSubscriptionWithStatus', () => {
-  it('returns the newest subscription in one of the given statuses',
-    async () => {
-      const user = await createTestUser();
-      const older = await createTestSubscription(user.id, {
-        status: 'canceled',
-        createdAt: new Date('2025-01-01T00:00:00Z'),
-      });
-      const newer = await createTestSubscription(user.id, {
-        status: 'active',
-        createdAt: new Date('2026-01-01T00:00:00Z'),
-      });
-      await createTestSubscription(user.id, {
-        status: 'active',
-        createdAt: new Date('2024-01-01T00:00:00Z'),
-      });
-
-      const subscription = await getSubscriptionWithStatus(
-        user.id,
-        [SubscriptionStatus.Active, SubscriptionStatus.PastDue],
-      );
-
-      expect(subscription?.id).toBe(newer.id);
-      expect(subscription?.id).not.toBe(older.id);
+  it('returns the newest subscription in one of the given statuses', async () => {
+    const user = await createTestUser();
+    const older = await createTestSubscription(user.id, {
+      status: 'canceled',
+      createdAt: new Date('2025-01-01T00:00:00Z'),
     });
+    const newer = await createTestSubscription(user.id, {
+      status: 'active',
+      createdAt: new Date('2026-01-01T00:00:00Z'),
+    });
+    await createTestSubscription(user.id, {
+      status: 'active',
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+    });
+
+    const subscription = await getSubscriptionWithStatus(
+      user.id,
+      [SubscriptionStatus.Active, SubscriptionStatus.PastDue],
+    );
+
+    expect(subscription?.id).toBe(newer.id);
+    expect(subscription?.id).not.toBe(older.id);
+  });
 
   it('returns undefined without a matching subscription', async () => {
     const user = await createTestUser();

@@ -15,13 +15,12 @@ const props: DocumentInviteEmailProps = {
 };
 
 describe('documentInviteEmailSubject', () => {
-  it('names who shared what, so the invite is recognisable in the inbox',
-    () => {
-      expect(documentInviteEmailSubject({
-        inviterName: 'Alex',
-        documentTitle: 'Trip to the Alps',
-      })).toBe('Alex shared "Trip to the Alps" with you');
-    });
+  it('names who shared what, so the invite is recognisable in the inbox', () => {
+    expect(documentInviteEmailSubject({
+      inviterName: 'Alex',
+      documentTitle: 'Trip to the Alps',
+    })).toBe('Alex shared "Trip to the Alps" with you');
+  });
 
   it('falls back to Untitled for a document with no heading yet', () => {
     expect(documentInviteEmailSubject({
@@ -32,12 +31,11 @@ describe('documentInviteEmailSubject', () => {
 });
 
 describe('DocumentInviteEmail', () => {
-  it('links to the document, which is what accepting the invite is',
-    async () => {
-      const html = await render(<DocumentInviteEmail {...props} />);
+  it('links to the document, which is what accepting the invite is', async () => {
+    const html = await render(<DocumentInviteEmail {...props} />);
 
-      expect(html).toContain(`href="${documentUrl}"`);
-    });
+    expect(html).toContain(`href="${documentUrl}"`);
+  });
 
   it('names the document and who shared it', async () => {
     const text = await render(<DocumentInviteEmail {...props} />, {

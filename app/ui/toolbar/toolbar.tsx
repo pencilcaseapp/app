@@ -13,10 +13,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   // the server cannot know the page is scrolled, so a blur switched on by
   // scrolling would pop in once the scripts run.
   return (
-    <div className={classNames('flex gap-2 items-center h-11 origin-center transition-all ring-pca-grey-200 bg-pca-white/85 dark:bg-pca-grey-900/80 rounded-2xl px-1.5 py-1.5 mx-1 lg:backdrop-blur-md',
-      isScrolling && 'lg:shadow-xs lg:ring-1 lg:dark:ring-pca-grey-800',
-    )}
-    >
+    <div className={classNames('flex gap-2 items-center h-11 origin-center transition-all ring-pca-grey-200 bg-pca-white/85 dark:bg-pca-grey-900/80 rounded-2xl px-1.5 py-1.5 mx-1 lg:backdrop-blur-md', isScrolling && 'lg:shadow-xs lg:ring-1 lg:dark:ring-pca-grey-800')}>
       {children}
     </div>
   );

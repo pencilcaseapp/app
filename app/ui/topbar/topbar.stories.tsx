@@ -87,10 +87,7 @@ export const SwapAreasExample: Story = {
           center={
             !isSwapped
               ? (
-                  <div className={classNames('flex gap-2 origin-center transition-all ring-pca-grey-200 bg-pca-white/85 dark:bg-pca-grey-900/80 rounded-2xl px-1.5 py-1.5 mx-1',
-                    isScrolling && 'lg:shadow-xs lg:ring-1 lg:dark:ring-pca-grey-700 lg:backdrop-blur-md',
-                  )}
-                  >
+                  <div className={classNames('flex gap-2 origin-center transition-all ring-pca-grey-200 bg-pca-white/85 dark:bg-pca-grey-900/80 rounded-2xl px-1.5 py-1.5 mx-1', isScrolling && 'lg:shadow-xs lg:ring-1 lg:dark:ring-pca-grey-700 lg:backdrop-blur-md')}>
                     <div className="flex gap-4 md:gap-2">
                       <Toggle className="h-8!" isActive={true} icon="h1" iconTitle="headline 1" />
                       <Toggle className="h-8!" isActive={false} icon="h2" iconTitle="headline 2" />

@@ -122,10 +122,9 @@ describe('getRemoteCollaborators', () => {
       .toEqual(['grace', 'alan']);
   });
 
-  it('should keep everybody when the local client is not in the states',
-    () => {
-      expect(getRemoteCollaborators(states, 99)).toHaveLength(3);
-    });
+  it('should keep everybody when the local client is not in the states', () => {
+    expect(getRemoteCollaborators(states, 99)).toHaveLength(3);
+  });
 
   it('should collapse the several tabs of the same person', () => {
     const withSecondTab = [...states, state(4, 'grace')];
@@ -185,15 +184,14 @@ describe('getRemoteCollaborators', () => {
       .toContain(getRemoteCollaborators(offPalette, 1)[0].color);
   });
 
-  it('should replace a missing colour rather than hide the collaborator',
-    () => {
-      const colorless = [{ clientId: 2, name: 'Otter' }];
+  it('should replace a missing colour rather than hide the collaborator', () => {
+    const colorless = [{ clientId: 2, name: 'Otter' }];
 
-      const [collaborator] = getRemoteCollaborators(colorless, 1);
+    const [collaborator] = getRemoteCollaborators(colorless, 1);
 
-      expect(collaborator.name).toBe('Otter');
-      expect(PRESENCE_COLORS).toContain(collaborator.color);
-    });
+    expect(collaborator.name).toBe('Otter');
+    expect(PRESENCE_COLORS).toContain(collaborator.color);
+  });
 
   it('should keep a colour that is in the palette', () => {
     const onPalette = [state(2, 'guest-a', { color: PRESENCE_COLORS[7] })];

@@ -25,11 +25,11 @@ vi.mock('~/hooks/use-is-mobile');
 
 function renderResponsiveDialog(
   { contentProps, innerProps, defaultOpen }:
-  {
-    contentProps?: ResponsiveDialogContentProps;
-    innerProps?: ResponsiveDialogContentInnerProps;
-    defaultOpen?: boolean;
-  } = {},
+    {
+      contentProps?: ResponsiveDialogContentProps;
+      innerProps?: ResponsiveDialogContentInnerProps;
+      defaultOpen?: boolean;
+    } = {},
 ) {
   return render(
     <ResponsiveDialog defaultOpen={defaultOpen}>

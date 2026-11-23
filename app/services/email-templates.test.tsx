@@ -111,8 +111,7 @@ describe('sendEmailDocumentInvite', () => {
   };
 
   it('sends the invite template scoped to the invite, and logs it against '
-    + 'the inviter rather than a recipient who may have no account',
-  async () => {
+    + 'the inviter rather than a recipient who may have no account', async () => {
     await sendEmailDocumentInvite(invite);
 
     expect(sendEMailMock).toHaveBeenCalledWith({

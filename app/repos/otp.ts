@@ -74,7 +74,8 @@ export async function expireAllValidOtps(canonicalEmail: string) {
         eq(otps.canonicalEmail, canonicalEmail),
         gt(otps.expiresAt, new Date()),
         isNull(otps.usedAt),
-      ))
+      ),
+    )
     .returning();
 }
 

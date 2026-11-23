@@ -79,8 +79,7 @@ export async function renderRoute<P extends keyof Register['pages']>(
   },
 ) {
   const match = flattenRoutes(routes).find(({ route, fullPath }) =>
-    path === '/' ? route.index === true : `/${fullPath}` === path,
-  );
+    path === '/' ? route.index === true : `/${fullPath}` === path);
   if (!match) {
     throw new Error(`No route found for ${path}`);
   }

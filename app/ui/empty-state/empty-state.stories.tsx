@@ -29,7 +29,7 @@ export const Default: Story = {
   args: {
     title: 'Permission Denied',
     description:
-        'You don’t have permission to access this doc. Please ask the owner to share the doc with you.',
+      'You don’t have permission to access this doc. Please ask the owner to share the doc with you.',
   },
 };
 
@@ -41,7 +41,7 @@ export const ActionArea: Story = {
   args: {
     title: 'Permission Denied',
     description:
-        'You don’t have permission to access this doc. Please ask the owner to share the doc with you.',
+      'You don’t have permission to access this doc. Please ask the owner to share the doc with you.',
     actionArea: (
       <Button>
         Request Access
@@ -58,7 +58,7 @@ export const CustomIllustration: Story = {
   args: {
     title: 'Not Found',
     description:
-        'It may have been deleted, moved, or the link you followed is taking you nowhere.',
+      'It may have been deleted, moved, or the link you followed is taking you nowhere.',
     imageSrcLight: '/lost-pencil-light.svg',
     imageSrcDark: '/lost-pencil-dark.svg',
     actionArea: (

@@ -111,7 +111,8 @@ export async function verifyEmailChange(
   }
 
   const attempt = await claimEmailChangeRequestAttempt(
-    change.id, MAX_EMAIL_CHANGE_ATTEMPTS,
+    change.id,
+    MAX_EMAIL_CHANGE_ATTEMPTS,
   );
 
   if (!attempt) {

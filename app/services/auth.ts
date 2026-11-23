@@ -83,7 +83,9 @@ export type VerifyMagicCodeResult
   = [VerifyMagicCodeError] | [null, { otp: Otp; user: User }];
 
 export async function verifyMagicCode(
-  id: string, email: string, code: string,
+  id: string,
+  email: string,
+  code: string,
 ): Promise<VerifyMagicCodeResult> {
   const otp = await getValidOtp(id);
 
@@ -155,7 +157,10 @@ export async function getAuthUserByCookie(
 }
 
 export async function createSessionCookie(input: {
-  request: Request; userId: string; userAgent?: string; }) {
+  request: Request;
+  userId: string;
+  userAgent?: string;
+}) {
   const { request, userId, userAgent } = input;
   const cookieSession = await getSession(
     request.headers.get('Cookie'),
@@ -219,10 +224,9 @@ export async function onboardUser(
 }
 
 export function getSignInUrl(returnUrl: string = href('/')) {
-  return withSearchParams(href('/signin'),
-    {
-      [SearchParamAuth.ReturnUrl]: getNormalizedReturnUrl(returnUrl),
-    });
+  return withSearchParams(href('/signin'), {
+    [SearchParamAuth.ReturnUrl]: getNormalizedReturnUrl(returnUrl),
+  });
 }
 
 async function readUserSession(cookieHeader: string | null) {

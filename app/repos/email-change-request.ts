@@ -64,7 +64,8 @@ export async function expireAllValidEmailChangeRequests(userId: string) {
         eq(emailChangeRequests.userId, userId),
         gt(emailChangeRequests.expiresAt, new Date()),
         isNull(emailChangeRequests.usedAt),
-      ));
+      ),
+    );
 }
 
 /**

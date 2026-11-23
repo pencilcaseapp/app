@@ -24,13 +24,7 @@ export type UpgradeTeaserProps<C extends React.ElementType>
  * card.
  */
 export function UpgradeTeaser<C extends React.ElementType = 'a'>(
-  { as,
-    plan,
-    title,
-    action,
-    className,
-    ref,
-    ...rest }: UpgradeTeaserProps<C>,
+  { as, plan, title, action, className, ref, ...rest }: UpgradeTeaserProps<C>,
 ) {
   const Component = as || 'a';
 

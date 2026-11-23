@@ -113,8 +113,7 @@ export function verifyRedirectSignature(searchParams: URLSearchParams) {
 
   const data = [...searchParams]
     .filter(([key, value]) =>
-      key !== 'signature' && value !== '' && value !== 'null',
-    )
+      key !== 'signature' && value !== '' && value !== 'null')
     .map(([key, value]) => `${key}=${value}`)
     .concat(`salt=${config.creem.apiKey}`)
     .join('|');

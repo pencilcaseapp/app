@@ -148,7 +148,8 @@ export const Default: Story = {
                   </DocumentGroupRoot>
                 </>
               ),
-            }, {
+            },
+            {
               key: 'personal',
               content: (
                 <DocumentGroupRoot>

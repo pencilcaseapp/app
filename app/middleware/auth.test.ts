@@ -56,12 +56,14 @@ describe('authMiddleware', () => {
     };
 
     await authMiddleware(
-      { request, context } as never, undefined as never,
+      { request, context } as never,
+      undefined as never,
     );
 
     expect(redirectMock).not.toHaveBeenCalled();
     expect(context.set).toHaveBeenCalledWith(
-      userSessionContext, userFixture,
+      userSessionContext,
+      userFixture,
     );
   });
 });

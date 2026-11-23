@@ -14,8 +14,7 @@ describe('LayoutAuth', () => {
           Component: () => 'Content',
         },
       ],
-    },
-    ]);
+    }]);
 
     const { container } = render(
       <Stub />,
