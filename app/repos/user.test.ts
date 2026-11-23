@@ -198,7 +198,7 @@ describe('getAndRefreshUserSession', () => {
     });
 
     expect(result?.session.expiresAt.getTime())
-      .toBeGreaterThan(Date.now() + 89 * 24 * 60 * 60 * 1000);
+      .toBeGreaterThan(Date.now() + 179 * 24 * 60 * 60 * 1000);
   });
 
   it('returns null if no session is found', async () => {
