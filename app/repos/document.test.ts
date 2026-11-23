@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   acceptInvite,
   connectCollaborator,
+  countDocuments,
   countOwnedDocuments,
   createDocument,
   createDocumentAsset,
@@ -18,6 +19,7 @@ import {
   getDocumentTitle,
   getInvitedCollaborators,
   getOwnedDocumentIds,
+  getSharedDocumentList,
   inviteCollaborator,
   getDocumentIdsDeletedBefore,
   hardDeleteDocuments,
@@ -441,12 +443,74 @@ describe('getDeletedDocumentList', () => {
     const documents = await getDeletedDocumentList(user.id);
 
     expect(documents).toStrictEqual([
-      { id: deleted.id, title: deleted.title },
+      { id: deleted.id, title: deleted.title, userId: user.id },
     ]);
   });
 
   it('returns an empty list for an invalid id', async () => {
     expect(await getDeletedDocumentList('not-a-uuid')).toStrictEqual([]);
+  });
+});
+
+describe('getSharedDocumentList', () => {
+  it('returns the documents of others shared with the user', async () => {
+    const owner = await createTestUser();
+    const user = await createTestUser();
+    await createDocumentWithTitle(user.id);
+    const linked = await createSharedDocument(owner.id);
+    const invited = await createDocumentWithTitle(owner.id);
+    await connectDocumentCollaborator(linked.id, user.id);
+    await inviteDocumentCollaborator(invited.id, user.email, {
+      userId: user.id,
+    });
+
+    const documents = await getSharedDocumentList(user.id);
+
+    expect(documents).toHaveLength(2);
+    expect(documents).toContainEqual({
+      id: linked.id,
+      title: linked.title,
+      userId: owner.id,
+    });
+    expect(documents).toContainEqual({
+      id: invited.id,
+      title: invited.title,
+      userId: owner.id,
+    });
+  });
+
+  it('leaves out the user\'s own and deleted documents', async () => {
+    const owner = await createTestUser();
+    const user = await createTestUser();
+    const own = await createSharedDocument(user.id);
+    await connectDocumentCollaborator(own.id, user.id);
+    const deleted = await createDeletedDocument(owner.id);
+    await connectDocumentCollaborator(deleted.id, user.id);
+
+    expect(await getSharedDocumentList(user.id)).toStrictEqual([]);
+  });
+
+  it('returns an empty list for an invalid id', async () => {
+    expect(await getSharedDocumentList('not-a-uuid')).toStrictEqual([]);
+  });
+});
+
+describe('countDocuments', () => {
+  it('counts the user\'s documents in use and deleted', async () => {
+    const user = await createTestUser();
+    const other = await createTestUser();
+    await createDocumentWithTitle(user.id);
+    await createDocumentWithTitle(user.id);
+    await createDeletedDocument(user.id);
+    await createDocumentWithTitle(other.id);
+
+    expect(await countDocuments(user.id))
+      .toStrictEqual({ owned: 2, deleted: 1 });
+  });
+
+  it('counts nothing for an invalid id', async () => {
+    expect(await countDocuments('not-a-uuid'))
+      .toStrictEqual({ owned: 0, deleted: 0 });
   });
 });
 

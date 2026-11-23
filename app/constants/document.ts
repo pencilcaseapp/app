@@ -34,6 +34,14 @@ export type DocumentCollaboratorSource
  */
 export type DocumentShareState = 'private' | 'link' | 'invite';
 
+/**
+ * The folders the navigation switches between: every document the user
+ * can open, the ones others shared with them, and their deleted ones.
+ */
+export const DOCUMENT_FOLDERS = ['all', 'shared', 'deleted'] as const;
+
+export type DocumentFolder = typeof DOCUMENT_FOLDERS[number];
+
 /** An invite defaults to editing: inviting somebody by name is asking
  * them to work on the document, not to look at it. */
 export const DEFAULT_DOCUMENT_INVITE_ACCESS: DocumentAccess = 'edit';

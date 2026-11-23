@@ -1,12 +1,20 @@
 import { createCookie } from 'react-router';
+import { DOCUMENT_FOLDERS, type DocumentFolder } from '~/constants/document';
 
 export interface UserPrefs {
   sidebarOpen: boolean;
+  /** The folder the navigation lists. */
+  folder: DocumentFolder;
 }
 
 const DEFAULT_USER_PREFS: UserPrefs = {
   sidebarOpen: true,
+  folder: 'all',
 };
+
+function isDocumentFolder(value: unknown): value is DocumentFolder {
+  return DOCUMENT_FOLDERS.some(folder => folder === value);
+}
 
 /**
  * The reader's preferences, kept in one cookie rather than local storage so
@@ -29,6 +37,9 @@ async function parseUserPrefs(cookie: string | null): Promise<UserPrefs> {
     sidebarOpen: typeof stored.sidebarOpen === 'boolean'
       ? stored.sidebarOpen
       : DEFAULT_USER_PREFS.sidebarOpen,
+    folder: isDocumentFolder(stored.folder)
+      ? stored.folder
+      : DEFAULT_USER_PREFS.folder,
   };
 }
 

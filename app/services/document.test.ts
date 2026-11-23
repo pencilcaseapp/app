@@ -13,6 +13,8 @@ import {
   CopyImageError,
   createDocument,
   getDocumentList,
+  getDocumentNavigation,
+  getSharedDocumentList,
   getLatestDocumentId,
   CreateDocumentError,
   deleteDocument,
@@ -80,6 +82,9 @@ const countOwnedDocumentsMock = vi.fn();
 const createDocumentRowMock = vi.fn();
 const getDocumentIdsDeletedBeforeMock = vi.fn();
 const getDocumentListMock = vi.fn();
+const getSharedDocumentListMock = vi.fn();
+const getDeletedDocumentListMock = vi.fn();
+const countDocumentsMock = vi.fn();
 const hardDeleteDocumentsMock = vi.fn();
 const getInvitedCollaboratorsMock = vi.fn();
 const insertInviteMock = vi.fn();
@@ -108,6 +113,11 @@ vi.mock('~/repos/document', () => ({
   getDocumentIdsDeletedBefore: (...args: unknown[]) =>
     getDocumentIdsDeletedBeforeMock(...args),
   getDocumentList: (...args: unknown[]) => getDocumentListMock(...args),
+  getSharedDocumentList: (...args: unknown[]) =>
+    getSharedDocumentListMock(...args),
+  getDeletedDocumentList: (...args: unknown[]) =>
+    getDeletedDocumentListMock(...args),
+  countDocuments: (...args: unknown[]) => countDocumentsMock(...args),
   hardDeleteDocuments: (...args: unknown[]) =>
     hardDeleteDocumentsMock(...args),
   getInvitedCollaborators: (...args: unknown[]) =>
@@ -1029,6 +1039,69 @@ describe('getDocumentList', () => {
     expect(list.map(({ id }) => id)).toStrictEqual(['own', 'shared']);
     expect(getDeletedUserIdsMock)
       .toHaveBeenCalledWith([otherUserId, 'deleted-owner']);
+  });
+});
+
+describe('getSharedDocumentList', () => {
+  it('leaves out the documents of a deleted account', async () => {
+    getSharedDocumentListMock.mockResolvedValue([
+      { id: 'shared', userId: otherUserId },
+      { id: 'gone', userId: 'deleted-owner' },
+    ]);
+    getDeletedUserIdsMock.mockResolvedValueOnce(['deleted-owner']);
+
+    const list = await getSharedDocumentList(userFixture.id);
+
+    expect(list.map(({ id }) => id)).toStrictEqual(['shared']);
+  });
+});
+
+describe('getDocumentNavigation', () => {
+  it('lists all documents and counts the folders from them', async () => {
+    countDocumentsMock.mockResolvedValue({ owned: 1, deleted: 3 });
+    getDocumentListMock.mockResolvedValue([
+      { id: 'own', userId: userFixture.id },
+      { id: 'shared', userId: otherUserId },
+    ]);
+    getDeletedUserIdsMock.mockResolvedValueOnce([]);
+
+    const navigation = await getDocumentNavigation(userFixture.id, 'all');
+
+    expect(navigation.documents.map(({ id }) => id))
+      .toStrictEqual(['own', 'shared']);
+    expect(navigation.counts).toStrictEqual({ all: 2, shared: 1, deleted: 3 });
+    expect(navigation.ownedCount).toBe(1);
+    expect(getSharedDocumentListMock).not.toHaveBeenCalled();
+    expect(getDeletedDocumentListMock).not.toHaveBeenCalled();
+  });
+
+  it('lists the shared documents without loading all of them', async () => {
+    countDocumentsMock.mockResolvedValue({ owned: 4, deleted: 0 });
+    getSharedDocumentListMock.mockResolvedValue([
+      { id: 'shared', userId: otherUserId },
+    ]);
+    getDeletedUserIdsMock.mockResolvedValueOnce([]);
+
+    const navigation = await getDocumentNavigation(userFixture.id, 'shared');
+
+    expect(navigation.documents.map(({ id }) => id)).toStrictEqual(['shared']);
+    expect(navigation.counts).toStrictEqual({ all: 5, shared: 1, deleted: 0 });
+    expect(getDocumentListMock).not.toHaveBeenCalled();
+    expect(getDeletedDocumentListMock).not.toHaveBeenCalled();
+  });
+
+  it('lists the deleted documents', async () => {
+    countDocumentsMock.mockResolvedValue({ owned: 2, deleted: 1 });
+    getSharedDocumentListMock.mockResolvedValue([]);
+    getDeletedDocumentListMock.mockResolvedValue([{ id: 'deleted' }]);
+    getDeletedUserIdsMock.mockResolvedValueOnce([]);
+
+    const navigation = await getDocumentNavigation(userFixture.id, 'deleted');
+
+    expect(navigation.documents.map(({ id }) => id))
+      .toStrictEqual(['deleted']);
+    expect(navigation.counts).toStrictEqual({ all: 2, shared: 0, deleted: 1 });
+    expect(getDocumentListMock).not.toHaveBeenCalled();
   });
 });
 

@@ -110,9 +110,6 @@
      animation ends, and without it those frames snap back to full opacity. */
   --animate-scale-out: scaleOut 0.15s cubic-bezier(0.4, 0, 1, 1) forwards;
 
-  --animate-accordion-down: accordionDown 0.2s ease-out;
-  --animate-accordion-up: accordionUp 0.2s ease-out;
-
   /* Reordering a document list: rows that make room glide over the one row
      they lost or gained (`--pca-row-shift`), while the row arriving at the
      top only settles in — it never travels the length of the list. */
@@ -222,27 +219,6 @@
     to {
       opacity: 0;
       transform: scale(0.9);
-    }
-  }
-
-  @keyframes accordionDown {
-    from {
-      height: 0;
-      opacity: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-      opacity: 1;
-    }
-  }
-  @keyframes accordionUp {
-    from {
-      height: var(--radix-accordion-content-height);
-      opacity: 1;
-    }
-    to {
-      height: 0;
-      opacity: 0;
     }
   }
 

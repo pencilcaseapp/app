@@ -5,15 +5,14 @@ import {
   NavLink,
   Outlet,
   useLocation,
+  useRevalidator,
 } from 'react-router';
 import {
   DocumentTitleProvider,
   useActiveDocumentTitle,
 } from '~/contexts/document-title';
 import { SocketClientProvider } from '~/contexts/socket-client';
-import { DocumentGroup } from '~/ui/document-group/document-group';
 import { DocumentGroupEmpty } from '~/ui/document-group/document-group-empty';
-import { DocumentGroupRoot } from '~/ui/document-group/document-root';
 import { DocumentItem } from '~/ui/document-item/document-item';
 import { DropdownMenu } from '~/ui/dropdown-menu/dropdown-menu';
 import { DropdownMenuContent } from '~/ui/dropdown-menu/dropdown-menu-content';
@@ -26,12 +25,9 @@ import { Sidebar } from '~/ui/sidebar/sidebar';
 import type { Route } from './+types/editor';
 import { optionalUserSessionContext } from '~/contexts/user-session';
 import {
-  countOwnedDocuments,
-  getDeletedDocumentList,
-} from '~/repos/document';
-import {
-  getDocumentList,
+  getDocumentNavigation,
   hasReachedDocumentLimit,
+  type DocumentNavigation,
 } from '~/services/document';
 import { useSidebarContext } from '~/ui/sidebar-context/use-sidebar-context';
 import { useStableOrder } from '~/hooks/use-stable-order';
@@ -43,10 +39,10 @@ import {
 import { LeavingDocumentProvider } from '~/contexts/leaving-document';
 import {
   useEffect,
-  useMemo,
   useState,
   type PropsWithChildren,
 } from 'react';
+import classNames from 'classnames';
 import {
   DeleteDocumentDialog,
   type DocumentToDelete,
@@ -55,7 +51,11 @@ import { RestoreDocumentMenu } from '~/components/restore-document-menu/restore-
 import { SidebarUpgrade } from '~/components/sidebar-upgrade/sidebar-upgrade';
 import { DocumentLimitDialog } from '~/components/document-limit-dialog/document-limit-dialog';
 import { FREE_DOCUMENT_LIMIT } from '~/constants/subscription';
-import type { DocumentShareState } from '~/constants/document';
+import type {
+  DocumentFolder,
+  DocumentShareState,
+} from '~/constants/document';
+import { FolderSwitch, type FolderSwitchItem } from '~/ui/folder-switch/folder-switch';
 import { useIsMobile } from '~/hooks/use-is-mobile';
 import { isNativeAppRequest } from '~/utils/native-app';
 import { readUserPrefs, storeUserPrefs } from '~/utils/user-prefs-cookie';
@@ -70,7 +70,7 @@ export const handle = {
  * the invites.
  */
 function getShareState(
-  document: { linkShared: boolean; inviteShared: boolean },
+  document: { linkShared?: boolean; inviteShared?: boolean },
 ): DocumentShareState {
   if (document.linkShared) {
     return 'link';
@@ -83,36 +83,35 @@ function getShareState(
   return 'private';
 }
 
+const EMPTY_NAVIGATION: DocumentNavigation = {
+  documents: [],
+  ownedCount: 0,
+  counts: { all: 0, shared: 0, deleted: 0 },
+};
+
 export async function loader({ context, request }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
+  const { sidebarOpen, folder } = await readUserPrefs(request);
   // The navigation also lists the documents shared with the user, which
   // none of their free allowance is spent on, so the usage meter counts
   // the ones they created themselves instead of the entries.
-  const [documentList, deletedDocumentList, ownedDocumentCount] = user
-    ? await Promise.all([
-        getDocumentList(user.id),
-        getDeletedDocumentList(user.id),
-        countOwnedDocuments(user.id),
-      ])
-    : [[], [], 0];
-  const navigation = documentList.map(doc => ({
+  const { documents, ownedCount: ownedDocumentCount, counts } = user
+    ? await getDocumentNavigation(user.id, folder)
+    : EMPTY_NAVIGATION;
+  const navigation = documents.map(doc => ({
     id: doc.id,
     label: doc.title ?? 'Untitled',
     to: href('/doc/:id', { id: doc.id }),
     shareState: getShareState(doc),
     isOwner: doc.userId === user?.id,
   }));
-  const deletedNavigation = deletedDocumentList.map(doc => ({
-    id: doc.id,
-    label: doc.title ?? 'Untitled',
-    to: href('/doc/:id', { id: doc.id }),
-  }));
 
   return {
     user,
-    sidebarOpen: (await readUserPrefs(request)).sidebarOpen,
+    sidebarOpen,
+    folder,
+    folderCounts: counts,
     navigation,
-    deletedNavigation,
     ownedDocumentCount,
     documentLimitReached: user
       ? hasReachedDocumentLimit(user, ownedDocumentCount)
@@ -125,8 +124,9 @@ export default function LayoutEditor({
   loaderData: {
     user,
     sidebarOpen,
+    folder,
+    folderCounts,
     navigation,
-    deletedNavigation,
     ownedDocumentCount,
     documentLimitReached,
     isNativeApp,
@@ -146,8 +146,9 @@ export default function LayoutEditor({
               {user
                 ? (
                     <EditorSidebar
+                      folder={folder}
+                      folderCounts={folderCounts}
                       navigation={navigation}
-                      deletedNavigation={deletedNavigation}
                       ownedDocumentCount={ownedDocumentCount}
                       documentLimitReached={documentLimitReached}
                       showUpgrade={!user.hasSubscription}
@@ -172,11 +173,12 @@ type NavigationItemData = {
   shareState: DocumentShareState;
   isOwner: boolean;
 };
-type DeletedItemData = { id: string; label: string; to: string };
 
 export interface EditorSidebarProps extends PropsWithChildren {
+  /** The folder the loader listed `navigation` for. */
+  folder: DocumentFolder;
+  folderCounts: Record<DocumentFolder, number>;
   navigation: NavigationItemData[];
-  deletedNavigation: DeletedItemData[];
   /** Documents the user created themselves, what the meter shows. */
   ownedDocumentCount: number;
   /** "Create Doc" opens the upgrade dialog instead of `/new`. */
@@ -190,9 +192,22 @@ const getNavigationKey = (item: NavigationItemData) => item.to;
 const getItemId = (item: { id: string }) => item.id;
 const getItemLabel = (item: { label: string }) => item.label;
 
+const FOLDER_LABELS: Record<DocumentFolder, string> = {
+  all: 'All Docs',
+  shared: 'Shared with you',
+  deleted: 'Deleted',
+};
+
+const EMPTY_FOLDER_COPIES: Record<DocumentFolder, string> = {
+  all: 'No documents',
+  shared: 'No documents shared with you',
+  deleted: 'No deleted documents',
+};
+
 function EditorSidebar({
+  folder,
+  folderCounts,
   navigation,
-  deletedNavigation,
   ownedDocumentCount,
   documentLimitReached,
   showUpgrade,
@@ -201,6 +216,7 @@ function EditorSidebar({
 }: EditorSidebarProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
+  const revalidator = useRevalidator();
   const activeDocument = useActiveDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
   const { editedDocumentId } = useEditedDocument();
@@ -208,19 +224,20 @@ function EditorSidebar({
     navigation,
     getNavigationKey,
   );
-  const allItems = useMemo(
-    () => [...navigation, ...deletedNavigation],
-    [navigation, deletedNavigation],
-  );
   // The editor's title for a document runs ahead of the one the loader
   // lists until the live server has stored it, so the list keeps showing
   // the editor's until then — for the open document and the one just left.
   const liveTitles = useLiveTitles(
-    allItems,
+    navigation,
     getItemId,
     getItemLabel,
     activeDocument,
   );
+  // The switch shows the picked folder straight away, while the list
+  // waits for the loader to list it.
+  const [pendingFolder, setPendingFolder] = useState<DocumentFolder>();
+  const isSwitchingFolder
+    = pendingFolder !== undefined && pendingFolder !== folder;
   // The document stays set while the dialog animates out, so its
   // title does not vanish from the copy mid-close.
   const [documentToDelete, setDocumentToDelete]
@@ -247,6 +264,30 @@ function EditorSidebar({
   const checkoutUrl = documentMatch?.params.id
     ? href('/doc/:id/checkout', { id: documentMatch.params.id })
     : href('/upgrade');
+  const folderGroups: FolderSwitchItem<DocumentFolder>[][] = [
+    [
+      {
+        value: 'all',
+        label: FOLDER_LABELS.all,
+        icon: 'space',
+        count: folderCounts.all,
+      },
+      {
+        value: 'shared',
+        label: FOLDER_LABELS.shared,
+        icon: 'users',
+        count: folderCounts.shared,
+      },
+    ],
+    [
+      {
+        value: 'deleted',
+        label: FOLDER_LABELS.deleted,
+        icon: 'trash',
+        count: folderCounts.deleted,
+      },
+    ],
+  ];
 
   useEffect(() => {
     if (!editedDocumentId) {
@@ -256,19 +297,44 @@ function EditorSidebar({
     moveToTop(href('/doc/:id', { id: editedDocumentId }));
   }, [editedDocumentId, moveToTop]);
 
+  const switchFolder = async (nextFolder: DocumentFolder) => {
+    setPendingFolder(nextFolder);
+    // The loader reads the folder from the cookie, so it is stored
+    // before the navigation is loaded again.
+    await storeUserPrefs({ folder: nextFolder });
+    await revalidator.revalidate();
+    setPendingFolder(undefined);
+  };
+
   return (
     <>
       <Sidebar
         items={[
           {
-            key: 'all-docs',
+            key: 'folder',
             content: (
               <>
-                <DocumentGroupRoot defaultValue={['all-docs']}>
-                  <DocumentGroup icon="space" title="All Docs" value="all-docs">
+                <div>
+                  <div className="sticky top-0 z-10 bg-pca-white pb-1.5 dark:bg-pca-grey-900">
+                    <FolderSwitch
+                      groups={folderGroups}
+                      value={pendingFolder ?? folder}
+                      onValueChange={folder => void switchFolder(folder)}
+                    />
+                  </div>
+                  <div
+                    // A new list for every folder, so the rows of one do
+                    // not glide into the places of the other.
+                    key={folder}
+                    aria-busy={isSwitchingFolder}
+                    className={classNames(
+                      'flex flex-col gap-1.5 transition-opacity',
+                      isSwitchingFolder && 'opacity-50',
+                    )}
+                  >
                     {stableNavigation.length === 0 && (
                       <DocumentGroupEmpty icon="no-docs">
-                        No documents
+                        {EMPTY_FOLDER_COPIES[folder]}
                       </DocumentGroupEmpty>
                     )}
                     {stableNavigation.map((item) => {
@@ -282,40 +348,45 @@ function EditorSidebar({
                           to={item.to}
                           key={item.to}
                           onClick={closeOnNavigate}
-                          actionArea={(
-                            <DropdownMenu>
-                              <DropdownMenuTrigger iconTitle="Item options" />
-                              <DropdownMenuPortal>
-                                <DropdownMenuContent
-                                  align={isMobile ? 'end' : 'start'}
-                                >
-                                  <DropdownMenuItem
-                                    as="button"
-                                    onClick={() => {
-                                      setDocumentToDelete({
-                                        id: item.id,
-                                        title: label,
-                                        shared: item.shareState !== 'private',
-                                        isOwner: item.isOwner,
-                                      });
-                                      setIsDeleteDialogOpen(true);
-                                    }}
-                                    color="danger"
-                                    icon="trash"
-                                  >
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenuPortal>
-                            </DropdownMenu>
-                          )}
+                          actionArea={folder === 'deleted'
+                            ? <RestoreDocumentMenu documentId={item.id} />
+                            : (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger
+                                    iconTitle="Item options"
+                                  />
+                                  <DropdownMenuPortal>
+                                    <DropdownMenuContent
+                                      align={isMobile ? 'end' : 'start'}
+                                    >
+                                      <DropdownMenuItem
+                                        as="button"
+                                        onClick={() => {
+                                          setDocumentToDelete({
+                                            id: item.id,
+                                            title: label,
+                                            shared:
+                                              item.shareState !== 'private',
+                                            isOwner: item.isOwner,
+                                          });
+                                          setIsDeleteDialogOpen(true);
+                                        }}
+                                        color="danger"
+                                        icon="trash"
+                                      >
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenuPortal>
+                                </DropdownMenu>
+                              )}
                         >
                           {label}
                         </DocumentItem>
                       );
                     })}
-                  </DocumentGroup>
-                </DocumentGroupRoot>
+                  </div>
+                </div>
                 <DeleteDocumentDialog
                   document={documentToDelete}
                   open={isDeleteDialogOpen}
@@ -329,36 +400,6 @@ function EditorSidebar({
                   onOpenChange={setIsLimitDialogOpen}
                 />
               </>
-            ),
-          },
-          {
-            key: 'deleted',
-            content: (
-              <DocumentGroupRoot>
-                <DocumentGroup icon="trash" title="Deleted" value="deleted">
-                  {deletedNavigation.length === 0 && (
-                    <DocumentGroupEmpty icon="no-docs">
-                      No deleted documents
-                    </DocumentGroupEmpty>
-                  )}
-                  {deletedNavigation.map((item) => {
-                    const label = liveTitles.get(item.id) ?? item.label;
-
-                    return (
-                      <DocumentItem
-                        title={label}
-                        as={NavLink}
-                        to={item.to}
-                        key={item.to}
-                        onClick={closeOnNavigate}
-                        actionArea={(
-                          <RestoreDocumentMenu documentId={item.id} />
-                        )}
-                      />
-                    );
-                  })}
-                </DocumentGroup>
-              </DocumentGroupRoot>
             ),
           },
         ]}

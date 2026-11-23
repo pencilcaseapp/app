@@ -7,10 +7,10 @@ import { useSidebarContext } from '../sidebar-context/use-sidebar-context';
 import { Logo } from '../logo/logo';
 import { Topbar } from '../topbar/topbar';
 import { Button } from '../button/button';
-import { DocumentGroup } from '../document-group/document-group';
 import { DocumentGroupEmpty } from '../document-group/document-group-empty';
 import { DocumentItem } from '../document-item/document-item';
-import { DocumentGroupRoot } from '../document-group/document-root';
+import { FolderSwitch } from '../folder-switch/folder-switch';
+import type { FolderSwitchItem } from '../folder-switch/folder-switch';
 import { NavigationItem } from '../navigation-item/navigation-item';
 import type { IconName } from '../icon/icons';
 import { DropdownMenu } from '../dropdown-menu/dropdown-menu';
@@ -18,8 +18,8 @@ import { DropdownMenuTrigger } from '../dropdown-menu/dropdown-menu-trigger';
 import { DropdownMenuPortal } from '../dropdown-menu/dropdown-menu-portal';
 import { DropdownMenuContent } from '../dropdown-menu/dropdown-menu-content';
 import { DropdownMenuItem } from '../dropdown-menu/dropdown-menu-item';
-import { DropdownMenuSeparator } from '../dropdown-menu/dropdown-menu-separator';
 import { action } from 'storybook/actions';
+import { useState } from 'react';
 
 /**
  * The `Sidebar` renders the application's primary navigation.
@@ -66,6 +66,16 @@ const navigation = [
   { label: 'Event Planning', to: '/event-planning' },
 ];
 
+type Folder = 'all' | 'shared' | 'deleted';
+
+const folderGroups: FolderSwitchItem<Folder>[][] = [
+  [
+    { value: 'all', label: 'All Docs', icon: 'space', count: navigation.length },
+    { value: 'shared', label: 'Shared with you', icon: 'users', count: 0 },
+  ],
+  [{ value: 'deleted', label: 'Deleted', icon: 'trash', count: 0 }],
+];
+
 const bottomNavigation = [
   { label: 'Create Doc', to: '/create-doc', icon: 'create-doc' },
   { label: 'Create Space', to: '/create-space', icon: 'create-space' },
@@ -86,6 +96,7 @@ export const Default: Story = {
   },
   render: () => {
     const { isSidebarOpen, setIsSidebarOpen } = useSidebarContext();
+    const [folder, setFolder] = useState<Folder>('all');
 
     return (
       <>
@@ -110,117 +121,49 @@ export const Default: Story = {
               ),
             },
             {
-              key: 'all-docs',
+              key: 'folder',
               content: (
-                <>
-                  <DocumentGroupRoot>
-                    <DocumentGroup icon="space" title="All Docs" value="all-docs">
-                      {navigation.map(item => (
-                        <DocumentItem
-                          title={item.label}
-                          as={NavLink}
-                          to={item.to}
-                          key={`${item.label}-${item.to}`}
-                          actionArea={(
-                            <DropdownMenu>
-                              <DropdownMenuTrigger iconTitle="Item options" />
-                              <DropdownMenuPortal>
-                                <DropdownMenuContent align="start">
-                                  <DropdownMenuItem as="button" onClick={action('share')} icon="share">
-                                    Share
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem as="button" onClick={action('rename')} icon="create-doc">
-                                    Rename
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem as="button" onClick={action('delete')} color="danger" icon="trash">
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenuPortal>
-                            </DropdownMenu>
-                          )}
-                        >
-                          {item.label}
-                        </DocumentItem>
-                      ))}
-                    </DocumentGroup>
-                  </DocumentGroupRoot>
-                </>
-              ),
-            },
-            {
-              key: 'personal',
-              content: (
-                <DocumentGroupRoot>
-                  <DocumentGroup icon="space" title="Personal" value="personal">
-                    {navigation.map(item => (
-                      <DocumentItem
-                        title={item.label}
-                        as={NavLink}
-                        to={item.to}
-                        key={`${item.label}-${item.to}`}
-                        actionArea={(
-                          <DropdownMenu>
-                            <DropdownMenuTrigger iconTitle="Item options" />
-                            <DropdownMenuPortal>
-                              <DropdownMenuContent align="start">
-                                <DropdownMenuItem as="button" onClick={action('share')} icon="share">
-                                  Share
-                                </DropdownMenuItem>
-                                <DropdownMenuItem as="button" onClick={action('rename')} icon="create-doc">
-                                  Rename
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem as="button" onClick={action('delete')} color="danger" icon="trash">
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenuPortal>
-                          </DropdownMenu>
+                <div>
+                  <div className="sticky top-0 z-10 bg-pca-white pb-1.5 dark:bg-pca-grey-900">
+                    <FolderSwitch
+                      groups={folderGroups}
+                      value={folder}
+                      onValueChange={setFolder}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    {folder === 'all'
+                      ? navigation.map(item => (
+                          <DocumentItem
+                            title={item.label}
+                            as={NavLink}
+                            to={item.to}
+                            key={`${item.label}-${item.to}`}
+                            actionArea={(
+                              <DropdownMenu>
+                                <DropdownMenuTrigger iconTitle="Item options" />
+                                <DropdownMenuPortal>
+                                  <DropdownMenuContent align="start">
+                                    <DropdownMenuItem as="button" onClick={action('delete')} color="danger" icon="trash">
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenuPortal>
+                              </DropdownMenu>
+                            )}
+                          >
+                            {item.label}
+                          </DocumentItem>
+                        ))
+                      : (
+                          <DocumentGroupEmpty icon="no-docs">
+                            {folder === 'shared'
+                              ? 'No documents shared with you'
+                              : 'No deleted documents'}
+                          </DocumentGroupEmpty>
                         )}
-                      >
-                        {item.label}
-                      </DocumentItem>
-                    ))}
-                  </DocumentGroup>
-                </DocumentGroupRoot>
-              ),
-            },
-            {
-              key: 'Work',
-              content: (
-                <DocumentGroupRoot>
-                  <DocumentGroup icon="space" title="Work Stuff" value="work-related">
-                    <DocumentGroupEmpty icon="no-docs">
-                      No documents in this space
-                    </DocumentGroupEmpty>
-                  </DocumentGroup>
-                </DocumentGroupRoot>
-              ),
-            },
-            {
-              key: 'Shared',
-              content: (
-                <DocumentGroupRoot>
-                  <DocumentGroup icon="share" title="Shared" value="share">
-                    <DocumentGroupEmpty icon="share">
-                      No shared documents
-                    </DocumentGroupEmpty>
-                  </DocumentGroup>
-                </DocumentGroupRoot>
-              ),
-            },
-            {
-              key: 'Deleted',
-              content: (
-                <DocumentGroupRoot>
-                  <DocumentGroup icon="trash" title="Deleted" value="deleted">
-                    <DocumentGroupEmpty icon="trash">
-                      No deleted documents
-                    </DocumentGroupEmpty>
-                  </DocumentGroup>
-                </DocumentGroupRoot>
+                  </div>
+                </div>
               ),
             },
           ]}

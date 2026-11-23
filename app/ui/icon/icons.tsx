@@ -17,6 +17,7 @@ export type IconName =
   | 'chevronLeft'
   | 'chevronRight'
   | 'chevronDown'
+  | 'chevronUpDown'
   | 'horizontalDots'
   | 'space'
   | 'create-space'
@@ -385,6 +386,15 @@ export const icons: {
   'chevronDown': (
     <path
       d="M6 9L12 15L18 9"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  'chevronUpDown': (
+    <path
+      d="M8 9.5L12 5.5L16 9.5M8 14.5L12 18.5L16 14.5"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
