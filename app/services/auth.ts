@@ -28,6 +28,7 @@ const { getSession, commitSession, destroySession }
 
 export enum InitMagicCodeError {
   TooManyRequests,
+  EmailFailed,
 }
 
 export type InitMagicCodeResult = [InitMagicCodeError] | [null, { otp: Otp }];
@@ -55,14 +56,21 @@ export async function initMagicCode(
   });
 
   if (!testAccountCode) {
-    await sendEmailMagicCode({
-      to: {
-        email: to,
-      },
-      code,
-      otpId: otp.id,
-      userId: otp.userId ?? undefined,
-    });
+    try {
+      await sendEmailMagicCode({
+        to: {
+          email: to,
+        },
+        code,
+        otpId: otp.id,
+        userId: otp.userId ?? undefined,
+      });
+    }
+    catch (error) {
+      console.error('Sending the sign-in code failed', error);
+      await expireOtp(otp.id);
+      return [InitMagicCodeError.EmailFailed];
+    }
   }
 
   return [null, { otp }];

@@ -15,6 +15,31 @@ the server renders templates with it. Do not reach for `@react-email/components`
 or the individual `@react-email/<component>` packages: React Email v6 folded them
 into `react-email` and npm now warns that they are deprecated.
 
+## Which e-mails wait for the job
+
+Only the codes are sent in the request: the sign-in code (`otp-code`) and
+the code that confirms a new address (`email-change-code`). The person is
+looking at a screen that asks for the code, so a send that fails has to
+tell them straight away. `initMagicCode` and `initEmailChange` catch the
+failure, expire the code nobody received and return `EmailFailed`, which
+the routes show as "We could not send you a code right now. Please try
+again later."
+
+Every other e-mail goes through `queueEmail` (`app/services/
+email-templates.tsx`): the invite, the report, the contact message, the
+contract notices and the subscription e-mails. The request (or the Creem
+webhook) only queues it, and the `send-email` job sends it, so a mail
+provider that is down delays these e-mails instead of failing whatever
+caused them. The job retries with backoff for a little over four hours
+(`docs/jobs.md`). `account-deleted` has a job of its own,
+`send-account-deleted-email`, because it checks the account is still
+deleted before it sends.
+
+A queued e-mail is logged as `queued` the moment it is queued, before the
+job runs. That is what keeps the daily invite limit honest: it counts the
+log, and a burst of invites would otherwise slip past it while the job
+catches up.
+
 ## The e-mail log
 
 Every send goes through `sendEmail`, and every send writes a row to
@@ -49,7 +74,7 @@ not a code: the link in it is the access, and it does not expire, so a
 second copy of the same invite is noise. But an invite that never arrives
 costs a collaborator, so a re-invite the owner deliberately sent has to
 send — which is why the scope is the invite and not the pair of document
-and address. `sendEmailDocumentInvite` therefore takes an `inviteId`, and
+and address. The invite e-mail therefore takes an `inviteId`, and
 whatever records invites owns what that is, exactly as the `otps` row id
 is what lets a resent code through.
 
@@ -63,9 +88,11 @@ recorded.
 A row ends up in one of four states. `sent` carries Lettermint's
 `provider_message_id`; `skipped` records the sends we deliberately do not make
 (no API token, a test address) so the log stays a complete account of what the
-app decided; `failed` carries the error. **`failed` is the only state a key can
-be claimed out of** — a send that never reached the provider has to be
-retryable, everything else is final.
+app decided; `failed` carries the error. Before that, a queued e-mail waits in
+`queued` and a send in flight holds `pending`. **`queued` and `failed` are the
+only states a key can be claimed out of** — the job claims what was queued for
+it, and a send that never reached the provider has to be retryable, everything
+else is final.
 
 Rows are kept for a year: the `clean-up-old-email-logs` job hard deletes
 every row created before that, whatever its template, every night. Deleting a

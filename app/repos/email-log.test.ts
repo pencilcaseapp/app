@@ -11,6 +11,7 @@ import {
   deleteEmailLogsCreatedBefore,
   getEmailLog,
   getEmailLogByIdempotencyKey,
+  insertQueuedEmailLog,
   markEmailLogFailed,
   markEmailLogSent,
   markEmailLogSkipped,
@@ -75,6 +76,39 @@ describe('claimEmailLog', () => {
     expect(log?.id).toBe(claimed!.id);
     expect(log?.status).toBe(EmailLogStatus.Pending);
     expect(log?.error).toBeNull();
+  });
+
+  it('claims a key that was queued', async () => {
+    const input = logInput();
+    const queued = await insertQueuedEmailLog(input);
+
+    const log = await claimEmailLog(input);
+
+    expect(log?.id).toBe(queued!.id);
+    expect(log?.status).toBe(EmailLogStatus.Pending);
+  });
+});
+
+describe('insertQueuedEmailLog', () => {
+  it('records a queued e-mail', async () => {
+    const input = logInput();
+
+    const log = await insertQueuedEmailLog(input);
+
+    expect(log).toMatchObject({
+      idempotencyKey: input.idempotencyKey,
+      status: EmailLogStatus.Queued,
+    });
+  });
+
+  it('leaves a key that already has a row alone', async () => {
+    const input = logInput();
+    const claimed = await claimEmailLog(input);
+    await markEmailLogSent({ id: claimed!.id, providerMessageId: 'msg_1' });
+
+    expect(await insertQueuedEmailLog(input)).toBeUndefined();
+    expect((await getEmailLog(claimed!.id))?.status)
+      .toBe(EmailLogStatus.Sent);
   });
 });
 

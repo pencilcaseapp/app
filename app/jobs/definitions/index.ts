@@ -8,6 +8,7 @@ import { cleanUpOldEmailLogs } from './clean-up-old-email-logs';
 import { purgeDeletedAccounts } from './purge-deleted-accounts';
 import { purgeDeletedDocuments } from './purge-deleted-documents';
 import { sendAccountDeletedEmail } from './send-account-deleted-email';
+import { sendEmail } from './send-email';
 
 export const jobDefinitions: JobDefinition[] = [
   cleanUpExpiredOtps,
@@ -24,4 +25,5 @@ export const onDemandJobDefinitions: {
   [Name in OnDemandJobName]: OnDemandJobDefinition<Name>;
 } = {
   'send-account-deleted-email': sendAccountDeletedEmail,
+  'send-email': sendEmail,
 };

@@ -6,6 +6,7 @@ import {
   optionalUserSessionContext,
   userSessionContext,
 } from '~/contexts/user-session';
+import { commonCopies } from '~/constants/common-copies';
 import { InitEmailChangeError } from '~/services/email-change';
 import { emailChangeRequestFixture } from '~/test/fixtures/email-change-request';
 import { userFixture } from '~/test/fixtures/user';
@@ -123,6 +124,18 @@ describe('the change e-mail route', () => {
     await person.click(screen.getByRole('button', { name: 'Continue' }));
 
     expect(await screen.findByText('Too many requests. Please try again later.'))
+      .toBeInTheDocument();
+  });
+
+  test('show that the code could not be sent', async () => {
+    initEmailChangeMock
+      .mockResolvedValueOnce([InitEmailChangeError.EmailFailed]);
+    const person = await renderEmail();
+
+    await person.type(await screen.findByLabelText('E-mail'), 'new@example.com');
+    await person.click(screen.getByRole('button', { name: 'Continue' }));
+
+    expect(await screen.findByText(commonCopies.errors.codeNotSent))
       .toBeInTheDocument();
   });
 });

@@ -10,6 +10,9 @@ import {
   InitEmailChangeError,
   VerifyEmailChangeError,
 } from '~/services/email-change';
+import { commonCopies } from '~/constants/common-copies';
+import { SearchParamToast } from '~/constants/search-params';
+import { withSearchParams } from '~/utils/url';
 import { emailChangeRequestFixture } from '~/test/fixtures/email-change-request';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
@@ -203,6 +206,23 @@ describe('the verify e-mail change route', () => {
       expect(redirectMock).toHaveBeenCalledWith(
         `${verifyUrl}?toastDanger=Too+many+requests.+Please+try+again+later.`,
       );
+    });
+  });
+
+  test('go back to the address with a toast when the new code cannot be '
+    + 'sent', async () => {
+    initEmailChangeMock
+      .mockResolvedValueOnce([InitEmailChangeError.EmailFailed]);
+    const person = await renderVerify();
+
+    await person.click(
+      await screen.findByRole('button', { name: 'Resend' }),
+    );
+
+    await vi.waitFor(() => {
+      expect(redirectMock).toHaveBeenCalledWith(withSearchParams(emailUrl, {
+        [SearchParamToast.ToastDanger]: commonCopies.errors.codeNotSent,
+      }));
     });
   });
 

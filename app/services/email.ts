@@ -8,6 +8,7 @@ import {
 } from '~/constants/email';
 import {
   claimEmailLog,
+  insertQueuedEmailLog,
   markEmailLogFailed,
   markEmailLogSent,
   markEmailLogSkipped,
@@ -106,6 +107,22 @@ export async function sendEmail(input: SendEmailInput) {
 
     throw error;
   }
+}
+
+/**
+ * Records an e-mail the background job is going to send, under the key
+ * the job's `sendEmail` will claim.
+ */
+export async function logQueuedEmail(input: SendEmailInput) {
+  const { to, subject, template, idempotencyScope, userId } = input;
+
+  await insertQueuedEmailLog({
+    idempotencyKey: emailIdempotencyKey(template, idempotencyScope),
+    template,
+    email: to.email,
+    subject,
+    userId,
+  });
 }
 
 const testEmailDomains = ['example.com', 'example.net', 'example.org'];

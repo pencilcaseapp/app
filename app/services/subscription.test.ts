@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { EmailTemplate } from '~/constants/email';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -93,16 +94,9 @@ vi.mock('~/clients/creem', async (importOriginal) => {
   };
 });
 
-const sendEmailSubscriptionStartedMock = vi.fn();
-const sendEmailSubscriptionPaymentFailedMock = vi.fn();
-const sendEmailSubscriptionCanceledMock = vi.fn();
+const queueEmailMock = vi.fn();
 vi.mock('./email-templates', () => ({
-  sendEmailSubscriptionStarted:
-    (...args: unknown[]) => sendEmailSubscriptionStartedMock(...args),
-  sendEmailSubscriptionPaymentFailed:
-    (...args: unknown[]) => sendEmailSubscriptionPaymentFailedMock(...args),
-  sendEmailSubscriptionCanceled:
-    (...args: unknown[]) => sendEmailSubscriptionCanceledMock(...args),
+  queueEmail: (...args: unknown[]) => queueEmailMock(...args),
 }));
 
 function creemSubscription(overrides: Record<string, unknown> = {}) {
@@ -344,10 +338,13 @@ describe('completeProCheckout', () => {
       hasSubscription: true,
       creemCustomerId: 'cust_123',
     }, 'tx');
-    expect(sendEmailSubscriptionStartedMock).toHaveBeenCalledWith({
-      to: { email: userFixture.email, name: userFixture.name ?? undefined },
-      subscriptionId: 'sub_123',
-      userId: userFixture.id,
+    expect(queueEmailMock).toHaveBeenCalledWith({
+      template: EmailTemplate.SubscriptionStarted,
+      input: {
+        to: { email: userFixture.email, name: userFixture.name ?? undefined },
+        subscriptionId: 'sub_123',
+        userId: userFixture.id,
+      },
     });
   });
 });
@@ -421,7 +418,9 @@ describe('handleCreemWebhook', () => {
       hasSubscription: true,
       creemCustomerId: 'cust_123',
     }, 'tx');
-    expect(sendEmailSubscriptionStartedMock).toHaveBeenCalled();
+    expect(queueEmailMock).toHaveBeenCalledWith(
+      expect.objectContaining({ template: EmailTemplate.SubscriptionStarted }),
+    );
     expect(markWebhookEventProcessedMock).toHaveBeenCalledWith('evt_123');
   });
 
@@ -434,7 +433,9 @@ describe('handleCreemWebhook', () => {
       'sig',
     );
 
-    expect(sendEmailSubscriptionStartedMock).not.toHaveBeenCalled();
+    expect(queueEmailMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ template: EmailTemplate.SubscriptionStarted }),
+    );
   });
 
   it('sends no welcome email when the first stored state is canceled', async () => {
@@ -450,7 +451,9 @@ describe('handleCreemWebhook', () => {
       'sig',
     );
 
-    expect(sendEmailSubscriptionStartedMock).not.toHaveBeenCalled();
+    expect(queueEmailMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ template: EmailTemplate.SubscriptionStarted }),
+    );
   });
 
   it('switches the features off and confirms a cancellation', async () => {
@@ -473,10 +476,13 @@ describe('handleCreemWebhook', () => {
       expect.objectContaining({ hasSubscription: false }),
       'tx',
     );
-    expect(sendEmailSubscriptionCanceledMock).toHaveBeenCalledWith({
-      to: { email: userFixture.email, name: userFixture.name ?? undefined },
-      subscriptionId: 'sub_123',
-      userId: userFixture.id,
+    expect(queueEmailMock).toHaveBeenCalledWith({
+      template: EmailTemplate.SubscriptionCanceled,
+      input: {
+        to: { email: userFixture.email, name: userFixture.name ?? undefined },
+        subscriptionId: 'sub_123',
+        userId: userFixture.id,
+      },
     });
   });
 
@@ -494,7 +500,9 @@ describe('handleCreemWebhook', () => {
 
     expect(error).toBeNull();
     expect(upsertSubscriptionMock).toHaveBeenCalled();
-    expect(sendEmailSubscriptionCanceledMock).not.toHaveBeenCalled();
+    expect(queueEmailMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ template: EmailTemplate.SubscriptionCanceled }),
+    );
   });
 
   it('keeps the features on and warns about a failed payment', async () => {
@@ -517,11 +525,14 @@ describe('handleCreemWebhook', () => {
       expect.objectContaining({ hasSubscription: true }),
       'tx',
     );
-    expect(sendEmailSubscriptionPaymentFailedMock).toHaveBeenCalledWith({
-      to: { email: userFixture.email, name: userFixture.name ?? undefined },
-      subscriptionId: 'sub_123',
-      billingPeriod: '2026-08-01T00:00:00.000Z',
-      userId: userFixture.id,
+    expect(queueEmailMock).toHaveBeenCalledWith({
+      template: EmailTemplate.SubscriptionPaymentFailed,
+      input: {
+        to: { email: userFixture.email, name: userFixture.name ?? undefined },
+        subscriptionId: 'sub_123',
+        billingPeriod: '2026-08-01T00:00:00.000Z',
+        userId: userFixture.id,
+      },
     });
   });
 
@@ -565,7 +576,9 @@ describe('handleCreemWebhook', () => {
 
     expect(error).toBeNull();
     expect(upsertSubscriptionMock).toHaveBeenCalled();
-    expect(sendEmailSubscriptionCanceledMock).not.toHaveBeenCalled();
+    expect(queueEmailMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ template: EmailTemplate.SubscriptionCanceled }),
+    );
   });
 
   it('records an event type it does not know and moves on', async () => {

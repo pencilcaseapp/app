@@ -8,7 +8,7 @@ import { PageTitle } from '~/components/page-title/page-title';
 import { returnFormError, validateForm } from '~/utils/form';
 import { href, redirect } from 'react-router';
 import { commonCopies } from '~/constants/common-copies';
-import { initMagicCode } from '~/services/auth';
+import { initMagicCode, InitMagicCodeError } from '~/services/auth';
 import { getNormalizedReturnUrl, getOptionalSearchParam, withSearchParams } from '~/utils/url';
 import { SearchParamAuth } from '~/constants/search-params';
 import { Notification } from '~/ui/notification/notification';
@@ -44,6 +44,12 @@ function getRestoreUntil(request: Request) {
   return date && formatLongDate(date);
 }
 
+const initMagicCodeErrorMessages: Record<InitMagicCodeError, string> = {
+  [InitMagicCodeError.TooManyRequests]:
+    'Too many requests. Please try again later.',
+  [InitMagicCodeError.EmailFailed]: commonCopies.errors.codeNotSent,
+};
+
 export async function action({ request }: Route.ActionArgs) {
   const form = await validateForm(request, formSchema);
   const returnUrl = getNormalizedReturnUrl(
@@ -58,7 +64,7 @@ export async function action({ request }: Route.ActionArgs) {
   if (error !== null) {
     return returnFormError(form.data, {
       email: {
-        message: 'Too many requests. Please try again later.',
+        message: initMagicCodeErrorMessages[error],
       },
     });
   }

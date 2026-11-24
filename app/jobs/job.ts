@@ -1,3 +1,5 @@
+import type { QueuedEmail } from '~/services/email-templates';
+
 /**
  * A background job is a plain object: give it a unique name, a cron
  * schedule and a `run` function, then register it in `./definitions`.
@@ -20,6 +22,7 @@ export interface JobDefinition {
  */
 export interface OnDemandJobs {
   'send-account-deleted-email': { userId: string; deletedAt: string };
+  'send-email': QueuedEmail;
 }
 
 export type OnDemandJobName = keyof OnDemandJobs;

@@ -28,6 +28,7 @@ export enum InitEmailChangeError {
   SameEmail,
   EmailTaken,
   TooManyRequests,
+  EmailFailed,
 }
 
 export type InitEmailChangeResult
@@ -70,14 +71,21 @@ export async function initEmailChange(
     codeHash,
   });
 
-  await sendEmailChangeCode({
-    to: {
-      email,
-    },
-    code,
-    requestId: request.id,
-    userId: user.id,
-  });
+  try {
+    await sendEmailChangeCode({
+      to: {
+        email,
+      },
+      code,
+      requestId: request.id,
+      userId: user.id,
+    });
+  }
+  catch (error) {
+    console.error('Sending the e-mail change code failed', error);
+    await expireEmailChangeRequest(request.id);
+    return [InitEmailChangeError.EmailFailed];
+  }
 
   return [null, { request }];
 }

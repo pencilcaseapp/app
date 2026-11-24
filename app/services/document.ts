@@ -81,10 +81,7 @@ import { renderDocumentPreview } from '~/utils/document-preview';
 import { createInitialDocumentContent } from '~/utils/headless';
 import { normalizeEmail } from '~/utils/email';
 import { processImage } from '~/utils/image';
-import {
-  sendEmailDocumentInvite,
-  sendEmailDocumentReport,
-} from './email-templates';
+import { queueEmail } from './email-templates';
 
 export type { DocumentViewer } from '~/repos/document';
 
@@ -429,13 +426,16 @@ export async function inviteCollaborator(
     return [InviteCollaboratorError.AlreadyInvited];
   }
 
-  await sendEmailDocumentInvite({
-    to: { email },
-    inviteId: invite.id,
-    documentId: document.id,
-    documentTitle: document.title,
-    inviterName: user.name ?? user.email,
-    inviterId: user.id,
+  await queueEmail({
+    template: EmailTemplate.DocumentInvite,
+    input: {
+      to: { email },
+      inviteId: invite.id,
+      documentId: document.id,
+      documentTitle: document.title,
+      inviterName: user.name ?? user.email,
+      inviterId: user.id,
+    },
   });
 
   return [null, { email }];
@@ -726,14 +726,17 @@ export async function reportDocument(
 
   const owner = await getUser(document.userId);
 
-  await sendEmailDocumentReport({
-    reportId: report.id,
-    reason,
-    details,
-    documentId: document.id,
-    documentTitle: document.title,
-    ownerEmail: owner?.email ?? document.userId,
-    reporter: { id: user.id, email: user.email },
+  await queueEmail({
+    template: EmailTemplate.DocumentReport,
+    input: {
+      reportId: report.id,
+      reason,
+      details,
+      documentId: document.id,
+      documentTitle: document.title,
+      ownerEmail: owner?.email ?? document.userId,
+      reporter: { id: user.id, email: user.email },
+    },
   });
 
   return [null];

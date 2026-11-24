@@ -44,6 +44,11 @@ attempts with exponential backoff starting at 30 seconds. A run that fails
 all three stays visible as a failed job (the last 1000 are kept) and is
 logged by the worker; the next scheduled run happens regardless.
 
+On-demand jobs get ten attempts (`ON_DEMAND_JOB_ATTEMPTS`) on the same
+backoff, which keeps retrying for a little over four hours. They send
+e-mails, and a send has to outlast an outage of the mail provider rather
+than give up after a minute and a half.
+
 Keep `run` idempotent: a retry after a half-finished run must be safe.
 
 ## Redis

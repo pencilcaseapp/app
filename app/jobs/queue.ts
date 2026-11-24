@@ -10,6 +10,13 @@ export const JOBS_PREFIX = 'pencil-case';
 
 const MAX_RECONNECT_DELAY = 2_000;
 
+/**
+ * The on-demand jobs send e-mails, which have to outlast an outage of the
+ * mail provider: with the queue's exponential backoff from 30 seconds,
+ * ten attempts keep trying for a little over four hours.
+ */
+const ON_DEMAND_JOB_ATTEMPTS = 10;
+
 let queue: Queue | undefined;
 
 /**
@@ -61,7 +68,8 @@ export function getJobsQueue() {
 }
 
 /**
- * Hands a job to the worker, which retries it with the queue's backoff.
+ * Hands a job to the worker, which retries it with the queue's backoff
+ * (`ON_DEMAND_JOB_ATTEMPTS` times).
  * Best effort: a job that cannot be queued is logged, never thrown, so
  * the work that queued it stands. Without a jobs Redis (the test
  * environment) nothing runs: tests call the definition's `run` directly.
@@ -78,7 +86,7 @@ export async function enqueueJob<Name extends OnDemandJobName>(
   }
 
   try {
-    await queue.add(name, data);
+    await queue.add(name, data, { attempts: ON_DEMAND_JOB_ATTEMPTS });
   }
   catch (error) {
     console.error(`Queueing ${name} failed`, error);
