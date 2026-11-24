@@ -172,12 +172,7 @@ test.describe('deletion', () => {
     await expect(userA.document.content).toHaveAttribute('contenteditable', 'false');
     await expect(userA.document.content).toContainText(heading);
 
-    // It stays that way after a reload, and so does the folder, even once
-    // another tab picked All Docs.
-    const otherTab = new Sidebar(await userA.page.context().newPage());
-    await otherTab.page.goto(url);
-    await otherTab.openFolder('All Docs');
-    await otherTab.page.close();
+    // It stays that way after a reload, and so does the folder.
     await userA.page.reload();
     await expect(userA.document.deletedNotice).toBeVisible();
     await expect(userA.sidebar.document(heading)).toBeVisible();
@@ -226,6 +221,24 @@ test.describe('deletion', () => {
     ).toBeVisible();
     await userB.sidebar.openFolder('Deleted');
     await expect(userB.sidebar.document(heading)).toHaveCount(0);
+  });
+});
+
+test.describe('folders', () => {
+  test('each tab keeps its folder through a reload', async ({ userA }) => {
+    const url = await userA.document.create();
+    await userA.sidebar.openFolder('Shared with you');
+    await expect(userA.page).toHaveURL(`${url}?folder=shared`);
+
+    // Another tab picks All Docs, which is what the cookie keeps now.
+    const otherTab = new Sidebar(await userA.page.context().newPage());
+    await otherTab.page.goto(url);
+    await otherTab.openFolder('All Docs');
+
+    await userA.page.reload();
+    await expect(userA.sidebar.folderSwitch).toHaveText(/^Shared with you/);
+    await otherTab.page.reload();
+    await expect(otherTab.folderSwitch).toHaveText(/^All Docs/);
   });
 });
 
