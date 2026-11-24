@@ -10,3 +10,7 @@ export enum SearchParamToast {
   ToastInfo = 'toastInfo',
   ToastDanger = 'toastDanger',
 }
+
+export enum SearchParamNavigation {
+  Folder = 'folder',
+}

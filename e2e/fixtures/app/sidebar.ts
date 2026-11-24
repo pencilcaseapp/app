@@ -16,9 +16,14 @@ export class Sidebar {
     return this.list.getByRole('link', { name: title });
   }
 
+  /** The switch on top of the navigation, labelled with its folder. */
+  get folderSwitch(): Locator {
+    return this.page.locator('nav').getByRole('combobox');
+  }
+
   /** Lists another folder through the switch on top of the navigation. */
   async openFolder(folder: SidebarFolder): Promise<void> {
-    const trigger = this.page.locator('nav').getByRole('combobox');
+    const trigger = this.folderSwitch;
 
     if ((await trigger.textContent())?.startsWith(folder)) {
       return;
