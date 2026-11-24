@@ -221,3 +221,60 @@ test.describe('deletion', () => {
     await expect(userB.sidebar.document(heading)).toHaveCount(0);
   });
 });
+
+test.describe('pinning', () => {
+  test('a pin moves the document to the top for its user only', async ({
+    userA,
+    userB,
+  }) => {
+    await userA.document.create();
+    const shared = `Pinned doc ${Date.now()}`;
+    await userA.document.typeLines(shared);
+    const shareUrl = await userA.sharePanel.share();
+    // The title is stored behind the live server's debounce, and the next
+    // document is a fresh page load that lists what is stored.
+    await expect(async () => {
+      await userA.page.reload();
+      await expect(userA.sidebar.document(shared))
+        .toBeVisible({ timeout: 3000 });
+    }).toPass();
+    await userA.document.create();
+    const newer = `Newer doc ${Date.now()}`;
+    await userA.document.typeLines(newer);
+    await expect(userA.sidebar.firstDocument).toContainText(newer);
+
+    await userA.sidebar.setPinned(shared, true);
+
+    await expect(userA.sidebar.pinnedDocument(shared)).toBeVisible();
+    await expect(userA.sidebar.firstDocument).toContainText(shared);
+
+    // The pin is stored, and only for the user who set it.
+    await userA.page.reload();
+    await expect(userA.sidebar.pinnedDocument(shared)).toBeVisible();
+    await expect(userA.sidebar.firstDocument).toContainText(shared);
+
+    await userB.document.open(shareUrl);
+    await expect(userB.sidebar.document(shared)).toBeVisible();
+    await expect(userB.sidebar.pinnedDocument(shared)).toHaveCount(0);
+
+    // Pinned in Shared with you, it is pinned in All Docs as well.
+    await userB.sidebar.openFolder('Shared with you');
+    await userB.sidebar.setPinned(shared, true);
+    await expect(userB.sidebar.pinnedDocument(shared)).toBeVisible();
+    await userB.sidebar.openFolder('All Docs');
+    await expect(userB.sidebar.pinnedDocument(shared)).toBeVisible();
+
+    // Unpinning it again leaves the other user's pin alone.
+    await userB.sidebar.setPinned(shared, false);
+    await expect(userB.sidebar.pinnedDocument(shared)).toHaveCount(0);
+    await userA.page.reload();
+    await expect(userA.sidebar.pinnedDocument(shared)).toBeVisible();
+
+    // Unpinned, it goes back below the document edited after it.
+    await userA.sidebar.setPinned(shared, false);
+    await expect(userA.sidebar.pinnedDocument(shared)).toHaveCount(0);
+    await expect(userA.sidebar.firstDocument).toContainText(newer);
+    await userA.page.reload();
+    await expect(userA.sidebar.firstDocument).toContainText(newer);
+  });
+});

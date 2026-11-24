@@ -58,6 +58,31 @@ export class Sidebar {
     expect((await restored).ok()).toBeTruthy();
   }
 
+  /**
+   * A document link of the open folder that says it is pinned, which the
+   * row reads out after its title and share state.
+   */
+  pinnedDocument(title: string): Locator {
+    return this.document(title)
+      .and(this.list.getByRole('link', { name: /, pinned$/ }));
+  }
+
+  /** The topmost document of the open folder. */
+  get firstDocument(): Locator {
+    return this.list.getByRole('link').first();
+  }
+
+  /** Pins or unpins the document through its row menu. */
+  async setPinned(title: string, pinned: boolean): Promise<void> {
+    await this.openDocumentMenu(title);
+
+    const saved = waitForPost(this.page, '/pin');
+    await this.page
+      .getByRole('menuitem', { name: pinned ? 'Pin' : 'Unpin' })
+      .click();
+    expect((await saved).ok()).toBeTruthy();
+  }
+
   /** The options button of a document's row, which shows on hover. */
   documentMenuTrigger(title: string): Locator {
     return this.documentRow(title)
