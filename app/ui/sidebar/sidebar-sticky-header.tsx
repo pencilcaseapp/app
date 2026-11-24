@@ -36,3 +36,21 @@ export const SidebarStickyHeader: FC<PropsWithChildren> = ({ children }) => (
     {children}
   </div>
 );
+
+/**
+ * Scrolls the area `element` sits in back to its top, the one the
+ * sidebar's list scrolls in on every width.
+ */
+export const scrollSidebarToTop = (element: Element) => {
+  for (
+    let parent = element.parentElement;
+    parent;
+    parent = parent.parentElement
+  ) {
+    if (/auto|scroll/.test(getComputedStyle(parent).overflowY)) {
+      parent.scrollTo({ top: 0 });
+
+      return;
+    }
+  }
+};

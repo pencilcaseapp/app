@@ -8,6 +8,7 @@ import { db } from '~/db';
 import {
   documentAssets,
   documentCollaborators,
+  documentPins,
   documentReports,
   documents,
   emailChangeRequests,
@@ -27,6 +28,7 @@ import {
   createDocumentWithTitle,
   createSharedDocument,
   inviteDocumentCollaborator,
+  pinTestDocument,
 } from '~/test/data-factories/document';
 import { createDocumentReport } from '~/test/data-factories/document-report';
 import { createTestEmailChangeRequest } from '~/test/data-factories/email-change-request';
@@ -232,6 +234,12 @@ describe('purgeDeletedAccounts', () => {
     await inviteDocumentCollaborator(invitedTo.id, user.email);
     const uploadedThere = await createTestAsset(theirs.id, user.id);
 
+    // Its pins, and the pin somebody else put on its document.
+    await pinTestDocument(shared.id, user.id);
+    await pinTestDocument(theirs.id, user.id);
+    await pinTestDocument(shared.id, other.id);
+    const keptPin = await pinTestDocument(theirs.id, other.id);
+
     // Its sign-in, e-mail and payment records.
     await createValidUserSession(user.id);
     await createValidOtp(user.id, user.email);
@@ -288,6 +296,10 @@ describe('purgeDeletedAccounts', () => {
       eq(documentCollaborators.userId, user.id),
       eq(documentCollaborators.email, user.email),
     ))).toEqual([]);
+    expect(await db.select().from(documentPins).where(or(
+      eq(documentPins.userId, user.id),
+      eq(documentPins.documentId, shared.id),
+    ))).toEqual([]);
     expect(await db.select().from(sessions)
       .where(eq(sessions.userId, user.id))).toEqual([]);
     expect(await db.select().from(otps).where(or(
@@ -310,6 +322,8 @@ describe('purgeDeletedAccounts', () => {
     const [kept] = await db.select().from(documentAssets)
       .where(eq(documentAssets.id, uploadedThere.id));
     expect(kept.userId).toBeNull();
+    expect(await db.select({ id: documentPins.id }).from(documentPins)
+      .where(eq(documentPins.id, keptPin.id))).toHaveLength(1);
     const [keptReport] = await db.select().from(documentReports)
       .where(eq(documentReports.id, report.id));
     expect(keptReport.userId).toBeNull();

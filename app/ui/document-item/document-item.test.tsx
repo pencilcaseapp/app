@@ -90,6 +90,20 @@ describe('DocumentItem', () => {
       .toHaveAccessibleName('My document , Shared with invited people');
   });
 
+  test('says a pinned document is pinned after its title', () => {
+    render(
+      <DocumentItem
+        href="/documents/1"
+        title="My document"
+        shareState="link"
+        isPinned
+      />,
+    );
+
+    expect(screen.getByRole('link'))
+      .toHaveAccessibleName('My document , Shared publicly , pinned');
+  });
+
   test('renders the actionArea as a sibling of the link', () => {
     render(
       <DocumentItem

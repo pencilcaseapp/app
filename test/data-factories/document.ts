@@ -1,6 +1,6 @@
 import { db } from '~/db';
 import { faker } from '@faker-js/faker';
-import { documentCollaborators, documents } from '~/db/schema';
+import { documentCollaborators, documentPins, documents } from '~/db/schema';
 import type { DocumentAccess } from '~/constants/document';
 
 export async function createEmptyDocument(userId: string) {
@@ -83,4 +83,18 @@ export async function inviteDocumentCollaborator(
   }).returning();
 
   return collaborator;
+}
+
+export async function pinTestDocument(
+  documentId: string,
+  userId: string,
+  pinnedAt: Date = faker.date.recent(),
+) {
+  const [pin] = await db.insert(documentPins).values({
+    documentId,
+    userId,
+    pinnedAt,
+  }).returning();
+
+  return pin;
 }

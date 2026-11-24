@@ -24,6 +24,7 @@ import { db, type Executor } from '~/db';
 import {
   documentAssets,
   documentCollaborators,
+  documentPins,
   documents,
   users,
 } from '~/db/schema';
@@ -183,7 +184,7 @@ export async function getDocumentTitle(id: string) {
  * `inviteShared` says whether anybody was invited to the document by
  * e-mail, which the navigation marks alongside `linkShared`: it rides
  * along as a correlated `EXISTS` so the list still costs one query
- * however long it is.
+ * however long it is. `pinnedAt` is when the user pinned it, if they did.
  */
 export async function getDocumentList(userId: string) {
   if (!isUuid(userId)) {
@@ -203,8 +204,10 @@ export async function getDocumentList(userId: string) {
         )),
     ).mapWith(Boolean),
     userId: documents.userId,
+    pinnedAt: documentPins.pinnedAt,
   })
     .from(documents)
+    .leftJoin(documentPins, isPinnedBy(userId))
     .where(and(
       isNull(documents.deletedAt),
       or(
@@ -246,7 +249,8 @@ export async function getDeletedDocumentList(userId: string) {
 
 /**
  * The documents of others the user has a collaborator row on, through an
- * invite or the link, most recently edited first. The owner's account may
+ * invite or the link, most recently edited first, with when the user
+ * pinned them. The owner's account may
  * be deleted, which only the user repo knows, so the service filters those.
  */
 export async function getSharedDocumentList(userId: string) {
@@ -260,9 +264,11 @@ export async function getSharedDocumentList(userId: string) {
     id: documents.id,
     title: documents.title,
     userId: documents.userId,
+    pinnedAt: documentPins.pinnedAt,
   })
     .from(documentCollaborators)
     .innerJoin(documents, eq(documents.id, documentCollaborators.documentId))
+    .leftJoin(documentPins, isPinnedBy(userId))
     .where(and(
       eq(documentCollaborators.userId, userId),
       ne(documents.userId, userId),
@@ -497,6 +503,8 @@ export async function hardDeleteDocuments(
       .where(inArray(documentAssets.documentId, ids));
     await tx.delete(documentCollaborators)
       .where(inArray(documentCollaborators.documentId, ids));
+    await tx.delete(documentPins)
+      .where(inArray(documentPins.documentId, ids));
     const deleted = await tx.delete(documents)
       .where(inArray(documents.id, ids))
       .returning({ id: documents.id });
@@ -742,6 +750,7 @@ export interface RemoveViewerCollaboratorsInput {
  */
 export async function removeViewerCollaborators(
   input: RemoveViewerCollaboratorsInput,
+  executor: Executor = db,
 ) {
   const { documentId, viewer } = input;
 
@@ -749,12 +758,95 @@ export async function removeViewerCollaborators(
     return [];
   }
 
-  return db.delete(documentCollaborators)
+  return executor.delete(documentCollaborators)
     .where(and(
       eq(documentCollaborators.documentId, documentId),
       isViewerCollaborator(viewer),
     ))
     .returning({ id: documentCollaborators.id });
+}
+
+/** Joins the pin of the user onto each document, one row at most. */
+function isPinnedBy(userId: string) {
+  return and(
+    eq(documentPins.documentId, documents.id),
+    eq(documentPins.userId, userId),
+  );
+}
+
+export interface DocumentPinInput {
+  documentId: string;
+  userId: string;
+}
+
+/**
+ * Pins the document for the user. Pinning it again keeps the time it was
+ * first pinned, so it stays where it is among the pinned ones.
+ */
+export async function pinDocument(input: DocumentPinInput) {
+  const { documentId, userId } = input;
+
+  if (!isUuid(documentId) || !isUuid(userId)) {
+    return;
+  }
+
+  await db.insert(documentPins)
+    .values({ documentId, userId })
+    .onConflictDoNothing({
+      target: [documentPins.userId, documentPins.documentId],
+    });
+}
+
+export async function unpinDocument(
+  input: DocumentPinInput,
+  executor: Executor = db,
+) {
+  const { documentId, userId } = input;
+
+  if (!isUuid(documentId) || !isUuid(userId)) {
+    return 0;
+  }
+
+  const deleted = await executor.delete(documentPins)
+    .where(and(
+      eq(documentPins.documentId, documentId),
+      eq(documentPins.userId, userId),
+    ))
+    .returning({ id: documentPins.id });
+
+  return deleted.length;
+}
+
+/** Unpins the document for everybody who pinned it. */
+export async function deleteDocumentPins(
+  documentId: string,
+  executor: Executor = db,
+) {
+  if (!isUuid(documentId)) {
+    return 0;
+  }
+
+  const deleted = await executor.delete(documentPins)
+    .where(eq(documentPins.documentId, documentId))
+    .returning({ id: documentPins.id });
+
+  return deleted.length;
+}
+
+/** Removes every pin of the user, on any document. */
+export async function deleteUserPins(
+  userId: string,
+  executor: Executor = db,
+) {
+  if (!isUuid(userId)) {
+    return 0;
+  }
+
+  const deleted = await executor.delete(documentPins)
+    .where(eq(documentPins.userId, userId))
+    .returning({ id: documentPins.id });
+
+  return deleted.length;
 }
 
 export interface CreateDocumentAssetInput {

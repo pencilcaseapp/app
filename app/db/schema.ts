@@ -231,6 +231,22 @@ export const documentAssets = pgTable('document_assets', {
 ]);
 
 /*
+ * A document somebody pinned to the top of their navigation. Pins belong
+ * to a person, not to the document: pinning a shared document pins it for
+ * nobody else. The navigation lists the pinned ones by `pinned_at`.
+ */
+export const documentPins = pgTable('document_pins', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  documentId: uuid('document_id').notNull().references(() => documents.id),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  pinnedAt: timestamp('pinned_at').notNull().defaultNow(),
+}, table => [
+  uniqueIndex('document_pins_user_id_document_id_idx')
+    .on(table.userId, table.documentId),
+  index('document_pins_document_id_idx').on(table.documentId),
+]);
+
+/*
  * A report somebody sent about a document they can open but do not own,
  * kept for `DOCUMENT_REPORT_RETENTION_DAYS` as the record of what was
  * reported and what we were told; the e-mail to our inbox is only the
