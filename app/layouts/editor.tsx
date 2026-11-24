@@ -53,7 +53,6 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import { useEmitToast } from '~/hooks/use-toast';
 import {
   DeleteDocumentDialog,
   type DocumentToDelete,
@@ -234,7 +233,6 @@ function EditorSidebar({
   const submit = useSubmit();
   const fetchers = useFetchers();
   const csrfToken = useAuthenticityToken();
-  const emitToast = useEmitToast();
   const listRef = useRef<HTMLUListElement>(null);
   const activeDocument = useActiveDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
@@ -341,16 +339,12 @@ function EditorSidebar({
     moveToTop(href('/doc/:id', { id: editedDocumentId }));
   }, [editedDocumentId, moveToTop]);
 
-  const setPinned = (item: NavigationItemData, title: string) => {
+  const setPinned = (item: NavigationItemData) => {
     const pinned = !isPinned(item);
 
     if (pinned && listRef.current) {
       // The row goes to the top of the list, so the list follows it.
       scrollSidebarToTop(listRef.current);
-    }
-
-    if (!pinned) {
-      emitToast({ type: 'success', title: `Unpinned “${title}”` });
     }
 
     void submit({ pinned: String(pinned), csrf: csrfToken }, {
@@ -382,7 +376,7 @@ function EditorSidebar({
                     <DropdownMenuContent align={isMobile ? 'end' : 'start'}>
                       <DropdownMenuItem
                         as="button"
-                        onClick={() => setPinned(item, label)}
+                        onClick={() => setPinned(item)}
                         icon="pin"
                       >
                         {isPinned(item) ? 'Unpin' : 'Pin'}
