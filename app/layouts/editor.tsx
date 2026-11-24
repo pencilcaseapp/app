@@ -6,7 +6,7 @@ import {
   Outlet,
   useFetchers,
   useLocation,
-  useRevalidator,
+  useSearchParams,
   useSubmit,
 } from 'react-router';
 import { useAuthenticityToken } from 'remix-utils/csrf/react';
@@ -69,6 +69,13 @@ import { FolderSwitch, type FolderSwitchItem } from '~/ui/folder-switch/folder-s
 import { useIsMobile } from '~/hooks/use-is-mobile';
 import { isNativeAppRequest } from '~/utils/native-app';
 import { readUserPrefs, storeUserPrefs } from '~/utils/user-prefs-cookie';
+import { getFolderSearchParam } from '~/utils/document-folder';
+import { keepFolderMiddleware } from '~/middleware/folder';
+import { SearchParamNavigation } from '~/constants/search-params';
+
+export const clientMiddleware: Route.ClientMiddlewareFunction[] = [
+  keepFolderMiddleware,
+];
 
 export const handle = {
   bodyClassName: 'w-full',
@@ -101,7 +108,11 @@ const EMPTY_NAVIGATION: DocumentNavigation = {
 
 export async function loader({ context, request }: Route.LoaderArgs) {
   const user = context.get(optionalUserSessionContext);
-  const { sidebarOpen, folder } = await readUserPrefs(request);
+  const prefs = await readUserPrefs(request);
+  const { sidebarOpen } = prefs;
+  // The URL names the folder of this tab, the cookie the one last picked
+  // in any tab.
+  const folder = getFolderSearchParam(request.url) ?? prefs.folder;
   // The navigation also lists the documents shared with the user, which
   // none of their free allowance is spent on, so the usage meter counts
   // the ones they created themselves instead of the entries.
@@ -229,7 +240,7 @@ function EditorSidebar({
 }: EditorSidebarProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
-  const revalidator = useRevalidator();
+  const [, setSearchParams] = useSearchParams();
   const submit = useSubmit();
   const fetchers = useFetchers();
   const csrfToken = useAuthenticityToken();
@@ -426,10 +437,13 @@ function EditorSidebar({
 
   const switchFolder = async (nextFolder: DocumentFolder) => {
     setPendingFolder(nextFolder);
-    // The loader reads the folder from the cookie, so it is stored
-    // before the navigation is loaded again.
+    // The URL keeps the folder for this tab, the cookie for the next
+    // page that names none.
     await storeUserPrefs({ folder: nextFolder });
-    await revalidator.revalidate();
+    await setSearchParams((searchParams) => {
+      searchParams.set(SearchParamNavigation.Folder, nextFolder);
+      return searchParams;
+    }, { replace: true, preventScrollReset: true });
   };
 
   return (

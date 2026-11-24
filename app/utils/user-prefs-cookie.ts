@@ -1,5 +1,6 @@
 import { createCookie } from 'react-router';
-import { DOCUMENT_FOLDERS, type DocumentFolder } from '~/constants/document';
+import type { DocumentFolder } from '~/constants/document';
+import { isDocumentFolder } from '~/utils/document-folder';
 
 export interface UserPrefs {
   sidebarOpen: boolean;
@@ -11,10 +12,6 @@ const DEFAULT_USER_PREFS: UserPrefs = {
   sidebarOpen: true,
   folder: 'all',
 };
-
-function isDocumentFolder(value: unknown): value is DocumentFolder {
-  return DOCUMENT_FOLDERS.some(folder => folder === value);
-}
 
 /**
  * The reader's preferences, kept in one cookie rather than local storage so

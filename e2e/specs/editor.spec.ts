@@ -1,5 +1,6 @@
 import { expect, test } from '../fixtures/test';
 import { createPng, expectLoaded, images, pasteImage } from '../utils/images';
+import { Sidebar } from '../fixtures/app/sidebar';
 
 test.describe('documents', () => {
   test('a new document keeps its content across a reload', async ({ user }) => {
@@ -163,14 +164,20 @@ test.describe('deletion', () => {
     await userA.sidebar.openFolder('Deleted');
     await expect(userA.sidebar.document(heading)).toBeVisible();
 
-    // It opens read-only from Deleted, with the notice on top.
+    // It opens read-only from Deleted, with the notice on top, and the
+    // tab keeps its folder in the URL.
     await userA.sidebar.document(heading).click();
-    await expect(userA.page).toHaveURL(url);
+    await expect(userA.page).toHaveURL(`${url}?folder=deleted`);
     await expect(userA.document.deletedNotice).toBeVisible();
     await expect(userA.document.content).toHaveAttribute('contenteditable', 'false');
     await expect(userA.document.content).toContainText(heading);
 
-    // It stays that way after a reload, and so does the folder.
+    // It stays that way after a reload, and so does the folder, even once
+    // another tab picked All Docs.
+    const otherTab = new Sidebar(await userA.page.context().newPage());
+    await otherTab.page.goto(url);
+    await otherTab.openFolder('All Docs');
+    await otherTab.page.close();
     await userA.page.reload();
     await expect(userA.document.deletedNotice).toBeVisible();
     await expect(userA.sidebar.document(heading)).toBeVisible();
