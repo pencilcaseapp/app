@@ -234,6 +234,9 @@ function EditorSidebar({
   const fetchers = useFetchers();
   const csrfToken = useAuthenticityToken();
   const listRef = useRef<HTMLUListElement>(null);
+  // The row a pin or unpin moved, whose new menu trigger takes the focus
+  // its old one had.
+  const focusAfterMoveRef = useRef<string>(undefined);
   const activeDocument = useActiveDocumentTitle();
   const { closeOnNavigate } = useSidebarContext();
   const { editedDocumentId } = useEditedDocument();
@@ -268,10 +271,8 @@ function EditorSidebar({
     const pinned = fetcher.formData?.get('pinned');
 
     if (fetcher.key.startsWith(PIN_FETCHER_PREFIX) && pinned) {
-      pinnedTimes.set(
-        fetcher.key.slice(PIN_FETCHER_PREFIX.length),
-        pinned === 'true' ? Number.MAX_SAFE_INTEGER : null,
-      );
+      const id = fetcher.key.slice(PIN_FETCHER_PREFIX.length);
+      pinnedTimes.set(id, pinned === 'true' ? Number.MAX_SAFE_INTEGER : null);
     }
   });
   const isPinned = (item: NavigationItemData) =>
@@ -341,6 +342,7 @@ function EditorSidebar({
 
   const setPinned = (item: NavigationItemData) => {
     const pinned = !isPinned(item);
+    focusAfterMoveRef.current = item.id;
 
     if (pinned && listRef.current) {
       // The row goes to the top of the list, so the list follows it.
@@ -352,6 +354,9 @@ function EditorSidebar({
       action: href('/doc/:id/pin', { id: item.id }),
       navigate: false,
       fetcherKey: `${PIN_FETCHER_PREFIX}${item.id}`,
+      // The row moves in the same commit the menu closes in, so the menu
+      // goes with the row it belonged to instead of fading out.
+      flushSync: true,
     });
   };
 
@@ -359,7 +364,9 @@ function EditorSidebar({
     const label = liveTitles.get(item.id) ?? item.label;
 
     return (
-      <li key={item.to}>
+      // A row that is pinned or unpinned is drawn anew in its new place
+      // rather than travelling there, and its open menu goes with it.
+      <li key={`${isPinned(item) ? 'pinned' : 'unpinned'}:${item.to}`}>
         <DocumentItem
           title={label}
           shareState={item.shareState}
@@ -371,7 +378,15 @@ function EditorSidebar({
             ? <RestoreDocumentMenu documentId={item.id} />
             : (
                 <DropdownMenu>
-                  <DropdownMenuTrigger iconTitle="Item options" />
+                  <DropdownMenuTrigger
+                    iconTitle="Item options"
+                    ref={(trigger) => {
+                      if (trigger && focusAfterMoveRef.current === item.id) {
+                        focusAfterMoveRef.current = undefined;
+                        trigger.focus({ preventScroll: true });
+                      }
+                    }}
+                  />
                   <DropdownMenuPortal>
                     <DropdownMenuContent align={isMobile ? 'end' : 'start'}>
                       <DropdownMenuItem
@@ -446,10 +461,8 @@ function EditorSidebar({
                     className="flex flex-col gap-1.5"
                   >
                     {/*
-                      One array for both, so a row keeps its element (and
-                      its menu's focus) and glides to its new place when
-                      it is pinned or unpinned. The heading and the rule
-                      are decorative: each pinned row says so itself.
+                      The heading and the rule are decorative: each pinned
+                      row says so itself.
                     */}
                     {[
                       pinnedItems.length > 0 && (

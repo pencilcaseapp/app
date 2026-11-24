@@ -1,10 +1,11 @@
 import { Trigger } from '@radix-ui/react-dropdown-menu';
 import type { DropdownMenuTriggerProps as RadixDropdownMenuTriggerProps } from '@radix-ui/react-dropdown-menu';
-import type { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren, Ref } from 'react';
 import { Button } from '../button/button';
 
 export type DropdownTriggerProps = {
   iconTitle?: string;
+  ref?: Ref<HTMLButtonElement>;
 } & RadixDropdownMenuTriggerProps
 & PropsWithChildren;
 
