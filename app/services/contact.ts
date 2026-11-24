@@ -1,16 +1,17 @@
 import { randomUUID } from 'node:crypto';
 import type { ContractNotice } from '~/constants/contract-notice';
-import {
-  sendEmailContactMessage,
-  sendEmailContractNotice,
-} from './email-templates';
+import { EmailTemplate } from '~/constants/email';
+import { queueEmail } from './email-templates';
 
 /** Mails a message from the website's contact form to our inbox. */
 export async function sendContactMessage(input: {
   email: string;
   message: string;
 }) {
-  await sendEmailContactMessage({ messageId: randomUUID(), ...input });
+  await queueEmail({
+    template: EmailTemplate.ContactMessage,
+    input: { messageId: randomUUID(), ...input },
+  });
 }
 
 /**
@@ -19,9 +20,13 @@ export async function sendContactMessage(input: {
  * reached us, and our inbox a copy to carry it out.
  */
 export async function sendContractNotice(notice: ContractNotice) {
-  await sendEmailContractNotice({
-    noticeId: randomUUID(),
-    notice,
-    receivedAt: new Date(),
-  });
+  const noticeId = randomUUID();
+  const receivedAt = new Date().toISOString();
+
+  for (const recipient of ['customer', 'inbox'] as const) {
+    await queueEmail({
+      template: EmailTemplate.ContractNotice,
+      input: { noticeId, notice, receivedAt, recipient },
+    });
+  }
 }

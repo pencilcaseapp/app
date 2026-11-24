@@ -27,6 +27,7 @@ const errorMessages: Record<InitEmailChangeError, string> = {
   [InitEmailChangeError.SameEmail]: emailChangeCopies.sameEmail,
   [InitEmailChangeError.EmailTaken]: emailChangeCopies.emailTaken,
   [InitEmailChangeError.TooManyRequests]: emailChangeCopies.tooManyRequests,
+  [InitEmailChangeError.EmailFailed]: commonCopies.errors.codeNotSent,
 };
 
 export function loader({ params }: Route.LoaderArgs) {

@@ -4,6 +4,7 @@ import { ControlledForm } from '~/components/controlled-form/controlled-form';
 import { ControlledSubmitButton } from '~/components/controlled-submit-button/controlled-submit-button';
 import { SettingsDialogContentInner } from '~/components/settings-dialog/settings-dialog';
 import { emailChangeCopies } from '~/constants/email-change';
+import { commonCopies } from '~/constants/common-copies';
 import { SearchParamToast } from '~/constants/search-params';
 import { userSessionContext } from '~/contexts/user-session';
 import { useAppForm } from '~/hooks/use-app-form';
@@ -144,6 +145,13 @@ export async function action({ request, params, context }: Route.ActionArgs) {
 
           case InitEmailChangeError.SameEmail: {
             return redirectWithDanger(emailUrl, emailChangeCopies.sameEmail);
+          }
+
+          case InitEmailChangeError.EmailFailed: {
+            return redirectWithDanger(
+              emailUrl,
+              commonCopies.errors.codeNotSent,
+            );
           }
 
           default: {

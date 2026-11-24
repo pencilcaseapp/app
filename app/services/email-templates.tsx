@@ -44,7 +44,13 @@ import { EmailTemplate } from '~/constants/email';
 import { SearchParamAuth } from '~/constants/search-params';
 import { formatLongDate, toDateParam } from '~/utils/date';
 import { withSearchParams } from '~/utils/url';
-import { sendEmail, type EmailData } from './email';
+import { enqueueJob } from '~/jobs/queue';
+import {
+  logQueuedEmail,
+  sendEmail,
+  type EmailData,
+  type SendEmailInput,
+} from './email';
 
 const config = getConfig();
 
@@ -84,32 +90,40 @@ export async function sendEmailChangeCode(input: {
   });
 }
 
-export async function sendEmailSubscriptionStarted(input: {
+type SubscriptionStartedInput = {
   to: EmailData;
   subscriptionId: string;
   userId: string;
-}) {
+};
+
+function subscriptionStartedEmail(
+  input: SubscriptionStartedInput,
+): SendEmailInput {
   const { to, subscriptionId, userId } = input;
 
-  await sendEmail({
+  return {
     to,
     subject: subscriptionStartedEmailSubject(),
     email: <SubscriptionStartedEmail />,
     template: EmailTemplate.SubscriptionStarted,
     idempotencyScope: subscriptionId,
     userId,
-  });
+  };
 }
 
-export async function sendEmailSubscriptionPaymentFailed(input: {
+type SubscriptionPaymentFailedInput = {
   to: EmailData;
   subscriptionId: string;
   billingPeriod: string;
   userId: string;
-}) {
+};
+
+function subscriptionPaymentFailedEmail(
+  input: SubscriptionPaymentFailedInput,
+): SendEmailInput {
   const { to, subscriptionId, billingPeriod, userId } = input;
 
-  await sendEmail({
+  return {
     to,
     subject: subscriptionPaymentFailedEmailSubject(),
     email: (
@@ -120,17 +134,21 @@ export async function sendEmailSubscriptionPaymentFailed(input: {
     template: EmailTemplate.SubscriptionPaymentFailed,
     idempotencyScope: `${subscriptionId}:${billingPeriod}`,
     userId,
-  });
+  };
 }
 
-export async function sendEmailSubscriptionCanceled(input: {
+type SubscriptionCanceledInput = {
   to: EmailData;
   subscriptionId: string;
   userId: string;
-}) {
+};
+
+function subscriptionCanceledEmail(
+  input: SubscriptionCanceledInput,
+): SendEmailInput {
   const { to, subscriptionId, userId } = input;
 
-  await sendEmail({
+  return {
     to,
     subject: subscriptionCanceledEmailSubject(),
     email: (
@@ -141,7 +159,7 @@ export async function sendEmailSubscriptionCanceled(input: {
     template: EmailTemplate.SubscriptionCanceled,
     idempotencyScope: subscriptionId,
     userId,
-  });
+  };
 }
 
 /**
@@ -151,14 +169,16 @@ export async function sendEmailSubscriptionCanceled(input: {
  * `inviterId` goes on the log row because the recipient need not have an
  * account yet, and the invite is the inviter's doing.
  */
-export async function sendEmailDocumentInvite(input: {
+type DocumentInviteInput = {
   to: EmailData;
   inviteId: string;
   documentId: string;
   documentTitle: string | null;
   inviterName: string;
   inviterId: string;
-}) {
+};
+
+function documentInviteEmail(input: DocumentInviteInput): SendEmailInput {
   const {
     to,
     inviteId,
@@ -168,7 +188,7 @@ export async function sendEmailDocumentInvite(input: {
     inviterId,
   } = input;
 
-  await sendEmail({
+  return {
     to,
     subject: documentInviteEmailSubject({ inviterName, documentTitle }),
     email: (
@@ -181,7 +201,7 @@ export async function sendEmailDocumentInvite(input: {
     template: EmailTemplate.DocumentInvite,
     idempotencyScope: inviteId,
     userId: inviterId,
-  });
+  };
 }
 
 /**
@@ -189,7 +209,7 @@ export async function sendEmailDocumentInvite(input: {
  * our own inbox with the reporter as the reply-to address, so answering
  * them is a reply. Logged against the reporter, whose reports are capped.
  */
-export async function sendEmailDocumentReport(input: {
+type DocumentReportInput = {
   reportId: string;
   reason: DocumentReportReason;
   details: string | null;
@@ -197,7 +217,9 @@ export async function sendEmailDocumentReport(input: {
   documentTitle: string | null;
   ownerEmail: string;
   reporter: { id: string; email: string };
-}) {
+};
+
+function documentReportEmail(input: DocumentReportInput): SendEmailInput {
   const {
     reportId,
     reason,
@@ -208,7 +230,7 @@ export async function sendEmailDocumentReport(input: {
     reporter,
   } = input;
 
-  await sendEmail({
+  return {
     to: { email: commonCopies.supportEmail },
     replyTo: reporter.email,
     subject: documentReportEmailSubject({ reason, documentTitle }),
@@ -226,56 +248,54 @@ export async function sendEmailDocumentReport(input: {
     template: EmailTemplate.DocumentReport,
     idempotencyScope: reportId,
     userId: reporter.id,
-  });
+  };
 }
 
-export async function sendEmailContactMessage(input: {
+type ContactMessageInput = {
   messageId: string;
   email: string;
   message: string;
-}) {
+};
+
+function contactMessageEmail(input: ContactMessageInput): SendEmailInput {
   const { messageId, email, message } = input;
 
-  await sendEmail({
+  return {
     to: { email: commonCopies.supportEmail },
     replyTo: email,
     subject: contactMessageEmailSubject(email),
     email: <ContactMessageEmail email={email} message={message} />,
     template: EmailTemplate.ContactMessage,
     idempotencyScope: messageId,
-  });
+  };
 }
 
-/**
- * Confirms a cancellation or withdrawal to the customer and hands our
- * inbox a copy to act on, answerable to the customer.
- */
-export async function sendEmailContractNotice(input: {
+type ContractNoticeInput = {
   noticeId: string;
   notice: ContractNotice;
-  receivedAt: Date;
-}) {
-  const { noticeId, notice, receivedAt } = input;
-  const email = (
-    <ContractNoticeEmail notice={notice} receivedAt={receivedAt} />
-  );
+  /** An ISO date, the input goes through the job queue as JSON. */
+  receivedAt: string;
+  recipient: 'customer' | 'inbox';
+};
 
-  await sendEmail({
-    to: { email: notice.email },
-    replyTo: commonCopies.supportEmail,
-    subject: contractNoticeEmailSubject(notice, 'customer'),
-    email,
+/**
+ * Confirms a cancellation or withdrawal to the customer, or hands our
+ * inbox a copy to act on, answerable to the customer.
+ */
+function contractNoticeEmail(input: ContractNoticeInput): SendEmailInput {
+  const { noticeId, notice, receivedAt, recipient } = input;
+  const toCustomer = recipient === 'customer';
+
+  return {
+    to: { email: toCustomer ? notice.email : commonCopies.supportEmail },
+    replyTo: toCustomer ? commonCopies.supportEmail : notice.email,
+    subject: contractNoticeEmailSubject(notice, recipient),
+    email: (
+      <ContractNoticeEmail notice={notice} receivedAt={new Date(receivedAt)} />
+    ),
     template: EmailTemplate.ContractNotice,
-    idempotencyScope: `${noticeId}:customer`,
-  });
-  await sendEmail({
-    to: { email: commonCopies.supportEmail },
-    replyTo: notice.email,
-    subject: contractNoticeEmailSubject(notice, 'inbox'),
-    email,
-    template: EmailTemplate.ContractNotice,
-    idempotencyScope: `${noticeId}:inbox`,
-  });
+    idempotencyScope: `${noticeId}:${recipient}`,
+  };
 }
 
 /**
@@ -306,4 +326,63 @@ export async function sendEmailAccountDeleted(input: {
     idempotencyScope: `${userId}:${deletedAt.toISOString()}`,
     userId,
   });
+}
+
+type QueuedEmailInputs = {
+  [EmailTemplate.SubscriptionStarted]: SubscriptionStartedInput;
+  [EmailTemplate.SubscriptionPaymentFailed]: SubscriptionPaymentFailedInput;
+  [EmailTemplate.SubscriptionCanceled]: SubscriptionCanceledInput;
+  [EmailTemplate.DocumentInvite]: DocumentInviteInput;
+  [EmailTemplate.DocumentReport]: DocumentReportInput;
+  [EmailTemplate.ContactMessage]: ContactMessageInput;
+  [EmailTemplate.ContractNotice]: ContractNoticeInput;
+};
+
+type QueuedEmailTemplate = keyof QueuedEmailInputs;
+
+/**
+ * An e-mail nobody waits on, sent by the `send-email` job. The input goes
+ * through Redis, so it stays JSON.
+ */
+export type QueuedEmail = {
+  [Template in QueuedEmailTemplate]: {
+    template: Template;
+    input: QueuedEmailInputs[Template];
+  };
+}[QueuedEmailTemplate];
+
+const queuedEmails: {
+  [Template in QueuedEmailTemplate]:
+  (input: QueuedEmailInputs[Template]) => SendEmailInput;
+} = {
+  [EmailTemplate.SubscriptionStarted]: subscriptionStartedEmail,
+  [EmailTemplate.SubscriptionPaymentFailed]: subscriptionPaymentFailedEmail,
+  [EmailTemplate.SubscriptionCanceled]: subscriptionCanceledEmail,
+  [EmailTemplate.DocumentInvite]: documentInviteEmail,
+  [EmailTemplate.DocumentReport]: documentReportEmail,
+  [EmailTemplate.ContactMessage]: contactMessageEmail,
+  [EmailTemplate.ContractNotice]: contractNoticeEmail,
+};
+
+export function buildQueuedEmail({ template, input }: QueuedEmail) {
+  const build = queuedEmails[template] as (
+    input: QueuedEmail['input'],
+  ) => SendEmailInput;
+
+  return build(input);
+}
+
+/**
+ * Hands an e-mail to the background job instead of sending it in the
+ * request, so a mail provider that is down only delays it. It is logged
+ * as queued right away, which is what the invite limit counts.
+ */
+export async function queueEmail(queued: QueuedEmail) {
+  await logQueuedEmail(buildQueuedEmail(queued));
+  await enqueueJob('send-email', queued);
+}
+
+/** Sends a queued e-mail. Throws when the send fails, so the job retries. */
+export async function sendQueuedEmail(queued: QueuedEmail) {
+  await sendEmail(buildQueuedEmail(queued));
 }

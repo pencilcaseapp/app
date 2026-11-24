@@ -182,7 +182,7 @@ goes away. A service hands work off with `enqueueJob(name, data)`
 `onDemandJobDefinitions`. Leaving `jobs.redis` out of the config (test) disables jobs;
 tests call `run` directly. Bull Board is mounted at `/dev/bullmq` in
 development only. Keep `run` idempotent — the queue retries three times
-with backoff.
+with backoff, an on-demand job ten times (about four hours).
 
 **Live authorisation — `app/live/connections.ts`.** The upgrade request never
 passes through the route middleware, so `onConnect` resolves the session from
@@ -284,6 +284,11 @@ through `SearchParamToast`.
 Lettermint (`app/clients/lettermint.ts`). `app/emails/templates/` holds one
 template per file (the only directory the preview server reads) and
 `app/emails/ui/` the shared email UI.
+Only the sign-in and e-mail change codes are sent in the request, and a
+failed send there returns `EmailFailed` for the route to show "Please try
+again later". Every other e-mail goes through `queueEmail`, which logs it
+as `queued` and hands it to the `send-email` job, so a Lettermint outage
+only delays it.
 Every send is logged in `email_logs` and claimed by an idempotency key first
 (`<template>:<scope>` from `app/constants/email.ts`), so the same e-mail never
 goes out twice; the key also rides along to Lettermint. Rows are kept for a

@@ -146,6 +146,17 @@ describe('initEmailChange', () => {
 
     expect(updateUserMock).not.toHaveBeenCalled();
   });
+
+  it('expires the request and says so when the e-mail fails', async () => {
+    sendEmailChangeCodeMock.mockRejectedValueOnce(new Error('Outage'));
+    vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+    const [error] = await initEmailChange(user, 'new@example.com');
+
+    expect(error).toBe(InitEmailChangeError.EmailFailed);
+    expect(expireEmailChangeRequestMock)
+      .toHaveBeenCalledWith(emailChangeRequestFixture.id);
+  });
 });
 
 describe('verifyEmailChange', () => {

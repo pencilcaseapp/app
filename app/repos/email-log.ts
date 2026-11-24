@@ -15,11 +15,33 @@ import { EmailLogStatus, type EmailTemplate } from '~/constants/email';
 export type EmailLog = InferSelectModel<typeof emailLogs>;
 
 /**
+ * Records an e-mail handed to the background job, so the log has it (and
+ * counts it) before the job sends it. Does nothing when the key already
+ * has a row.
+ */
+export async function insertQueuedEmailLog(input: {
+  idempotencyKey: string;
+  template: string;
+  email: string;
+  subject: string;
+  userId?: string;
+}) {
+  const [log] = await db
+    .insert(emailLogs)
+    .values({ ...input, status: EmailLogStatus.Queued })
+    .onConflictDoNothing({ target: emailLogs.idempotencyKey })
+    .returning();
+
+  return log;
+}
+
+/**
  * Takes the idempotency key for one send and returns the log row, or
  * `undefined` when the key is already taken — that is what blocks a
- * duplicate. A previous attempt that failed before it reached the
- * provider is claimed again; anything else keeps the row it has. One
- * statement, so two callers racing for the same key cannot both win.
+ * duplicate. A queued e-mail is claimed by its job, and a previous
+ * attempt that failed before it reached the provider is claimed again;
+ * anything else keeps the row it has. One statement, so two callers
+ * racing for the same key cannot both win.
  */
 export async function claimEmailLog(input: {
   idempotencyKey: string;
@@ -33,7 +55,10 @@ export async function claimEmailLog(input: {
     .values({ ...input, status: EmailLogStatus.Pending })
     .onConflictDoUpdate({
       target: emailLogs.idempotencyKey,
-      setWhere: eq(emailLogs.status, EmailLogStatus.Failed),
+      setWhere: inArray(
+        emailLogs.status,
+        [EmailLogStatus.Queued, EmailLogStatus.Failed],
+      ),
       set: {
         ...input,
         status: EmailLogStatus.Pending,

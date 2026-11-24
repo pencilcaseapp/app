@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getConfig } from '~/config';
 import { transaction } from '~/db';
 import { SubscriptionStatus } from '~/constants/subscription';
+import { EmailTemplate } from '~/constants/email';
 import {
   getWebhookEvent,
   markWebhookEventProcessed,
@@ -35,11 +36,7 @@ import {
   verifyWebhookSignature,
   type CreemSubscription,
 } from '~/clients/creem';
-import {
-  sendEmailSubscriptionCanceled,
-  sendEmailSubscriptionPaymentFailed,
-  sendEmailSubscriptionStarted,
-} from './email-templates';
+import { queueEmail } from './email-templates';
 
 const config = getConfig();
 
@@ -361,20 +358,26 @@ async function processWebhookEvent(
     }
 
     if (eventType === 'subscription.past_due') {
-      await sendEmailSubscriptionPaymentFailed({
-        to: emailData(synced.user),
-        subscriptionId: creemSubscription.id,
-        billingPeriod:
-          creemSubscription.current_period_start_date ?? eventId,
-        userId: synced.user.id,
+      await queueEmail({
+        template: EmailTemplate.SubscriptionPaymentFailed,
+        input: {
+          to: emailData(synced.user),
+          subscriptionId: creemSubscription.id,
+          billingPeriod:
+            creemSubscription.current_period_start_date ?? eventId,
+          userId: synced.user.id,
+        },
       });
     }
 
     if (eventType === 'subscription.canceled') {
-      await sendEmailSubscriptionCanceled({
-        to: emailData(synced.user),
-        subscriptionId: creemSubscription.id,
-        userId: synced.user.id,
+      await queueEmail({
+        template: EmailTemplate.SubscriptionCanceled,
+        input: {
+          to: emailData(synced.user),
+          subscriptionId: creemSubscription.id,
+          userId: synced.user.id,
+        },
       });
     }
 
@@ -466,10 +469,13 @@ async function syncCreemSubscription(creemSubscription: CreemSubscription) {
     && ACCESS_GRANTING_STATUSES
       .includes(creemSubscription.status as SubscriptionStatus)
   ) {
-    await sendEmailSubscriptionStarted({
-      to: emailData(user),
-      subscriptionId: creemSubscription.id,
-      userId: user.id,
+    await queueEmail({
+      template: EmailTemplate.SubscriptionStarted,
+      input: {
+        to: emailData(user),
+        subscriptionId: creemSubscription.id,
+        userId: user.id,
+      },
     });
   }
 

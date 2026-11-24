@@ -17,12 +17,15 @@ export enum EmailTemplate {
 }
 
 /**
- * `Pending` is the claim taken before the provider is called: it is what
- * blocks a second send while the first is in flight. `Skipped` records
- * the sends `sendEmail` deliberately does not make (no API token, a test
- * address), and only `Failed` may be claimed again.
+ * `Queued` is an e-mail handed to the background job, recorded when it is
+ * queued so the log counts it before it goes out. `Pending` is the claim
+ * taken before the provider is called: it is what blocks a second send
+ * while the first is in flight. `Skipped` records the sends `sendEmail`
+ * deliberately does not make (no API token, a test address), and only
+ * `Queued` and `Failed` may be claimed.
  */
 export enum EmailLogStatus {
+  Queued = 'queued',
   Pending = 'pending',
   Sent = 'sent',
   Failed = 'failed',

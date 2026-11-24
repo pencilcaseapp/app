@@ -6,7 +6,7 @@ import { Typography } from '~/ui/typography/typography';
 import { commonCopies } from '~/constants/common-copies';
 import type { Route } from './+types/otp';
 import { returnFormError, validateForm } from '~/utils/form';
-import { createSessionCookie, initMagicCode, verifyMagicCode, VerifyMagicCodeError } from '~/services/auth';
+import { createSessionCookie, initMagicCode, InitMagicCodeError, verifyMagicCode, VerifyMagicCodeError } from '~/services/auth';
 import { href, redirect, Link as ReactRouterLink } from 'react-router';
 import { accountCopies } from '~/constants/account';
 import { SearchParamAuth, SearchParamToast } from '~/constants/search-params';
@@ -128,6 +128,22 @@ export async function action({ request, params: { otpId } }: Route.ActionArgs) {
 
     case 'resend': {
       const [error, result] = await initMagicCode(email);
+
+      // Asking for a new code expired this one, so a code that could not
+      // be sent leaves nothing to enter here.
+      if (error === InitMagicCodeError.EmailFailed) {
+        return redirect(
+          withSearchParams(
+            href('/signin'),
+            {
+              [SearchParamAuth.Email]: email,
+              [SearchParamAuth.ReturnUrl]: returnUrl,
+              [SearchParamToast.ToastDanger]: commonCopies.errors.codeNotSent,
+            },
+          ),
+        );
+      }
+
       if (error !== null) {
         return;
       }

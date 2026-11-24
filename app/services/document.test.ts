@@ -188,13 +188,9 @@ vi.mock('~/repos/email-log', () => ({
     countEmailLogsByUserMock(...args),
 }));
 
-const sendEmailDocumentInviteMock = vi.fn();
-const sendEmailDocumentReportMock = vi.fn();
+const queueEmailMock = vi.fn();
 vi.mock('./email-templates', () => ({
-  sendEmailDocumentInvite: (...args: unknown[]) =>
-    sendEmailDocumentInviteMock(...args),
-  sendEmailDocumentReport: (...args: unknown[]) =>
-    sendEmailDocumentReportMock(...args),
+  queueEmail: (...args: unknown[]) => queueEmailMock(...args),
 }));
 
 const closeDocumentConnectionsMock = vi.fn();
@@ -1379,7 +1375,7 @@ describe('invites', () => {
   });
 
   describe('inviteCollaborator', () => {
-    it('records the invite and sends the e-mail keyed by it', async () => {
+    it('records the invite and queues the e-mail keyed by it', async () => {
       const [error, result] = await inviteAddress(' Grace@Example.com ');
 
       expect(error).toBeNull();
@@ -1390,13 +1386,16 @@ describe('invites', () => {
         access: 'edit',
         userId: undefined,
       });
-      expect(sendEmailDocumentInviteMock).toHaveBeenCalledWith({
-        to: { email: 'grace@example.com' },
-        inviteId,
-        documentId: documentFixture.id,
-        documentTitle: documentFixture.title,
-        inviterName: owner.name,
-        inviterId: owner.id,
+      expect(queueEmailMock).toHaveBeenCalledWith({
+        template: EmailTemplate.DocumentInvite,
+        input: {
+          to: { email: 'grace@example.com' },
+          inviteId,
+          documentId: documentFixture.id,
+          documentTitle: documentFixture.title,
+          inviterName: owner.name,
+          inviterId: owner.id,
+        },
       });
     });
 
@@ -1419,9 +1418,10 @@ describe('invites', () => {
         access: 'view',
       });
 
-      expect(sendEmailDocumentInviteMock).toHaveBeenCalledWith(
-        expect.objectContaining({ inviterName: owner.email }),
-      );
+      expect(queueEmailMock).toHaveBeenCalledWith({
+        template: EmailTemplate.DocumentInvite,
+        input: expect.objectContaining({ inviterName: owner.email }),
+      });
     });
 
     it('refuses anybody but the owner', async () => {
@@ -1478,7 +1478,7 @@ describe('invites', () => {
       const [error] = await inviteAddress('grace@example.com');
 
       expect(error).toBe(InviteCollaboratorError.AlreadyInvited);
-      expect(sendEmailDocumentInviteMock).not.toHaveBeenCalled();
+      expect(queueEmailMock).not.toHaveBeenCalled();
     });
 
     it('counts the invite e-mails the owner sent in the last day', async () => {
@@ -1503,7 +1503,7 @@ describe('invites', () => {
 
       expect(error).toBe(InviteCollaboratorError.TooManyInvites);
       expect(insertInviteMock).not.toHaveBeenCalled();
-      expect(sendEmailDocumentInviteMock).not.toHaveBeenCalled();
+      expect(queueEmailMock).not.toHaveBeenCalled();
     });
   });
 
@@ -1963,14 +1963,17 @@ describe('reportDocument', () => {
       details: 'Insults a colleague by name.',
     });
     expect(getUserMock).toHaveBeenCalledWith(otherUserId);
-    expect(sendEmailDocumentReportMock).toHaveBeenCalledWith({
-      reportId,
-      reason: 'harassment',
-      details: 'Insults a colleague by name.',
-      documentId: documentFixture.id,
-      documentTitle: documentFixture.title,
-      ownerEmail,
-      reporter: { id: viewer.id, email: viewer.email },
+    expect(queueEmailMock).toHaveBeenCalledWith({
+      template: EmailTemplate.DocumentReport,
+      input: {
+        reportId,
+        reason: 'harassment',
+        details: 'Insults a colleague by name.',
+        documentId: documentFixture.id,
+        documentTitle: documentFixture.title,
+        ownerEmail,
+        reporter: { id: viewer.id, email: viewer.email },
+      },
     });
   });
 
@@ -1980,9 +1983,10 @@ describe('reportDocument', () => {
     expect(createDocumentReportMock).toHaveBeenCalledWith(
       expect.objectContaining({ details: null }),
     );
-    expect(sendEmailDocumentReportMock).toHaveBeenCalledWith(
-      expect.objectContaining({ details: null }),
-    );
+    expect(queueEmailMock).toHaveBeenCalledWith({
+      template: EmailTemplate.DocumentReport,
+      input: expect.objectContaining({ details: null }),
+    });
   });
 
   it('lets somebody invited by e-mail report with the link off', async () => {
@@ -2010,7 +2014,7 @@ describe('reportDocument', () => {
 
     expect(error).toBe(ReportDocumentError.PermissionDenied);
     expect(createDocumentReportMock).not.toHaveBeenCalled();
-    expect(sendEmailDocumentReportMock).not.toHaveBeenCalled();
+    expect(queueEmailMock).not.toHaveBeenCalled();
   });
 
   it('refuses somebody who cannot open the document', async () => {
@@ -2066,6 +2070,6 @@ describe('reportDocument', () => {
 
     expect(error).toBe(ReportDocumentError.TooManyReports);
     expect(createDocumentReportMock).not.toHaveBeenCalled();
-    expect(sendEmailDocumentReportMock).not.toHaveBeenCalled();
+    expect(queueEmailMock).not.toHaveBeenCalled();
   });
 });

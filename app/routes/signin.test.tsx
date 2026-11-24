@@ -98,6 +98,23 @@ test('returns form error on too many requests', async () => {
   expect(await findByText('Too many requests. Please try again later.')).toBeInTheDocument();
 });
 
+test('returns form error when the code cannot be sent', async () => {
+  initMagicCodeMock.mockResolvedValue([InitMagicCodeError.EmailFailed]);
+
+  const { findByLabelText, findByText } = await renderRoute('/signin');
+
+  const emailInput = await findByLabelText('E-Mail');
+  const submitButton = await findByText(commonCopies.actions.continue);
+
+  await userEvent.type(emailInput, 'test@example.com');
+  await act(async () => {
+    fireEvent.submit(submitButton);
+  });
+
+  expect(await findByText(commonCopies.errors.codeNotSent))
+    .toBeInTheDocument();
+});
+
 test('expired code shows notification', async () => {
   const { findByText } = await renderRoute('/signin', {
     params: {},

@@ -187,6 +187,17 @@ describe('initMagicCode', () => {
         userId: otpFixture.userId,
       });
     });
+
+    it('expires the code and says so when the e-mail fails', async () => {
+      canRequestNewOtpMock.mockResolvedValueOnce(true);
+      sendEmailMagicCodeMock.mockRejectedValueOnce(new Error('Outage'));
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+
+      const [error] = await initMagicCode('test@example.com');
+
+      expect(error).toEqual(InitMagicCodeError.EmailFailed);
+      expect(expireOtpMock).toHaveBeenCalledWith(otpFixture.id);
+    });
   });
 
   describe('for a test account', () => {

@@ -1,12 +1,13 @@
 import './otp';
 import { beforeEach, expect, test, vi } from 'vitest';
-import { SearchParamAuth } from '~/constants/search-params';
+import { SearchParamAuth, SearchParamToast } from '~/constants/search-params';
 import { otpFixture } from '~/test/fixtures/otp';
 import { userFixture } from '~/test/fixtures/user';
 import { renderRoute } from '~/utils/testing';
 import { userSessionFixture } from '~/test/fixtures/user';
 import { userEvent } from '@testing-library/user-event';
-import { VerifyMagicCodeError } from '~/services/auth';
+import { InitMagicCodeError, VerifyMagicCodeError } from '~/services/auth';
+import { commonCopies } from '~/constants/common-copies';
 import { fireEvent } from '@testing-library/dom';
 import { act } from 'react';
 import { withSearchParams } from '~/utils/url';
@@ -237,6 +238,37 @@ test('resends code', async () => {
         },
 
       ),
+    );
+  });
+});
+
+test('sends back to sign in when the new code cannot be sent', async () => {
+  getValidOtpMock.mockResolvedValue(otpFixture);
+  initMagicCodeMock.mockResolvedValueOnce([InitMagicCodeError.EmailFailed]);
+
+  const { findByText } = await renderRoute('/otp/:otpId', {
+    params: {
+      otpId: otpFixture.id,
+    },
+    searchParams: {
+      [SearchParamAuth.Email]: userFixture.email,
+      [SearchParamAuth.ReturnUrl]: '/',
+    },
+  });
+
+  const button = await findByText('Resend code');
+
+  await act(async () => {
+    await fireEvent.submit(button);
+  });
+
+  await vi.waitFor(() => {
+    expect(redirectMock).toHaveBeenCalledWith(
+      withSearchParams(href('/signin'), {
+        [SearchParamAuth.Email]: userFixture.email,
+        [SearchParamAuth.ReturnUrl]: '/',
+        [SearchParamToast.ToastDanger]: commonCopies.errors.codeNotSent,
+      }),
     );
   });
 });

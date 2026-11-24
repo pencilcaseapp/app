@@ -10,19 +10,24 @@ import { documentReportEmailSubject } from '~/emails/templates/document-report';
 import { contactMessageEmailSubject } from '~/emails/templates/contact-message';
 import { accountDeletedEmailSubject } from '~/emails/templates/account-deleted';
 import {
+  buildQueuedEmail,
+  queueEmail,
   sendEmailAccountDeleted,
   sendEmailChangeCode,
-  sendEmailContactMessage,
-  sendEmailContractNotice,
-  sendEmailDocumentInvite,
-  sendEmailDocumentReport,
   sendEmailMagicCode,
-  sendEmailSubscriptionPaymentFailed,
+  sendQueuedEmail,
 } from './email-templates';
 
 const sendEMailMock = vi.fn();
+const logQueuedEmailMock = vi.fn();
 vi.mock('./email', () => ({
   sendEmail: (...args: unknown[]) => sendEMailMock(...args),
+  logQueuedEmail: (...args: unknown[]) => logQueuedEmailMock(...args),
+}));
+
+const enqueueJobMock = vi.fn();
+vi.mock('~/jobs/queue', () => ({
+  enqueueJob: (...args: unknown[]) => enqueueJobMock(...args),
 }));
 
 beforeEach(() => {
@@ -85,24 +90,64 @@ describe('sendEmailChangeCode', () => {
   });
 });
 
-describe('sendEmailSubscriptionPaymentFailed', () => {
-  it('scopes the key to the billing period, so one failed payment is one '
-    + 'e-mail however often Creem retries it', async () => {
-    await sendEmailSubscriptionPaymentFailed({
-      to: { email: 'test@example.com' },
-      subscriptionId: 'sub_123',
-      billingPeriod: '2026-08-01T00:00:00.000Z',
-      userId: 'user-id',
+describe('queueEmail', () => {
+  const queued = {
+    template: EmailTemplate.ContactMessage,
+    input: {
+      messageId: 'message-id',
+      email: 'sam@example.com',
+      message: 'Hello',
+    },
+  } as const;
+
+  it('logs the e-mail as queued and hands it to the job', async () => {
+    await queueEmail(queued);
+
+    expect(logQueuedEmailMock).toHaveBeenCalledWith(buildQueuedEmail(queued));
+    expect(enqueueJobMock).toHaveBeenCalledWith('send-email', queued);
+    expect(sendEMailMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('sendQueuedEmail', () => {
+  it('sends the e-mail it is given', async () => {
+    await sendQueuedEmail({
+      template: EmailTemplate.ContactMessage,
+      input: {
+        messageId: 'message-id',
+        email: 'sam@example.com',
+        message: 'Hello',
+      },
     });
 
     expect(sendEMailMock).toHaveBeenCalledWith(expect.objectContaining({
-      template: EmailTemplate.SubscriptionPaymentFailed,
-      idempotencyScope: 'sub_123:2026-08-01T00:00:00.000Z',
+      template: EmailTemplate.ContactMessage,
+      idempotencyScope: 'message-id',
     }));
   });
 });
 
-describe('sendEmailDocumentInvite', () => {
+describe('subscription payment failed e-mail', () => {
+  it('scopes the key to the billing period, so one failed payment is one '
+    + 'e-mail however often Creem retries it', () => {
+    const email = buildQueuedEmail({
+      template: EmailTemplate.SubscriptionPaymentFailed,
+      input: {
+        to: { email: 'test@example.com' },
+        subscriptionId: 'sub_123',
+        billingPeriod: '2026-08-01T00:00:00.000Z',
+        userId: 'user-id',
+      },
+    });
+
+    expect(email).toMatchObject({
+      template: EmailTemplate.SubscriptionPaymentFailed,
+      idempotencyScope: 'sub_123:2026-08-01T00:00:00.000Z',
+    });
+  });
+});
+
+describe('document invite e-mail', () => {
   const invite = {
     to: { email: 'friend@example.com' },
     inviteId: 'invite-id',
@@ -112,11 +157,16 @@ describe('sendEmailDocumentInvite', () => {
     inviterId: 'user-id',
   };
 
-  it('sends the invite template scoped to the invite, and logs it against '
-    + 'the inviter rather than a recipient who may have no account', async () => {
-    await sendEmailDocumentInvite(invite);
+  function inviteEmail() {
+    return buildQueuedEmail({
+      template: EmailTemplate.DocumentInvite,
+      input: invite,
+    });
+  }
 
-    expect(sendEMailMock).toHaveBeenCalledWith({
+  it('sends the invite template scoped to the invite, and logs it against '
+    + 'the inviter rather than a recipient who may have no account', () => {
+    expect(inviteEmail()).toStrictEqual({
       to: { email: 'friend@example.com' },
       subject: documentInviteEmailSubject({
         inviterName: 'Alex',
@@ -130,15 +180,13 @@ describe('sendEmailDocumentInvite', () => {
   });
 
   it('links to the document the invite is for', async () => {
-    await sendEmailDocumentInvite(invite);
-
-    const [{ email }] = sendEMailMock.mock.calls[0];
+    const { email } = inviteEmail();
     expect(await render(email, { plainText: true }))
       .toContain(`/doc/${invite.documentId}`);
   });
 });
 
-describe('sendEmailDocumentReport', () => {
+describe('document report e-mail', () => {
   const report = {
     reportId: 'report-id',
     reason: 'spam' as const,
@@ -149,11 +197,16 @@ describe('sendEmailDocumentReport', () => {
     reporter: { id: 'user-id', email: 'sam@example.com' },
   };
 
-  it('sends the report to our inbox, answerable to the reporter and logged '
-    + 'against them', async () => {
-    await sendEmailDocumentReport(report);
+  function reportEmail() {
+    return buildQueuedEmail({
+      template: EmailTemplate.DocumentReport,
+      input: report,
+    });
+  }
 
-    expect(sendEMailMock).toHaveBeenCalledWith({
+  it('sends the report to our inbox, answerable to the reporter and logged '
+    + 'against them', () => {
+    expect(reportEmail()).toStrictEqual({
       to: { email: 'inbox@pencilcase.app' },
       replyTo: 'sam@example.com',
       subject: documentReportEmailSubject({
@@ -168,31 +221,30 @@ describe('sendEmailDocumentReport', () => {
   });
 
   it('links to the reported document', async () => {
-    await sendEmailDocumentReport(report);
-
-    const [{ email }] = sendEMailMock.mock.calls[0];
+    const { email } = reportEmail();
     expect(await render(email, { plainText: true }))
       .toContain(`/doc/${report.documentId}`);
   });
 
   it('names the report row', async () => {
-    await sendEmailDocumentReport(report);
-
-    const [{ email }] = sendEMailMock.mock.calls[0];
+    const { email } = reportEmail();
     expect(await render(email, { plainText: true }))
       .toContain('report-id');
   });
 });
 
-describe('sendEmailContactMessage', () => {
-  it('sends the message to our inbox, answerable to the sender', async () => {
-    await sendEmailContactMessage({
-      messageId: 'message-id',
-      email: 'sam@example.com',
-      message: 'Hello',
+describe('contact message e-mail', () => {
+  it('sends the message to our inbox, answerable to the sender', () => {
+    const email = buildQueuedEmail({
+      template: EmailTemplate.ContactMessage,
+      input: {
+        messageId: 'message-id',
+        email: 'sam@example.com',
+        message: 'Hello',
+      },
     });
 
-    expect(sendEMailMock).toHaveBeenCalledWith({
+    expect(email).toStrictEqual({
       to: { email: 'inbox@pencilcase.app' },
       replyTo: 'sam@example.com',
       subject: contactMessageEmailSubject('sam@example.com'),
@@ -203,21 +255,24 @@ describe('sendEmailContactMessage', () => {
   });
 });
 
-describe('sendEmailContractNotice', () => {
-  it('confirms it to the customer and copies our inbox', async () => {
-    const notice = {
+describe('contract notice e-mail', () => {
+  const input = {
+    noticeId: 'notice-id',
+    notice: {
       kind: 'withdrawal' as const,
       name: 'Sam Doe',
       email: 'sam@example.com',
-    };
+    },
+    receivedAt: '2026-11-16T13:56:42.000Z',
+  };
 
-    await sendEmailContractNotice({
-      noticeId: 'notice-id',
-      notice,
-      receivedAt: new Date('2026-11-16T13:56:42Z'),
+  it('confirms it to the customer', () => {
+    const email = buildQueuedEmail({
+      template: EmailTemplate.ContractNotice,
+      input: { ...input, recipient: 'customer' },
     });
 
-    expect(sendEMailMock).toHaveBeenNthCalledWith(1, {
+    expect(email).toStrictEqual({
       to: { email: 'sam@example.com' },
       replyTo: 'inbox@pencilcase.app',
       subject: 'We received your withdrawal',
@@ -225,7 +280,15 @@ describe('sendEmailContractNotice', () => {
       template: EmailTemplate.ContractNotice,
       idempotencyScope: 'notice-id:customer',
     });
-    expect(sendEMailMock).toHaveBeenNthCalledWith(2, {
+  });
+
+  it('copies our inbox, answerable to the customer', () => {
+    const email = buildQueuedEmail({
+      template: EmailTemplate.ContractNotice,
+      input: { ...input, recipient: 'inbox' },
+    });
+
+    expect(email).toStrictEqual({
       to: { email: 'inbox@pencilcase.app' },
       replyTo: 'sam@example.com',
       subject: 'Withdrawal: sam@example.com',
